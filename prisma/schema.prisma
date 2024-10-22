@@ -60,6 +60,8 @@ model OrganizationsUsers {
   organizationId Int
   organization   Organizations    @relation(fields: [organizationId], references: [id])
   role           OrganizationRole @default(USER)
+
+  @@unique([userId, organizationId]) // Ensures a user can have one role per organization-repo pair
 }
 
 // Enums
