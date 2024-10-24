@@ -5,80 +5,11 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-// Tables
-
-model Users {
-  id                   Int                       @id @default(autoincrement())
-  email                String                    @unique
-  name                 String?
-  organizations        OrganizationsUsers[]
-  userOrganizationRepo ReposUsersOrganizations[]
-  role                 UserRole                  @default(USER)
-}
-
-model Organizations {
-  id                   Int                       @id @default(autoincrement())
-  name                 String?
-  users                OrganizationsUsers[]
-  userOrganizationRepo ReposUsersOrganizations[]
-}
-
-model Repos {
-  id                   Int                       @id @default(autoincrement())
-  name                 String
-  description          String?
-  favorite             Boolean
-  public               Boolean
-  userOrganizationRepo ReposUsersOrganizations[]
-}
-
-model ReposUsersOrganizations {
-  id             Int           @id @default(autoincrement()) // Primary key
-  userId         Int
-  user           Users         @relation(fields: [userId], references: [id])
-  organizationId Int
-  organization   Organizations @relation(fields: [organizationId], references: [id])
-  repoId         Int
-  repo           Repos         @relation(fields: [repoId], references: [id])
-  repoRole       RepoRole      @default(VIEWER)
-
-  @@unique([userId, organizationId, repoId]) // Ensures a user can have one role per organization-repo pair
-}
-
-model OrganizationsUsers {
-  id             Int              @id @default(autoincrement()) // Primary key
-  userId         Int
-  user           Users            @relation(fields: [userId], references: [id])
-  organizationId Int
-  organization   Organizations    @relation(fields: [organizationId], references: [id])
-  role           OrganizationRole @default(USER)
-
-  @@unique([userId, organizationId]) // Ensures a user can have one role per organization-repo pair
-}
-
-// Enums
-
-enum UserRole {
-  USER
-  ADMIN
-}
-
-enum OrganizationRole {
-  USER
-  ADMIN
-}
-
-enum RepoRole {
-  ADMIN
-  MAINTAINER
-  CONTRIBUTOR
-  VIEWER
 }

@@ -1,0 +1,13 @@
+model Users {
+    id                   Int                       @id @default(autoincrement())
+    email                String                    @unique
+    name                 String?
+    organizations        OrganizationsUsers[]
+    userOrganizationRepo ReposUsersOrganizations[]
+    role                 UserRole                  @default(USER)
+}
+
+enum UserRole {
+    USER
+    ADMIN
+}
