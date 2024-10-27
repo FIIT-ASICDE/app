@@ -17,18 +17,21 @@ export default async function Home() {
             await db.users.create({
                 data: {
                     name: "Daniel",
-                    email: "daniel@sawa.sk"
+                    email: "daniel@sawa.sk",
+                    password: "password",
+                    nickname: "Danielino"
                 }
             })
         }
         console.log(allUsers)
         return (
             <div className="flex h-screen w-screen items-center justify-center">
-                {allUsers.length ? allUsers[0].name : "no users, refresh this page!"}
+                {allUsers.length ? JSON.stringify(allUsers) : "no users, refresh this page!"}
             </div>
         );
     }
-    catch {
+    catch (err) {
+        console.log(err)
         return (
             <div className="flex h-screen w-screen items-center justify-center">
                 No db conncetion!
@@ -37,4 +40,10 @@ export default async function Home() {
     }
 
 
+
+    let result: string | null = null;
+
+
+    const userName: string = result!;
+    console.log(userName)
 }
