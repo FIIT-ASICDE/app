@@ -1,49 +1,241 @@
+"use client";
+
 import { PrismaClient } from "@prisma/client";
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
+let db: PrismaClient = new PrismaClient();
 
-var db: PrismaClient = new PrismaClient()
+export default function Home() {
+    const [username, setUsername] = useState("");
+    const [name, setName] = useState('');
+    const [surname, setSurname] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [usernameOrEmail, setUsernameOrEmail] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [message, setMessage] = useState('');
+    const router = useRouter();
 
+    const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
 
-export default async function Home() {
-    var allUsers;
-    try {
-        allUsers = await db.users.findMany({
-            where: {
-                name: "Daniel"
+        const data = {
+            username,
+            name,
+            surname,
+            email,
+            password,
+        };
+
+        try {
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+            console.log('Server response:', result);
+
+            if (response.ok) {
+                setUsername('');
+                setName('');
+                setSurname('');
+                setEmail('');
+                setPassword('');
+                setMessage('Registration successful!');
+                setIsModalOpen(true);
+            } else {
+                setMessage('Registration failed. Please try again.');
+                setIsModalOpen(true);
             }
-        });
-
-        if (allUsers.length == 0) {
-            await db.users.create({
-                data: {
-                    name: "Daniel",
-                    email: "daniel@sawa.sk",
-                    password: "password",
-                    nickname: "Danielino"
-                }
-            })
+        } catch (error) {
+            console.error('Error:', error);
+            setMessage('An error occurred. Please try again.');
+            setIsModalOpen(true);
         }
-        console.log(allUsers)
-        return (
-            <div className="flex h-screen w-screen items-center justify-center">
-                {allUsers.length ? JSON.stringify(allUsers) : "no users, refresh this page!"}
+    };
+
+    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        const data = {
+            usernameOrEmail,
+            password
+        };
+
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    usernameOrEmail: data.usernameOrEmail,
+                    password: data.password,
+                }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                const csrfToken = response.headers.get('X-CSRF-Token');
+
+                localStorage.setItem('csrfToken', csrfToken!);
+                router.push('/home');
+            } else {
+                setMessage(result.error || 'Login failed. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            setMessage('An error occurred. Please try again.');
+        }
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
+
+    return (
+        <div className="flex h-screen w-screen items-center justify-center bg-gray-100 space-x-10">
+            {/* Registrácia */}
+            <div className="bg-white p-8 rounded-lg shadow-lg w-96">
+                <h1 className="text-2xl font-bold mb-4 text-center">Register</h1>
+                <form onSubmit={handleRegister}>
+                    <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
+                            Username
+                        </label>
+                        <input
+                            type="text"
+                            id="username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            placeholder="Enter your username"
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+                            Name
+                        </label>
+                        <input
+                            type="text"
+                            id="name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            placeholder="Enter your name"
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="surname">
+                            Surname
+                        </label>
+                        <input
+                            type="text"
+                            id="surname"
+                            value={surname}
+                            onChange={(e) => setSurname(e.target.value)}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            placeholder="Enter your surname"
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+                            Email
+                        </label>
+                        <input
+                            type="email"
+                            id="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            placeholder="Enter your email"
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+                            Password
+                        </label>
+                        <input
+                            type="password"
+                            id="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            placeholder="Enter your password"
+                        />
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <button
+                            type="submit"
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                        >
+                            Register
+                        </button>
+                    </div>
+                </form>
             </div>
-        );
-    }
-    catch (err) {
-        console.log(err)
-        return (
-            <div className="flex h-screen w-screen items-center justify-center">
-                No db conncetion!
+
+            {/* Prihlásenie */}
+            <div className="bg-white p-8 rounded-lg shadow-lg w-96">
+                <h1 className="text-2xl font-bold mb-4 text-center">Login</h1>
+                <form onSubmit={handleLogin}>
+                    <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="loginUsernameOrEmail">
+                            Username or Email
+                        </label>
+                        <input
+                            type="text"
+                            id="loginUsernameOrEmail"
+                            value={usernameOrEmail}
+                            onChange={(e) => {setUsernameOrEmail(e.target.value)}}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            placeholder="Enter your username or email"
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="loginPassword">
+                            Password
+                        </label>
+                        <input
+                            type="password"
+                            id="loginPassword"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            placeholder="Enter your password"
+                        />
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <button
+                            type="submit"
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                        >
+                            Login
+                        </button>
+                    </div>
+                </form>
             </div>
-        );
-    }
 
-
-
-    let result: string | null = null;
-
-
-    const userName: string = result!;
-    console.log(userName)
+            {/* Modal pre uspesnu registraciu/login */}
+            {isModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div className="bg-white p-6 rounded shadow-lg">
+                        <h2 className="text-lg font-bold mb-2">{message}</h2>
+                        <button
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                            onClick={closeModal}
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 }
