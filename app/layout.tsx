@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Link from 'next/link'
+import HeaderDefault from "@/components/custom/Header/HeaderDefault";
+import HeaderLoggedIn from "@/components/custom/Header/HeaderLoggedIn";
+import Footer from "@/components/custom/Footer/Footer";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -15,25 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <header className="bg-gray-800 text-white p-4">
-          <div className="container mx-auto pr-5 flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-white rounded-md flex items-center justify-center">
-                <span className="text-gray-800 font-bold text-xl">A</span>
-              </div>
-              <span className="font-bold text-xl">ASICDE</span>
-            </div>
-            <nav>
-              <ul className="flex space-x-10">
-                <li><Link href="/" className="hover:text-gray-400">Home</Link></li>
-                <li><Link href="/about" className="hover:text-gray-400">About Us</Link></li>
-                <li><Link href="/features" className="hover:text-gray-400">Features</Link></li>
-                <li><Link href="/pricing" className="hover:text-gray-400">Pricing</Link></li>
-              </ul>
-            </nav>
-          </div>
-        </header>
+        {<HeaderDefault />}
         {children}
+        {<Footer />}
       </body>
     </html>
   );
