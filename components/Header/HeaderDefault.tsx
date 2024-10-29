@@ -1,14 +1,14 @@
 import Link from "next/link";
 
-import { Button } from "../../ui/button";
+import { Button } from "@/components/ui/button";
 
 export default function HeaderDefault() {
     return (
-        <header className="bg-gray-800 p-1 text-white">
+        <header className="bg-header p-1 text-primary-foreground">
             <div className="container mx-auto flex items-center justify-between pr-5">
                 <div className="flex items-center space-x-2 p-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-white">
-                        <span className="text-xl font-bold text-gray-800">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-header-foreground">
+                        <span className="text-xl font-bold text-header">
                             A
                         </span>
                     </div>
@@ -20,7 +20,7 @@ export default function HeaderDefault() {
                             <Link href={"/"}>
                                 <Button
                                     variant="default"
-                                    className="bg-gray-800 px-6 text-base font-normal hover:bg-gray-700"
+                                    className="bg-header px-6 text-base font-normal hover:bg-header-button-hover"
                                 >
                                     Home
                                 </Button>
@@ -30,7 +30,7 @@ export default function HeaderDefault() {
                             <Link href={"/about"}>
                                 <Button
                                     variant="default"
-                                    className="bg-gray-800 px-6 text-base font-normal hover:bg-gray-700"
+                                    className="bg-header px-6 text-base font-normal hover:bg-header-button-hover"
                                 >
                                     About Us
                                 </Button>
@@ -40,7 +40,7 @@ export default function HeaderDefault() {
                             <Link href={"/features"}>
                                 <Button
                                     variant="default"
-                                    className="bg-gray-800 px-6 text-base font-normal hover:bg-gray-700"
+                                    className="bg-header px-6 text-base font-normal hover:bg-header-button-hover"
                                 >
                                     Features
                                 </Button>
@@ -50,7 +50,7 @@ export default function HeaderDefault() {
                             <Link href={"/pricing"}>
                                 <Button
                                     variant="default"
-                                    className="bg-gray-800 px-6 text-base font-normal hover:bg-gray-700"
+                                    className="bg-header px-6 text-base font-normal hover:bg-header-button-hover"
                                 >
                                     Pricing
                                 </Button>

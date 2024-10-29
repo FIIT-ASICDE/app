@@ -5,15 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
 import { Button } from "@/components/ui/button";
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
-    FormLabel,
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -67,10 +64,10 @@ export default function Register() {
     }
 
     return (
-        <div className="flex flex-col bg-gray-100">
-            <main className="container mx-auto my-0 w-[1000px] px-10 py-10">
-                <div className="flex h-full overflow-hidden rounded-lg bg-white shadow-lg">
-                    <div className="w-1/2 bg-gray-200">
+        <div className="flex flex-col bg-background">
+            <main className="container mx-auto my-0 w-3/4 px-10 py-10">
+                <div className="flex h-full overflow-hidden rounded-lg bg-card shadow-lg">
+                    <div className="w-1/2">
                         <Image
                             src={"/images/duotone.png"}
                             alt="Placeholder Image"
@@ -85,10 +82,10 @@ export default function Register() {
                                 onSubmit={form.handleSubmit(onSubmit)}
                                 className="space-y-4"
                             >
-                                <h1 className="mb-4 text-2xl font-bold text-gray-800">
+                                <h1 className="mb-4 text-2xl font-bold text-secondary-foreground">
                                     Welcome to ASICDE
                                 </h1>
-                                <p className="mb-4 text-sm text-gray-600">
+                                <p className="mb-4 text-sm text-secondary-foreground">
                                     Web IDE for ASIC development and
                                     collaboration
                                 </p>
@@ -173,15 +170,18 @@ export default function Register() {
                                 <div className="flex items-center justify-between pt-2">
                                     <Button
                                         type="submit"
-                                        className="rounded bg-gray-800 px-6 py-2 text-white hover:bg-gray-700"
+                                        variant="default"
+                                        className="rounded px-6 py-2"
                                     >
                                         Register
                                     </Button>
-                                    <Link
-                                        href="/login"
-                                        className="text-sm text-gray-600 hover:text-gray-500"
-                                    >
-                                        Back to login
+                                    <Link href="/login">
+                                        <Button
+                                            variant="secondary"
+                                            className="bg-secondary text-secondary-foreground"
+                                        >
+                                            Back to login
+                                        </Button>
                                     </Link>
                                 </div>
                             </form>
