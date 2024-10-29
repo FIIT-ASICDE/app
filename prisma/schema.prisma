@@ -16,14 +16,15 @@ datasource db {
 
 model Users {
   id                   Int                       @id @default(autoincrement())
+  username             String                    @unique
   email                String                    @unique
+  name                 String
+  surname              String
   password             String
-  nickname             String
-  name                 String?
-  surname              String?
   organizations        OrganizationsUsers[]
   userOrganizationRepo ReposUsersOrganizations[]
   role                 UserRole                  @default(USER)
+  Sessions             Sessions[]
 }
 
 enum UserRole {
