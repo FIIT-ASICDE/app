@@ -1,0 +1,22 @@
+model Organizations {
+    id                   Int                       @id @default(autoincrement())
+    name                 String?
+    users                OrganizationsUsers[]
+    userOrganizationRepo ReposUsersOrganizations[]
+}
+
+model OrganizationsUsers {
+    id             Int              @id @default(autoincrement()) // Primary key
+    userId         Int
+    user           Users            @relation(fields: [userId], references: [id])
+    organizationId Int
+    organization   Organizations    @relation(fields: [organizationId], references: [id])
+    role           OrganizationRole @default(USER)
+
+    @@unique([userId, organizationId]) // Ensures a user can have one role per organization-repo pair
+}
+
+enum OrganizationRole {
+    USER
+    ADMIN
+}
