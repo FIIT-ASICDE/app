@@ -9,6 +9,27 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { username, name, surname, email, password } = body;
 
+        if (!username || !name || !surname || !email || !password) {
+            return NextResponse.json({ error: 'Missing required field' }, { status: 400 });
+        }
+
+        if (password.length < 8) {
+            return NextResponse.json({ error: 'Password must contain at least 8 characters' }, { status: 400 });
+        }
+
+        const existingUser = await prisma.users.findFirst({
+            where: {
+                OR: [
+                    { username },
+                    { email }
+                ]
+            }
+        });
+
+        if (existingUser) {
+            return NextResponse.json({ error: 'User with this username or email already exists' }, { status: 400 });
+        }
+
         const hashedPassword: string = await bcrypt.hash(password, 10);
 
         await prisma.users.create({

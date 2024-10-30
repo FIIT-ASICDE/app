@@ -1,151 +1,98 @@
 "use client";
 
-import { PrismaClient } from "@prisma/client";
-import React, { useState } from 'react';
+import { SessionProvider, useSession, signIn, signOut } from "next-auth/react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
+import { User } from "@/types/User";
 
-let db: PrismaClient = new PrismaClient();
-
-export default function Home() {
-    const [username, setUsername] = useState("");
-    const [name, setName] = useState('');
-    const [surname, setSurname] = useState('');
-    const [email, setEmail] = useState('');
+const HomeComponent = () => {
     const [password, setPassword] = useState('');
-    const [usernameOrEmail, setUsernameOrEmail] = useState('');
+    const [email, setEmail] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [message, setMessage] = useState('');
     const router = useRouter();
+    const [userData, setUserData] = useState<User | null>(null);
 
-    const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    const { data: session, status } = useSession();
 
-        const data = {
-            username,
-            name,
-            surname,
-            email,
-            password,
-        };
-
-        try {
-            const response = await fetch('/api/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            });
-
-            const result = await response.json();
-            console.log('Server response:', result);
-
-            if (response.ok) {
-                setUsername('');
-                setName('');
-                setSurname('');
-                setEmail('');
-                setPassword('');
-                setMessage('Registration successful!');
-                setIsModalOpen(true);
-            } else {
-                setMessage('Registration failed. Please try again.');
-                setIsModalOpen(true);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            setMessage('An error occurred. Please try again.');
-            setIsModalOpen(true);
-        }
-    };
-
+    /* Funkcia pre handling loginu, po logine refreshne tu istu domovsku stranku */
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        const data = {
-            usernameOrEmail,
-            password
-        };
+        const result = await signIn("credentials", {
+            redirect: false,
+            email,
+            password,
+        });
 
-        try {
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    usernameOrEmail: data.usernameOrEmail,
-                    password: data.password,
-                }),
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                const csrfToken = response.headers.get('X-CSRF-Token');
-
-                localStorage.setItem('csrfToken', csrfToken!);
-                router.push('/home');
-            } else {
-                setMessage(result.error || 'Login failed. Please try again.');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            setMessage('An error occurred. Please try again.');
+        if (result?.error) {
+            setMessage("Invalid credentials");
+            setIsModalOpen(true);
+        } else {
+            router.push('/');
         }
     };
+
+    /* TODO - zatial pre priklad len fetchovanie users data,
+        neskor ked budu endpointy sa pridaju aj dalsie potrebne data pre userovu home page */
+    const fetchUserData = async () => {
+        if (session) {
+            const response = await fetch(`/api/users/${session?.user?.id}`);
+            if (response.ok) {
+                const data = await response.json();
+                setUserData(data);
+            } else {
+                console.error("Failed to fetch user data");
+            }
+        }
+    };
+
+    /* Dáta sa fetchnú len ak je autorizovaná session */
+    useEffect(() => {
+        fetchUserData();
+    }, [session]);
 
     const closeModal = () => {
         setIsModalOpen(false);
     };
 
-    return (
-        <div className="flex h-screen w-screen items-center justify-center bg-gray-100 space-x-10">
-            {/* Registrácia */}
-            <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-                <h1 className="text-2xl font-bold mb-4 text-center">Register</h1>
-                <form onSubmit={handleRegister}>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-                            Username
-                        </label>
-                        <input
-                            type="text"
-                            id="username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            placeholder="Enter your username"
-                        />
+    /* Tuto treba nejaké kolečko počas autorizacia a fetchovania dát */
+    if (status === "loading") {
+        return <div>Loading...</div>;
+    }
+
+    if (session) {
+        /* TODO - ak je session autorizovana zobrazi sa home page pre prihlaseneho usera */
+        return (
+            <div>
+                <h1>Welcome, {session.user?.name}!</h1>
+                <button
+                    onClick={() => signOut()}
+                    className="mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
+                >
+                    Sign Out
+                </button>
+                {userData && (
+                    <div>
+                        <h2>User Details:</h2>
+                        <p>Email: {userData.email}</p>
+                        <p>Name: {userData.name}</p>
                     </div>
+                )}
+            </div>
+        )
+            ;
+    } else {
+        /* TODO - ak session nie je autorizovana zobrazi sa klasicka landing page
+        *   kde budemat user moznost sa prihlasit */
+        return (
+            <div className="flex h-screen w-screen items-center justify-center bg-gray-100 space-x-10">
+                <form onSubmit={handleLogin} className="p-6 bg-white shadow-md rounded w-80">
+                <h2 className="text-2xl font-semibold mb-4">Login</h2>
+                    {isModalOpen && <p className="text-red-500 mb-4">{message}</p>} {/* Zobrazovanie chybových správ */}
+
                     <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
-                            Name
-                        </label>
-                        <input
-                            type="text"
-                            id="name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            placeholder="Enter your name"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="surname">
-                            Surname
-                        </label>
-                        <input
-                            type="text"
-                            id="surname"
-                            value={surname}
-                            onChange={(e) => setSurname(e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            placeholder="Enter your surname"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+                        <label htmlFor="email" className="block text-sm font-medium">
                             Email
                         </label>
                         <input
@@ -153,12 +100,13 @@ export default function Home() {
                             id="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            placeholder="Enter your email"
+                            required
+                            className="mt-1 p-2 w-full border border-gray-300 rounded"
                         />
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+
+                    <div className="mb-6">
+                        <label htmlFor="password" className="block text-sm font-medium">
                             Password
                         </label>
                         <input
@@ -166,76 +114,45 @@ export default function Home() {
                             id="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            placeholder="Enter your password"
+                            required
+                            className="mt-1 p-2 w-full border border-gray-300 rounded"
                         />
                     </div>
-                    <div className="flex items-center justify-between">
-                        <button
-                            type="submit"
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                        >
-                            Register
-                        </button>
-                    </div>
-                </form>
-            </div>
 
-            {/* Prihlásenie */}
-            <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-                <h1 className="text-2xl font-bold mb-4 text-center">Login</h1>
-                <form onSubmit={handleLogin}>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="loginUsernameOrEmail">
-                            Username or Email
-                        </label>
-                        <input
-                            type="text"
-                            id="loginUsernameOrEmail"
-                            value={usernameOrEmail}
-                            onChange={(e) => {setUsernameOrEmail(e.target.value)}}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            placeholder="Enter your username or email"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="loginPassword">
-                            Password
-                        </label>
-                        <input
-                            type="password"
-                            id="loginPassword"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            placeholder="Enter your password"
-                        />
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <button
-                            type="submit"
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                        >
-                            Login
-                        </button>
-                    </div>
+                    <button
+                        type="submit"
+                        className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                    >
+                        Login
+                    </button>
                 </form>
-            </div>
 
-            {/* Modal pre uspesnu registraciu/login */}
-            {isModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded shadow-lg">
-                        <h2 className="text-lg font-bold mb-2">{message}</h2>
-                        <button
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                            onClick={closeModal}
-                        >
-                            Close
-                        </button>
+                {/* Modal pre neúspešný login */}
+                {isModalOpen && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                        <div className="bg-white p-6 rounded shadow-lg">
+                            <h2 className="text-lg font-bold mb-2">{message}</h2>
+                            <button
+                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                onClick={closeModal}
+                            >
+                                Close
+                            </button>
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )}
+            </div>
+        );
+    }
+};
+
+
+export default function Home() {
+    return (
+        /* Kazda page ktora musi byt zobrazena az po autorizacii
+        * musi byt v elemente SessionProvider */
+        <SessionProvider>
+            <HomeComponent />
+        </SessionProvider>
     );
 }

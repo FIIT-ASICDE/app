@@ -24,7 +24,6 @@ model Users {
   organizations        OrganizationsUsers[]
   userOrganizationRepo ReposUsersOrganizations[]
   role                 UserRole                  @default(USER)
-  Sessions             Sessions[]
 }
 
 enum UserRole {
