@@ -3,7 +3,8 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "dev": "next dev",
+        "dev": "prisma migrate dev && next dev",
+        "migrate": "prisma migrate dev",
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
@@ -11,10 +12,14 @@
     },
     "dependencies": {
         "@hookform/resolvers": "^3.9.1",
-        "@joint/core": "^4.0.4",
         "@radix-ui/react-label": "^2.1.0",
         "@radix-ui/react-slot": "^1.1.0",
+        "@auth/prisma-adapter": "^2.7.3",
+        "@prisma/adapter-pg": "^5.21.1",
+        "@prisma/client": "^5.21.1",
+        "@joint/core": "^4.0.4",
         "antlr4ts": "^0.5.0-alpha.4",
+        "bcryptjs": "^2.4.3",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",
         "lucide-react": "^0.453.0",
@@ -36,6 +41,7 @@
         "postcss": "^8",
         "prettier": "^3.3.3",
         "prettier-plugin-tailwindcss": "^0.6.8",
+        "prisma": "^5.21.1",
         "tailwindcss": "^3.4.1",
         "typescript": "^5"
     },
@@ -52,5 +58,8 @@
         ],
         "importOrderSeparation": true,
         "importOrderSortSpecifiers": true
+    },
+    "prisma": {
+        "schema": "prisma/"
     }
 }

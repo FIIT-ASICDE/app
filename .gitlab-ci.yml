@@ -1,0 +1,13 @@
+stages:
+    - code-quality
+
+lint:
+    stage: code-quality
+    script:
+        - bun install
+        - bun run lint
+    cache:
+        key: $CI_COMMIT_REF_SLUG
+        paths:
+            - bun.lockb
+            - node_modules
