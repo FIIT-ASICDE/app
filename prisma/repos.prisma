@@ -1,0 +1,28 @@
+model Repos {
+    id                   Int                       @id @default(autoincrement())
+    name                 String
+    description          String?
+    favorite             Boolean
+    public               Boolean
+    userOrganizationRepo ReposUsersOrganizations[]
+}
+
+model ReposUsersOrganizations {
+    id             Int           @id @default(autoincrement()) // Primary key
+    userId         Int
+    user           Users         @relation(fields: [userId], references: [id])
+    organizationId Int
+    organization   Organizations @relation(fields: [organizationId], references: [id])
+    repoId         Int
+    repo           Repos         @relation(fields: [repoId], references: [id])
+    repoRole       RepoRole      @default(VIEWER)
+
+    @@unique([userId, organizationId, repoId]) // Ensures a user can have one role per organization-repo pair
+}
+
+enum RepoRole {
+    ADMIN
+    MAINTAINER
+    CONTRIBUTOR
+    VIEWER
+}
