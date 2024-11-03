@@ -22,7 +22,11 @@ const config: Config = {
                 },
                 primary: {
                     DEFAULT: 'var(--primary)',
-                    foreground: 'var(--primary-foreground)'
+                    foreground: 'var(--primary-foreground)',
+                    button: {
+                        DEFAULT: 'var(--primary-button)',
+                        hover: 'var(--primary-button-hover)'
+                    }
                 },
                 secondary: {
                     DEFAULT: 'var(--secondary)',
