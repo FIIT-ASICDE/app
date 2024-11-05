@@ -1,10 +1,9 @@
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import bcrypt from "bcryptjs";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
-import { randomBytes } from "node:crypto";
 
-const prisma = new PrismaClient();
+import prisma from "./prisma";
 
 // https://next-auth.js.org/configuration/options#jwt
 // https://next-auth.js.org/tutorials/securing-pages-and-api-routes
@@ -12,15 +11,12 @@ const prisma = new PrismaClient();
 
 /* TODO - pridat GitHub a Google providers */
 
-export const {
-    handlers,
-    auth,
-    signIn,
-    signOut } = NextAuth ({
+export const { handlers, auth, signIn, signOut } = NextAuth({
     session: {
-        strategy: 'jwt',
+        strategy: "jwt",
     },
     secret: process.env.NEXTAUTH_SECRET || randomBytes(32).toString("hex"),
+    adapter: PrismaAdapter(prisma),
     providers: [
         Credentials({
             name: "Credentials",
@@ -29,14 +25,16 @@ export const {
                 password: { label: "Password", type: "password" },
             },
             authorize: async (credentials) => {
-
                 if (!credentials) {
                     throw new Error("Missing required field!");
                 }
 
-                const { email, password } = credentials as { email: string; password: string };
+                const { email, password } = credentials as {
+                    email: string;
+                    password: string;
+                };
 
-                const user = await prisma.users.findUnique({
+                const user = await prisma.user.findUnique({
                     where: { email },
                 });
 
@@ -50,14 +48,14 @@ export const {
                 }
 
                 return {
-                    id: user.id.toString(),
+                    id: user.id,
                     email: user.email,
                     name: user.name,
                     username: user.username,
                     surname: user.surname,
-                    role: user.role
+                    role: user.role,
                 };
-            }
+            },
         }),
     ],
     callbacks: {
