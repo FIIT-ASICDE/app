@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/prisma";
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
-
-const prisma = new PrismaClient();
 
 export async function GET(
     req: Request,
@@ -24,8 +22,8 @@ export async function GET(
     }
 
     try {
-        const user = await prisma.users.findUnique({
-            where: { id: Number(id) },
+        const user = await prisma.user.findUnique({
+            where: { id: id },
         });
 
         if (!user) {

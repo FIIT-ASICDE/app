@@ -1,10 +1,9 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { randomBytes } from "node:crypto";
 
-const prisma = new PrismaClient();
+import prisma from "./prisma";
 
 // https://next-auth.js.org/configuration/options#jwt
 // https://next-auth.js.org/tutorials/securing-pages-and-api-routes
@@ -17,6 +16,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         strategy: "jwt",
     },
     secret: process.env.NEXTAUTH_SECRET || randomBytes(32).toString("hex"),
+    adapter: PrismaAdapter(prisma),
     providers: [
         Credentials({
             name: "Credentials",
@@ -34,7 +34,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     password: string;
                 };
 
-                const user = await prisma.users.findUnique({
+                const user = await prisma.user.findUnique({
                     where: { email },
                 });
 
@@ -48,7 +48,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 }
 
                 return {
-                    id: user.id.toString(),
+                    id: user.id,
                     email: user.email,
                     name: user.name,
                     username: user.username,

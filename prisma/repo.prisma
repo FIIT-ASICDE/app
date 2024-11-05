@@ -1,0 +1,30 @@
+model Repo {
+  id                   String                 @id @default(cuid())
+  name                 String
+  description          String?
+  favorite             Boolean
+  public               Boolean
+  userOrganizationRepo RepoUserOrganization[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RepoUserOrganization {
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  repoId         String
+  repo           Repo         @relation(fields: [repoId], references: [id])
+  repoRole       RepoRole     @default(VIEWER)
+
+  @@unique([userId, organizationId, repoId]) // Ensures a user can have one role per organization-repo pair
+}
+
+enum RepoRole {
+  ADMIN
+  MAINTAINER
+  CONTRIBUTOR
+  VIEWER
+}
