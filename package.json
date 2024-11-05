@@ -1,57 +1,63 @@
 {
-  "name": "asicde-v2",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "prisma generate --schema ./prisma/ && prisma db push --schema ./prisma/ && next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "@joint/core": "^4.0.4",
-    "@prisma/client": "^5.21.1",
-    "antlr4ts": "^0.5.0-alpha.4",
-    "bcryptjs": "^2.4.3",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.1",
-    "lucide-react": "^0.453.0",
-    "next": "15.0.0",
-    "next-auth": "^5.0.0-beta.25",
-    "react": "19.0.0-rc-65a56d0e-20241020",
-    "react-dom": "19.0.0-rc-65a56d0e-20241020",
-    "tailwind-merge": "^2.5.4",
-    "tailwindcss-animate": "^1.0.7",
-    "uuid": "^10.0.0"
-  },
-  "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "@types/uuid": "^10.0.0",
-    "eslint": "^9.13.0",
-    "eslint-config-next": "15.0.0",
-    "postcss": "^8",
-    "prettier": "^3.3.3",
-    "prettier-plugin-tailwindcss": "^0.6.8",
-    "prisma": "^5.21.1",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5"
-  },
-  "prettier": {
-    "plugins": [
-      "@trivago/prettier-plugin-sort-imports",
-      "prettier-plugin-tailwindcss"
-    ],
-    "tabWidth": 4,
-    "importOrder": [
-      "^[./]",
-      "@/components/(.*)$",
-      "@/utils/(.*)$"
-    ],
-    "importOrderSeparation": true,
-    "importOrderSortSpecifiers": true
-  }
+    "name": "asicde-v2",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "prisma migrate dev && next dev",
+        "migrate": "prisma migrate dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint",
+        "format": "prettier --write './**/*.{ts,tsx,js,jsx,json}'"
+    },
+    "dependencies": {
+        "@auth/prisma-adapter": "^2.7.3",
+        "@joint/core": "^4.0.4",
+        "@prisma/client": "^5.21.1",
+        "antlr4ts": "^0.5.0-alpha.4",
+        "bcryptjs": "^2.4.3",
+        "class-variance-authority": "^0.7.0",
+        "clsx": "^2.1.1",
+        "lucide-react": "^0.453.0",
+        "next": "15.0.0",
+        "next-auth": "^5.0.0-beta.25",
+        "react": "19.0.0-rc-65a56d0e-20241020",
+        "react-dom": "19.0.0-rc-65a56d0e-20241020",
+        "tailwind-merge": "^2.5.4",
+        "tailwindcss-animate": "^1.0.7",
+        "uuid": "^10.0.0"
+    },
+    "devDependencies": {
+        "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+        "@types/bcryptjs": "^2.4.6",
+        "@types/node": "^20",
+        "@types/react": "^18",
+        "@types/react-dom": "^18",
+        "@types/uuid": "^10.0.0",
+        "eslint": "^9.13.0",
+        "eslint-config-next": "15.0.0",
+        "postcss": "^8",
+        "prettier": "^3.3.3",
+        "prettier-plugin-tailwindcss": "^0.6.8",
+        "prisma": "^5.21.1",
+        "tailwindcss": "^3.4.1",
+        "typescript": "^5"
+    },
+    "prettier": {
+        "plugins": [
+            "@trivago/prettier-plugin-sort-imports",
+            "prettier-plugin-tailwindcss"
+        ],
+        "tabWidth": 4,
+        "importOrder": [
+            "^[./]",
+            "@/components/(.*)$",
+            "@/utils/(.*)$"
+        ],
+        "importOrderSeparation": true,
+        "importOrderSortSpecifiers": true
+    },
+    "prisma": {
+        "schema": "prisma/"
+    }
 }

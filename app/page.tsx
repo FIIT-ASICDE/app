@@ -1,15 +1,15 @@
 "use client";
 
-import { SessionProvider, useSession, signIn, signOut } from "next-auth/react";
-import React, { useEffect, useState } from "react";
-import { useRouter } from 'next/navigation';
 import { User } from "@/types/User";
+import { SessionProvider, signIn, signOut, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
 
 const HomeComponent = () => {
-    const [password, setPassword] = useState('');
-    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState("");
+    const [email, setEmail] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState("");
     const router = useRouter();
     const [userData, setUserData] = useState<User | null>(null);
 
@@ -29,7 +29,7 @@ const HomeComponent = () => {
             setMessage("Invalid credentials");
             setIsModalOpen(true);
         } else {
-            router.push('/');
+            router.push("/");
         }
     };
 
@@ -68,7 +68,7 @@ const HomeComponent = () => {
                 <h1>Welcome, {session.user?.name}!</h1>
                 <button
                     onClick={() => signOut()}
-                    className="mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
+                    className="mt-4 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
                 >
                     Sign Out
                 </button>
@@ -80,19 +80,26 @@ const HomeComponent = () => {
                     </div>
                 )}
             </div>
-        )
-            ;
+        );
     } else {
         /* TODO - ak session nie je autorizovana zobrazi sa klasicka landing page
-        *   kde budemat user moznost sa prihlasit */
+         *   kde budemat user moznost sa prihlasit */
         return (
-            <div className="flex h-screen w-screen items-center justify-center bg-gray-100 space-x-10">
-                <form onSubmit={handleLogin} className="p-6 bg-white shadow-md rounded w-80">
-                <h2 className="text-2xl font-semibold mb-4">Login</h2>
-                    {isModalOpen && <p className="text-red-500 mb-4">{message}</p>} {/* Zobrazovanie chybových správ */}
-
+            <div className="flex h-screen w-screen items-center justify-center space-x-10 bg-gray-100">
+                <form
+                    onSubmit={handleLogin}
+                    className="w-80 rounded bg-white p-6 shadow-md"
+                >
+                    <h2 className="mb-4 text-2xl font-semibold">Login</h2>
+                    {isModalOpen && (
+                        <p className="mb-4 text-red-500">{message}</p>
+                    )}{" "}
+                    {/* Zobrazovanie chybových správ */}
                     <div className="mb-4">
-                        <label htmlFor="email" className="block text-sm font-medium">
+                        <label
+                            htmlFor="email"
+                            className="block text-sm font-medium"
+                        >
                             Email
                         </label>
                         <input
@@ -101,12 +108,14 @@ const HomeComponent = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            className="mt-1 p-2 w-full border border-gray-300 rounded"
+                            className="mt-1 w-full rounded border border-gray-300 p-2"
                         />
                     </div>
-
                     <div className="mb-6">
-                        <label htmlFor="password" className="block text-sm font-medium">
+                        <label
+                            htmlFor="password"
+                            className="block text-sm font-medium"
+                        >
                             Password
                         </label>
                         <input
@@ -115,13 +124,12 @@ const HomeComponent = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            className="mt-1 p-2 w-full border border-gray-300 rounded"
+                            className="mt-1 w-full rounded border border-gray-300 p-2"
                         />
                     </div>
-
                     <button
                         type="submit"
-                        className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                        className="w-full rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
                     >
                         Login
                     </button>
@@ -129,11 +137,13 @@ const HomeComponent = () => {
 
                 {/* Modal pre neúspešný login */}
                 {isModalOpen && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                        <div className="bg-white p-6 rounded shadow-lg">
-                            <h2 className="text-lg font-bold mb-2">{message}</h2>
+                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                        <div className="rounded bg-white p-6 shadow-lg">
+                            <h2 className="mb-2 text-lg font-bold">
+                                {message}
+                            </h2>
                             <button
-                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                className="focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
                                 onClick={closeModal}
                             >
                                 Close
@@ -146,11 +156,10 @@ const HomeComponent = () => {
     }
 };
 
-
 export default function Home() {
     return (
         /* Kazda page ktora musi byt zobrazena az po autorizacii
-        * musi byt v elemente SessionProvider */
+         * musi byt v elemente SessionProvider */
         <SessionProvider>
             <HomeComponent />
         </SessionProvider>
