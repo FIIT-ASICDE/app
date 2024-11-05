@@ -1,5 +1,5 @@
 model Organization {
-  id                   String                 @id @default(cuid())
+  id                   String @db.Uuid                 @id @default(cuid())
   name                 String?
   users                OrganizationUser[]
   userOrganizationRepo RepoUserOrganization[]
@@ -9,9 +9,9 @@ model Organization {
 }
 
 model OrganizationUser {
-  userId         String
+  userId         String @db.Uuid
   user           User             @relation(fields: [userId], references: [id])
-  organizationId String
+  organizationId String @db.Uuid
   organization   Organization     @relation(fields: [organizationId], references: [id])
   role           OrganizationRole @default(USER)
 

@@ -1,5 +1,5 @@
 model Repo {
-  id                   String                 @id @default(cuid())
+  id                   String @db.Uuid                 @id @default(cuid())
   name                 String
   description          String?
   favorite             Boolean
@@ -11,11 +11,11 @@ model Repo {
 }
 
 model RepoUserOrganization {
-  userId         String
+  userId         String @db.Uuid
   user           User         @relation(fields: [userId], references: [id])
-  organizationId String
+  organizationId String @db.Uuid
   organization   Organization @relation(fields: [organizationId], references: [id])
-  repoId         String
+  repoId         String @db.Uuid
   repo           Repo         @relation(fields: [repoId], references: [id])
   repoRole       RepoRole     @default(VIEWER)
 

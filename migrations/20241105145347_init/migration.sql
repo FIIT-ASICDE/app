@@ -9,7 +9,7 @@ CREATE TYPE "UserRole" AS ENUM ('USER', 'ADMIN');
 
 -- CreateTable
 CREATE TABLE "Organization" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "name" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -19,14 +19,14 @@ CREATE TABLE "Organization" (
 
 -- CreateTable
 CREATE TABLE "OrganizationUser" (
-    "userId" TEXT NOT NULL,
-    "organizationId" TEXT NOT NULL,
+    "userId" UUID NOT NULL,
+    "organizationId" UUID NOT NULL,
     "role" "OrganizationRole" NOT NULL DEFAULT 'USER'
 );
 
 -- CreateTable
 CREATE TABLE "Repo" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
     "favorite" BOOLEAN NOT NULL,
@@ -39,15 +39,15 @@ CREATE TABLE "Repo" (
 
 -- CreateTable
 CREATE TABLE "RepoUserOrganization" (
-    "userId" TEXT NOT NULL,
-    "organizationId" TEXT NOT NULL,
-    "repoId" TEXT NOT NULL,
+    "userId" UUID NOT NULL,
+    "organizationId" UUID NOT NULL,
+    "repoId" UUID NOT NULL,
     "repoRole" "RepoRole" NOT NULL DEFAULT 'VIEWER'
 );
 
 -- CreateTable
 CREATE TABLE "User" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "email" TEXT NOT NULL,
     "username" TEXT NOT NULL,
     "password" TEXT NOT NULL,
@@ -64,7 +64,7 @@ CREATE TABLE "User" (
 
 -- CreateTable
 CREATE TABLE "Account" (
-    "userId" TEXT NOT NULL,
+    "userId" UUID NOT NULL,
     "type" TEXT NOT NULL,
     "provider" TEXT NOT NULL,
     "providerAccountId" TEXT NOT NULL,
@@ -84,7 +84,7 @@ CREATE TABLE "Account" (
 -- CreateTable
 CREATE TABLE "Session" (
     "sessionToken" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
+    "userId" UUID NOT NULL,
     "expires" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL
