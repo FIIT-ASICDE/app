@@ -1,6 +1,6 @@
 export default function Footer() {
     return (
-        <footer className="bg-background flex items-center justify-center p-1 text-foreground">
+        <footer className="flex items-center justify-center bg-background p-1 text-foreground">
             <p>ASICDE</p>
         </footer>
     );

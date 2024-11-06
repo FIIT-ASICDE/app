@@ -1,9 +1,14 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, Lock, Mail, UserRound, UserRoundPen } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+
+import GithubIcon from "@/components/icons/github";
+import GoogleIcon from "@/components/icons/google";
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -14,10 +19,6 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Mail, Lock, EyeOff, Eye, UserRound, UserRoundPen } from "lucide-react";
-import { useState } from "react";
-import GoogleIcon from "@/components/icons/google";
-import GithubIcon from "@/components/icons/github";
 
 const passwordValidation = {
     upperCase: new RegExp(/[A-Z]/),
@@ -83,23 +84,36 @@ export default function Register() {
                         />
                     </div>
                     <div className="w-1/2 overflow-y-auto p-8">
-                        <div className="space-y-2 mb-10">
-                            <h1 className="text-2xl font-bold text-secondary-foreground">Welcome to ASICDE</h1>
-                            <p className="text-gray-500">Web IDE for ASIC development and collaboration</p>
+                        <div className="mb-10 space-y-2">
+                            <h1 className="text-2xl font-bold text-secondary-foreground">
+                                Welcome to ASICDE
+                            </h1>
+                            <p className="text-gray-500">
+                                Web IDE for ASIC development and collaboration
+                            </p>
                         </div>
                         <Form {...form}>
-                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                            <form
+                                onSubmit={form.handleSubmit(onSubmit)}
+                                className="space-y-5"
+                            >
                                 <div className="grid gap-4 sm:grid-cols-2">
                                     <FormField
                                         control={form.control}
                                         name="firstName"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>First name</FormLabel>
+                                                <FormLabel>
+                                                    First name
+                                                </FormLabel>
                                                 <FormControl>
                                                     <div className="relative">
                                                         <UserRoundPen className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                                                        <Input className="pl-10" placeholder="John" {...field} />
+                                                        <Input
+                                                            className="pl-10"
+                                                            placeholder="John"
+                                                            {...field}
+                                                        />
                                                     </div>
                                                 </FormControl>
                                                 <FormMessage />
@@ -115,7 +129,11 @@ export default function Register() {
                                                 <FormControl>
                                                     <div className="relative">
                                                         <UserRoundPen className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                                                        <Input className="pl-10" placeholder="Doe" {...field} />
+                                                        <Input
+                                                            className="pl-10"
+                                                            placeholder="Doe"
+                                                            {...field}
+                                                        />
                                                     </div>
                                                 </FormControl>
                                                 <FormMessage />
@@ -132,7 +150,11 @@ export default function Register() {
                                             <FormControl>
                                                 <div className="relative">
                                                     <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                                                    <Input className="pl-10" placeholder="you@example.com" {...field} />
+                                                    <Input
+                                                        className="pl-10"
+                                                        placeholder="you@example.com"
+                                                        {...field}
+                                                    />
                                                 </div>
                                             </FormControl>
                                             <FormMessage />
@@ -148,7 +170,11 @@ export default function Register() {
                                             <FormControl>
                                                 <div className="relative">
                                                     <UserRound className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                                                    <Input className="pl-10" placeholder="johndoe" {...field} />
+                                                    <Input
+                                                        className="pl-10"
+                                                        placeholder="johndoe"
+                                                        {...field}
+                                                    />
                                                 </div>
                                             </FormControl>
                                             <FormMessage />
@@ -166,13 +192,21 @@ export default function Register() {
                                                     <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                                                     <Input
                                                         className="pl-10 pr-10"
-                                                        type={showPassword ? "text" : "password"}
+                                                        type={
+                                                            showPassword
+                                                                ? "text"
+                                                                : "password"
+                                                        }
                                                         placeholder="********"
                                                         {...field}
                                                     />
                                                     <Button
                                                         className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                                                        onClick={() => setShowPassword(!showPassword)}
+                                                        onClick={() =>
+                                                            setShowPassword(
+                                                                !showPassword,
+                                                            )
+                                                        }
                                                         variant="ghost"
                                                         type="button"
                                                     >
@@ -182,7 +216,9 @@ export default function Register() {
                                                             <Eye className="h-5 w-5 text-muted-foreground" />
                                                         )}
                                                         <span className="sr-only">
-                                                            {showPassword ? "Hide password" : "Show password"}
+                                                            {showPassword
+                                                                ? "Hide password"
+                                                                : "Show password"}
                                                         </span>
                                                     </Button>
                                                 </div>
@@ -203,12 +239,12 @@ export default function Register() {
                         </Form>
                         <div className="flex items-center justify-center">
                             <div className="flex justify-center text-xs">
-                                <span className="bg-background px-2 text-muted-foreground my-5">
+                                <span className="my-5 bg-background px-2 text-muted-foreground">
                                     OR CONTINUE WITH
                                 </span>
                             </div>
                         </div>
-                        <div className="grid gap-4 sm:grid-cols-2 mb-5">
+                        <div className="mb-5 grid gap-4 sm:grid-cols-2">
                             <Button variant="outline" size="lg">
                                 <GoogleIcon />
                                 Google
@@ -219,12 +255,8 @@ export default function Register() {
                             </Button>
                         </div>
                         <div className="text-center text-sm">
-                            Already have an account?{' '}
-                            <Button
-                                variant="link"
-                            >
-                                Back to login
-                            </Button>
+                            Already have an account?{" "}
+                            <Button variant="link">Back to login</Button>
                         </div>
                     </div>
                 </div>

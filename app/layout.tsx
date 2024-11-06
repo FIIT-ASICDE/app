@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
+
 import "./globals.css";
+
+import Footer from "@/components/footer/footer";
 import Header from "@/components/header/header";
-import Footer from '@/components/footer/footer';
 
 export const metadata: Metadata = {
     title: "ASICDE",
-    description: "Web based HDL IDE"
+    description: "Web based HDL IDE",
 };
 
 export default function RootLayout({
