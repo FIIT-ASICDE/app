@@ -1,5 +1,5 @@
 model User {
-  id                   String @db.Uuid                 @id @default(cuid())
+  id                   String @db.Uuid                 @id @default(uuid())
 
   email    String @unique
   username String @unique

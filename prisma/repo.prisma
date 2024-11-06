@@ -1,5 +1,5 @@
 model Repo {
-  id                   String @db.Uuid                 @id @default(cuid())
+  id                   String @db.Uuid                 @id @default(uuid())
   name                 String
   description          String?
   favorite             Boolean
