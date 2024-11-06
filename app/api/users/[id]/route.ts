@@ -1,18 +1,14 @@
+import { authenticate } from "@/lib/authenticate";
 import prisma from "@/prisma";
-import { getToken } from "next-auth/jwt";
+import { Session } from "next-auth";
 import { NextResponse } from "next/server";
 
-export async function GET(
+async function getUserById(
     req: Request,
-    { params }: { params: { id: string } },
+    { params }: { params: { id: string },
+    session: Session | null },
 ) {
     const { id } = await params;
-
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-
-    if (!token) {
-        return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
 
     if (!id) {
         return NextResponse.json(
@@ -42,3 +38,5 @@ export async function GET(
         );
     }
 }
+
+export const GET = authenticate(getUserById);
