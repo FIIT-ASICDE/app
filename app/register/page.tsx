@@ -28,8 +28,8 @@ const passwordValidation = {
 };
 
 const formSchema = z.object({
-    firstName: z.string().min(1, { message: "First name is required" }),
-    lastName: z.string().min(1, { message: "Last name is required" }),
+    name: z.string().min(1, { message: "First name is required" }),
+    surname: z.string().min(1, { message: "Last name is required" }),
     email: z.string().email().min(1, { message: "Email is required" }),
     username: z
         .string()
@@ -57,16 +57,23 @@ export default function Register() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            firstName: "",
-            lastName: "",
+            name: "",
+            surname: "",
             email: "",
             username: "",
             password: "",
         },
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: z.infer<typeof formSchema>) {
         // client-side validated, TODO: server-side validation
+        await fetch("http://localhost:3000/api/register", {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify(values),
+        })
         console.log(values);
     }
 
@@ -100,7 +107,7 @@ export default function Register() {
                                 <div className="grid gap-4 sm:grid-cols-2">
                                     <FormField
                                         control={form.control}
-                                        name="firstName"
+                                        name="name"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
@@ -122,7 +129,7 @@ export default function Register() {
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="lastName"
+                                        name="surname"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Last name</FormLabel>
