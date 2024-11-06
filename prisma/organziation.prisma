@@ -1,5 +1,5 @@
 model Organization {
-  id                   String @db.Uuid                 @id @default(cuid())
+  id                   String @db.Uuid                 @id @default(uuid())
   name                 String?
   users                OrganizationUser[]
   userOrganizationRepo RepoUserOrganization[]
