@@ -9,14 +9,14 @@ export async function POST(request: Request) {
 
         if (!username || !name || !surname || !email || !password) {
             return NextResponse.json(
-                { error: "Missing required field" },
+                { error: "Missing required field", errorCode: "missing_field" },
                 { status: 400 },
             );
         }
 
         if (password.length < 8) {
             return NextResponse.json(
-                { error: "Password must contain at least 8 characters" },
+                { error: "Password must contain at least 8 characters", errorCode: "password_length" },
                 { status: 400 },
             );
         }
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
         if (existingUser) {
             return NextResponse.json(
                 { error: "User with this username or email already exists" },
-                { status: 400 },
+                { status: 409 },
             );
         }
 
