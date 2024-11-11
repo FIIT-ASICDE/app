@@ -67,4 +67,11 @@
     --header-button: #0A0A0A;
     --header-button-hover: #151515;
   }
+  
+  .gradient-background {
+    background: #c9d6ff;
+    background: -webkit-linear-gradient(to right, #e2e2e2, #c9d6ff);
+    background: linear-gradient(to right, #e2e2e2, #c9d6ff);
+  }
+
 }
