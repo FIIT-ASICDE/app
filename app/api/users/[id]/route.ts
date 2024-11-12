@@ -1,6 +1,5 @@
 import { authenticate } from "@/lib/authenticate";
 import prisma from "@/prisma";
-import { Session } from "next-auth";
 import { NextResponse } from "next/server";
 
 /* TODO - bude to upravene,

@@ -7,8 +7,7 @@ import { NextResponse } from "next/server";
     je to len example ako pouzivat authenticate handler */
 async function getUserByIdAndUsername(
     req: Request,
-    { params }: { params: { id: string; username: string ,}},
-    session: Session | null
+    { params }: { params: { id: string; username: string ,}}
 ) {
     const { id, username } = await params;
 
@@ -44,6 +43,6 @@ async function getUserByIdAndUsername(
     }
 }
 
-export const GET = authenticate<{ params: { id: string, username: string }}>(({request, params, session}) => {
-    return getUserByIdAndUsername(request, params, session);
+export const GET = authenticate<{ params: { id: string, username: string }}>(({request, params}) => {
+    return getUserByIdAndUsername(request, params);
 })
