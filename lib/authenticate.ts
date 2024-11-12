@@ -1,17 +1,26 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
+import { Session } from "next-auth";
 
-export function authenticate(handler: Function) {
-    return async (req: Request, context: any) => {
+interface HandlerParams<T> {
+    request: Request;
+    params: T;
+    session: Session | null;
+}
+
+type Handler<T = unknown> = (params: HandlerParams<T>) => Promise<NextResponse>;
+
+export function authenticate<T>(handler: Handler<T>) {
+    return async (request: Request, params: T) => {
         const session = await auth();
 
         if (!session) {
             return NextResponse.json(
                 { message: "Unauthorized" },
-                { status: 401 },
+                { status: 401 }
             );
         }
 
-        return handler(req, context, session);
+        return handler({ request, params, session });
     };
 }

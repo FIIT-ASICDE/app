@@ -5,22 +5,26 @@ import { NextResponse } from "next/server";
 
 /* TODO - bude to upravene,
     je to len example ako pouzivat authenticate handler */
-export async function getUserById(
+async function getUserByIdAndUsername(
     req: Request,
-    { params }: { params: { id: string }}
+    { params }: { params: { id: string; username: string ,}},
+    session: Session | null
 ) {
-    const { id } = await params;
+    const { id, username } = await params;
 
-    if (!id) {
+    if (!id || !username) {
         return NextResponse.json(
-            { message: "Missing id parameter" },
+            { message: "Missing id or username parameter" },
             { status: 400 },
         );
     }
 
     try {
         const user = await prisma.user.findUnique({
-            where: { id: id },
+            where: {
+                id: id,
+                username: username
+            },
         });
 
         if (!user) {
@@ -40,7 +44,6 @@ export async function getUserById(
     }
 }
 
-export const GET = authenticate<{ params: { id: string }}>(({request, params}) => {
-    return getUserById(request, params);
+export const GET = authenticate<{ params: { id: string, username: string }}>(({request, params, session}) => {
+    return getUserByIdAndUsername(request, params, session);
 })
-
