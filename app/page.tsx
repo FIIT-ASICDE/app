@@ -146,7 +146,7 @@ const HomeComponent = () => {
                                 className="h-full w-full object-cover"
                             />
                             <div className="absolute top-4 left-4 bg-transparent">
-                                <h1 className="text-secondary text-xl font-bold">> ASICDE</h1>
+                                <h1 className="text-secondary text-xl font-bold">{">"} ASICDE</h1>
                             </div>
                         </div>
                         <div className="w-1/2 overflow-y-auto p-8">
