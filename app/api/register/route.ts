@@ -2,6 +2,27 @@ import prisma from "@/prisma";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 
+/**
+ * @swagger
+ * /api/register:
+ *   post:
+ *     tags:
+ *       - User
+ *     description: Register new user in app.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: User registered successfully.
+ *       400:
+ *         description: Bad request. Missing required field. Password must contain at least 8 characters. User with this username or email already exists.
+ *       500:
+ *         description: Registration failed.
+ */
 export async function POST(request: Request) {
     try {
         const body = await request.json();
