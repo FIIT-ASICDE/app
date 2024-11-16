@@ -3,11 +3,13 @@ stages:
 
 lint:
     stage: code-quality
+    tags:
+        - npm
     script:
-        - bun install
-        - bun run lint
+        - npm install --legacy-peer-deps
+        - npm run lint
     cache:
         key: $CI_COMMIT_REF_SLUG
         paths:
-            - bun.lockb
+            - package-lock.json
             - node_modules
