@@ -2,9 +2,9 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import { randomBytes } from "node:crypto";
 
 import prisma from "./prisma";
-import { randomBytes } from "node:crypto";
 
 // https://next-auth.js.org/configuration/options#jwt
 // https://next-auth.js.org/tutorials/securing-pages-and-api-routes

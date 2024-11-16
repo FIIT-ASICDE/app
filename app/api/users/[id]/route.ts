@@ -4,9 +4,33 @@ import { NextResponse } from "next/server";
 
 /* TODO - bude to upravene,
     je to len example ako pouzivat authenticate handler */
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   get:
+ *     tags:
+ *       - User
+ *     description: Returns user by id.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the user
+ *     responses:
+ *       200:
+ *         description: User was found.
+ *       404:
+ *         description: User not found.
+ *       400:
+ *         description: Missing required field.
+ *       500:
+ *         description: Failed to fetch user.
+ */
 export async function getUserById(
     req: Request,
-    { params }: { params: { id: string }}
+    { params }: { params: { id: string } },
 ) {
     const { id } = await params;
 
@@ -39,7 +63,8 @@ export async function getUserById(
     }
 }
 
-export const GET = authenticate<{ params: { id: string }}>(({request, params}) => {
-    return getUserById(request, params);
-})
-
+export const GET = authenticate<{ params: { id: string } }>(
+    ({ request, params }) => {
+        return getUserById(request, params);
+    },
+);

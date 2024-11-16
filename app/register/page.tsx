@@ -3,10 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Lock, Mail, UserRound, UserRoundPen } from "lucide-react";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { redirect } from 'next/navigation'
 
 import GithubIcon from "@/components/icons/github";
 import GoogleIcon from "@/components/icons/google";
@@ -54,7 +54,9 @@ const formSchema = z.object({
 
 export default function Register() {
     const [showPassword, setShowPassword] = useState<boolean>(false);
-    const [serverErrorMessage, setServerErrorMessage] = useState<string | null>(null);
+    const [serverErrorMessage, setServerErrorMessage] = useState<string | null>(
+        null,
+    );
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -70,32 +72,28 @@ export default function Register() {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         // client-side validated, TODO: server-side validation
         const response = await fetch("http://localhost:3000/api/register", {
-            method: 'POST',
+            method: "POST",
             headers: {
-                'content-type': 'application/json',
+                "content-type": "application/json",
             },
             body: JSON.stringify(values),
-        })
+        });
         if (response.ok) {
-            setServerErrorMessage(null)
-            redirect("/login")
+            setServerErrorMessage(null);
+            redirect("/login");
             // login page isn't present yet
-        }
-        else {
-            const responseJSON = await response.json()
+        } else {
+            const responseJSON = await response.json();
             if (response.status === 400) {
                 if (responseJSON.errorCode === "missing_field") {
-                    setServerErrorMessage(responseJSON.error)
+                    setServerErrorMessage(responseJSON.error);
+                } else if (responseJSON.errorCode === "password_length") {
+                    setServerErrorMessage(responseJSON.error);
                 }
-                else if (responseJSON.errorCode === "password_length") {
-                    setServerErrorMessage(responseJSON.error)
-                }
-            }
-            else if (response.status === 409) {
-                setServerErrorMessage(responseJSON.error)
-            }
-            else if (response.status === 500) {
-                setServerErrorMessage(responseJSON.error)
+            } else if (response.status === 409) {
+                setServerErrorMessage(responseJSON.error);
+            } else if (response.status === 500) {
+                setServerErrorMessage(responseJSON.error);
             }
         }
     }
