@@ -1,14 +1,11 @@
 import { authenticate } from "@/lib/authenticate";
+import prisma from "@/prisma";
 import { Session } from "next-auth";
 import { NextResponse } from "next/server";
-import prisma from "@/prisma";
 
 /* TODO - bude to upravene,
     je to len example ako pouzivat authenticate handler */
-export async function getUserBySession(
-    req: Request,
-    session: Session | null
-) {
+export async function getUserBySession(req: Request, session: Session | null) {
     try {
         const user = await prisma.user.findUnique({
             where: { id: session?.user?.id },
@@ -31,7 +28,6 @@ export async function getUserBySession(
     }
 }
 
-export const GET = authenticate(({request, session}) => {
+export const GET = authenticate(({ request, session }) => {
     return getUserBySession(request, session);
-})
-
+});

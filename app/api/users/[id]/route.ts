@@ -30,7 +30,7 @@ import { NextResponse } from "next/server";
  */
 export async function getUserById(
     req: Request,
-    { params }: { params: { id: string }}
+    { params }: { params: { id: string } },
 ) {
     const { id } = await params;
 
@@ -63,7 +63,8 @@ export async function getUserById(
     }
 }
 
-export const GET = authenticate<{ params: { id: string }}>(({request, params}) => {
-    return getUserById(request, params);
-})
-
+export const GET = authenticate<{ params: { id: string } }>(
+    ({ request, params }) => {
+        return getUserById(request, params);
+    },
+);

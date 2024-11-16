@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
-import { NextResponse } from "next/server";
 import { Session } from "next-auth";
+import { NextResponse } from "next/server";
 
 interface HandlerParams<T> {
     request: Request;
@@ -17,7 +17,7 @@ export function authenticate<T>(handler: Handler<T>) {
         if (!session) {
             return NextResponse.json(
                 { message: "Unauthorized" },
-                { status: 401 }
+                { status: 401 },
             );
         }
 
