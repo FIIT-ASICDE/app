@@ -1,39 +1,39 @@
-import { createSwaggerSpec } from 'next-swagger-doc';
-
-import 'server-only';
-import { User } from "@/types/SwaggerSchemas";
+import { User } from "@/types/swagger-schemas";
+import { createSwaggerSpec } from "next-swagger-doc";
+import "server-only";
 
 export const getApiDocs = async () => {
     const spec = createSwaggerSpec({
-        apiFolder: 'app/api',
+        apiFolder: "app/api",
         definition: {
-            openapi: '3.0.0',
+            openapi: "3.0.0",
             info: {
-                title: 'ASICDE2 API DOC',
-                version: '1.0',
+                title: "ASICDE2 API DOC",
+                version: "1.0",
             },
             tags: [
                 {
                     name: "User",
-                    description: "API endpoints related to user."
+                    description: "API endpoints related to user.",
                 },
             ],
             components: {
                 securitySchemes: {
                     BearerAuth: {
-                        type: 'http',
-                        scheme: 'bearer',
-                        bearerFormat: 'JWT',
+                        type: "http",
+                        scheme: "bearer",
+                        bearerFormat: "JWT",
                     },
                     OAuth2: {
-                        type: 'oauth2',
+                        type: "oauth2",
                         flows: {
                             authorizationCode: {
-                                authorizationUrl: 'https://example.com/oauth/authorize',
-                                tokenUrl: 'https://example.com/oauth/token',
+                                authorizationUrl:
+                                    "https://example.com/oauth/authorize",
+                                tokenUrl: "https://example.com/oauth/token",
                                 scopes: {
-                                    read: 'Grants read access',
-                                    write: 'Grants write access',
+                                    read: "Grants read access",
+                                    write: "Grants write access",
                                 },
                             },
                         },
