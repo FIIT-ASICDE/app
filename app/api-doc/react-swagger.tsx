@@ -1,15 +1,14 @@
-'use client';
+"use client";
 
-import SwaggerUI from 'swagger-ui-react';
-
-import 'swagger-ui-react/swagger-ui.css';
+import { createSwaggerSpec } from "next-swagger-doc";
+import SwaggerUI from "swagger-ui-react";
+import "swagger-ui-react/swagger-ui.css";
 
 type Props = {
-    spec: Record<string, any>;
+    spec: ReturnType<typeof createSwaggerSpec>;
 };
 
 function ReactSwagger({ spec }: Props) {
-    // @ts-ignore - SwaggerUI is not typed
     return <SwaggerUI spec={spec} />;
 }
 
