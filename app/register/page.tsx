@@ -99,10 +99,10 @@ export default function Register() {
     }
 
     return (
-        <div className="flex flex-col bg-background">
+        <div className="flex flex-col bg-gradient-to-r from-slate-200 to-indigo-200">
             <main className="container mx-auto my-0 w-3/4 px-10 py-10">
                 <div className="flex h-full overflow-hidden rounded-lg bg-card shadow-lg">
-                    <div className="w-1/2">
+                    <div className="w-1/2 relative">
                         <Image
                             src={"/images/duotone.webp"}
                             alt="Duotone"
@@ -110,6 +110,9 @@ export default function Register() {
                             height={600}
                             className="h-full w-full object-cover"
                         />
+                        <div className="absolute top-4 left-4 bg-transparent">
+                            <h1 className="text-secondary text-xl font-bold">{">"} ASICDE</h1>
+                        </div>
                     </div>
                     <div className="w-1/2 overflow-y-auto p-8">
                         <div className="mb-10 space-y-2">

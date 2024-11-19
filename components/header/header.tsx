@@ -10,6 +10,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import LogoIcon from "@/components/icons/logo";
+
 interface HeaderProps {
     type: "logged-in" | "not-logged-in";
     isInOrganisation: boolean;
@@ -21,16 +23,12 @@ export default function Header({ type, isInOrganisation }: HeaderProps) {
             <div className="container flex items-center justify-between">
                 {!isInOrganisation ? (
                     <div className="flex items-center">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-header-foreground text-xl font-bold text-header">
-                            A
-                        </div>
+                        <LogoIcon/>
                         <p className="text-xl font-bold">ASICDE</p>
                     </div>
                 ) : (
                     <div className="flex items-center space-x-2 p-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-header-foreground text-xl font-bold text-header">
-                            A
-                        </div>
+                        <LogoIcon/>
                         <p className="text-xl font-bold">ASICDE</p>
                         <ChevronRight className="ml-3 h-4 w-4" />
                         <Link href={"/organisation"}>
