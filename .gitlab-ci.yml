@@ -1,5 +1,6 @@
 stages:
     - code-quality
+    - build
 
 lint:
     stage: code-quality
@@ -13,3 +14,17 @@ lint:
         paths:
             - package-lock.json
             - node_modules
+            - .next/cache/
+
+build-app:
+    stage: build
+    tags:
+        - npm
+    script:
+        - npm run build
+    cache:
+        key: $CI_COMMIT_REF_SLUG
+        paths:
+            - package-lock.json
+            - node_modules
+            - .next/cache/
