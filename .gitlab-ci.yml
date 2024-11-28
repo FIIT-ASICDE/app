@@ -36,7 +36,7 @@ deploy-dev:
     tags:
         - alpine
     dependencies:
-        - build
+        - build-app
     before_script:
         - "command -v ssh-agent >/dev/null || ( apk add --update openssh rsync )"
         - eval $(ssh-agent -s)
