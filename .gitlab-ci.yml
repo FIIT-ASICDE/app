@@ -41,6 +41,7 @@ deploy-dev:
         - mkdir -p ~/.ssh
         - chmod 700 ~/.ssh
         - echo "$DEPLOYER_SSH_PK" | base64 -d > ~/.ssh/id_ed25519
+        - wc -l ~/.ssh/id_ed25519
         - chmod 400 ~/.ssh/id_ed25519
         - ssh-add ~/.ssh/id_ed25519
         - echo "StrictHostKeyChecking no" >> ~/.ssh/config # https://forum.gitlab.com/t/error-host-key-verification-failed/77315/3
@@ -51,3 +52,9 @@ deploy-dev:
         - master
         - deploy-dev
 
+    # TODO
+    # 1. env with AUTH_TRUST_HOST="http://localhost:3000"
+    # 2. copy package-lock.json, package.json, public directory, migrations directory, .next directory, prisma directory
+    # 3. npm ci --legacy-peer-deps --omit=dev
+    # 4. npx prisma generate
+    # 5. npm run start
