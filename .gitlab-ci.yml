@@ -1,6 +1,7 @@
 stages:
     - code-quality
     - build
+    - deploy
 
 lint:
     stage: code-quality
@@ -28,3 +29,25 @@ build-app:
             - package-lock.json
             - node_modules
             - .next/cache/
+
+# https://docs.gitlab.com/ee/ci/jobs/ssh_keys.html#ssh-keys-when-using-the-docker-executor
+deploy-dev:
+    stage: deploy
+    tags:
+        - alpine
+    before_script:
+        - "command -v ssh-agent >/dev/null || ( apk add --update openssh rsync )"
+        - eval $(ssh-agent -s)
+        - mkdir -p ~/.ssh
+        - chmod 700 ~/.ssh
+        - echo "$DEPLOYER_SSH_PK" | base64 -d > ~/.ssh/id_ed25519
+        - chmod 400 ~/.ssh/id_ed25519
+        - ssh-add ~/.ssh/id_ed25519
+        - echo "StrictHostKeyChecking no" >> ~/.ssh/config # https://forum.gitlab.com/t/error-host-key-verification-failed/77315/3
+    script:
+        - echo -e "package-lock.json\npackage.json\npublic/\nmigrations/\n.next/\nprisma/" > filelist.txt
+        - rsync -avz --delete --exclude '.env' --files-from=filelist.txt ./ asicde-dev-env@asicde.fiit.stuba.sk:/home/asicde-dev-env/asicde/
+    only:
+        - master
+        - deploy-dev
+
