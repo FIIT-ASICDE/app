@@ -23,7 +23,6 @@ build-app:
         - npm
     script:
         - npm run build
-        - ls -lah
     cache:
         key: $CI_COMMIT_REF_SLUG
         paths:
@@ -36,6 +35,8 @@ deploy-dev:
     stage: deploy
     tags:
         - alpine
+    dependencies:
+        - build
     before_script:
         - "command -v ssh-agent >/dev/null || ( apk add --update openssh rsync )"
         - eval $(ssh-agent -s)
@@ -52,12 +53,6 @@ deploy-dev:
     only:
         - master
         - deploy-dev
-    cache:
-        key: $CI_COMMIT_REF_SLUG
-        paths:
-            - package-lock.json
-            - node_modules
-            - .next
 
     # TODO
     # 1. env with AUTH_TRUST_HOST="http://localhost:3000"
