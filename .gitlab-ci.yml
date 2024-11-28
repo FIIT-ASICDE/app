@@ -23,6 +23,7 @@ build-app:
         - npm
     script:
         - npm run build
+        - ls -lah
     cache:
         key: $CI_COMMIT_REF_SLUG
         paths:
@@ -45,6 +46,7 @@ deploy-dev:
         - ssh-add ~/.ssh/id_ed25519
         - echo "StrictHostKeyChecking no" >> ~/.ssh/config # https://forum.gitlab.com/t/error-host-key-verification-failed/77315/3
     script:
+        - ls -lah
         - echo -e "package-lock.json\npackage.json\npublic/\nmigrations/\n.next/\nprisma/" > filelist.txt
         - rsync -avz --delete --exclude '.env' --files-from=filelist.txt ./ asicde-dev-env@asicde.fiit.stuba.sk:/home/asicde-dev-env/asicde/
     only:
@@ -55,7 +57,7 @@ deploy-dev:
         paths:
             - package-lock.json
             - node_modules
-            - .next/cache/
+            - .next
 
     # TODO
     # 1. env with AUTH_TRUST_HOST="http://localhost:3000"
