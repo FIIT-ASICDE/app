@@ -24,7 +24,7 @@ build-app:
     artifacts:
         paths:
             - .next
-        expire_in: 1 day
+        expire_in: 24 hours
     script:
         - npm run build
     cache:
@@ -52,15 +52,8 @@ deploy-dev:
         - echo "StrictHostKeyChecking no" >> ~/.ssh/config # https://forum.gitlab.com/t/error-host-key-verification-failed/77315/3
     script:
         - ls -lah
-        - echo -e "package-lock.json\npackage.json\npublic/\nmigrations/\n.next/\nprisma/" > filelist.txt
-        - rsync -avz --delete --exclude '.env' --files-from=filelist.txt ./ asicde-dev-env@asicde.fiit.stuba.sk:/home/asicde-dev-env/asicde/
+        - echo -e "package-lock.json\npackage.json\npublic/\nmigrations/\n.next/\nprisma/\nscripts/" > filelist.txt
+        - rsync -avzr --delete --exclude '.env' --files-from=filelist.txt ./ asicde-dev-env@asicde.fiit.stuba.sk:/home/asicde-dev-env/asicde/
     only:
         - master
         - deploy-dev
-
-    # TODO
-    # 1. env with AUTH_TRUST_HOST="http://localhost:3000"
-    # 2. copy package-lock.json, package.json, public directory, migrations directory, .next directory, prisma directory
-    # 3. npm ci --legacy-peer-deps --omit=dev
-    # 4. npx prisma generate
-    # 5. npm run start
