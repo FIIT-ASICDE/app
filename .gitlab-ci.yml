@@ -41,7 +41,6 @@ deploy-dev:
         - mkdir -p ~/.ssh
         - chmod 700 ~/.ssh
         - echo "$DEPLOYER_SSH_PK" | base64 -d > ~/.ssh/id_ed25519
-        - wc -l ~/.ssh/id_ed25519
         - chmod 400 ~/.ssh/id_ed25519
         - ssh-add ~/.ssh/id_ed25519
         - echo "StrictHostKeyChecking no" >> ~/.ssh/config # https://forum.gitlab.com/t/error-host-key-verification-failed/77315/3
