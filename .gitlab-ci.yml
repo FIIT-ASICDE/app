@@ -21,6 +21,10 @@ build-app:
     stage: build
     tags:
         - npm
+    artifacts:
+        paths:
+            - .next
+        expire_in: 1 day
     script:
         - npm run build
     cache:
