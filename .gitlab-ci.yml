@@ -50,6 +50,12 @@ deploy-dev:
     only:
         - master
         - deploy-dev
+    cache:
+        key: $CI_COMMIT_REF_SLUG
+        paths:
+            - package-lock.json
+            - node_modules
+            - .next/cache/
 
     # TODO
     # 1. env with AUTH_TRUST_HOST="http://localhost:3000"
