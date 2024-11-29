@@ -29,6 +29,4 @@ else
 	echo -e "${GREEN}Application reloaded successfully.${RESET}"
 fi
 
-echo -e "${GREEN}Application started successfully.${RESET}"
-
 echo -e "${BLUE}Deployment process completed successfully.${RESET}"
