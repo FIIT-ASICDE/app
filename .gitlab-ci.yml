@@ -53,7 +53,7 @@ deploy-dev:
     script:
         - echo -e "package-lock.json\npackage.json\npublic/\nmigrations/\n.next/\nprisma/\nscripts/" > filelist.txt
         - rsync -avzr --delete --exclude '.env' --files-from=filelist.txt ./ asicde-dev-env@asicde.fiit.stuba.sk:/home/asicde-dev-env/asicde/
-        - ssh asicde-dev-env@asicde.fiit.stuba.sk "cd asicde && ./scripts/deploy.sh"
+        - ssh asicde-dev-env@asicde.fiit.stuba.sk "source ~/.nvm/nvm.sh && cd ~/asicde && ./scripts/deploy.sh"
     only:
         - master
         - deploy-dev
