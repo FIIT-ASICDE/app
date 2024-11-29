@@ -109,7 +109,7 @@ const HomeComponent = () => {
         /* TODO - ak je session autorizovana zobrazi sa home page pre prihlaseneho usera */
         return (
             <div>
-                <h1>Welcome, {session.user?.name}!</h1>
+                <h1>Hi, {session.user?.name}!</h1>
                 <button
                     onClick={() => signOut()}
                     className="mt-4 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"

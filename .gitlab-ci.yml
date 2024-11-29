@@ -37,6 +37,9 @@ build-app:
 # https://docs.gitlab.com/ee/ci/jobs/ssh_keys.html#ssh-keys-when-using-the-docker-executor
 deploy-dev:
     stage: deploy
+    environment:
+        name: development
+        url: https://ide.drasic.com
     tags:
         - alpine
     dependencies:
