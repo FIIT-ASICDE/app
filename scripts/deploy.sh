@@ -18,7 +18,17 @@ npx prisma generate
 echo -e "${GREEN}Prisma client generated successfully.${RESET}"
 
 echo -e "${YELLOW}Starting the application...${RESET}"
-# pm2 start npm --name "asicde" -i 2 --wait-ready -- start
+
+if [ -z "$(pm2 pid asicde)" ]; then
+	echo -e "${YELLOW}No running instance found. Starting the application...${RESET}"
+	pm2 start npm --name "asicde" -- start
+	echo -e "${GREEN}Application started successfully.${RESET}"
+else
+	echo -e "${YELLOW}Instance found. Reloading the application...${RESET}"
+	pm2 reload asicde
+	echo -e "${GREEN}Application reloaded successfully.${RESET}"
+fi
+
 echo -e "${GREEN}Application started successfully.${RESET}"
 
 echo -e "${BLUE}Deployment process completed successfully.${RESET}"
