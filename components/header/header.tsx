@@ -1,6 +1,7 @@
 import { ChevronRight, UserRound } from "lucide-react";
 import Link from "next/link";
 
+import LogoIcon from "@/components/icons/logo";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -9,8 +10,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-import LogoIcon from "@/components/icons/logo";
 
 interface HeaderProps {
     type: "logged-in" | "not-logged-in";
@@ -23,12 +22,12 @@ export default function Header({ type, isInOrganisation }: HeaderProps) {
             <div className="container flex items-center justify-between">
                 {!isInOrganisation ? (
                     <div className="flex items-center">
-                        <LogoIcon/>
+                        <LogoIcon />
                         <p className="text-xl font-bold">ASICDE</p>
                     </div>
                 ) : (
                     <div className="flex items-center space-x-2 p-2">
-                        <LogoIcon/>
+                        <LogoIcon />
                         <p className="text-xl font-bold">ASICDE</p>
                         <ChevronRight className="ml-3 h-4 w-4" />
                         <Link href={"/organisation"}>

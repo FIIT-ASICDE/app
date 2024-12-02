@@ -1,15 +1,15 @@
 "use client";
 
 import { User } from "@/types/user";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, Lock, UserRound } from "lucide-react";
 import { SessionProvider, signIn, signOut, useSession } from "next-auth/react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
-
-import Image from "next/image";
 import GithubIcon from "@/components/icons/github";
 import GoogleIcon from "@/components/icons/google";
 import { Button } from "@/components/ui/button";
@@ -23,8 +23,6 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Lock, UserRound } from "lucide-react";
-
 
 const formSchema = z.object({
     email: z
@@ -33,18 +31,20 @@ const formSchema = z.object({
     password: z
         .string()
         .min(8, { message: "Password must be at least 8 characters" }),
-    keepMeLoggedIn: z.boolean().optional()
+    keepMeLoggedIn: z.boolean().optional(),
 });
 
 const HomeComponent = () => {
     const [keepMeLoggedIn, setKeepMeLoggedIn] = useState(false);
     const router = useRouter();
     const [userData, setUserData] = useState<User | null>(null);
-    
+
     const { data: session, status } = useSession();
 
     const [showPassword, setShowPassword] = useState<boolean>(false);
-    const [serverErrorMessage, setServerErrorMessage] = useState<string | null>(null);
+    const [serverErrorMessage, setServerErrorMessage] = useState<string | null>(
+        null,
+    );
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -72,8 +72,8 @@ const HomeComponent = () => {
 
     /* TODO */
     const forgotPassword = () => {
-        console.log("User forgot password")
-    }
+        console.log("User forgot password");
+    };
 
     /* TODO - zatial pre priklad len fetchovanie users data,
         neskor ked budu endpointy sa pridaju aj dalsie potrebne data pre userovu home page */
@@ -93,7 +93,7 @@ const HomeComponent = () => {
     useEffect(() => {
         fetchUserData();
     }, [session]);
-    
+
     /*
     const closeModal = () => {
         setIsModalOpen(false);
@@ -132,7 +132,7 @@ const HomeComponent = () => {
             <div className="flex flex-col bg-gradient-to-r from-slate-200 to-indigo-200">
                 <main className="container mx-auto my-0 w-3/4 px-10 py-10">
                     <div className="flex h-full overflow-hidden rounded-lg bg-card shadow-lg">
-                        <div className="w-1/2 relative">
+                        <div className="relative w-1/2">
                             <Image
                                 src={"/images/duotone.webp"}
                                 alt="Duotone"
@@ -140,8 +140,10 @@ const HomeComponent = () => {
                                 height={600}
                                 className="h-full w-full object-cover"
                             />
-                            <div className="absolute top-4 left-4 bg-transparent">
-                                <h1 className="text-secondary text-xl font-bold">{">"} ASICDE</h1>
+                            <div className="absolute left-4 top-4 bg-transparent">
+                                <h1 className="text-xl font-bold text-secondary">
+                                    {">"} ASICDE
+                                </h1>
                             </div>
                         </div>
                         <div className="w-1/2 overflow-y-auto p-8">
@@ -150,7 +152,8 @@ const HomeComponent = () => {
                                     Welcome to ASICDE
                                 </h1>
                                 <p className="text-gray-500">
-                                    Web IDE for ASIC development and collaboration
+                                    Web IDE for ASIC development and
+                                    collaboration
                                 </p>
                             </div>
                             <Form {...form}>
@@ -163,7 +166,9 @@ const HomeComponent = () => {
                                         name="email"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Username or email</FormLabel>
+                                                <FormLabel>
+                                                    Username or email
+                                                </FormLabel>
                                                 <FormControl>
                                                     <div className="relative">
                                                         <UserRound className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
@@ -189,13 +194,21 @@ const HomeComponent = () => {
                                                         <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                                                         <Input
                                                             className="pl-10 pr-10"
-                                                            type={showPassword ? "text" : "password"}
+                                                            type={
+                                                                showPassword
+                                                                    ? "text"
+                                                                    : "password"
+                                                            }
                                                             placeholder="********"
                                                             {...field}
                                                         />
                                                         <Button
                                                             className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                                                            onClick={() => setShowPassword(!showPassword)}
+                                                            onClick={() =>
+                                                                setShowPassword(
+                                                                    !showPassword,
+                                                                )
+                                                            }
                                                             variant="ghost"
                                                             type="button"
                                                         >
@@ -205,7 +218,9 @@ const HomeComponent = () => {
                                                                 <Eye className="h-5 w-5 text-muted-foreground" />
                                                             )}
                                                             <span className="sr-only">
-                                                                {showPassword ? "Hide password" : "Show password"}
+                                                                {showPassword
+                                                                    ? "Hide password"
+                                                                    : "Show password"}
                                                             </span>
                                                         </Button>
                                                     </div>
@@ -215,12 +230,16 @@ const HomeComponent = () => {
                                         )}
                                     />
 
-                                    <div className="flex justify-between items-center">
+                                    <div className="flex items-center justify-between">
                                         <div className="flex items-center space-x-2">
                                             <Checkbox
                                                 id="keepMeLoggedIn"
                                                 checked={keepMeLoggedIn}
-                                                onCheckedChange={() => setKeepMeLoggedIn(!keepMeLoggedIn)}
+                                                onCheckedChange={() =>
+                                                    setKeepMeLoggedIn(
+                                                        !keepMeLoggedIn,
+                                                    )
+                                                }
                                             />
                                             <label
                                                 htmlFor="keepMeLoggedIn"
@@ -229,19 +248,21 @@ const HomeComponent = () => {
                                                 Keep me logged in
                                             </label>
                                         </div>
-                                        <Button 
+                                        <Button
                                             variant="link"
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 forgotPassword();
-                                            }}  
+                                            }}
                                         >
                                             Forgot password?
                                         </Button>
                                     </div>
 
                                     {serverErrorMessage && (
-                                        <FormMessage>{serverErrorMessage}</FormMessage>
+                                        <FormMessage>
+                                            {serverErrorMessage}
+                                        </FormMessage>
                                     )}
                                     <Button
                                         className="w-full bg-primary text-primary-foreground hover:bg-primary-button-hover"

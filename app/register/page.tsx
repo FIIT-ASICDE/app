@@ -71,7 +71,7 @@ export default function Register() {
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         // client-side validated, TODO: server-side validation
-        const response = await fetch("http://localhost:3000/api/register", {
+        const response = await fetch("/api/register", {
             method: "POST",
             headers: {
                 "content-type": "application/json",
@@ -102,7 +102,7 @@ export default function Register() {
         <div className="flex flex-col bg-gradient-to-r from-slate-200 to-indigo-200">
             <main className="container mx-auto my-0 w-3/4 px-10 py-10">
                 <div className="flex h-full overflow-hidden rounded-lg bg-card shadow-lg">
-                    <div className="w-1/2 relative">
+                    <div className="relative w-1/2">
                         <Image
                             src={"/images/duotone.webp"}
                             alt="Duotone"
@@ -110,8 +110,10 @@ export default function Register() {
                             height={600}
                             className="h-full w-full object-cover"
                         />
-                        <div className="absolute top-4 left-4 bg-transparent">
-                            <h1 className="text-secondary text-xl font-bold">{">"} ASICDE</h1>
+                        <div className="absolute left-4 top-4 bg-transparent">
+                            <h1 className="text-xl font-bold text-secondary">
+                                {">"} ASICDE
+                            </h1>
                         </div>
                     </div>
                     <div className="w-1/2 overflow-y-auto p-8">

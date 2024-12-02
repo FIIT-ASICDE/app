@@ -4,14 +4,14 @@ import { NextResponse } from "next/server";
 
 interface HandlerParams<T> {
     request: Request;
-    params: T;
+    params: Promise<T>;
     session: Session | null;
 }
 
 type Handler<T = unknown> = (params: HandlerParams<T>) => Promise<NextResponse>;
 
 export function authenticate<T>(handler: Handler<T>) {
-    return async (request: Request, params: T) => {
+    return async (request: Request, params: { params: Promise<T> }) => {
         const session = await auth();
 
         if (!session) {
@@ -21,6 +21,6 @@ export function authenticate<T>(handler: Handler<T>) {
             );
         }
 
-        return handler({ request, params, session });
+        return handler({ request, params: params.params, session });
     };
 }

@@ -2,8 +2,6 @@ import { authenticate } from "@/lib/authenticate";
 import prisma from "@/prisma";
 import { NextResponse } from "next/server";
 
-/* TODO - bude to upravene,
-    je to len example ako pouzivat authenticate handler */
 /**
  * @swagger
  * /api/users/{id}:
@@ -28,10 +26,7 @@ import { NextResponse } from "next/server";
  *       500:
  *         description: Failed to fetch user.
  */
-export async function getUserById(
-    req: Request,
-    { params }: { params: { id: string } },
-) {
+export async function getUserById(params: Promise<{ id?: string }>) {
     const { id } = await params;
 
     if (!id) {
@@ -63,8 +58,6 @@ export async function getUserById(
     }
 }
 
-export const GET = authenticate<{ params: { id: string } }>(
-    ({ request, params }) => {
-        return getUserById(request, params);
-    },
+export const GET = authenticate<{ id?: string }>(({ params }) =>
+    getUserById(params),
 );
