@@ -5,8 +5,7 @@ import { NextResponse } from "next/server";
 /* TODO - bude to upravene,
     je to len example ako pouzivat authenticate handler */
 async function getUserByIdAndUsername(
-    req: Request,
-    { params }: { params: { id: string; username: string } },
+    params: Promise<{ id: string; username: string }>,
 ) {
     const { id, username } = await params;
 
@@ -42,8 +41,6 @@ async function getUserByIdAndUsername(
     }
 }
 
-export const GET = authenticate<{ params: { id: string; username: string } }>(
-    ({ request, params }) => {
-        return getUserByIdAndUsername(request, params);
-    },
+export const GET = authenticate<{ id: string; username: string }>(
+    ({ params }) => getUserByIdAndUsername(params),
 );
