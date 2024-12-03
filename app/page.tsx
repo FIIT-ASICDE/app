@@ -269,7 +269,6 @@ const HomeComponent = () => {
                                         size="lg"
                                         type="submit"
                                         variant="default"
-                                        onClick={() => handleLogin}
                                     >
                                         Login
                                     </Button>
@@ -293,8 +292,14 @@ const HomeComponent = () => {
                                 </Button>
                             </div>
                             <div className="text-center text-sm">
-                                Don&apos;t have an account?{" "}
-                                <Button variant="link">Register</Button>
+                                Don&apos;t have an account?
+                                <Button
+                                    className="px-2"
+                                    variant="link"
+                                    onClick={() => router.push("/register")}
+                                >
+                                    Register
+                                </Button>
                             </div>
                         </div>
                     </div>

@@ -80,7 +80,7 @@ export default function Register() {
         });
         if (response.ok) {
             setServerErrorMessage(null);
-            redirect("/login");
+            redirect("/");
             // login page isn't present yet
         } else {
             const responseJSON = await response.json();
@@ -289,8 +289,10 @@ export default function Register() {
                             </Button>
                         </div>
                         <div className="text-center text-sm">
-                            Already have an account?{" "}
-                            <Button variant="link">Back to login</Button>
+                            Already have an account?
+                            <Button className="px-2" variant="link">
+                                Back to login
+                            </Button>
                         </div>
                     </div>
                 </div>

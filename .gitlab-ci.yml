@@ -1,5 +1,7 @@
 stages:
     - code-quality
+    - build
+    - deploy
 
 lint:
     stage: code-quality
@@ -13,3 +15,47 @@ lint:
         paths:
             - package-lock.json
             - node_modules
+            - .next/cache/
+
+build-app:
+    stage: build
+    tags:
+        - npm
+    artifacts:
+        paths:
+            - .next
+        expire_in: 24 hours
+    script:
+        - npm run build
+    cache:
+        key: $CI_COMMIT_REF_SLUG
+        paths:
+            - package-lock.json
+            - node_modules
+            - .next/cache/
+
+# https://docs.gitlab.com/ee/ci/jobs/ssh_keys.html#ssh-keys-when-using-the-docker-executor
+deploy-dev:
+    stage: deploy
+    environment:
+        name: development
+        url: https://ide.drasic.com
+    tags:
+        - alpine
+    dependencies:
+        - build-app
+    before_script:
+        - "command -v ssh-agent >/dev/null || ( apk add --update openssh rsync )"
+        - eval $(ssh-agent -s)
+        - mkdir -p ~/.ssh
+        - chmod 700 ~/.ssh
+        - echo "$DEPLOYER_SSH_PK" | base64 -d > ~/.ssh/id_ed25519
+        - chmod 400 ~/.ssh/id_ed25519
+        - ssh-add ~/.ssh/id_ed25519
+        - echo "StrictHostKeyChecking no" >> ~/.ssh/config # https://forum.gitlab.com/t/error-host-key-verification-failed/77315/3
+    script:
+        - echo -e "package-lock.json\npackage.json\npublic/\nmigrations/\n.next/\nprisma/\nscripts/" > filelist.txt
+        - rsync -avzr --delete --exclude '.env' --files-from=filelist.txt ./ asicde-dev-env@asicde.fiit.stuba.sk:/home/asicde-dev-env/asicde/
+        - ssh asicde-dev-env@asicde.fiit.stuba.sk "source ~/.nvm/nvm.sh && cd ~/asicde && ./scripts/deploy.sh"
+    only:
+        - master
