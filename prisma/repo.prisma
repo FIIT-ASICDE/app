@@ -1,8 +1,7 @@
 model Repo {
-  id                   String @db.Uuid                 @id @default(uuid())
+  id                   String                 @id @default(uuid()) @db.Uuid
   name                 String
   description          String?
-  favorite             Boolean
   public               Boolean
   userOrganizationRepo RepoUserOrganization[]
 
@@ -11,20 +10,21 @@ model Repo {
 }
 
 model RepoUserOrganization {
-  userId         String @db.Uuid
-  user           User         @relation(fields: [userId], references: [id])
-  organizationId String @db.Uuid
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  repoId         String @db.Uuid
-  repo           Repo         @relation(fields: [repoId], references: [id])
-  repoRole       RepoRole     @default(VIEWER)
+  favorite       Boolean
+  userId         String        @db.Uuid
+  user           User          @relation(fields: [userId], references: [id])
+  organizationId String        @db.Uuid
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  repoId         String        @db.Uuid
+  repo           Repo          @relation(fields: [repoId], references: [id])
+  repoRole       RepoRole      @default(OWNER)
 
   @@unique([userId, organizationId, repoId]) // Ensures a user can have one role per organization-repo pair
 }
 
 enum RepoRole {
   ADMIN
-  MAINTAINER
   CONTRIBUTOR
   VIEWER
+  OWNER
 }
