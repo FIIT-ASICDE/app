@@ -59,4 +59,3 @@ deploy-dev:
         - ssh asicde-dev-env@asicde.fiit.stuba.sk "source ~/.nvm/nvm.sh && cd ~/asicde && ./scripts/deploy.sh"
     only:
         - master
-        - deploy-dev
