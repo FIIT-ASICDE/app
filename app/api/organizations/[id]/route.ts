@@ -87,7 +87,7 @@ async function getOrganizationById(
  *       500:
  *         description: Failed to delete organization.
  */
-export async function deleteOrganizationById(
+async function deleteOrganizationById(
     params: Promise<{ id?: string }>
 ) {
     try {
