@@ -3,7 +3,7 @@ import prisma from "@/prisma";
 import { Session } from "next-auth";
 import { NextResponse } from "next/server";
 
-export async function getUserBySession(session: Session | null) {
+async function getUserBySession(session: Session | null) {
     try {
         const user = await prisma.user.findUnique({
             where: { id: session?.user?.id },
