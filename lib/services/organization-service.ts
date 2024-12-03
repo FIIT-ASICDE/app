@@ -1,13 +1,11 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "@/prisma";
 
 export async function getOrganizationsUserByUserId(userId: string) {
     const organizationsUser = await prisma.organizationUser.findMany({
         where: {
-            userId
+            userId,
         },
-        include: { organization: true, user: true }
+        include: { organization: true, user: true },
     });
 
     return organizationsUser;

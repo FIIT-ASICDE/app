@@ -26,7 +26,7 @@ import { NextResponse } from "next/server";
  *       500:
  *         description: Failed to fetch user.
  */
-export async function getUserById(params: Promise<{ id?: string }>) {
+async function getUserById(params: Promise<{ id?: string }>) {
     const { id } = await params;
 
     if (!id) {

@@ -1,26 +1,26 @@
-import { HttpError } from "lib/errors/HttpError";
-import { getLoggedInUser } from "./user-service";
 import { RepoCreation } from "@/types/RepoCreation.type";
-import { getOrganizationsUserByUserId as getOrganizationsUserByUserId } from "lib/services/organization-service";
-import { PrismaClient, Repo, User, RepoRole } from "@prisma/client";
+import { PrismaClient, Repo, RepoRole, User } from "@prisma/client";
+import { HttpError } from "lib/errors/HttpError";
+import { getOrganizationsUserByUserId } from "lib/services/organization-service";
+
+import { getLoggedInUser } from "./user-service";
 
 const prisma = new PrismaClient();
-
 
 export async function getRepo(repoId: string): Promise<Repo> {
     const user = await getLoggedInUser();
 
     const repo = await prisma.repo.findFirstOrThrow({
         where: {
-            id: repoId
-        }
+            id: repoId,
+        },
     });
 
     if (repo.public) {
         return repo;
     }
 
-    await checkRepoAccess(repoId, user!.id)
+    await checkRepoAccess(repoId, user!.id);
 
     return repo;
 }
@@ -32,11 +32,11 @@ export async function addRepo(repoCreation: RepoCreation) {
         where: {
             userId: loggedInUser.id,
             repo: {
-                name: repoCreation.name
-            }
+                name: repoCreation.name,
+            },
         },
-        include: { repo: true }
-    })
+        include: { repo: true },
+    });
 
     if (existingRepo) {
         throw new HttpError("Repo with this name already exists!", 400);
@@ -52,15 +52,18 @@ export async function addRepo(repoCreation: RepoCreation) {
                     userId: loggedInUser!.id!,
                     organizationId: "",
                     favorite: repoCreation.favorite,
-                }
-            }
+                },
+            },
         },
     });
 
-    return repo
+    return repo;
 }
 
-export async function updateRepo(repoId: string, repoCreation: RepoCreation): Promise<Repo> {
+export async function updateRepo(
+    repoId: string,
+    repoCreation: RepoCreation,
+): Promise<Repo> {
     const loggedInUser: User = await getLoggedInUser();
 
     await checkRepoRoleAdminOwner(repoId, loggedInUser.id);
@@ -70,8 +73,8 @@ export async function updateRepo(repoId: string, repoCreation: RepoCreation): Pr
             userId_organizationId_repoId: {
                 repoId: repoId!,
                 userId: loggedInUser.id!,
-                organizationId: ""
-            }
+                organizationId: "",
+            },
         },
         data: {
             favorite: repoCreation.favorite,
@@ -80,13 +83,13 @@ export async function updateRepo(repoId: string, repoCreation: RepoCreation): Pr
                     name: repoCreation.name,
                     description: repoCreation.description,
                     public: repoCreation.public,
-                }
-            }
+                },
+            },
         },
-        include: { repo: true }
+        include: { repo: true },
     });
 
-    return repoUserOrganization.repo
+    return repoUserOrganization.repo;
 }
 
 export async function deleteRepo(repoId: string) {
@@ -95,23 +98,22 @@ export async function deleteRepo(repoId: string) {
     await checkRepoRoleAdminOwner(repoId, loggedInUser.id);
     await prisma.repo.delete({
         where: {
-            id: repoId
-        }
+            id: repoId,
+        },
     });
 }
 
-
 export async function checkRepoAccess(repoId: string, userId: string) {
     const organizationsUser = await getOrganizationsUserByUserId(userId);
-    const organizationIds = organizationsUser.map(_ => _.organization.id);
+    const organizationIds = organizationsUser.map((_) => _.organization.id);
 
     const reposUsersOrganization = await prisma.repoUserOrganization.findFirst({
         where: {
             repoId,
             OR: [
                 { organizationId: { in: organizationIds } },
-                { userId: userId }
-            ]
+                { userId: userId },
+            ],
         },
     });
     if (!reposUsersOrganization) {
@@ -124,7 +126,10 @@ export async function checkRepoAccess(repoId: string, userId: string) {
 export async function checkRepoRoleAdminOwner(repoId: string, userId: string) {
     const reposUsersOrganization = await checkRepoAccess(repoId, userId);
 
-    if (reposUsersOrganization.repoRole == RepoRole.VIEWER || reposUsersOrganization.repoRole == RepoRole.CONTRIBUTOR) {
+    if (
+        reposUsersOrganization.repoRole == RepoRole.VIEWER ||
+        reposUsersOrganization.repoRole == RepoRole.CONTRIBUTOR
+    ) {
         throw new HttpError("Unauthorized", 403);
     }
 }

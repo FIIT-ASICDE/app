@@ -1,6 +1,6 @@
 "use client";
 
-import { User } from "@/types/user";
+import { User } from "@/types/User.type";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Lock, UserRound } from "lucide-react";
 import { SessionProvider, signIn, signOut, useSession } from "next-auth/react";
