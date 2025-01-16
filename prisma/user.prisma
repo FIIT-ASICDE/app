@@ -1,5 +1,5 @@
 model User {
-  id                   String @db.Uuid                 @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
   email    String @unique
   username String @unique
@@ -8,14 +8,16 @@ model User {
   name    String?
   surname String?
   role    UserRole @default(USER)
+  bio     String?
 
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
 
-  organizations        OrganizationUser[]
-  userOrganizationRepo RepoUserOrganization[]
+  organizations              OrganizationUser[]
+  userOrganizationRepo       RepoUserOrganization[]
+  OrganizationUserInvitation OrganizationUserInvitation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -27,7 +29,7 @@ enum UserRole {
 }
 
 model Account {
-  userId            String @db.Uuid
+  userId            String  @db.Uuid
   type              String
   provider          String
   providerAccountId String
@@ -49,7 +51,7 @@ model Account {
 
 model Session {
   sessionToken String   @unique
-  userId       String @db.Uuid
+  userId       String   @db.Uuid
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 

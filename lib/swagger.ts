@@ -1,4 +1,4 @@
-import { User } from "@/types/swagger-schemas";
+import { Organization, User } from "@/types/swagger-schemas";
 import { createSwaggerSpec } from "next-swagger-doc";
 import "server-only";
 
@@ -16,6 +16,10 @@ export const getApiDocs = async () => {
                     name: "User",
                     description: "API endpoints related to user.",
                 },
+                {
+                    name: "Organization",
+                    description: "API endpoints related to organization.",
+                }
             ],
             components: {
                 securitySchemes: {
@@ -41,6 +45,7 @@ export const getApiDocs = async () => {
                 },
                 schemas: {
                     User,
+                    Organization
                 },
             },
             security: [],

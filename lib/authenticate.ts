@@ -6,6 +6,7 @@ interface HandlerParams<T> {
     request: Request;
     params: Promise<T>;
     session: Session | null;
+    query: URLSearchParams;
 }
 
 type Handler<T = unknown> = (params: HandlerParams<T>) => Promise<NextResponse>;
@@ -21,6 +22,9 @@ export function authenticate<T>(handler: Handler<T>) {
             );
         }
 
-        return handler({ request, params: params.params, session });
+        const url = new URL(request.url);
+        const query = url.searchParams;
+
+        return handler({ request, params: params.params, session, query });
     };
 }
