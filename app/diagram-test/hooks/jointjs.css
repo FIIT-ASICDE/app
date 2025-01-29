@@ -1,0 +1,13 @@
+/* src/styles/jointjs.css */
+
+
+/* Стиль для доступных портов */
+.joint-port-body.available-magnet {
+    fill: green !important;
+    stroke-width: 2 !important;
+}
+
+/* Стиль для недоступных портов */
+.joint-port-body {
+    cursor: crosshair;
+}

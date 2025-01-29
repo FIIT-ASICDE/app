@@ -1,0 +1,13 @@
+/* pages/diagram-test/components/DiagramArea/DiagramArea.module.css */
+
+.diagramArea {
+    flex: 1;
+    position: relative;
+    background-color: #f9f9f9;
+    overflow: hidden;
+    cursor: grab;
+}
+
+.diagramArea.grabbing {
+    cursor: grabbing;
+}

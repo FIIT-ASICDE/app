@@ -1,0 +1,86 @@
+import { BaseSvgElement } from '../base/BaseSvgElement';
+import { Port } from '../classes/port'; // Ваш класс для хранения данных and
+
+export const JointJSOutputPort = (output: Port) => {
+
+    const dimension = 60; // пример формулы, можно менять по вкусу
+
+
+    const portItems = [];
+
+    portItems.push({
+        id: 'input1',
+        group: 'input',
+        args: {
+            x: 0,
+            y: dimension / 6
+        }
+    });
+
+    return new BaseSvgElement({
+        elType: 'output',
+        name: output.name,
+        bandwidth: output.bandwidth,
+        position: { x: output.position?.x || 100, y: output.position?.y || 100 },
+        size: { width: dimension, height: dimension/3},
+        attrs: {
+            body: {
+                refD: 'M 5 0 L 15 0 15 10 5 10 0 5 z',
+                fill: 'white',
+                stroke: '#000',
+                strokeWidth: 2,
+            },
+            label: {
+                text: '',
+                fontSize: 14,
+                fontFamily: 'Arial',
+                fontWeight: 'bold',
+                fill: '#333',
+                x: dimension / 2,
+                y: dimension/3 + 10,
+            },
+        },
+        ports: {
+            items: portItems,
+            groups: {
+                input: {
+                    position: { name: 'absolute' },
+                    markup: [
+                        {
+                            tagName: 'line',       // непосредственно линия
+                            selector: 'portLine'
+                        },
+                        {
+                            tagName: 'circle',     // кружок на конце
+                            selector: 'portCircle'
+                        }
+                    ],
+                    attrs: {
+                        portBody: {
+                            // Объект-атрибуты для <g>
+                            // (дополнительно стили, transform, если надо)
+                        },
+                        portLine: {
+                            x1: 0,   y1: 0,
+                            x2: -20, y2: 0,      // Линия теперь идёт влево
+                            stroke: '#000',
+                            strokeWidth: 2,
+
+                        },
+                        portCircle: {
+                            cx: -20,  // кружок тоже в левом конце
+                            cy: 0,
+                            r: 4,
+                            fill: '#fff',
+                            stroke: '#000',
+                            strokeWidth: 2,
+                            magnet: 'passive',
+                            'port-group': 'input',
+                        }
+                    }
+                },
+            }
+        },
+    });
+};
+

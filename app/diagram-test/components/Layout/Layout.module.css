@@ -1,0 +1,22 @@
+/* pages/diagram-test/components/Layout/Layout.module.css */
+
+.appContainer {
+    display: flex;
+    height: 100vh;
+}
+
+.mainContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* Стили для полноэкранного режима */
+:fullscreen .appContainer {
+    height: 100%;
+}
+
+:fullscreen .mainContent {
+    height: 100%;
+}
