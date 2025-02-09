@@ -37,7 +37,6 @@ const PropertiesPanel = () => {
 
     useEffect(() => {
         if (selectedElement) {
-            console.log(selectedElement)
             const props: Properties = {
                 label: selectedElement.attributes.attrs?.label?.text || '',
                 bandwidth: selectedElement.attributes.bandwidth || 1,
@@ -66,13 +65,27 @@ const PropertiesPanel = () => {
 
 
     useEffect(() => {
-        if (selectedElement && selectedElement.attributes.elType === 'comparator') {
+        if (!selectedElement) return;
+
+        const elType = selectedElement.attributes.elType;
+        const labelText = selectedElement.attributes.attrs?.label?.text || "";
+        const labelLines4 = labelText.split('\n\n\n\n');
+        const labelLines1 = labelText.split('\n');
+
+        if (['comparator', 'adder', 'subtractor'].includes(elType)) {
             setProperties({
-                label: selectedElement.attributes.attrs?.label?.text?.split('\n\n\n\n')[1],
-                comparatorType: selectedElement.attributes.attrs?.label?.text?.split('\n')[0],
+                label: labelLines4[1],
+                comparatorType: labelLines4[0],
+            });
+        } else if (['decoder', 'encoder'].includes(elType)) {
+            setProperties({
+                label: labelLines1[1],
             });
         }
     }, [selectedElement]);
+
+
+
 
     useEffect(() => {
         if (!isHover) return;
@@ -327,6 +340,10 @@ const PropertiesPanel = () => {
             onMouseEnter={() => setIsHover(true)}
             onMouseLeave={() => setIsHover(false)}
         >
+
+
+
+
             <h3>Properties</h3>
             {/* Пример для I/O портов */}
             {(['output', 'input'].includes(selectedElement.attributes.elType)) && (
@@ -475,16 +492,16 @@ const PropertiesPanel = () => {
 
             {selectedElement.attributes.elType === 'multiplexer' && (
                 <>
-                <label>
-                    {toTitleCase(selectedElement.attributes.elType)} signal's name:
-                    <input
-                        type="text"
-                        name="label"
-                        placeholder="Insert name..."
-                        value={properties.label || ''}
-                        onChange={handleChange}
-                    />
-                </label>
+                    <label>
+                        {toTitleCase(selectedElement.attributes.elType)} signal's name:
+                        <input
+                            type="text"
+                            name="label"
+                            placeholder="Insert name..."
+                            value={properties.label || ''}
+                            onChange={handleChange}
+                        />
+                    </label>
 
                     <div className={styles.radioContainer}>
                         <span>Select DATA input(s) width:</span>
@@ -550,14 +567,14 @@ const PropertiesPanel = () => {
                         </label>
                     )}
 
-                <label>
-                    Multiplexer type:
-                    <select onChange={handlePortChange} defaultValue="2" name="inputPorts">
-                        <option value="2">2-to-1</option>
-                        <option value="4">4-to-1</option>
-                        <option value="8">8-to-1</option>
-                    </select>
-                </label>
+                    <label>
+                        Multiplexer type:
+                        <select onChange={handlePortChange} defaultValue="2" name="inputPorts">
+                            <option value="2">2-to-1</option>
+                            <option value="4">4-to-1</option>
+                            <option value="8">8-to-1</option>
+                        </select>
+                    </label>
                 </>
 
             )}
@@ -575,14 +592,56 @@ const PropertiesPanel = () => {
                     </label>
                     <label>
                     DATA width:
-                    <input
-                        type="number"
-                        name="bandwidth"
-                        value={properties.bandwidth || 0}
-                        onChange={handleChange}
-                    />
-                </label>
+                        <input
+                            type="number"
+                            name="bandwidth"
+                            value={properties.bandwidth || 0}
+                            onChange={handleChange}
+                        />
+                    </label>
 
+                </>
+
+            )}
+
+            {(['adder', 'subtractor', 'comparator'].includes(selectedElement.attributes.elType)) && (
+                <>
+                    <label>
+                        {selectedElement.attributes.elType.toUpperCase()} name:
+                        <input
+                            type="text"
+                            name="label"
+                            placeholder="Insert name..."
+                            value={properties.label || ''}
+                            onChange={handleChange}
+                        />
+                    </label>
+                    <label>
+                        DATA width:
+                        <input
+                            type="number"
+                            name="bandwidth"
+                            value={properties.bandwidth || 0}
+                            onChange={handleChange}
+                        />
+                    </label>
+                    {selectedElement.attributes.elType === 'comparator' && (
+                        <label>
+                            Comparator Type:
+                            <select
+                                name="comparatorType"
+                                value={properties.comparatorType}
+                                onChange={handleChange}
+                            >
+                                <option value=">">{'>'}</option>
+                                <option value="<">{'<'}</option>
+                                <option value=">=">{'>='}</option>
+                                <option value="<=">{'<='}</option>
+                                <option value="==">{'=='}</option>
+                                <option value="!=">{'!='}</option>
+                            </select>
+                        </label>
+                    )}
                 </>
 
             )}
@@ -608,23 +667,7 @@ const PropertiesPanel = () => {
                 </label>
             )}
 
-            {selectedElement.attributes.elType === 'comparator' && (
-                <label>
-                    Comparator Type:
-                    <select
-                        name="comparatorType"
-                        value={properties.comparatorType}
-                        onChange={handleChange}
-                    >
-                        <option value=">">{'>'}</option>
-                        <option value="<">{'<'}</option>
-                        <option value=">=">{'>='}</option>
-                        <option value="<=">{'<='}</option>
-                        <option value="==">{'=='}</option>
-                        <option value="!=">{'!='}</option>
-                    </select>
-                </label>
-            )}
+
 
             {/* Если это связь — показываем настройки stroke, strokeWidth */}
             {selectedElement.isLink() && (

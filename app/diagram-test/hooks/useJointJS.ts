@@ -82,30 +82,74 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                 linkPinning: false,
                 markAvailable: true,
                 snapLinks: { radius: 75 },
-                validateConnection: function(sourceView, sourceMagnet, targetView, targetMagnet, end, linkView) {
-                    // Запретить соединение самого себя
-                    if (sourceView === targetView) {
+                validateConnection: function (
+                    sourceView: dia.CellView,
+                    sourceMagnet: Element | null,
+                    targetView: dia.CellView,
+                    targetMagnet: Element | null,
+                    end: string,
+                    linkView: dia.LinkView
+                ): boolean {
+
+                    // Если пытаемся соединить порты одного и того же элемента, запрещаем
+                    if (sourceView.model.id === targetView.model.id) {
                         return false;
                     }
-                    // Разрешить соединение только из портов
+
                     if (!sourceMagnet || !targetMagnet) {
                         return false;
                     }
-                    const sourcePortGroup = sourceMagnet.getAttribute('port-group');
-                    const targetPortGroup = targetMagnet.getAttribute('port-group');
 
-                    const links = graph.getLinks();
-                    const targetId = targetView.model.id;
-                    const targetPortId = targetMagnet.getAttribute('port');
-                    for (let i = 0; i < links.length; i++) {
-                        const link = links[i];
-                        if (link.id !== linkView.model.id && // Ensure it's not checking the current link being drawn
-                            link.get('target').id === targetId && link.get('target').port === targetPortId) {
-                            return false; // There's already a link connected to this port
+                    // Вспомогательные функции для безопасного получения атрибута.
+                    function getPort(magnet: Element | null): string | null {
+                        if (!magnet) return null;
+                        let port = magnet.getAttribute('port');
+                        if (!port && magnet.parentElement) {
+                            port = magnet.parentElement.getAttribute('port');
                         }
+                        return port;
                     }
 
-                    return sourcePortGroup === 'output' && targetPortGroup === 'input';
+                    function getPortGroup(magnet: Element | null): string | null {
+                        if (!magnet) return null;
+                        let group = magnet.getAttribute('port-group');
+                        if (!group && magnet.parentElement) {
+                            group = magnet.parentElement.getAttribute('port-group');
+                        }
+                        return group;
+                    }
+
+                    const sourcePortId = getPort(sourceMagnet);
+                    const sourcePortGroup = getPortGroup(sourceMagnet);
+                    const targetPortId = getPort(targetMagnet);
+                    const targetPortGroup = getPortGroup(targetMagnet);
+
+                    // Если хотя бы один из портов не определён, запрещаем соединение
+                    if (!sourcePortId || !targetPortId) {
+                        return false;
+                    }
+
+                    // Разрешаем соединять только output -> input
+                    if (sourcePortGroup !== 'output' || targetPortGroup !== 'input') {
+                        return false;
+                    }
+
+                    // Проверяем, нет ли уже связи, ведущей в тот же target-порт
+                    const links = graph.getLinks();
+                    const targetElementId = targetView.model.id;
+                    for (const link of links) {
+                        if (link.id !== linkView.model.id) {
+                            const linkTarget = link.get('target');
+                            if (
+                                linkTarget.id === targetElementId &&
+                                linkTarget.port === targetPortId
+                            ) {
+                                return false; // Этот порт уже занят
+                            }
+                        }
+                    }
+                    return true;
+
                 },
             });
 
@@ -148,6 +192,11 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                 if (sourcePortGroup === 'output') {
                     console.log('Начато соединение с output порта');
                 }
+
+            });
+
+            paper.on('element:pointerdown', (elementView, evt, x, y) => {
+                console.log('element:pointerdown at', { x, y }, 'DOM target=', evt.target);
             });
             // Обработка окончания соединения (успешного или отменённого)
             paper.on('link:connect link:disconnect', () => {
@@ -173,7 +222,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                     targetElement.portProp(targetPortId, 'attrs/circle', { display: 'none' });
 
                     targetElement.portProp(targetPortId, 'attrs/portCircle/cx', 3);
-                    targetElement.portProp(targetPortId, 'attrs/portCircle', { display: 'none' });
+                    targetElement.portProp(targetPortId, 'attrs/portCircle', { display: 'none'});
                     targetElement.portProp(targetPortId, 'attrs/portLine', { display: 'none' });
                 }
             });

@@ -30,11 +30,11 @@ export function useDiagramEvents({ paper, paperElement }: UseDiagramEventsProps)
             const moveStep = 20;
 
             switch (event.key) {
-                case 'ArrowUp':    dy = moveStep;   break;
-                case 'ArrowDown':  dy = -moveStep;  break;
-                case 'ArrowLeft':  dx = moveStep;   break;
-                case 'ArrowRight': dx = -moveStep;  break;
-                default: return;
+            case 'ArrowUp':    dy = moveStep;   break;
+            case 'ArrowDown':  dy = -moveStep;  break;
+            case 'ArrowLeft':  dx = moveStep;   break;
+            case 'ArrowRight': dx = -moveStep;  break;
+            default: return;
             }
 
             const { tx, ty } = paper.translate();

@@ -16,7 +16,10 @@ export const JointJSAnd = (and: And) => {
         portItems.push({
             id: `input${i}`,
             group: 'input',
-            args: { x: 0, y: portY } // абсолютная позиция: (0, portY)
+            args: {
+                x: 0,
+                y: portY,
+            } // абсолютная позиция: (0, portY)
         });
     }
 
@@ -29,6 +32,7 @@ export const JointJSAnd = (and: And) => {
             y: dimension / 2
         }
     });
+
 
     // Для наглядности можно менять «путь» (Path) или «Image»:
     // Здесь для примера используем «Image» c SVG andIcon, но можем и path-форму применить
@@ -47,14 +51,14 @@ export const JointJSAnd = (and: And) => {
                 strokeWidth: 2,
             },
             label: {
-            text: '',
-            fontSize: 14,
-            fontFamily: 'Arial',
-            fontWeight: 'bold',
-            fill: '#333',
-            x: dimension / 2,
-            y: dimension + 10,
-        },
+                text: '',
+                fontSize: 14,
+                fontFamily: 'Arial',
+                fontWeight: 'bold',
+                fill: '#333',
+                x: dimension / 2,
+                y: dimension + 10,
+            },
         },
         ports: {
             items: portItems,
@@ -65,6 +69,7 @@ export const JointJSAnd = (and: And) => {
                         {
                             tagName: 'line',       // непосредственно линия
                             selector: 'portLine'
+
                         },
                         {
                             tagName: 'circle',     // кружок на конце
@@ -73,15 +78,13 @@ export const JointJSAnd = (and: And) => {
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
+
                         },
                         portLine: {
                             x1: 0,   y1: 0,
                             x2: -20, y2: 0,      // Линия теперь идёт влево
                             stroke: '#000',
                             strokeWidth: 2,
-
                         },
                         portCircle: {
                             cx: -20,  // кружок тоже в левом конце
@@ -92,6 +95,8 @@ export const JointJSAnd = (and: And) => {
                             strokeWidth: 2,
                             magnet: 'passive',
                             'port-group': 'input',
+
+
                         }
                     }
                 },
@@ -135,4 +140,9 @@ export const JointJSAnd = (and: And) => {
             }
         },
     });
+
+
 };
+
+
+
