@@ -51,15 +51,4 @@ export type FavoriteRepositoriesFilter = "all" | "favorite" | "notFavorite";
 
 export type VisibilityRepositoriesFilter = "all" | "public" | "private";
 
-export type RepositoryCreationStatus =
-    | "initial"
-    | "nameEmpty"
-    | "nameTaken"
-    | "ownerEmpty"
-    | "freeToCreate";
-
-export type RepositoryEditStatus =
-    | "notChanged"
-    | "nameEmpty"
-    | "nameTaken"
-    | "freeToEdit";
+export type RepositoryCardDisplayType = "pinned" | "favorite" | "recent";

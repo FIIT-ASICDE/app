@@ -1,7 +1,7 @@
 "use client";
 
 import { Repository } from "@/lib/types/repository";
-import { BookUser, Code, Settings } from "lucide-react";
+import { BookUser, Code, CodeXml, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { NavigationButton } from "@/components/navigation-button/navigation-button";
@@ -66,6 +66,13 @@ export const RepositoryNavigation = ({
                     "/settings"
                 }
                 access={showSettings()}
+            />
+            <NavigationButton
+                title={"Open in IDE"}
+                icon={CodeXml}
+                variant="default"
+                link={"/editor"}
+                access={"interactive"}
             />
         </div>
     );

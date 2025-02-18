@@ -3,9 +3,9 @@ import SettingsPage from "@/app/orgs/[organisationslug]/(organisation)/settings/
 export default async function OrganisationSettingsPage({
     params,
 }: {
-    params: Promise<{ userslug: string }>;
+    params: Promise<{ orgslug: string }>;
 }) {
-    const userSlug = (await params).userslug;
+    const orgSlug = (await params).orgslug;
 
-    return <SettingsPage userSlug={userSlug} />;
+    return <SettingsPage orgSlug={orgSlug} />;
 }

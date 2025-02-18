@@ -10,7 +10,7 @@ import { Suspense } from "react";
 import { getDateString } from "@/components/generic/generic";
 import { NoData } from "@/components/no-data/no-data";
 import { MemberCardDisplay } from "@/components/organisations/members/member-card-display";
-import { PinnedRepositoryCardDisplay } from "@/components/profile/pinned-repository-card-display";
+import { RepositoryCardDisplay } from "@/components/profile/repository-card-display";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Tooltip,
@@ -83,7 +83,8 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                                     />
                                 )}
                                 {organisation.repositories.map((repository) => (
-                                    <PinnedRepositoryCardDisplay
+                                    <RepositoryCardDisplay
+                                        type="pinned"
                                         key={repository.id}
                                         id={repository.id}
                                         ownerName={repository.ownerName}

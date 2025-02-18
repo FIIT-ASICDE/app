@@ -5,6 +5,7 @@ export type Organisation = {
     name: string;
     image?: string;
     bio?: string;
+    showMembers?: boolean;
 
     createdAt: Date;
     members: Array<OrganisationMember>;

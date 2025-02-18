@@ -9,7 +9,6 @@ import { UsersRound } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { getWidthFromResponsivenessCheckpoint } from "@/components/generic/generic";
-import { LayoutOptions } from "@/components/layout/layout-options";
 import { NoData } from "@/components/no-data/no-data";
 import {
     MemberFilter,
@@ -29,7 +28,7 @@ import {
 } from "@/components/ui/pagination";
 
 interface MembersPageProps {
-    userSlug: string;
+    orgSlug: string;
 }
 
 const data = {
@@ -99,7 +98,7 @@ const data = {
 
 export default function MembersPage(
     {
-        // userSlug
+        // orgSlug
     }: MembersPageProps,
 ) {
     const [membersLayout, setMembersLayout] = useState<LayoutType>("grid");
@@ -148,11 +147,11 @@ export default function MembersPage(
                             }
                         />
                     </div>
-                    <LayoutOptions
+                    {/*<LayoutOptions
                         layout={membersLayout}
                         setLayout={setMembersLayout}
                         responsivenessCheckpoint={"lg"}
-                    />
+                    />*/}
                 </div>
                 <div className="m-6 mb-0 flex space-x-3">
                     <MemberFilterBadges
