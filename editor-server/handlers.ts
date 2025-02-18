@@ -8,7 +8,6 @@ import {
     writeVarUint,
     writeVarUint8Array,
 } from "lib0/encoding";
-import { readFileSync } from "node:fs";
 import {
     Awareness,
     applyAwarenessUpdate,
@@ -62,13 +61,6 @@ export class WSSharedFile extends Y.Doc {
         this.awareness.setLocalState(null);
         this.updates = 0;
         this.flushInterval = setInterval(() => this.flush(), FLUSH_INTERVAL);
-
-        const initialContent = getFileContents(this.path);
-        if (initialContent !== "") {
-            const ytext = this.getText("monaco");
-            ytext.delete(0, ytext.length);
-            ytext.insert(0, initialContent);
-        }
 
         const awarenessChangeHandler = (
             { added, updated, removed }: ClientsDiff,
@@ -309,16 +301,25 @@ function getFile(filePath: string, gc: boolean = true): WSSharedFile {
     if (files.has(filePath)) {
         return files.get(filePath)!;
     }
+
     const newFile = new WSSharedFile(filePath);
-    newFile.gc = gc;
-    newFile.flush();
-    files.set(filePath, newFile);
+    getFileContents(filePath).then((initialContent) => {
+        if (initialContent !== "") {
+            const ytext = newFile.getText("monaco");
+            ytext.delete(0, ytext.length);
+            ytext.insert(0, initialContent);
+        }
+        newFile.gc = gc;
+        newFile.flush();
+        files.set(filePath, newFile);
+    });
     return newFile;
 }
 
-function getFileContents(filePath: string): string {
+async function getFileContents(filePath: string): Promise<string> {
     try {
-        return readFileSync(filePath, "utf-8");
+        const f = Bun.file(filePath);
+        return await f.text();
     } catch (error) {
         logger.error(
             { event: "file_read_error", filePath, error },
