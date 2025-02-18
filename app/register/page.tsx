@@ -1,9 +1,13 @@
 "use client";
 
+import { registerSchema } from "@/lib/schemas/user-schemas";
+import { api } from "@/lib/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Lock, Mail, UserRound, UserRoundPen } from "lucide-react";
+import { useTheme } from "next-themes";
 import Image from "next/image";
-import { redirect } from "next/navigation";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -21,45 +25,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-const passwordValidation = {
-    upperCase: new RegExp(/[A-Z]/),
-    lowerCase: new RegExp(/[a-z]/),
-    number: new RegExp(/[0-9]/),
-    special: new RegExp(/[!@#$%^&*(),.?":{}|<>]/),
-};
-
-const formSchema = z.object({
-    name: z.string().min(1, { message: "First name is required" }),
-    surname: z.string().min(1, { message: "Last name is required" }),
-    email: z.string().email().min(1, { message: "Email is required" }),
-    username: z
-        .string()
-        .min(2, { message: "Username must be at least 2 characters" }),
-    password: z
-        .string()
-        .min(8, { message: "Password must be at least 8 characters" })
-        .regex(passwordValidation.upperCase, {
-            message: "Password must contain an uppercase character",
-        })
-        .regex(passwordValidation.lowerCase, {
-            message: "Password must contain a lowercase character",
-        })
-        .regex(passwordValidation.number, {
-            message: "Password must contain a number",
-        })
-        .regex(passwordValidation.special, {
-            message: "Password must contain a special character",
-        }),
-});
-
 export default function Register() {
-    const [showPassword, setShowPassword] = useState<boolean>(false);
-    const [serverErrorMessage, setServerErrorMessage] = useState<string | null>(
-        null,
-    );
+    const router = useRouter();
+    const { theme } = useTheme();
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const [showPassword, setShowPassword] = useState<boolean>(false);
+
+    const form = useForm<z.infer<typeof registerSchema>>({
+        resolver: zodResolver(registerSchema),
         defaultValues: {
             name: "",
             surname: "",
@@ -69,59 +42,37 @@ export default function Register() {
         },
     });
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
-        // client-side validated, TODO: server-side validation
-        const response = await fetch("/api/register", {
-            method: "POST",
-            headers: {
-                "content-type": "application/json",
-            },
-            body: JSON.stringify(values),
-        });
-        if (response.ok) {
-            setServerErrorMessage(null);
-            redirect("/");
-            // login page isn't present yet
-        } else {
-            const responseJSON = await response.json();
-            if (response.status === 400) {
-                if (responseJSON.errorCode === "missing_field") {
-                    setServerErrorMessage(responseJSON.error);
-                } else if (responseJSON.errorCode === "password_length") {
-                    setServerErrorMessage(responseJSON.error);
-                }
-            } else if (response.status === 409) {
-                setServerErrorMessage(responseJSON.error);
-            } else if (response.status === 500) {
-                setServerErrorMessage(responseJSON.error);
-            }
-        }
-    }
+    const onSubmitProcedure = api.user.register.useMutation({
+        onSuccess: () => router.replace("/login"),
+    });
+
+    const onSubmit = (values: z.infer<typeof registerSchema>) => {
+        onSubmitProcedure.mutate(values);
+    };
 
     return (
-        <div className="flex flex-col bg-gradient-to-r from-slate-200 to-indigo-200">
+        <div className="flex flex-col bg-background">
             <main className="container mx-auto my-0 w-3/4 px-10 py-10">
-                <div className="flex h-full overflow-hidden rounded-lg bg-card shadow-lg">
+                <div className="flex overflow-hidden rounded-lg bg-card shadow-lg">
                     <div className="relative w-1/2">
                         <Image
-                            src={"/images/duotone.webp"}
+                            src={
+                                theme === "light"
+                                    ? "/images/duotone.webp"
+                                    : "/images/duotone-dark-v2.webp"
+                            }
                             alt="Duotone"
                             width={600}
                             height={600}
                             className="h-full w-full object-cover"
                         />
-                        <div className="absolute left-4 top-4 bg-transparent">
-                            <h1 className="text-xl font-bold text-secondary">
-                                {">"} ASICDE
-                            </h1>
-                        </div>
                     </div>
                     <div className="w-1/2 overflow-y-auto p-8">
                         <div className="mb-10 space-y-2">
-                            <h1 className="text-2xl font-bold text-secondary-foreground">
+                            <h1 className="text-2xl font-bold text-primary">
                                 Welcome to ASICDE
                             </h1>
-                            <p className="text-gray-500">
+                            <p className="text-muted-foreground">
                                 Web IDE for ASIC development and collaboration
                             </p>
                         </div>
@@ -260,7 +211,9 @@ export default function Register() {
                                         </FormItem>
                                     )}
                                 />
-                                <FormMessage>{serverErrorMessage}</FormMessage>
+                                <FormMessage>
+                                    {onSubmitProcedure.error?.message}
+                                </FormMessage>
                                 <Button
                                     className="w-full bg-primary text-primary-foreground hover:bg-primary-button-hover"
                                     size="lg"
@@ -273,8 +226,8 @@ export default function Register() {
                         </Form>
                         <div className="flex items-center justify-center">
                             <div className="flex justify-center text-xs">
-                                <span className="my-5 bg-background px-2 text-muted-foreground">
-                                    OR CONTINUE WITH
+                                <span className="my-5 bg-card px-2 text-muted-foreground">
+                                    Or continue with
                                 </span>
                             </div>
                         </div>
@@ -289,10 +242,8 @@ export default function Register() {
                             </Button>
                         </div>
                         <div className="text-center text-sm">
-                            Already have an account?
-                            <Button className="px-2" variant="link">
-                                Back to login
-                            </Button>
+                            Already have an account?{" "}
+                            <Link href="/">Back to login</Link>
                         </div>
                     </div>
                 </div>

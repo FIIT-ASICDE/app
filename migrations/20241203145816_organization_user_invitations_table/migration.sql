@@ -3,7 +3,7 @@ CREATE TABLE "OrganizationUserInvitation" (
     "userId" UUID NOT NULL,
     "organizationId" UUID NOT NULL,
     "isPending" BOOLEAN NOT NULL DEFAULT true,
-    "role" "OrganizationRole" NOT NULL DEFAULT 'MEMBER'
+    "role" "OrganizationRole" NOT NULL
 );
 
 -- CreateIndex

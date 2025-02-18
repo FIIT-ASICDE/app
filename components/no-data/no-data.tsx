@@ -1,0 +1,22 @@
+import { cn } from "@/lib/utils";
+import { ElementType } from "react";
+
+interface NoDataProps {
+    icon: ElementType;
+    message: string;
+    className?: string;
+}
+
+export const NoData = ({ icon: Icon, message, className }: NoDataProps) => {
+    return (
+        <div
+            className={cn(
+                "flex flex-col items-center gap-y-2 text-center text-muted-foreground opacity-70",
+                className,
+            )}
+        >
+            <Icon className="h-12 w-12 opacity-70" />
+            <span className="text-sm font-semibold">{message}</span>
+        </div>
+    );
+};
