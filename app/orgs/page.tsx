@@ -1,36 +1,95 @@
-"use client";
-
-import { api } from "@/lib/trpc/react";
+import { api } from "@/lib/trpc/server";
 
 import { OrganisationCardDisplay } from "@/components/profile/organisation-card-display";
+import Search from "@/components/ui/search";
+import { PaginationWithLinks } from "@/components/pagination-with-links/pagination-with-links";
+import { UsersRound } from "lucide-react";
+import { LayoutOptions } from "@/components/layout/layout-options";
+import { NoData } from "@/components/no-data/no-data";
+import { cn } from "@/lib/utils";
 
-export default function OrganizationsPage() {
+export default async function OrganisationsPage(props: {
+    searchParams?: Promise<{
+        query?: string;
+        page?: string;
+        rows?: boolean;
+    }>;
+}) {
+    const searchParams = await props.searchParams;
+    const query = searchParams?.query || "";
+    const currentPage = Number(searchParams?.page) || 1;
+
     const pageSize = 20;
 
-    const orgs = api.org.search.useQuery({
-        searchTerm: "",
-        page: 0,
-        pageSize,
+    const { organizations, pagination } = await api.org.search({
+        searchTerm: query,
+        page: currentPage,
+        pageSize: pageSize,
     });
 
-    // TODO kili organisations add pagination and search.
     return (
-        <main className="container mx-auto px-4 py-10">
-            <h1 className="mb-8 text-center text-3xl font-bold">
-                Organizations
-            </h1>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {orgs.data?.organizations.map((org) => (
-                    <OrganisationCardDisplay
-                        key={org.id}
-                        id={org.id}
-                        name={org.name}
-                        image={org.image}
-                        role={org.userRole}
-                        memberCount={org.memberCount}
+        <div className="bg-background text-foreground">
+            <div className="flex items-center justify-between">
+                <div className="m-6 mb-0 flex w-1/2 items-center space-x-5">
+                    <div className="relative w-full">
+                        <UsersRound className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
+                        <Search placeholder="Search organisations..." />
+                    </div>
+                    <LayoutOptions
+                        layout={searchParams?.rows ? "rows" : "grid"}
+                        responsivenessCheckpoint={"lg"}
                     />
-                ))}
+                </div>
+                <div className="m-6 mb-0 flex space-x-3">
+                    {/*<OrganisationFilterBadges
+                        roleFilter={roleFilter}
+                        setRoleFilter={setRoleFilter}
+                        memberCountSort={memberCountSort}
+                        setMemberCountSort={setMemberCountSort}
+                    />
+                    <OrganisationFilter
+                        roleFilter={roleFilter}
+                        setRoleFilter={setRoleFilter}
+                        memberCountSort={memberCountSort}
+                        setMemberCountSort={setMemberCountSort}
+                    />
+                    */}
+                </div>
             </div>
-        </main>
+
+            <main>
+                <div className={cn(
+                        "m-6 grid grid-cols-1 gap-3",
+                        !searchParams?.rows ?
+                            "lg:grid-cols-2" :
+                            ""
+                )}>
+                    {organizations.length === 0 && (
+                        <NoData
+                            icon={UsersRound}
+                            message={"No organisations found."}
+                        />
+                    )}
+                    {organizations.map((org) => (
+                        <OrganisationCardDisplay
+                            key={org.id}
+                            id={org.id}
+                            name={org.name}
+                            image={org.image}
+                            role={org.userRole}
+                            memberCount={org.memberCount}
+                        />
+                    ))}
+                </div>
+                <div className="mb-6">
+                    <PaginationWithLinks
+                    totalCount={pagination.pageCount}
+                    pageSize={pagination.pageSize}
+                    page={pagination.page}
+                    />
+                </div>
+
+            </main>
+        </div>
     );
-}
+};

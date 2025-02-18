@@ -11,7 +11,7 @@ export default async function OrganisationHome({
         const orgOverview = await api.org.overview(orgSlug);
         return <OverviewPage overview={orgOverview} />;
     } catch (e) {
-        console.error("unkown error", e);
+        console.error("unknown error", e);
         return <></>;
     }
 }
