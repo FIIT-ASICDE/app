@@ -1,5 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
+import { DefaultArgs } from "@prisma/client/runtime/library";
 import { Pool } from "pg";
 
 // https://www.prisma.io/docs/orm/more/help-and-troubleshooting/help-articles/nextjs-prisma-client-dev-practices
@@ -14,7 +15,12 @@ declare const globalThis: {
     prismaGlobal: ReturnType<typeof prismaClientSingleton>;
 } & typeof global;
 
-const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
+export type PrismaType = PrismaClient<
+    { adapter: PrismaPg },
+    never,
+    DefaultArgs
+>;
+const prisma: PrismaType = globalThis.prismaGlobal ?? prismaClientSingleton();
 
 export default prisma;
 

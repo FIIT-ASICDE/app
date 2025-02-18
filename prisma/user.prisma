@@ -5,8 +5,8 @@ model User {
   username String @unique
   password String
 
-  name    String?
-  surname String?
+  name    String
+  surname String
   role    UserRole @default(USER)
   bio     String?
 

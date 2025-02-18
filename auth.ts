@@ -1,9 +1,12 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
-import NextAuth from "next-auth";
+import NextAuth, { DefaultSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
 import prisma from "./prisma";
+import { $Enums } from ".prisma/client";
+
+import UserRole = $Enums.UserRole;
 
 // https://next-auth.js.org/configuration/options#jwt
 // https://next-auth.js.org/tutorials/securing-pages-and-api-routes
@@ -11,7 +14,28 @@ import prisma from "./prisma";
 
 /* TODO - pridat GitHub a Google providers */
 
+declare module "next-auth" {
+    import UserRole = $Enums.UserRole;
+
+    interface User {
+        username?: string;
+        surname?: string;
+    }
+    interface Session {
+        user: {
+            id: string; // overwrites the id?: string in DefaultSession['user']
+            username: string;
+            surname: string;
+            image?: string;
+            role: UserRole;
+        } & DefaultSession["user"];
+    }
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
+    pages: {
+        signIn: "/login",
+    },
     session: {
         strategy: "jwt",
     },
@@ -54,6 +78,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     username: user.username,
                     surname: user.surname,
                     role: user.role,
+                    image: user.image,
                 };
             },
         }),
@@ -62,11 +87,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         async jwt({ token, user }) {
             if (user) {
                 token.id = user.id;
+                token.username = user.username;
+                token.surname = user.surname;
+                token.image = user.image;
             }
             return token;
         },
         async session({ session, token }) {
             session.user.id = token.id as string;
+            session.user.username = token.username as string;
+            session.user.surname = token.surname as string;
+            session.user.image = token.image as string;
+            session.user.role = token.role as UserRole;
             return session;
         },
     },

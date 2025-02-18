@@ -8,20 +8,22 @@
     --foreground: #0A0A0A;
     --card: #FFFFFF;
     --card-foreground: #0A0A0A;
+    --card-hover: #6B7280;
     --popover: #FFFFFF;
     --popover-foreground: #0A0A0A;
     --primary: #9333EA;
     --primary-foreground: #F8FAFC;
     --primary-button: #9333EA;
     --primary-button-hover: #a051ea;
-    --secondary: #F3F4F6;
-    --secondary-foreground: #1F2937;
+    --secondary: #1F2937;
+    --secondary-foreground: #F3F4F6;
     --muted: #F3F4F6;
     --muted-foreground: #6B7280;
     --accent: #F3F4F6;
     --accent-foreground: #1F2937;
     --destructive: #EF4444;
     --destructive-foreground: #F8FAFC;
+    --destructive-hover: #ED6060;
     --border: #E5E7EB;
     --input: #E5E7EB;
     --ring: #9333EA;
@@ -34,6 +36,29 @@
     --header: #1F2937;
     --header-foreground: #F3F4F6;
     --header-button-hover: #2d3b4e;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    --tertiary-button: #FFFFFF;
+    --tertiary-button-foreground: #0A0A0A;
+    --tertiary-button-hover: #E5E7EB;
+    --badge-public: #1E3A8A;
+    --badge-public-foreground: #FFFFFF;
+    --badge-public-hover: #2B4EAA;
+    --badge-private: #3E3E3E;
+    --badge-private-foreground: #FFFFFF;
+    --badge-private-hover: #4E4E4E;
+    --badge-admin: #9333EA;
+    --badge-admin-foreground: #F8FAFC;
+    --badge-admin-hover: #A351EA;
+    --badge-member: #1F2937;
+    --badge-member-foreground: #F3F4F6;
+    --badge-member-hover: #2F3B4B;
   }
 
   .dark {
@@ -41,6 +66,7 @@
     --foreground: #F8FAFC;
     --card: #0A0A0A;
     --card-foreground: #F8FAFC;
+    --card-hover: #111111;
     --popover: #0A0A0A;
     --popover-foreground: #F8FAFC;
     --primary: #7C3AED;
@@ -53,6 +79,7 @@
     --accent-foreground: #F8FAFC;
     --destructive: #7F1D1D;
     --destructive-foreground: #F8FAFC;
+    --destructive-hover: #853131;
     --border: #1F2937;
     --input: #1F2937;
     --ring: #7C3AED;
@@ -66,5 +93,38 @@
     --header-foreground: #F3F4F6;
     --header-button: #0A0A0A;
     --header-button-hover: #151515;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    --tertiary: #111111;
+    --tertiary-button: #111111;
+    --tertiary-button-foreground: #F8FAFC;
+    --tertiary-button-hover: #202020;
+    --badge-public: #1E3A8A;
+    --badge-public-foreground: #FFFFFF;
+    --badge-public-hover: #2B4EAA;
+    --badge-private: #2E2E2E;
+    --badge-private-foreground: #FFFFFF;
+    --badge-private-hover: #3E3E3E;
+    --badge-admin: #7C3AED;
+    --badge-admin-foreground: #F8FAFC;
+    --badge-admin-hover: #8C4AED;
+    --badge-member: #1F2937;
+    --badge-member-foreground: #F8FAFC;
+    --badge-member-hover: #2F3B4B;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
