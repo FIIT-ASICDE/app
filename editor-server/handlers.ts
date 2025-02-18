@@ -8,6 +8,7 @@ import {
     writeVarUint,
     writeVarUint8Array,
 } from "lib0/encoding";
+import { readFileSync } from "node:fs";
 import {
     Awareness,
     applyAwarenessUpdate,
@@ -25,14 +26,13 @@ const MESSAGE_AWARENESS = 1;
 const FLUSH_UPDATES_THRESHOLD = 10;
 const FLUSH_INTERVAL = 1_000;
 const COUNT_LOG_INTERVAL = 5000;
+const CLEANUP_DELAY = 5000;
 
 export const files = new Map<string, WSSharedFile>();
+const pendingCleanups = new Map<string, Timer>();
 
 setInterval(() => {
-    logger.info(
-        { event: "file_tracking", openFiles: files.size },
-        `${files.size} opened files`,
-    );
+    logger.info({ event: "file_tracking", openFiles: files.size });
 }, COUNT_LOG_INTERVAL);
 
 export interface EditorSocketData {
@@ -63,6 +63,13 @@ export class WSSharedFile extends Y.Doc {
         this.updates = 0;
         this.flushInterval = setInterval(() => this.flush(), FLUSH_INTERVAL);
 
+        const initialContent = getFileContents(this.path);
+        if (initialContent !== "") {
+            const ytext = this.getText("monaco");
+            ytext.delete(0, ytext.length);
+            ytext.insert(0, initialContent);
+        }
+
         const awarenessChangeHandler = (
             { added, updated, removed }: ClientsDiff,
             ws: ServerWebSocket<EditorSocketData> | null,
@@ -76,6 +83,8 @@ export class WSSharedFile extends Y.Doc {
                 removed.forEach((clientID) =>
                     connControlledIDs.delete(clientID),
                 );
+            } else if (ws !== null) {
+                this.conns.set(ws, new Set());
             }
 
             // broadcast awareness update
@@ -86,7 +95,7 @@ export class WSSharedFile extends Y.Doc {
                 encodeAwarenessUpdate(this.awareness, changedClients),
             );
             const buff = toUint8Array(encoder);
-            this.conns.forEach((_, ws) => ws.send(buff));
+            this.conns.forEach((_, ws) => ws.send?.(buff));
         };
 
         this.awareness.on("update", awarenessChangeHandler);
@@ -134,6 +143,21 @@ export class WSSharedFile extends Y.Doc {
 
 export function onOpen(ws: ServerWebSocket<EditorSocketData>) {
     ws.binaryType = "arraybuffer";
+
+    const pendingCleanup = pendingCleanups.get(ws.data.filePath);
+    if (pendingCleanup) {
+        logger.debug(
+            {
+                event: "cleanup_cancelled",
+                filePath: ws.data.filePath,
+            },
+            "Cancelled pending file cleanup due to new connection",
+        );
+
+        clearTimeout(pendingCleanup);
+        pendingCleanups.delete(ws.data.filePath);
+    }
+
     const file = getFile(ws.data.filePath);
 
     const encoder = createEncoder();
@@ -223,10 +247,44 @@ export function onClose(
     file.removeWs(ws);
     removeAwarenessStates(file.awareness, Array.from(controlledIds), null);
 
-    if (controlledIds.size === 0) {
-        files.delete(ws.data.filePath);
-        file.destroy();
+    // cancel existing cleanup
+    const existingCleanup = pendingCleanups.get(ws.data.filePath);
+    if (existingCleanup) {
+        clearTimeout(existingCleanup);
     }
+
+    // and schedule new cleanup
+    const cleanup = setTimeout(() => {
+        // Check if there are any active connections for this file
+        const file = files.get(ws.data.filePath);
+        if (!file) return;
+
+        // If there are no connections, cleanup the file
+        if (file.getIds(ws).size === 0) {
+            logger.debug(
+                {
+                    event: "file_cleanup",
+                    filePath: ws.data.filePath,
+                },
+                "Cleaning up file after delay",
+            );
+
+            files.delete(ws.data.filePath);
+            file.destroy();
+            pendingCleanups.delete(ws.data.filePath);
+        } else {
+            logger.debug(
+                {
+                    event: "file_cleanup_cancelled",
+                    filePath: ws.data.filePath,
+                    activeConnections: file.getIds(ws).size,
+                },
+                "File cleanup cancelled - active connections exist",
+            );
+        }
+    }, CLEANUP_DELAY);
+
+    pendingCleanups.set(ws.data.filePath, cleanup);
 }
 
 function updateHandler(
@@ -256,4 +314,16 @@ function getFile(filePath: string, gc: boolean = true): WSSharedFile {
     newFile.flush();
     files.set(filePath, newFile);
     return newFile;
+}
+
+function getFileContents(filePath: string): string {
+    try {
+        return readFileSync(filePath, "utf-8");
+    } catch (error) {
+        logger.error(
+            { event: "file_read_error", filePath, error },
+            "Failed to read initial file contents",
+        );
+        return "";
+    }
 }
