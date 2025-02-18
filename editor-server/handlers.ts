@@ -87,7 +87,11 @@ export class WSSharedFile extends Y.Doc {
                 encodeAwarenessUpdate(this.awareness, changedClients),
             );
             const buff = toUint8Array(encoder);
-            this.conns.forEach((_, ws) => ws.send?.(buff));
+            this.conns.forEach((_, ws) => {
+                if ("send" in ws) {
+                    ws.send?.(buff);
+                }
+            });
         };
 
         this.awareness.on("update", awarenessChangeHandler);
