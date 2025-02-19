@@ -4,8 +4,8 @@ import { CircleX, Eye, EyeOff, UserRoundMinus } from "lucide-react";
 
 import { DeleteOrganisationDialog } from "@/components/organisations/delete-organisation-dialog";
 import { LeaveOrganisationDialog } from "@/components/organisations/leave-organisation-dialog";
-import { Card, CardContent } from "@/components/ui/card";
 import { ToggleMembersVisibilityDialog } from "@/components/organisations/members/toggle-members-visibility-dialog";
+import { Card, CardContent } from "@/components/ui/card";
 
 const data = {
     id: "2daf6c64-2104-4039-a619-b7477d3882bf",
@@ -28,9 +28,10 @@ export default function SettingsPage({} /* orgSlug */ : SettingsPageProps) {
         return (
             <span className="text-sm text-muted-foreground">
                 You are currently{" "}
-                <span className="font-bold">{showMembers ? "showing" : "hiding"}</span>{" "}
-                the members of your organisation{" "}
-                {showMembers ? "to" : "from"}{" "}
+                <span className="font-bold">
+                    {showMembers ? "showing" : "hiding"}
+                </span>{" "}
+                the members of your organisation {showMembers ? "to" : "from"}{" "}
                 the public.
             </span>
         );
@@ -71,7 +72,11 @@ export default function SettingsPage({} /* orgSlug */ : SettingsPageProps) {
                             {getChangeMembersVisibilityMessage()}
                         </div>
                     </div>
-                    <ToggleMembersVisibilityDialog id={id} name={name} showMembers={showMembers} />
+                    <ToggleMembersVisibilityDialog
+                        id={id}
+                        name={name}
+                        showMembers={showMembers}
+                    />
                 </div>
 
                 <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">

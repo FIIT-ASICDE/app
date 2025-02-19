@@ -83,6 +83,10 @@ export const EditOrganisationDialog = ({
         console.log(data);
     };
 
+    if (organisation.userRole !== "admin") {
+        return undefined;
+    }
+
     return (
         <Dialog>
             <Tooltip>

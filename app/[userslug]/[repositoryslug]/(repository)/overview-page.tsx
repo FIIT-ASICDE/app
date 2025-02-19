@@ -4,7 +4,7 @@ import { OrganisationDisplay } from "@/lib/types/organisation";
 import { Repository, RepositoryFile } from "@/lib/types/repository";
 import { Calendar } from "lucide-react";
 
-import { ReadMeFilePreview } from "@/components/file/read-me-file-preview";
+import { MarkdownRenderer } from "@/components/file/markdown-renderer";
 import { getDateString } from "@/components/generic/generic";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -153,92 +153,129 @@ const data = {
     ] satisfies Array<OrganisationDisplay>,
 };
 
-const markdownContentExample: string = `# 🚀 Awesome Project
+const markdownContentExample: string = `# 🚀 Complete Markdown Demo
 
-Welcome to the Awesome Project! This README demonstrates various Markdown features.
+## Text Formatting
 
-## 📋 Table of Contents
+This is a paragraph with **bold text**, *italic text*, and ***bold italic text***. You can also use __underscores__ for _italics_ and **_bold italics_**.
 
-- [Installation](#installation)
-- [Usage](#usage)
-- [Features](#features)
-- [Contributing](#contributing)
-- [License](#license)
+You can also add \`inline code\` like this.
 
-## 🛠 Installation
+## Links and Images
 
-To get started with this project, follow these steps:
+[Visit Next.js](https://nextjs.org) - External link example
 
-1. Clone the repository:
-   \`\`\`bash
-   git clone https://github.com/username/awesome-project.git
-   \`\`\`
+## Lists
 
-2. Navigate to the project directory:
-   \`\`\`bash
-   cd awesome-project
-   \`\`\`
+### Unordered List
+- First item
+- Second item
+  - Nested item 1
+  - Nested item 2
+- Third item
 
-3. Install dependencies:
-   \`\`\`bash
-   npm install
-   \`\`\`
+### Ordered List
+1. First step
+2. Second step
+   1. Nested step 1
+   2. Nested step 2
+3. Third step
 
-## 🚦 Usage
+## Blockquotes
 
-Here's a quick example of how to use the main function:
+> This is a blockquote. You can use it to emphasize some text or show quotes.
+> 
+> It can span multiple paragraphs if you add a > on the empty line
+>
+> - You can also use other markdown elements inside blockquotes
+> - Like lists
+> - And **bold** text
 
-\`\`\`javascript
-const awesomeProject = require('awesome-project');
+## Code Blocks
 
-const result = awesomeProject.doSomethingAwesome();
-console.log(result);
+Here's some inline code: \`const greeting = "Hello, World!"\`
+
+And here's a code block with syntax highlighting:
+
+\`\`\`typescript
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+const getUser = async (id: string): Promise<User> => {
+  try {
+    const response = await fetch(\`/api/users/\${id}\`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    throw error;
+  }
+};
 \`\`\`
 
-## ✨ Features
+Here's some CSS:
 
-- **Fast**: Optimized for speed
-- **Flexible**: Easily customizable
-- **Secure**: Built with security in mind
+\`\`\`css
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+}
+\`\`\`
 
-### Feature Comparison
+## Tables (GitHub Flavored Markdown)
 
-| Feature       | Awesome Project | Other Projects |
-|---------------|-----------------|-----------------|
-| Speed         | ⚡⚡⚡          | ⚡             |
-| Flexibility   | 🔧🔧🔧          | 🔧             |
-| Security      | 🔒🔒🔒          | 🔒             |
+| Feature | Description | Status |
+|---------|-------------|--------|
+| Tables | GFM tables support | ✅ |
+| Lists | Ordered and unordered lists | ✅ |
+| Code Blocks | Syntax highlighting | ✅ |
+| Blockquotes | Quote formatting | ✅ |
 
-## 🤝 Contributing
+## Task Lists (GitHub Flavored Markdown)
 
-We welcome contributions! Please follow these steps:
+- [x] Implement markdown renderer
+- [x] Add syntax highlighting
+- [x] Support GitHub Flavored Markdown
+- [ ] Add more features
 
-1. Fork the repository
-2. Create your feature branch (\`git checkout -b feature/AmazingFeature\`)
-3. Commit your changes (\`git commit -m 'Add some AmazingFeature'\`)
-4. Push to the branch (\`git push origin feature/AmazingFeature\`)
-5. Open a Pull Request
+## Line Breaks and Horizontal Rules
 
-For more details, please read our [CONTRIBUTING.md](CONTRIBUTING.md) file.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+This is a paragraph with a line break.  
+This is the next line (using two spaces at the end of the previous line).
 
 ---
 
-## 🙏 Acknowledgements
+## Special Characters & Escaping
 
-- [Awesome README](https://github.com/matiassingers/awesome-readme)
-- [Shields.io](https://shields.io/)
-- [Choose an Open Source License](https://choosealicense.com)
+You can use special characters by escaping them: \* \` \# \[ \]
 
-## 📊 Project Status
+## Mathematical Expressions (if supported)
 
-![Build Status](https://img.shields.io/travis/username/awesome-project.svg)
-![Downloads](https://img.shields.io/github/downloads/username/awesome-project/total.svg)
-![Version](https://img.shields.io/github/v/release/username/awesome-project.svg)
+Here's an example of inline math: \`$E = mc^2$\`
 
+And block math:
+
+\`\`\`math
+\\sum_{n=1}^\\infty \\frac{1}{n^2} = \\frac{\\pi^2}{6}
+\`\`\`
+
+## Emoji Support 
+
+- 👋 Hello
+- 🎉 Celebration
+- 💻 Coding
+- 🚀 Launch
+- ✨ Sparkles
+
+---
+
+> 💡 **Pro Tip:** This markdown example showcases all the features supported by our MarkdownRenderer component.
 `;
 
 export default function OverviewPage({} /* userSlug */ : OverviewPageProps) {
@@ -293,12 +330,7 @@ export default function OverviewPage({} /* userSlug */ : OverviewPageProps) {
 
             <main className="mt-3 flex w-full flex-col gap-y-3 md:mt-0 md:w-2/3">
                 {readMeFile && (
-                    <ReadMeFilePreview
-                        name={readMeFile.name}
-                        language={readMeFile.language}
-                        content={markdownContentExample}
-                        lastActivity={readMeFile.lastActivity}
-                    />
+                    <MarkdownRenderer content={markdownContentExample} />
                 )}
             </main>
         </div>

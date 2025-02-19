@@ -1,5 +1,6 @@
 import { imgSrc } from "@/lib/client-file-utils";
 import { OrganisationMember } from "@/lib/types/organisation";
+import Link from "next/link";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { ManageMemberDialog } from "@/components/organisations/members/manage-member-dialog";
@@ -32,9 +33,11 @@ export const OrganisationMemberCard = ({
                                 " " +
                                 organisationMember.surname}
                         </span>
-                        <span className="text-sm text-muted-foreground">
-                            {organisationMember.username}
-                        </span>
+                        <Link href={"/" + organisationMember.username}>
+                            <span className="m-0 max-w-full overflow-hidden truncate whitespace-nowrap p-0 text-sm font-semibold leading-none tracking-tight text-primary underline-offset-4 hover:underline">
+                                {organisationMember.username}
+                            </span>
+                        </Link>
                     </div>
                 </div>
                 <div className="flex flex-row space-x-3">

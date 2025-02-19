@@ -1,12 +1,12 @@
 import { api } from "@/lib/trpc/server";
-
-import { OrganisationCardDisplay } from "@/components/profile/organisation-card-display";
-import Search from "@/components/ui/search";
-import { PaginationWithLinks } from "@/components/pagination-with-links/pagination-with-links";
+import { cn } from "@/lib/utils";
 import { UsersRound } from "lucide-react";
+
 import { LayoutOptions } from "@/components/layout/layout-options";
 import { NoData } from "@/components/no-data/no-data";
-import { cn } from "@/lib/utils";
+import { PaginationWithLinks } from "@/components/pagination-with-links/pagination-with-links";
+import { OrganisationCardDisplay } from "@/components/profile/organisation-card-display";
+import Search from "@/components/ui/search";
 
 export default async function OrganisationsPage(props: {
     searchParams?: Promise<{
@@ -58,12 +58,12 @@ export default async function OrganisationsPage(props: {
             </div>
 
             <main>
-                <div className={cn(
+                <div
+                    className={cn(
                         "m-6 grid grid-cols-1 gap-3",
-                        !searchParams?.rows ?
-                            "lg:grid-cols-2" :
-                            ""
-                )}>
+                        !searchParams?.rows ? "lg:grid-cols-2" : "",
+                    )}
+                >
                     {organizations.length === 0 && (
                         <NoData
                             icon={UsersRound}
@@ -83,13 +83,12 @@ export default async function OrganisationsPage(props: {
                 </div>
                 <div className="mb-6">
                     <PaginationWithLinks
-                    totalCount={pagination.pageCount}
-                    pageSize={pagination.pageSize}
-                    page={pagination.page}
+                        totalCount={pagination.pageCount}
+                        pageSize={pagination.pageSize}
+                        page={pagination.page}
                     />
                 </div>
-
             </main>
         </div>
     );
-};
+}

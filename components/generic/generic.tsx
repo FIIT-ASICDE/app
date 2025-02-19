@@ -151,3 +151,12 @@ export const getBadgeStyle = (badgeType: BadgeType) => {
             return "";
     }
 };
+
+export const getCurrentPage = (
+    pathname: string,
+    sliceIndex: number,
+): string => {
+    const parts: Array<string> = pathname.split("/").filter(Boolean);
+    if (parts.length < sliceIndex) throw new Error("Pathname invalid");
+    return parts.length > 1 ? "/" + parts.slice(sliceIndex).join("/") : "/";
+};

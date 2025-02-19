@@ -4,6 +4,7 @@ import { Repository } from "@/lib/types/repository";
 import { BookUser, Code, CodeXml, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
 
+import { getCurrentPage } from "@/components/generic/generic";
 import { NavigationButton } from "@/components/navigation-button/navigation-button";
 
 interface RepositoryNavigationProps {
@@ -14,14 +15,7 @@ export const RepositoryNavigation = ({
     repository,
 }: RepositoryNavigationProps) => {
     const pathname: string = usePathname();
-
-    const getCurrentPage = (): string => {
-        const parts = pathname.split("/").filter(Boolean);
-        if (parts.length < 2) throw new Error("Pathname invalid");
-        return "/" + parts.slice(2).join("/");
-    };
-
-    const currentPage: string = getCurrentPage();
+    const currentPage: string = getCurrentPage(pathname, 2);
 
     const showSettings = () => {
         if (repository.userRole === "guest") {
@@ -39,14 +33,14 @@ export const RepositoryNavigation = ({
     return (
         <div className="mr-6 flex flex-row justify-end gap-x-1">
             <NavigationButton
-                title="Overview"
+                title="overview"
                 icon={BookUser}
                 variant={currentPage === "/" ? "secondary" : "outline"}
                 link={"/" + repository.ownerName + "/" + repository.name + "/"}
                 access="interactive"
             />
             <NavigationButton
-                title="Code"
+                title="code"
                 icon={Code}
                 variant={currentPage === "/code" ? "secondary" : "outline"}
                 link={
@@ -55,7 +49,7 @@ export const RepositoryNavigation = ({
                 access="interactive"
             />
             <NavigationButton
-                title="Settings"
+                title="settings"
                 icon={Settings}
                 variant={currentPage === "/settings" ? "secondary" : "outline"}
                 link={
@@ -68,7 +62,7 @@ export const RepositoryNavigation = ({
                 access={showSettings()}
             />
             <NavigationButton
-                title={"Open in IDE"}
+                title={"open in IDE"}
                 icon={CodeXml}
                 variant="default"
                 link={"/editor"}

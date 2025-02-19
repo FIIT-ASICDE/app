@@ -1,8 +1,9 @@
-"use client"
+"use client";
 
 import type { LayoutType, ResponsivenessCheckpoint } from "@/lib/types/generic";
 import { cn } from "@/lib/utils";
 import { LayoutGrid, Rows3 } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { getWidthFromResponsivenessCheckpoint } from "@/components/generic/generic";
@@ -11,7 +12,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 interface LayoutOptionsProps {
     layout: LayoutType;
@@ -51,8 +51,7 @@ export const LayoutOptions = ({
             const params = new URLSearchParams(searchParams);
             if (newLayout === "rows") {
                 params.set("rows", "true");
-            }
-            else {
+            } else {
                 params.delete("rows");
             }
             router.replace(`${pathname}?${params.toString()}`);

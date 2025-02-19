@@ -1,8 +1,16 @@
 "use client";
 
 import { OrganisationDisplay } from "@/lib/types/organisation";
+import { RepositoryDisplay } from "@/lib/types/repository";
 import { UsersOverview } from "@/lib/types/user";
-import { Calendar, CalendarOff, Ellipsis, PinOff, StarOff, UsersRound } from "lucide-react";
+import {
+    Calendar,
+    CalendarOff,
+    Ellipsis,
+    PinOff,
+    StarOff,
+    UsersRound,
+} from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -16,7 +24,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { RepositoryDisplay } from "@/lib/types/repository";
 
 const data = {
     favoriteRepositories: [
@@ -96,40 +103,40 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>
-                            Recent activity
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Suspense
-                            fallback={<div>Loading recent activity...</div>}
-                        >
-                            <div className="flex flex-col gap-y-3">
-                                {recentRepositories.length === 0 && (
-                                    <NoData
-                                        icon={CalendarOff}
-                                        message={
-                                            "No recent repositories found."
-                                        }
-                                    />
-                                )}
-                                {recentRepositories.map((repository) => (
-                                    <RepositoryCardDisplay
-                                        type="recent"
-                                        key={"recent" + repository.id}
-                                        id={repository.id}
-                                        ownerName={repository.ownerName}
-                                        name={repository.name}
-                                        visibility={repository.visibility}
-                                        ownerImage={repository.ownerImage}
-                                    />
-                                ))}
-                            </div>
-                        </Suspense>
-                    </CardContent>
-                </Card>
+                {overview.isItMe && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Recent activity</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Suspense
+                                fallback={<div>Loading recent activity...</div>}
+                            >
+                                <div className="flex flex-col gap-y-3">
+                                    {recentRepositories.length === 0 && (
+                                        <NoData
+                                            icon={CalendarOff}
+                                            message={
+                                                "No recent repositories found."
+                                            }
+                                        />
+                                    )}
+                                    {recentRepositories.map((repository) => (
+                                        <RepositoryCardDisplay
+                                            type="recent"
+                                            key={"recent" + repository.id}
+                                            id={repository.id}
+                                            ownerName={repository.ownerName}
+                                            name={repository.name}
+                                            visibility={repository.visibility}
+                                            ownerImage={repository.ownerImage}
+                                        />
+                                    ))}
+                                </div>
+                            </Suspense>
+                        </CardContent>
+                    </Card>
+                )}
             </aside>
 
             <main className="mt-3 flex w-full flex-col gap-y-3 md:mt-0 md:w-2/3">

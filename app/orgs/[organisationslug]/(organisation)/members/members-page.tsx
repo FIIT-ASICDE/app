@@ -36,6 +36,7 @@ const data = {
     bio: "",
     createdAt: new Date(),
     userIsAdmin: true,
+    showMembers: true,
     members: [
         {
             id: "86db4870-15bf-4333-8f03-89eb3d66d6a6",
@@ -130,6 +131,12 @@ export default function MembersPage(
             filterMembers(members, membersSearchPhrase, roleFilter),
         );
     }, [membersSearchPhrase, roleFilter, members]);
+
+    if (!data.showMembers) {
+        return (
+            <h3>TODO: This organisation is not showing their member list.</h3>
+        );
+    }
 
     return (
         <div className="bg-background text-foreground">

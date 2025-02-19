@@ -2,6 +2,11 @@ import { ElementType } from "react";
 
 export type AvatarDisplayType = "heading" | "card" | "select" | "profile";
 
+export type AvatarProportions = {
+    avatarSize: string;
+    fallbackFontSize: string;
+};
+
 export type LayoutType = "grid" | "rows";
 
 export type ResponsivenessCheckpoint =

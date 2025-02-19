@@ -17,20 +17,19 @@ interface ToggleMembersVisibilityDialogProps {
     showMembers: boolean;
 }
 
-export const ToggleMembersVisibilityDialog = (
-    {
-        id,
-        name,
-        showMembers
-    }: ToggleMembersVisibilityDialogProps
-) => {
+export const ToggleMembersVisibilityDialog = ({
+    id,
+    name,
+    showMembers,
+}: ToggleMembersVisibilityDialogProps) => {
     const getChangeMembersVisibilityMessage = () => {
         return (
             <span>
                 This will result in{" "}
-                <span className="font-bold">{showMembers ? "hiding" : "showing"}</span>{" "}
-                the members of your organisation{" "}
-                {showMembers ? "from" : "to"}{" "}
+                <span className="font-bold">
+                    {showMembers ? "hiding" : "showing"}
+                </span>{" "}
+                the members of your organisation {showMembers ? "from" : "to"}{" "}
                 the public.
             </span>
         );
@@ -38,7 +37,16 @@ export const ToggleMembersVisibilityDialog = (
 
     const handleMembersVisibilityChange = () => {
         /* TODO: change visibility */
-        console.log("Organisation " + name + " with ID: " + id + " toggled members visibility from " + showMembers + " to " + !showMembers);
+        console.log(
+            "Organisation " +
+                name +
+                " with ID: " +
+                id +
+                " toggled members visibility from " +
+                showMembers +
+                " to " +
+                !showMembers,
+        );
     };
 
     return (
@@ -58,7 +66,8 @@ export const ToggleMembersVisibilityDialog = (
                         Change members visibility
                     </DialogTitle>
                     <DialogDescription className="text-center">
-                        You are about to change the visibility of the members of your organisation.
+                        You are about to change the visibility of the members of
+                        your organisation.
                     </DialogDescription>
                     {getChangeMembersVisibilityMessage()}
                 </DialogHeader>

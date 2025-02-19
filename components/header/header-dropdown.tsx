@@ -31,6 +31,7 @@ export const HeaderDropdown = ({
                     displayType={"card"}
                     image={imgSrc(image)}
                     name={name + " " + surname}
+                    className="bg-header-button-hover text-header-foreground"
                 />
             </DropdownMenuTrigger>
             <DropdownMenuContent>

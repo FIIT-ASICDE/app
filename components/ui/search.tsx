@@ -1,9 +1,16 @@
-'use client';
+"use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
 import { Input } from "@/components/ui/input";
 
-export default function Search({ placeholder, className }: { placeholder: string, className?: string }) {
+export default function Search({
+    placeholder,
+    className,
+}: {
+    placeholder: string;
+    className?: string;
+}) {
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
@@ -24,7 +31,7 @@ export default function Search({ placeholder, className }: { placeholder: string
             onChange={(e) => {
                 handleSearch(e.target.value);
             }}
-            defaultValue={searchParams.get('query')?.toString()}
+            defaultValue={searchParams.get("query")?.toString()}
             className={className}
         />
     );

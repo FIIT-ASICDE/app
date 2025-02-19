@@ -11,11 +11,11 @@ export const NoData = ({ icon: Icon, message, className }: NoDataProps) => {
     return (
         <div
             className={cn(
-                "flex flex-col items-center gap-y-2 text-center text-muted-foreground opacity-70",
+                "flex flex-col items-center gap-y-2 text-center text-muted-foreground",
                 className,
             )}
         >
-            <Icon className="h-12 w-12 opacity-70" />
+            <Icon className="h-12 w-12" />
             <span className="text-sm font-semibold">{message}</span>
         </div>
     );

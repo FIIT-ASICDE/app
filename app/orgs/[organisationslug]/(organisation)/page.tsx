@@ -9,6 +9,8 @@ export default async function OrganisationHome({
     const orgSlug = (await params).organisationslug.replace(/%20/g, " ");
     try {
         const orgOverview = await api.org.overview(orgSlug);
+        /* TODO: this in db */
+        orgOverview.organisation.showMembers = true;
         return <OverviewPage overview={orgOverview} />;
     } catch (e) {
         console.error("unknown error", e);
