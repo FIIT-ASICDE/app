@@ -8,10 +8,11 @@ import {
     FolderPlus,
     Folders,
     Home,
+    Settings,
     SunMoon,
     UserRoundPen,
     UserRoundPlus,
-    UsersRound,
+    UsersRound
 } from "lucide-react";
 import { Session } from "next-auth";
 
@@ -19,9 +20,11 @@ interface CommandOptionsProps {
     user: Session["user"];
 }
 
-export const CommandOptions = ({
-    user,
-}: CommandOptionsProps): Array<CommandElementGroup> => {
+export const CommandOptions = (
+    {
+        user,
+    }: CommandOptionsProps
+): Array<CommandElementGroup> => {
     return [
         {
             groupDisplayTitle: "Suggestions",
@@ -40,6 +43,11 @@ export const CommandOptions = ({
                     displayTitle: "Organisations",
                     icon: UsersRound,
                     link: "/" + user.username + "/organisations",
+                } satisfies CommandElement,
+                {
+                    displayTitle: "Settings",
+                    icon: Settings,
+                    link: "/" + user.username + "/settings",
                 } satisfies CommandElement,
             ] satisfies Array<CommandElement>,
         } satisfies CommandElementGroup,
@@ -73,7 +81,7 @@ export const CommandOptions = ({
                 {
                     displayTitle: "Change theme",
                     icon: SunMoon,
-                    link: "/" + user.username,
+                    link: "/" + user.username + "/settings",
                     action: "openSettingsTab",
                     shortcut: ["Ctrl", "T"],
                 } satisfies CommandElement,
