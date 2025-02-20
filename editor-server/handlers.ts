@@ -88,9 +88,7 @@ export class WSSharedFile extends Y.Doc {
             );
             const buff = toUint8Array(encoder);
             this.conns.forEach((_, ws) => {
-                if ("send" in ws) {
-                    ws.send?.(buff);
-                }
+                safeSend(ws, buff);
             });
         };
 
@@ -108,7 +106,7 @@ export class WSSharedFile extends Y.Doc {
     }
 
     sendAll(message: Uint8Array) {
-        this.conns.forEach((_, ws) => ws.send(message));
+        this.conns.forEach((_, ws) => safeSend(ws, message));
     }
 
     async flush() {
@@ -159,7 +157,7 @@ export function onOpen(ws: ServerWebSocket<EditorSocketData>) {
     const encoder = createEncoder();
     writeVarUint(encoder, MESSAGE_SYNC);
     writeSyncStep1(encoder, file);
-    ws.send(toUint8Array(encoder));
+    safeSend(ws, toUint8Array(encoder));
 
     const awarenessStates = file.awareness.getStates();
     if (awarenessStates.size > 0) {
@@ -172,7 +170,7 @@ export function onOpen(ws: ServerWebSocket<EditorSocketData>) {
                 Array.from(awarenessStates.keys()),
             ),
         );
-        ws.send(toUint8Array(encoder));
+        safeSend(ws, toUint8Array(encoder));
     }
 }
 
@@ -207,7 +205,7 @@ export function onMessage(
                 // message, there is no need to send the message. When `encoder` only
                 // contains the type of reply, its length is 1.
                 if (encodingLength(encoder) > 1) {
-                    ws.send(toUint8Array(encoder));
+                    safeSend(ws, toUint8Array(encoder));
                 }
                 break;
             case MESSAGE_AWARENESS:
@@ -331,4 +329,13 @@ async function getFileContents(filePath: string): Promise<string> {
         );
         return "";
     }
+}
+
+/**
+ * When compiling this into a binary with Bun, the WebSocket object sometimes
+ * doesn't have the send method, so use this to protect the call
+ *
+ */
+function safeSend(ws: ServerWebSocket<EditorSocketData>, data: Uint8Array) {
+    ws?.send?.(data);
 }
