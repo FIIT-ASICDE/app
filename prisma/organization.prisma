@@ -10,7 +10,7 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // @@index([name(ops: raw("gin_trgm_ops"))], map: "organization_name_trgm_idx", type: Gin)
+  @@index([name(ops: raw("gin_trgm_ops"))], map: "organization_name_trgm_idx", type: Gin)
 }
 
 model OrganizationUser {
@@ -20,7 +20,10 @@ model OrganizationUser {
   organization   Organization     @relation(fields: [organizationId], references: [id])
   role           OrganizationRole
 
-  @@unique([userMetadataId, organizationId]) // Ensures a user can have one role per organization
+ // user can have one role per organization
+  @@id([userMetadataId, organizationId])
+  @@index([userMetadataId])
+  @@index([organizationId])
 }
 
 model OrganizationUserInvitation {
@@ -31,7 +34,8 @@ model OrganizationUserInvitation {
   isPending      		Boolean          @default(true)
   role           		OrganizationRole @default(MEMBER)
 
-  @@unique([userMetadataId, organizationId])
+ // user can have one invitation per organization
+  @@id([userMetadataId, organizationId])
 }
 
 enum OrganizationRole {

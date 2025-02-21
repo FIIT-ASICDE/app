@@ -17,7 +17,7 @@ model User {
 
   metadata 		UserMetadata?
 
-  // @@index([name(ops: raw("gin_trgm_ops"))], map: "organization_name_trgm_idx", type: Gin)
+  @@index([name(ops: raw("gin_trgm_ops"))], map: "user_name_trgm_idx", type: Gin)
 }
 
 // To have more data about the user, we need to gather it after OAuth signup
@@ -62,16 +62,19 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
   sessionToken String   @unique
-  userId       String   @db.Uuid
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String   @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model VerificationToken {

@@ -7,6 +7,8 @@ model Repo {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([name])
 }
 
 model RepoUserOrganization {
@@ -20,7 +22,13 @@ model RepoUserOrganization {
   repo           Repo          @relation(fields: [repoId], references: [id])
   repoRole       RepoRole      @default(OWNER)
 
+  // user can have one role per repo, but it doesn't make sense to create
+  // and PK from the unique columns, because searching through this table
+  // will is done by joining either from user, org, or repo, not all
   @@unique([userMetadataId, repoId])
+  @@index([userMetadataId])
+  @@index([organizationId])
+  @@index([repoId])
 }
 
 enum RepoRole {
