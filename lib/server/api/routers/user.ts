@@ -2,20 +2,17 @@ import {
     editUserProcedureSchema,
     userSearchSchema,
 } from "@/lib/schemas/user-schemas";
-import { registerSchema } from "@/lib/schemas/user-schemas";
+import { PaginationResult } from "@/lib/types/generic";
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import { User, UserDisplay, UsersOverview } from "@/lib/types/user";
 import { PrismaType } from "@/prisma";
-import { UserRole } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import bcrypt from "bcryptjs";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { pinnedRepos } from "./repos";
 
 export const userRouter = createTRPCRouter({
-    register: registerRoute(),
     byId: userById(),
     byUsername: byUsername(),
     usersOverview: usersOverview(),
@@ -23,43 +20,10 @@ export const userRouter = createTRPCRouter({
     search: trigramSearch(),
 });
 
-function registerRoute() {
-    return publicProcedure
-        .input(registerSchema)
-        .mutation(async ({ ctx, input }) => {
-            const prisma = ctx.prisma;
-            const { username, email, password, name, surname } = input;
-
-            const existingUser = await prisma.user.findFirst({
-                where: { OR: [{ username }, { email }] },
-            });
-
-            if (existingUser) {
-                throw new TRPCError({
-                    code: "CONFLICT",
-                    message: "User with this username or email already exists",
-                });
-            }
-
-            const hashedPassword: string = await bcrypt.hash(password, 10);
-
-            await prisma.user.create({
-                data: {
-                    username,
-                    name,
-                    surname,
-                    email,
-                    password: hashedPassword,
-                    role: "USER",
-                },
-            });
-        });
-}
-
 function userById() {
     return protectedProcedure
         .input(z.string().uuid())
-        .query(async ({ ctx, input: id }) => {
+        .query(async ({ ctx, input: id }): Promise<User> => {
             const prisma = ctx.prisma;
 
             if (ctx.session.user.id !== id) {
@@ -69,11 +33,12 @@ function userById() {
                 });
             }
 
-            const user = await prisma.user.findUnique({
-                where: { id: id },
+            const userMetadata = await prisma.userMetadata.findUnique({
+                where: { userId: id },
+                include: { user: true },
             });
 
-            if (!user) {
+            if (!userMetadata) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
                     message: "User doesn't exist",
@@ -81,15 +46,15 @@ function userById() {
             }
 
             return {
-                id: user.id,
-                name: user.name,
-                surname: user.surname,
-                username: user.username,
-                email: user.email,
-                role: user.role,
-                image: user.image || undefined,
-                bio: user.bio || undefined,
-                createdAt: user.createdAt,
+                id: userMetadata.id,
+                username: userMetadata.user.name!,
+                name: userMetadata.firstName,
+                surname: userMetadata.surname,
+                email: userMetadata.user.email,
+                role: userMetadata.role,
+                image: userMetadata.user.image || undefined,
+                bio: userMetadata.bio || undefined,
+                createdAt: userMetadata.user.createdAt,
             } satisfies User;
         });
 }
@@ -102,10 +67,7 @@ function editUser() {
 
             // there may be user with the same username
             const withSameUsername = await ctx.prisma.user.findFirst({
-                where: {
-                    username: input.username,
-                    NOT: { id: userId },
-                },
+                where: { name: input.username, NOT: { id: userId } },
             });
 
             if (withSameUsername) {
@@ -116,38 +78,44 @@ function editUser() {
             }
 
             const updatedUser = await ctx.prisma.user.update({
-                where: {
-                    id: userId,
-                },
+                where: { id: userId },
                 data: {
-                    name: input.name,
-                    surname: input.surname,
-                    username: input.username,
-                    bio: input.bio,
+                    name: input.username,
                     image: input.image,
                 },
                 select: {
                     id: true,
                     name: true,
-                    surname: true,
-                    username: true,
-                    bio: true,
                     image: true,
                     email: true,
-                    role: true,
                     createdAt: true,
                     updatedAt: true,
                 },
             });
 
+            const updatedUserMetadata = await ctx.prisma.userMetadata.update({
+                where: { userId },
+                data: {
+                    firstName: input.name,
+                    surname: input.surname,
+                    bio: input.bio,
+                },
+                select: {
+                    firstName: true,
+                    surname: true,
+                    bio: true,
+                    role: true,
+                },
+            });
+
             return {
                 id: updatedUser.id,
-                name: updatedUser.name,
-                surname: updatedUser.surname,
-                username: updatedUser.username,
+                name: updatedUserMetadata.firstName,
+                surname: updatedUserMetadata.surname,
+                username: updatedUser.name!,
                 email: updatedUser.email,
-                bio: updatedUser.bio || undefined,
-                role: updatedUser.role,
+                bio: updatedUserMetadata.bio || undefined,
+                role: updatedUserMetadata.role,
                 image: updatedUser.image || undefined,
                 createdAt: updatedUser.createdAt,
             } satisfies User;
@@ -155,9 +123,14 @@ function editUser() {
 }
 
 function trigramSearch() {
-    return protectedProcedure
-        .input(userSearchSchema)
-        .query(async ({ ctx, input }) => {
+    return protectedProcedure.input(userSearchSchema).query(
+        async ({
+            ctx,
+            input,
+        }): Promise<{
+            users: UserDisplay[];
+            pagination: PaginationResult;
+        }> => {
             const { searchTerm, page, pageSize } = input;
             const offset = page * pageSize;
 
@@ -166,41 +139,22 @@ function trigramSearch() {
                 ctx.prisma.$queryRaw<[{ count: number }]>`
           select count(*) as count
           from "User"
-          where 
-            (
-              similarity(username, ${searchTerm}) * 0.4 +
-              similarity(email, ${searchTerm}) * 0.3 +
-              similarity(name, ${searchTerm}) * 0.2 +
-              similarity(surname, ${searchTerm}) * 0.1
-            ) > 0.1
+          where similarity(name, ${searchTerm}) > 0.1
         `,
-                ctx.prisma.$queryRaw<UserDisplay[]>`
-          select id, username, image, (
-              -- username (highest priority: 40%)
-              similarity(COALESCE(username, ''), ${searchTerm}) * 0.4 +
-              -- email (second priority: 30%)
-              similarity(COALESCE(email, ''), ${searchTerm}) * 0.3 +
-              -- name (third priority: 20%)
-              similarity(COALESCE(name, ''), ${searchTerm}) * 0.2 +
-              -- surname (fourth priority: 10%)
-              similarity(COALESCE(surname, ''), ${searchTerm}) * 0.1
-            ) as rank
+                ctx.prisma.$queryRaw<
+                    { id: string; name: string; image?: string }[]
+                >`
+          select id, name, image, similarity(COALESCE(name, ''), ${searchTerm}) as rank
           from "User"
-          where 
-            (
-              similarity(username, ${searchTerm}) * 0.4 +
-              similarity(email, ${searchTerm}) * 0.3 +
-              similarity(name, ${searchTerm}) * 0.2 +
-              similarity(surname, ${searchTerm}) * 0.1
-            ) > 0.1
+          where similarity(name, ${searchTerm}) > 0.1
           order by rank desc limit ${pageSize} offset ${offset}
         `,
             ]);
 
             return {
-                users: users.map(({ id, username, image }) => ({
+                users: users.map(({ id, name, image }) => ({
                     id,
-                    username,
+                    username: name,
                     image,
                 })),
                 pagination: {
@@ -210,7 +164,8 @@ function trigramSearch() {
                     pageSize,
                 },
             };
-        });
+        },
+    );
 }
 
 function byUsername() {
@@ -254,22 +209,18 @@ async function userByUsername(
     prisma: PrismaType,
     username: string,
 ): Promise<User> {
-    const user = await prisma.user.findUnique({
-        where: { username },
+    const userMetadata = await prisma.userMetadata.findFirst({
+        where: { user: { name: username } },
         select: {
-            id: true,
-            name: true,
+            firstName: true,
             surname: true,
-            username: true,
-            email: true,
             role: true,
-            createdAt: true,
-            image: true,
             bio: true,
+            user: true,
         },
     });
 
-    if (!user) {
+    if (!userMetadata) {
         throw new TRPCError({
             code: "NOT_FOUND",
             message: "User not found",
@@ -277,15 +228,15 @@ async function userByUsername(
     }
 
     return {
-        id: user.id,
-        name: user.name,
-        surname: user.surname,
-        username: user.username,
-        email: user.email,
-        role: user.role as UserRole,
-        createdAt: user.createdAt,
-        image: user.image || undefined,
-        bio: user.bio || undefined,
+        id: userMetadata.user.id,
+        username: userMetadata.user.name!,
+        name: userMetadata.firstName,
+        surname: userMetadata.surname,
+        email: userMetadata.user.email,
+        role: userMetadata.role,
+        createdAt: userMetadata.user.createdAt,
+        image: userMetadata.user.image || undefined,
+        bio: userMetadata.bio || undefined,
     };
 }
 
@@ -294,17 +245,16 @@ async function getUsersOrgs(
     userId: string,
 ): Promise<Array<OrganisationDisplay>> {
     const organizations = await prisma.organization.findMany({
-        where: { users: { some: { userId } } },
+        where: { users: { some: { userMetadata: { userId } } } },
         include: {
-            users: { where: { userId: userId }, select: { role: true } },
+            users: {
+                select: { role: true },
+                where: { userMetadata: { userId } },
+            },
             _count: { select: { users: true } },
         },
         orderBy: [{ name: "asc" }],
     });
-
-    if (!organizations.length) {
-        return [];
-    }
 
     const transformedOrgs: OrganisationDisplay[] = organizations.map((org) => ({
         id: org.id,

@@ -39,3 +39,10 @@ export type ButtonVariant =
     | undefined;
 
 export type ButtonSize = "default" | "icon" | "sm" | "lg" | null | undefined;
+
+export interface PaginationResult {
+    total: number;
+    pageCount: number;
+    page: number;
+    pageSize: number;
+}

@@ -27,11 +27,9 @@ export const registerSchema =
                   .string()
                   .email()
                   .min(1, { message: "Email is required." }),
-              username: z
-                  .string()
-                  .min(2, {
-                      message: "Username must be at least 2 characters.",
-                  }),
+              username: z.string().min(2, {
+                  message: "Username must be at least 2 characters.",
+              }),
               password: z
                   .string()
                   .min(8, {
@@ -52,9 +50,9 @@ export const registerSchema =
           });
 
 export const editUserProcedureSchema = z.object({
-    name: z.string().min(1, "Name is required"),
-    surname: z.string().min(1, "Surname is required"),
-    username: z.string().min(1, "Username is required"),
+    name: z.string().min(1, "Name is required").optional(),
+    surname: z.string().min(1, "Surname is required").optional(),
+    username: z.string().min(1, "Username is required").optional(),
     bio: z.string().optional(),
     image: z.string().optional(),
 });
