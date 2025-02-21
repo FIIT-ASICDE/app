@@ -157,7 +157,7 @@ function search() {
         order by
           case 
             when ou."role" = 'ADMIN' then 1
-            when ou."role" = 'USER'  then 2
+            when ou."role" = 'MEMBER'  then 2
             else 3
           end,
           org.name

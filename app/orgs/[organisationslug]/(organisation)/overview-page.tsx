@@ -104,7 +104,7 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                                 <TooltipTrigger asChild>
                                     <Link
                                         href={
-                                            "/orgs" +
+                                            "/orgs/" +
                                             organisation.name +
                                             "/members"
                                         }
