@@ -6,8 +6,6 @@ import GitHub from "next-auth/providers/github";
 import prisma from "./prisma";
 import { $Enums } from ".prisma/client";
 
-import UserRole = $Enums.UserRole;
-
 declare module "next-auth" {
     import UserRole = $Enums.UserRole;
 
@@ -26,49 +24,7 @@ declare module "next-auth" {
     }
 }
 
-const providers: Provider[] = [
-    GitHub,
-    // Credentials({
-    //     name: "Credentials",
-    //     credentials: {
-    //         email: { label: "Email", type: "text" },
-    //         password: { label: "Password", type: "password" },
-    //     },
-    //     authorize: async (credentials) => {
-    //         if (!credentials) {
-    //             throw new Error("Missing required field!");
-    //         }
-    //
-    //         const { email, password } = credentials as {
-    //             email: string;
-    //             password: string;
-    //         };
-    //
-    //         const user = await prisma.user.findUnique({
-    //             where: { email },
-    //         });
-    //
-    //         if (!user || !user.password) {
-    //             throw new Error("Invalid email or password");
-    //         }
-    //
-    //         const isMatch = await bcrypt.compare(password, user.password);
-    //         if (!isMatch) {
-    //             throw new Error("Invalid email or password");
-    //         }
-    //
-    //         return {
-    //             id: user.id,
-    //             email: user.email,
-    //             name: user.name,
-    //             username: user.username,
-    //             surname: user.surname,
-    //             role: user.role,
-    //             image: user.image,
-    //         };
-    //     },
-    // }),
-];
+const providers: Provider[] = [GitHub];
 
 export const providerMap = providers
     .map((provider) => {
@@ -82,33 +38,29 @@ export const providerMap = providers
     .filter((provider) => provider.id !== "credentials");
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-    // pages: {
-    //     signIn: "/login",
-    // },
-    // session: {
-    //     strategy: "jwt",
-    // },
+    pages: { signIn: "/login" },
+    // If you want to change session strategy, then also auth in editor server
+    // must be also reimplemented
+    session: { strategy: "jwt" },
     secret: process.env.NEXTAUTH_SECRET,
     adapter: PrismaAdapter(prisma),
     providers,
     callbacks: {
         async jwt({ token, user }) {
-            console.log("jwt", token, user);
             if (user) {
                 token.id = user.id;
-                token.username = user.username;
-                token.surname = user.surname;
+                token.username = user.name;
+                token.surname = "REMOVE";
                 token.image = user.image;
             }
             return token;
         },
         async session({ session, token }) {
-            console.log("session", session, token);
             session.user.id = token.id as string;
-            session.user.username = token.username as string;
-            session.user.surname = token.surname as string;
+            session.user.username = token.name as string;
+            session.user.surname = "REMOVE";
             session.user.image = token.image as string;
-            session.user.role = token.role as UserRole;
+            session.user.role = "USER";
             return session;
         },
     },
