@@ -177,4 +177,116 @@
 }
 
 
+/* Модальное окно и затемнённый фон */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7); /* затемнение фона */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    max-width: 90%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.modal h3 {
+    margin-top: 0;
+    text-align: center;
+}
+
+.modal label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.modal input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.modalButtons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.modalButtons button {
+    flex: 1;
+    padding: 10px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #1abc9c;
+    color: #fff;
+    transition: background-color 0.3s ease;
+}
+
+.modalButtons button:hover {
+    background-color: #16a085;
+}
+
+/* Секция портов */
+.portSection {
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.portSection h4 {
+    margin: 0 0 8px 0;
+    padding-bottom: 4px;
+    font-size: 16px;
+    color: #333;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Список портов */
+.portItem {
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+    color: #555;
+    display: flex;
+    align-items: center;
+}
+
+.portItem:last-child {
+    border-bottom: none;
+}
+
+/* Кнопка для добавления порта */
+.addPortButton {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 12px;
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.addPortButton:hover {
+    background-color: #2980b9;
+}
+
 

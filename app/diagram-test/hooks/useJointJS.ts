@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { dia, shapes } from "@joint/core";
 import { useDiagramContext } from '../context/useDiagramContext';
 import './jointjs.css'
+import { BaseSvgElement } from "@/app/diagram-test/components/Shapes/base/BaseSvgElement";
 
 const highlightSettings = {
     name: 'stroke',
@@ -16,6 +17,9 @@ const highlightSettings = {
     }
 };
 
+const customNamespace = Object.assign({}, shapes);
+customNamespace['custom.BaseSvgElement'] = BaseSvgElement;
+
 const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
     const { graph, setSelectedElement, setPaper, isPanning } = useDiagramContext();
     const paperRef = useRef<dia.Paper | null>(null);
@@ -25,6 +29,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
     const lastClientY = useRef(0);
     const translation = useRef({ x: 0, y: 0 }); // Текущее смещение
     const originalPortStyles = useRef<Map<string, string>>(new Map());
+
 
     useEffect(() => {
         if (paperElement.current && !paperRef.current) {
@@ -37,7 +42,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                 drawGrid: true,
                 background: { color: '#f9f9f9' },
                 interactive: true,
-                cellViewNamespace: shapes, // Используем кастомные формы
+                cellViewNamespace: customNamespace, // Используем кастомные формы
                 defaultLink: () => new shapes.standard.Link({
                     // router: {
                     //     name: 'manhattan',  // или 'metro' / 'orthogonal' / 'manhattan' / etc.
@@ -151,7 +156,9 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                     return true;
 
                 },
-            });
+            })
+            console.log("Namespace keys:", Object.keys(customNamespace));
+            ;
 
 
             // Устанавливаем Paper в контекст
@@ -181,9 +188,6 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
             });
 
 
-
-
-
             // Начало соединения
             paper.on('element:magnet:pointerdown', (elementView, evt, magnet, x, y) => {
                 if (!magnet) return;
@@ -195,9 +199,6 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
 
             });
 
-            paper.on('element:pointerdown', (elementView, evt, x, y) => {
-                console.log('element:pointerdown at', { x, y }, 'DOM target=', evt.target);
-            });
             // Обработка окончания соединения (успешного или отменённого)
             paper.on('link:connect link:disconnect', () => {
                 // Можно добавить действия при подключении или отключении связей

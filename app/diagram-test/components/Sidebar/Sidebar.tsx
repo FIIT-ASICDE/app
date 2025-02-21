@@ -1,6 +1,6 @@
 // pages/diagram-test/components/Sidebar/Sidebar.tsx
 
-import React from 'react';
+import React, { useRef } from "react";
 import {
     FaShapes,
     FaSearchPlus,
@@ -18,56 +18,59 @@ import {
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css'; // Импорт стилей Tippy
 import { useDiagramContext } from '../../context/useDiagramContext';
-import { saveDiagramAsCode, loadCodeToDiagram } from '../../utils/codeParser';
+import { generateSystemVerilogCode } from '../../utils/codeGenerator';
+import { saveDiagram, loadDiagram } from '../../utils/diagramStorage';
 import styles from './Sidebar.module.css';
 
 const Sidebar = () => {
     const { zoomIn, zoomOut, fitToView, graph, isPanning, togglePanning } = useDiagramContext();
     const [isLogicCollapsed, setIsLogicCollapsed] = React.useState(false);
     const [isIOCollapsed, setIsIOCollapsed] = React.useState(false);
+    const [isModulesCollapsed, setIsModulesCollapsed] = React.useState(false);
     const [isToolsCollapsed, setIsToolsCollapsed] = React.useState(false);
     const [isSaveLoadCollapsed, setIsSaveLoadCollapsed] = React.useState(false);
     const [isActionsCollapsed, setIsActionsCollapsed] = React.useState(false);
     const [isComplexLogicCollapsed, setIsComplexLogicCollapsed] = React.useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleDragStart = (event: React.DragEvent, toolType: string) => {
         event.dataTransfer.setData('toolType', toolType);
     };
 
-    const handleSave = async () => {
-        const code = saveDiagramAsCode(graph);
-        const name = prompt('Введите имя диаграммы:');
-        if (name) {
-            try {
-                const response = await fetch('/api/saveDiagram', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ name, code }),
-                });
-                const result = await response.json();
-                if (response.ok) {
-                    alert('Диаграмма успешно сохранена');
-                } else {
-                    alert(`Ошибка: ${result.error}`);
-                }
-            } catch (error) {
-                alert('Произошла ошибка при сохранении диаграммы');
-            }
-        }
-    };
-
-    const handleLoad = () => {
-        const code = prompt('Вставьте ваш SystemVerilog код:');
-        if (code) {
-            loadCodeToDiagram(code, graph);
-        }
-    };
+    // const handleSave = async () => {
+    //     const code = saveDiagramAsCode(graph);
+    //     const name = prompt('Введите имя диаграммы:');
+    //     if (name) {
+    //         try {
+    //             const response = await fetch('/api/saveDiagram', {
+    //                 method: 'POST',
+    //                 headers: {
+    //                     'Content-Type': 'application/json',
+    //                 },
+    //                 body: JSON.stringify({ name, code }),
+    //             });
+    //             const result = await response.json();
+    //             if (response.ok) {
+    //                 alert('Диаграмма успешно сохранена');
+    //             } else {
+    //                 alert(`Ошибка: ${result.error}`);
+    //             }
+    //         } catch (error) {
+    //             alert('Произошла ошибка при сохранении диаграммы');
+    //         }
+    //     }
+    // };
+    //
+    // const handleLoad = () => {
+    //     const code = prompt('Вставьте ваш SystemVerilog код:');
+    //     if (code) {
+    //         loadCodeToDiagram(code, graph);
+    //     }
+    // };
 
     const handleGenerateCode = () => {
-        const code = saveDiagramAsCode(graph);
-        // Предложите скачать код как файл
+        const code = generateSystemVerilogCode(graph);
+        // Создаем Blob и ссылку для скачивания
         const blob = new Blob([code], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -75,6 +78,43 @@ const Sidebar = () => {
         a.download = 'diagram.sv';
         a.click();
         URL.revokeObjectURL(url);
+    };
+    // Сохранение диаграммы в файл
+    const handleSaveDiagram = () => {
+        const diagramJSON = JSON.stringify(graph.toJSON(), null, 2);
+        const blob = new Blob([diagramJSON], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'diagram.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    // Обработчик выбора файла для загрузки диаграммы
+    const handleLoadDiagram = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const json = JSON.parse(event.target?.result as string);
+                    graph.fromJSON(json);
+                    alert('Диаграмма загружена');
+                } catch (error) {
+                    console.error("Error parsing file", error);
+                    alert("Ошибка при загрузке диаграммы");
+                }
+            };
+            reader.readAsText(file);
+        }
+    };
+
+    // Функция для запуска выбора файла
+    const triggerLoadDiagram = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
     };
 
     const handlePanToggle = () => {
@@ -316,6 +356,45 @@ const Sidebar = () => {
                     </div>
                 )}
             </div>
+            {/* Module Group */}
+            <div className={styles.group}>
+                <div className={styles.groupHeader} onClick={() => setIsModulesCollapsed(!isModulesCollapsed)}>
+                    <FaPlug className={styles.collapseIcon} />
+                    <h3>I/O</h3>
+                    <FaBars className={styles.toggleIcon} />
+                </div>
+                {!isModulesCollapsed && (
+                    <div className={styles.iconList}>
+                        <Tippy content="New Module" placement="right" delay={[500, 0]}>
+                            <div
+                                className={styles.iconItem}
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, 'newModule')}
+                            >
+                                <img
+                                    src="/images/svg/NewModule.svg"
+                                    alt="New Module"
+                                    className={styles.svgIcon}
+                                />
+                            </div>
+                        </Tippy>
+                        <Tippy content="Existing Module" placement="right" delay={[500, 0]}>
+                            <div
+                                className={styles.iconItem}
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, 'newModule')}
+                            >
+                                <img
+                                    src="/images/svg/ExistingModule.svg"
+                                    alt="Existing Module"
+                                    className={styles.svgIcon}
+                                />
+                            </div>
+                        </Tippy>
+
+                    </div>
+                )}
+            </div>
 
             {/* Tools Group */}
             <div className={styles.group}>
@@ -395,6 +474,26 @@ const Sidebar = () => {
                                 <span>Generate Code</span>
                             </div>
                         </Tippy>
+                        <Tippy content="Save Diagram" placement="right" delay={[500, 0]}>
+                            <div className={styles.iconItem} onClick={handleSaveDiagram}>
+                                <FaSave size={24} />
+                                <span>Save Diagram</span>
+                            </div>
+                        </Tippy>
+                        <Tippy content="Load Diagram" placement="right" delay={[500, 0]}>
+                            <div className={styles.iconItem} onClick={triggerLoadDiagram}>
+                                <FaFolderOpen size={24} />
+                                <span>Load Diagram</span>
+                            </div>
+                        </Tippy>
+                        {/* Скрытый input для загрузки файла */}
+                        <input
+                            type="file"
+                            accept=".json"
+                            ref={fileInputRef}
+                            style={{ display: 'none' }}
+                            onChange={handleLoadDiagram}
+                        />
                     </div>
                 )}
             </div>

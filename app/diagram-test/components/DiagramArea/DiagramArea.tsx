@@ -34,7 +34,10 @@ import {JointJSSubtractor} from '../Shapes/complexLogic/JointJSSubtractor';
 import { Subtractor } from '../Shapes/classes/subtractor';
 import { JointJSComparator } from '../Shapes/complexLogic/JointJSComparator';
 import { Comparator } from '../Shapes/classes/comparator';
+import { JointJSNewModule } from '../Shapes/modules/JointJSNewModule';
+import { Module } from '../Shapes/classes/module';
 import {useDiagramEvents} from "@/app/diagram-test/hooks/useDiagramEvents";
+
 
 
 const DiagramArea = () => {
@@ -156,7 +159,12 @@ const DiagramArea = () => {
             comparator.type = ">";
             element = JointJSComparator(comparator);
             break;
-        // Добавьте остальные типы
+        case 'newModule':
+            const newModule = new Module();
+            newModule.name = "New Module";
+            newModule.instance = "";
+            element = JointJSNewModule(newModule);
+            break;
         default:
             return;
         }

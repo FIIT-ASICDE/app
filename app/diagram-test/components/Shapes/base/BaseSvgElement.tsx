@@ -1,7 +1,7 @@
 // src/components/Shapes/base/BaseElement.tsx
 import { shapes } from "@joint/core";
 
-export const BaseSvgElement = shapes.standard.Path.define('custom.MyCustomAnd',{
+export const BaseSvgElement = shapes.standard.Path.define('custom.BaseSvgElement', {
     attrs: {
         body: {
 

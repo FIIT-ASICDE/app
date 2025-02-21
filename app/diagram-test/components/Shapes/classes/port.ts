@@ -3,7 +3,7 @@ export class Port {
     public id: string;
     public bandwidth?: number;
     public direction: string;
-    public position: {
+    public position?: {
         x: number,
         y: number
     };

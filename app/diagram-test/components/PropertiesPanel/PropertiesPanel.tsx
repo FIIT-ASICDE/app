@@ -1,5 +1,6 @@
 // pages/diagram-test/components/PropertiesPanel/PropertiesPanel.tsx
 import React, { useState, useEffect } from 'react';
+import { useHotkeys } from '../../hooks/useHotkeys';
 import { useDiagramContext } from '../../context/useDiagramContext';
 import styles from './PropertiesPanel.module.css';
 import {Multiplexer} from "../Shapes/classes/multiplexer";
@@ -17,6 +18,9 @@ import {JointJSNand} from "../Shapes/gates/JointJSNand";
 import {Nand} from "../Shapes/classes/nand";
 import {JointJSNor} from "../Shapes/gates/JointJSNor";
 import {Nor} from "../Shapes/classes/nor";
+import {JointJSNewModule} from "../Shapes/modules/JointJSNewModule";
+import {Module} from "../Shapes/classes/module";
+
 interface Properties {
     label?: string;
     stroke?: string;
@@ -24,16 +28,35 @@ interface Properties {
     comparatorType?: string;
     bandwidth?: number;
     inputPorts?: number;
-
-
+    instance?: string;
+    inPortsModule?: { name: string; bandwidth: number }[];
+    outPortsModule?: { name: string; bandwidth: number }[];
 }
 
 const PropertiesPanel = () => {
     const { selectedElement,graph,setSelectedElement, updateElement, removeElement } = useDiagramContext();
-    const [properties, setProperties] = useState<Properties>({});
-    const [isHover, setIsHover] = useState(false); // отслеживаем, наведена ли мышь
+    const [properties, setProperties] = useState<Properties>({
+        label: '',
+        instance: '',
+        bandwidth: 1,
+        inputPorts: 2,
+        stroke: '#000',
+        strokeWidth: 2,
+        comparatorType: '',
+        inPortsModule: [],
+        outPortsModule: [],
+    });
+    const [isHover, setIsHover] = useState(false);
     const [portWidthMode, setPortWidthMode] = useState<'bit' | 'vector' | 'struct'>('bit');
     const [logicWidthMode, setLogicWidthMode] = useState<'bit' | 'vector'>('bit');
+
+    // Состояние для диалога добавления порта
+    const [showAddPortDialog, setShowAddPortDialog] = useState(false);
+    // Тип порта, который добавляем: "input" или "output"
+    const [newPortType, setNewPortType] = useState<'input' | 'output'>('input');
+    // Данные для нового порта (например, имя, пропускная способность и т.п.)
+    const [newPortData, setNewPortData] = useState({ name: '', bandwidth: 1 });
+
 
     useEffect(() => {
         if (selectedElement) {
@@ -41,6 +64,9 @@ const PropertiesPanel = () => {
                 label: selectedElement.attributes.attrs?.label?.text || '',
                 bandwidth: selectedElement.attributes.bandwidth || 1,
                 inputPorts: selectedElement.attributes.inPorts || 0,
+                inPortsModule: selectedElement.attributes.moduleInPorts || [],
+                outPortsModule: selectedElement.attributes.moduleOutPorts || [],
+                instance: selectedElement.attributes.instance || ''
 
             };
             if (selectedElement.isLink()) {
@@ -59,7 +85,17 @@ const PropertiesPanel = () => {
             }
             setProperties(props);
         } else {
-            setProperties({});
+            setProperties({
+                label: '',
+                instance: '',
+                bandwidth: 1,
+                inputPorts: 2,
+                stroke: '#000',
+                strokeWidth: 2,
+                comparatorType: '',
+                inPortsModule: [],
+                outPortsModule: [],
+            });
         }
     }, [selectedElement]);
 
@@ -73,42 +109,25 @@ const PropertiesPanel = () => {
         const labelLines1 = labelText.split('\n');
 
         if (['comparator', 'adder', 'subtractor'].includes(elType)) {
-            setProperties({
+            setProperties(prev => ({
+                ...prev,
                 label: labelLines4[1],
                 comparatorType: labelLines4[0],
-            });
+            }));
         } else if (['decoder', 'encoder'].includes(elType)) {
-            setProperties({
+            setProperties(prev => ({
+                ...prev,
                 label: labelLines1[1],
-            });
+            }));
+        }
+        else if (['newModule'].includes(elType)) {
+            setProperties(prev => ({
+                ...prev,
+                label: labelLines1[0],
+            }));
         }
     }, [selectedElement]);
 
-
-
-
-    useEffect(() => {
-        if (!isHover) return;
-
-        const handleKeyDown = (e: KeyboardEvent) => {
-            // Ctrl+S (Win/Linux) или Cmd+S (macOS)
-            const isCtrlOrCmd = e.ctrlKey || e.metaKey;
-
-            if (isCtrlOrCmd && e.key.toLowerCase() === 's') {
-                e.preventDefault();    // чтобы не вызывалось «сохранение страницы»
-                handleSave();
-            }
-            if (e.key === 'Delete') {
-                handleDelete();
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [selectedElement]);
-    // ============================================================================
 
     const handleChange = (e: { target: { name: any; value: any; }; }) => {
         const { name, value } = e.target;
@@ -118,6 +137,65 @@ const PropertiesPanel = () => {
         }));
 
     };
+
+    // Обработчики открытия модального окна для добавления порта
+    const handleAddInputPort = () => {
+        setNewPortType('input');
+        setNewPortData({ name: '', bandwidth: 1 });
+        setShowAddPortDialog(true);
+    };
+
+    const handleAddOutputPort = () => {
+        setNewPortType('output');
+        setNewPortData({ name: '', bandwidth: 1 });
+        setShowAddPortDialog(true);
+    };
+
+    // Обработчик изменения данных нового порта
+    const handleNewPortDataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setNewPortData(prev => ({
+            ...prev,
+            [name]: name === 'bandwidth' ? Number(value) : value
+        }));
+    };
+
+    const handleNewPortSubmit = () => {
+        if (!selectedElement) return;
+
+        // В зависимости от newPortType добавляем в properties.inPortsModule или outPortsModule
+        if (newPortType === 'input') {
+            setProperties(prev => ({
+                ...prev,
+                inPortsModule: [
+                    ...prev.inPortsModule,
+                    {
+                        name: newPortData.name || `input${Date.now()}`,
+                        bandwidth: newPortData.bandwidth
+                    }
+                ]
+            }));
+        } else {
+            setProperties(prev => ({
+                ...prev,
+                outPortsModule: [
+                    ...prev.outPortsModule,
+                    {
+                        name: newPortData.name || `output${Date.now()}`,
+                        bandwidth: newPortData.bandwidth
+                    }
+                ]
+            }));
+        }
+
+        setShowAddPortDialog(false);
+    };
+
+    const handleNewPortCancel = () => {
+        setShowAddPortDialog(false);
+    };
+
+
     const handlePortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const portCount = parseInt(event.target.value);
         if (selectedElement?.attributes.elType === 'multiplexer') {
@@ -133,6 +211,40 @@ const PropertiesPanel = () => {
             setSelectedElement(newMultiplexer);
         }
     };
+
+    const handleModulePortChange = () => {
+        if (!selectedElement) return;
+
+        // Создаём новый объект модуля
+        const newMod = new Module();
+        newMod.name = properties.label || '';
+        newMod.instance = properties.instance || '';
+
+        // Конвертируем локальные inPortsModule / outPortsModule в Port[]
+        newMod.inPorts = properties.inPortsModule.map((p, i) => ({
+            name: p.name,
+            bandwidth: p.bandwidth,
+        }));
+        newMod.outPorts = properties.outPortsModule.map((p, i) => ({
+            name: p.name,
+            bandwidth: p.bandwidth,
+        }));
+
+        // Позицию и т.д.
+        const { x, y } = selectedElement.position();
+        newMod.position = { x, y };
+
+        // Удаляем старый элемент из графа
+        graph.removeCells([selectedElement]);
+
+        // Создаем новый элемент через JointJSNewModule и добавляем в граф
+        const newModuleCell = JointJSNewModule(newMod);
+        graph.addCell(newModuleCell);
+
+        // Выбираем его
+        setSelectedElement(newModuleCell);
+    };
+
     const handleLogicPortChange = () => {
 
         if (selectedElement?.attributes.elType === 'and') {
@@ -248,6 +360,12 @@ const PropertiesPanel = () => {
         else if (selectedElement.attributes.elType === 'encoder') {
             attrsToUpdate.label = { text: 'ENCODER\n' + properties.label };
         }
+        else if (selectedElement.attributes.elType === 'newModule') {
+            handleModulePortChange();
+            // attrsToUpdate.label = { text: properties.label + '\n' + properties.instance };
+            return;
+
+        }
         else if (selectedElement.attributes.elType === 'adder') {
             attrsToUpdate.label = { text: '+\n\n\n\n' + properties.label };
         }
@@ -278,6 +396,7 @@ const PropertiesPanel = () => {
             handleLogicPortChange();
             return;
         }
+
         else {
             attrsToUpdate.label = { text: properties.label };
         }
@@ -293,6 +412,11 @@ const PropertiesPanel = () => {
             removeElement();
         }
     };
+    useHotkeys({
+        onSave: handleSave,
+        onDelete: handleDelete,
+        enabled: isHover  // например, только при наведении мыши на панель
+    });
 
     // Вызывается при переключении радио-кнопок
     const handleBandwidthRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -360,7 +484,7 @@ const PropertiesPanel = () => {
                     </label>
 
                     <div className={styles.radioContainer}>
-                        <span>Select Port's width:</span>
+                        <span>Select Port width:</span>
                         <div className={styles.radioOption}>
                             <input
                                 type="radio"
@@ -428,7 +552,7 @@ const PropertiesPanel = () => {
             {(['and', 'nand', 'xor', 'or', 'nor', 'not', 'xnor'].includes(selectedElement.attributes.elType)) && (
                 <>
                     <label>
-                        {selectedElement.attributes.elType.toUpperCase()} signal's name:
+                        {selectedElement.attributes.elType.toUpperCase()} signal name:
                         <input
                             type="text"
                             name="label"
@@ -439,7 +563,7 @@ const PropertiesPanel = () => {
                     </label>
 
                     <div className={styles.radioContainer}>
-                        <span>Select {selectedElement.attributes.elType.toUpperCase()}'s width:</span>
+                        <span>Select {selectedElement.attributes.elType.toUpperCase()} width:</span>
                         <div className={styles.radioOption}>
                             <input
                                 type="radio"
@@ -493,7 +617,7 @@ const PropertiesPanel = () => {
             {selectedElement.attributes.elType === 'multiplexer' && (
                 <>
                     <label>
-                        {toTitleCase(selectedElement.attributes.elType)} signal's name:
+                        {toTitleCase(selectedElement.attributes.elType)} signal name:
                         <input
                             type="text"
                             name="label"
@@ -645,28 +769,49 @@ const PropertiesPanel = () => {
                 </>
 
             )}
+            {(['newModule'].includes(selectedElement.attributes.elType)) && (
+                <>
+                    <label>
+                        New Module name:
+                        <input
+                            type="text"
+                            name="label"
+                            placeholder="Insert name..."
+                            value={properties.label || ''}
+                            onChange={handleChange}
+                        />
+                    </label>
+                    <label>
+                        Instance name:
+                        <input
+                            type="text"
+                            name="instance"
+                            placeholder="Insert instance..."
+                            value={properties.instance || ''}
+                            onChange={handleChange}
+                        />
+                    </label>
 
-
-
-            {!selectedElement.isLink() && (
-                <label>
-                    Text:
-                    <input
-                        type="text"
-                        name="label"
-                        value={properties.label || ''}
-                        onChange={handleChange}
-                    />
-                    Bandwidth:
-                    <input
-                        type="number"
-                        name="bandwidth"
-                        value={properties.bandwidth || 0}
-                        onChange={handleChange}
-                    />
-                </label>
+                    <div className={styles.portSection}>
+                        <h4>Input Ports</h4>
+                        {properties.inPortsModule.map((p, idx) => (
+                            <div key={idx} className={styles.portItem}>
+                                <span>{p.name} (bw={p.bandwidth})</span>
+                            </div>
+                        ))}
+                        <button onClick={handleAddInputPort} className={styles.addPortButton}>Add Input Port</button>
+                    </div>
+                    <div className={styles.portSection}>
+                        <h4>Output Ports</h4>
+                        {properties.outPortsModule.map((p, idx) => (
+                            <div key={idx} className={styles.portItem}>
+                                <span>{p.name} (bw={p.bandwidth})</span>
+                            </div>
+                        ))}
+                        <button onClick={handleAddOutputPort} className={styles.addPortButton}>Add Output Port</button>
+                    </div>
+                </>
             )}
-
 
 
             {/* Если это связь — показываем настройки stroke, strokeWidth */}
@@ -703,6 +848,36 @@ const PropertiesPanel = () => {
                     Delete
                 </button>
             </div>
+            {/* Модальное окно для добавления порта */}
+            {showAddPortDialog && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modal}>
+                        <h3>Add {newPortType === 'input' ? 'Input' : 'Output'} Port</h3>
+                        <label>
+                            Port Name:
+                            <input
+                                type="text"
+                                name="name"
+                                value={newPortData.name}
+                                onChange={handleNewPortDataChange}
+                            />
+                        </label>
+                        <label>
+                            Bandwidth:
+                            <input
+                                type="number"
+                                name="bandwidth"
+                                value={newPortData.bandwidth}
+                                onChange={handleNewPortDataChange}
+                            />
+                        </label>
+                        <div className={styles.modalButtons}>
+                            <button onClick={handleNewPortSubmit}>Add Port</button>
+                            <button onClick={handleNewPortCancel}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

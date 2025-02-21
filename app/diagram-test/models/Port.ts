@@ -6,10 +6,10 @@ export interface Port {
         x: number;
         y: number;
     };
-    id: string;
+    id?: string;
     name: string;
     bandwidth?: number;
-    direction: 'in' | 'out';
+    direction?: 'in' | 'out';
     standalone?: boolean;
     bit?: boolean;
     struct?: string;
