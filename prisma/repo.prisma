@@ -12,15 +12,15 @@ model Repo {
 model RepoUserOrganization {
   favorite       Boolean
   pinned 		 Boolean?
-  userId         String        @db.Uuid
-  user           User          @relation(fields: [userId], references: [id])
+  userMetadataId String        @db.Uuid
+  userMetadata   UserMetadata  @relation(fields: [userMetadataId], references: [id])
   organizationId String?       @db.Uuid
   organization   Organization? @relation(fields: [organizationId], references: [id])
   repoId         String        @db.Uuid
   repo           Repo          @relation(fields: [repoId], references: [id])
   repoRole       RepoRole      @default(OWNER)
 
-  @@unique([userId, repoId]) // Ensures a user can have one role per repo
+  @@unique([userMetadataId, repoId])
 }
 
 enum RepoRole {

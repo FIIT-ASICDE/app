@@ -10,28 +10,28 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([name(ops: raw("gin_trgm_ops"))], map: "organization_name_trgm_idx", type: Gin)
+  // @@index([name(ops: raw("gin_trgm_ops"))], map: "organization_name_trgm_idx", type: Gin)
 }
 
 model OrganizationUser {
-  userId         String           @db.Uuid
-  user           User             @relation(fields: [userId], references: [id])
+  userMetadataId String           @db.Uuid
+  userMetadata   UserMetadata     @relation(fields: [userMetadataId], references: [id])
   organizationId String           @db.Uuid
   organization   Organization     @relation(fields: [organizationId], references: [id])
   role           OrganizationRole
 
-  @@unique([userId, organizationId]) // Ensures a user can have one role per organization
+  @@unique([userMetadataId, organizationId]) // Ensures a user can have one role per organization
 }
 
 model OrganizationUserInvitation {
-  userId         String           @db.Uuid
-  user           User             @relation(fields: [userId], references: [id])
-  organizationId String           @db.Uuid
-  organization   Organization     @relation(fields: [organizationId], references: [id])
-  isPending      Boolean          @default(true)
-  role           OrganizationRole @default(MEMBER)
+  userMetadataId        String           @db.Uuid
+  userMetadata          UserMetadata     @relation(fields: [userMetadataId], references: [id])
+  organizationId 		String           @db.Uuid
+  organization   		Organization     @relation(fields: [organizationId], references: [id])
+  isPending      		Boolean          @default(true)
+  role           		OrganizationRole @default(MEMBER)
 
-  @@unique([userId, organizationId])
+  @@unique([userMetadataId, organizationId])
 }
 
 enum OrganizationRole {

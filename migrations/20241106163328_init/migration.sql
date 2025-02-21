@@ -1,3 +1,5 @@
+create extension if not exists pg_trgm;
+
 -- CreateEnum
 CREATE TYPE "OrganizationRole" AS ENUM ('USER', 'ADMIN');
 
