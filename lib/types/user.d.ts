@@ -3,17 +3,28 @@ import { $Enums } from ".prisma/client";
 
 import UserRole = $Enums.UserRole;
 
-export type User = {
-    id: string;
-    name: string;
-    surname: string;
-    username: string;
-    email: string;
-    role: UserRole;
-    createdAt: Date;
-    image?: string;
-    bio?: string;
-};
+export type User =
+    | {
+          type: "onboarded";
+          id: string;
+          name: string;
+          surname: string;
+          username: string;
+          email: string;
+          role: UserRole;
+          createdAt: Date;
+          image?: string;
+          bio?: string;
+      }
+    | {
+          type: "non-onboarded";
+          id: string;
+          username: string;
+          email: string;
+          image?: string;
+      };
+
+export type OnboardedUser = Extract<User, { type: "onboarded" }>;
 
 export type UserDisplay = {
     id: string;
@@ -23,7 +34,7 @@ export type UserDisplay = {
 
 export interface UsersOverview {
     isItMe: boolean;
-    profile: User;
+    profile: OnboardedUser;
     organisations: Array<OrganisationDisplay>;
     pinnedRepositories: Array<RepositoryDisplay>;
 }

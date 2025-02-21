@@ -1,10 +1,14 @@
-import { providerMap, signIn } from "@/auth";
+import { auth, providerMap, signIn } from "@/auth";
+import { redirectIfNotOnboarded } from "@/lib/onboarding-guard";
 import { AuthError } from "next-auth";
 import Image from "next/image";
 
 export default async function LoginPage(props: {
     searchParams: Promise<{ callbackUrl: string | undefined }>;
 }) {
+    const session = await auth();
+    await redirectIfNotOnboarded(session, "login");
+
     const { callbackUrl } = await props.searchParams;
 
     return (

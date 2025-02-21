@@ -1,10 +1,16 @@
 import {
     editUserProcedureSchema,
+    onboardSchema,
     userSearchSchema,
 } from "@/lib/schemas/user-schemas";
 import { PaginationResult } from "@/lib/types/generic";
 import { OrganisationDisplay } from "@/lib/types/organisation";
-import { User, UserDisplay, UsersOverview } from "@/lib/types/user";
+import {
+    OnboardedUser,
+    User,
+    UserDisplay,
+    UsersOverview,
+} from "@/lib/types/user";
 import { PrismaType } from "@/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -13,6 +19,7 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { pinnedRepos } from "./repos";
 
 export const userRouter = createTRPCRouter({
+    completeOnboarding: completeOnboarding(),
     byId: userById(),
     byUsername: byUsername(),
     usersOverview: usersOverview(),
@@ -20,10 +27,56 @@ export const userRouter = createTRPCRouter({
     search: trigramSearch(),
 });
 
+function completeOnboarding() {
+    return protectedProcedure
+        .input(onboardSchema)
+        .mutation(async ({ ctx, input }): Promise<User> => {
+            const user = await ctx.prisma.user.findUnique({
+                where: { id: ctx.session.user.id },
+                include: { metadata: true },
+            });
+
+            if (!user) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "User not found",
+                });
+            }
+            if (user.metadata) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "User already onboarded",
+                });
+            }
+
+            const userMetadata = await ctx.prisma.userMetadata.create({
+                data: {
+                    firstName: input.name,
+                    surname: input.surname,
+                    bio: input.bio,
+                    user: { connect: { id: user.id } },
+                },
+            });
+
+            return {
+                type: "onboarded",
+                id: user.id,
+                username: user.name!,
+                name: userMetadata.firstName,
+                surname: userMetadata.surname,
+                email: user.email,
+                role: userMetadata.role,
+                image: user.image || undefined,
+                bio: userMetadata.bio || undefined,
+                createdAt: user.createdAt,
+            };
+        });
+}
+
 function userById() {
     return protectedProcedure
         .input(z.string().uuid())
-        .query(async ({ ctx, input: id }): Promise<User> => {
+        .query(async ({ ctx, input: id }): Promise<User | undefined> => {
             const prisma = ctx.prisma;
 
             if (ctx.session.user.id !== id) {
@@ -33,36 +86,44 @@ function userById() {
                 });
             }
 
-            const userMetadata = await prisma.userMetadata.findUnique({
-                where: { userId: id },
-                include: { user: true },
+            const user = await prisma.user.findUnique({
+                where: { id },
+                include: { metadata: true },
             });
 
-            if (!userMetadata) {
-                throw new TRPCError({
-                    code: "NOT_FOUND",
-                    message: "User doesn't exist",
-                });
+            if (!user) {
+                return undefined;
+            }
+
+            if (user.metadata) {
+                return {
+                    type: "onboarded",
+                    id: user.id,
+                    username: user.name!,
+                    name: user.metadata.firstName,
+                    surname: user.metadata.surname,
+                    email: user.email,
+                    role: user.metadata.role,
+                    image: user.image || undefined,
+                    bio: user.metadata.bio || undefined,
+                    createdAt: user.createdAt,
+                };
             }
 
             return {
-                id: userMetadata.id,
-                username: userMetadata.user.name!,
-                name: userMetadata.firstName,
-                surname: userMetadata.surname,
-                email: userMetadata.user.email,
-                role: userMetadata.role,
-                image: userMetadata.user.image || undefined,
-                bio: userMetadata.bio || undefined,
-                createdAt: userMetadata.user.createdAt,
-            } satisfies User;
+                type: "non-onboarded",
+                id: user.id,
+                username: user.name!,
+                email: user.email,
+                image: user.image || undefined,
+            };
         });
 }
 
 function editUser() {
     return protectedProcedure
         .input(editUserProcedureSchema)
-        .mutation(async ({ ctx, input }) => {
+        .mutation(async ({ ctx, input }): Promise<OnboardedUser> => {
             const userId = ctx.session.user.id;
 
             // there may be user with the same username
@@ -109,6 +170,7 @@ function editUser() {
             });
 
             return {
+                type: "onboarded",
                 id: updatedUser.id,
                 name: updatedUserMetadata.firstName,
                 surname: updatedUserMetadata.surname,
@@ -118,7 +180,7 @@ function editUser() {
                 role: updatedUserMetadata.role,
                 image: updatedUser.image || undefined,
                 createdAt: updatedUser.createdAt,
-            } satisfies User;
+            };
         });
 }
 
@@ -175,7 +237,7 @@ function byUsername() {
                 username: z.string(),
             }),
         )
-        .query(async ({ ctx, input }): Promise<User> => {
+        .query(async ({ ctx, input }): Promise<OnboardedUser> => {
             return await userByUsername(ctx.prisma, input.username);
         });
 }
@@ -208,7 +270,7 @@ function usersOverview() {
 async function userByUsername(
     prisma: PrismaType,
     username: string,
-): Promise<User> {
+): Promise<OnboardedUser> {
     const userMetadata = await prisma.userMetadata.findFirst({
         where: { user: { name: username } },
         select: {
@@ -228,6 +290,7 @@ async function userByUsername(
     }
 
     return {
+        type: "onboarded",
         id: userMetadata.user.id,
         username: userMetadata.user.name!,
         name: userMetadata.firstName,

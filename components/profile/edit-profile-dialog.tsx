@@ -6,7 +6,7 @@ import {
     editUserProcedureSchema,
 } from "@/lib/schemas/user-schemas";
 import { api } from "@/lib/trpc/react";
-import { User } from "@/lib/types/user";
+import { OnboardedUser } from "@/lib/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
     FileText,
@@ -51,7 +51,7 @@ import {
 } from "@/components/ui/tooltip";
 
 interface EditProfileDialogProps {
-    profile: User;
+    profile: OnboardedUser;
 }
 
 export const EditProfileDialog = ({ profile }: EditProfileDialogProps) => {
