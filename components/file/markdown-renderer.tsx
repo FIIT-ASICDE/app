@@ -25,6 +25,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
             return match ? (
                 <SyntaxHighlighter
+                    // @ts-expect-error this is according to the official docs
                     style={oneDark}
                     language={match[1]}
                     PreTag="div"
