@@ -1,5 +1,4 @@
 import { TRPCReactProvider } from "@/lib/trpc/react";
-import { SessionProvider } from "next-auth/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import React, { Suspense } from "react";
 
@@ -24,21 +23,17 @@ export default async function RootLayout({
     return (
         <html lang="en" suppressHydrationWarning>
             <body>
-                <SessionProvider>
-                    <Header />
-                    <ThemeProvider attribute="class" disableTransitionOnChange>
+                <Header />
+                <ThemeProvider attribute="class" disableTransitionOnChange>
+                    <Suspense fallback={<div>TODO: LOADING</div>}>
                         <TooltipProvider delayDuration={0}>
-                            <Suspense fallback={<div>TODO: LOADING</div>}>
-                                <TRPCReactProvider>
-                                    {children}
-                                </TRPCReactProvider>
-                                {process.env.NODE_ENV === "development" && (
-                                    <DevControls />
-                                )}
-                            </Suspense>
+                            <TRPCReactProvider>{children}</TRPCReactProvider>
+                            {process.env.NODE_ENV === "development" && (
+                                <DevControls />
+                            )}
                         </TooltipProvider>
-                    </ThemeProvider>
-                </SessionProvider>
+                    </Suspense>
+                </ThemeProvider>
             </body>
         </html>
     );

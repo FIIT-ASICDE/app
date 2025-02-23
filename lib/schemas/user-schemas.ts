@@ -1,60 +1,15 @@
 import { z } from "zod";
 
-const passwordValidation = {
-    upperCase: new RegExp(/[A-Z]/),
-    lowerCase: new RegExp(/[a-z]/),
-    number: new RegExp(/[0-9]/),
-    special: new RegExp(/[!@#$%^&*(),.?":{}|<>]/),
-};
-
-const devRegisterSchema = z.object({
+export const onboardSchema = z.object({
     name: z.string().min(1, { message: "Name is required." }),
     surname: z.string().min(1, { message: "Surname is required." }),
-    email: z.string().email().min(1, { message: "Email is required." }),
-    username: z
-        .string()
-        .min(2, { message: "Username must be at least 2 characters." }),
-    password: z.string().min(1),
+    bio: z.string().optional(),
 });
 
-export const registerSchema =
-    process.env.NODE_ENV === "development"
-        ? devRegisterSchema
-        : z.object({
-              name: z.string().min(1, { message: "Name is required." }),
-              surname: z.string().min(1, { message: "Surname is required." }),
-              email: z
-                  .string()
-                  .email()
-                  .min(1, { message: "Email is required." }),
-              username: z
-                  .string()
-                  .min(2, {
-                      message: "Username must be at least 2 characters.",
-                  }),
-              password: z
-                  .string()
-                  .min(8, {
-                      message: "Password must be at least 8 characters.",
-                  })
-                  .regex(passwordValidation.upperCase, {
-                      message: "Password must contain an uppercase character.",
-                  })
-                  .regex(passwordValidation.lowerCase, {
-                      message: "Password must contain a lowercase character.",
-                  })
-                  .regex(passwordValidation.number, {
-                      message: "Password must contain a number.",
-                  })
-                  .regex(passwordValidation.special, {
-                      message: "Password must contain a special character.",
-                  }),
-          });
-
 export const editUserProcedureSchema = z.object({
-    name: z.string().min(1, "Name is required"),
-    surname: z.string().min(1, "Surname is required"),
-    username: z.string().min(1, "Username is required"),
+    name: z.string().min(1, "Name is required").optional(),
+    surname: z.string().min(1, "Surname is required").optional(),
+    username: z.string().min(1, "Username is required").optional(),
     bio: z.string().optional(),
     image: z.string().optional(),
 });

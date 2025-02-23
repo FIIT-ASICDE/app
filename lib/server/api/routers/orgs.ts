@@ -19,14 +19,14 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { pinnedRepos } from "./repos";
 
 export const orgRouter = createTRPCRouter({
-    create: createRoute(),
+    create: createOrg(),
     overview: orgOverview(),
     search: search(),
     byName: byName(),
     userOrgs: usersOrgs(),
 });
 
-function createRoute() {
+function createOrg() {
     return protectedProcedure
         .input(createOrgProcedureSchema)
         .mutation(async ({ ctx, input }): Promise<Organisation> => {
@@ -44,6 +44,15 @@ function createRoute() {
             }
 
             return await ctx.prisma.$transaction(async (tx) => {
+                const creatorUserMetadata =
+                    await tx.userMetadata.findFirstOrThrow({
+                        where: { userId: ctx.session.user.id },
+                    });
+
+                const initialMembersMetadata = await tx.userMetadata.findMany({
+                    where: { userId: { in: initialMembers } },
+                });
+
                 const organization = await tx.organization.create({
                     data: {
                         name,
@@ -52,11 +61,11 @@ function createRoute() {
                         users: {
                             create: [
                                 {
-                                    userId: ctx.session.user.id,
+                                    userMetadataId: creatorUserMetadata.id,
                                     role: $Enums.OrganizationRole.ADMIN,
                                 },
-                                ...initialMembers.map((userId) => ({
-                                    userId,
+                                ...initialMembersMetadata.map((metadata) => ({
+                                    userMetadataId: metadata.id,
                                     role: $Enums.OrganizationRole.MEMBER,
                                 })),
                             ],
@@ -64,18 +73,17 @@ function createRoute() {
                     },
                 });
 
-                const orgWithMembers = await tx.organization.findUnique({
+                const orgUsers = await tx.organization.findUnique({
                     where: { id: organization.id },
                     include: {
                         users: {
+                            select: { role: true },
                             include: {
-                                user: {
+                                userMetadata: {
                                     select: {
-                                        id: true,
-                                        username: true,
-                                        name: true,
+                                        firstName: true,
                                         surname: true,
-                                        image: true,
+                                        user: true,
                                     },
                                 },
                             },
@@ -83,7 +91,7 @@ function createRoute() {
                     },
                 });
 
-                if (!orgWithMembers) {
+                if (!orgUsers) {
                     throw new TRPCError({
                         code: "INTERNAL_SERVER_ERROR",
                         message: "Failed to create organization",
@@ -91,19 +99,21 @@ function createRoute() {
                 }
 
                 return {
-                    id: orgWithMembers.id,
-                    name: orgWithMembers.name,
-                    image: orgWithMembers.image ?? undefined,
-                    bio: orgWithMembers.bio ?? undefined,
-                    createdAt: orgWithMembers.createdAt,
+                    id: orgUsers.id,
+                    name: orgUsers.name,
+                    image: orgUsers.image ?? undefined,
+                    bio: orgUsers.bio ?? undefined,
+                    createdAt: orgUsers.createdAt,
                     repositories: [],
-                    members: orgWithMembers.users.map((user) => ({
-                        id: user.user.id,
-                        username: user.user.username,
-                        name: user.user.name,
-                        surname: user.user.surname,
-                        image: user.user.image ? user.user.image : undefined,
-                        role: user.role === "ADMIN" ? "admin" : "member",
+                    members: orgUsers.users.map(({ userMetadata, role }) => ({
+                        id: userMetadata.user.id,
+                        // AuthJS requires name to be nullable, but it will be always there
+                        //  if not there is a bug
+                        username: userMetadata.user.name!,
+                        name: userMetadata.firstName,
+                        surname: userMetadata.surname,
+                        image: userMetadata.user.image || undefined,
+                        role: role === "ADMIN" ? "admin" : "member",
                     })),
                 } satisfies Organisation;
             });
@@ -157,7 +167,7 @@ function search() {
         order by
           case 
             when ou."role" = 'ADMIN' then 1
-            when ou."role" = 'MEMBER'  then 2
+            when ou."role" = 'MEMBER' then 2
             else 3
           end,
           org.name
@@ -264,9 +274,8 @@ async function orgByName(
         where: { name },
         include: {
             users: {
-                include: {
-                    user: true,
-                },
+                select: { role: true },
+                include: { userMetadata: { include: { user: true } } },
             },
         },
     });
@@ -279,15 +288,13 @@ async function orgByName(
     }
 
     const members: Array<OrganisationMember> = organization.users
-        .map((orgUser) => ({
-            id: orgUser.user.id,
-            username: orgUser.user.username,
-            name: orgUser.user.name,
-            surname: orgUser.user.surname,
-            image: orgUser.user.image || undefined,
-            role: (orgUser.role === "ADMIN"
-                ? "admin"
-                : "member") as OrganisationRole,
+        .map(({ userMetadata, role }) => ({
+            id: userMetadata.user.id,
+            username: userMetadata.user.name!,
+            name: userMetadata.firstName,
+            surname: userMetadata.surname,
+            image: userMetadata.user.image || undefined,
+            role: (role === "ADMIN" ? "admin" : "member") as OrganisationRole,
         }))
         .sort((a, b) => {
             if (a.role === "admin" && b.role === "member") return -1;
@@ -333,7 +340,7 @@ function usersOrgs() {
                 const orgs = await ctx.prisma.organizationUser.findMany({
                     where: {
                         AND: [
-                            { userId: input.usersId },
+                            { userMetadata: { userId: input.usersId } },
                             input.role ? { role: input.role } : {},
                         ],
                     },

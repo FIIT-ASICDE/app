@@ -1,4 +1,0 @@
-model RepoFile {
-    id   String
-    file String @id @default(uuid()) @db.Uuid
-}

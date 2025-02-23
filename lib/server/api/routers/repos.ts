@@ -1,6 +1,6 @@
 import {
     createRepositoryFormSchema,
-    repoSearchSchema,
+    repoBySlugsSchema,
 } from "@/lib/schemas/repo-schemas";
 import {
     RepoUserRole,
@@ -19,7 +19,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const repoRouter = createTRPCRouter({
     create: create(),
-    search: search(),
+    search: searchByOwnerAndRepoSlug(),
     ownersRepos: reposByOwnerSlug(),
     toggleState: toggleStateOnRepo(),
 });
@@ -35,7 +35,10 @@ function create() {
             const existingRepo = await prisma.repoUserOrganization.findFirst({
                 where: {
                     repo: { name },
-                    OR: [{ userId: ownerId }, { organizationId: ownerId }],
+                    OR: [
+                        { userMetadata: { userId: ownerId } },
+                        { organizationId: ownerId },
+                    ],
                 },
             });
 
@@ -54,12 +57,8 @@ function create() {
                     name: true,
                     image: true,
                     users: {
-                        where: {
-                            userId: session.user.id,
-                        },
-                        select: {
-                            role: true,
-                        },
+                        select: { role: true },
+                        where: { userMetadata: { userId: session.user.id } },
                     },
                 },
             });
@@ -90,19 +89,19 @@ function create() {
                 const user = await prisma.user.findUnique({
                     where: { id: ownerId },
                     select: {
-                        username: true,
+                        name: true,
                         image: true,
                     },
                 });
 
-                if (!user) {
+                if (!user || !user.name) {
                     throw new TRPCError({
                         code: "NOT_FOUND",
                         message: "Owner not found.",
                     });
                 }
 
-                ownerName = user.username;
+                ownerName = user.name;
                 ownerImage = user.image;
                 userRole = $Enums.RepoRole.OWNER;
             }
@@ -120,10 +119,14 @@ function create() {
                     },
                 });
 
+                const userMetadata = await tx.userMetadata.findUniqueOrThrow({
+                    where: { userId: session.user.id },
+                });
+
                 await tx.repoUserOrganization.create({
                     data: {
                         repoId: repo.id,
-                        userId: session.user.id,
+                        userMetadataId: userMetadata.id,
                         organizationId: organization ? ownerId : undefined,
                         repoRole: userRole,
                         favorite: false,
@@ -157,9 +160,9 @@ function create() {
         });
 }
 
-function search() {
+function searchByOwnerAndRepoSlug() {
     return protectedProcedure
-        .input(repoSearchSchema)
+        .input(repoBySlugsSchema)
         .query(async ({ ctx, input }) => {
             const organization = await ctx.prisma.organization.findFirst({
                 where: { name: input.ownerSlug },
@@ -169,8 +172,8 @@ function search() {
             // if no organization found, try to find user by username
             const user = !organization
                 ? await ctx.prisma.user.findFirst({
-                      where: { username: input.ownerSlug },
-                      select: { id: true, username: true, image: true },
+                      select: { id: true, name: true, image: true },
+                      where: { name: input.ownerSlug },
                   })
                 : null;
 
@@ -182,7 +185,7 @@ function search() {
             }
 
             const ownerId = organization?.id || user?.id;
-            const ownerName = organization?.name || user?.username;
+            const ownerName = organization?.name || user?.name;
             const ownerImage = organization?.image || user?.image;
 
             const repo = await ctx.prisma.repo.findFirst({
@@ -194,7 +197,11 @@ function search() {
                             userOrganizationRepo: {
                                 some: {
                                     AND: [
-                                        { userId: ctx.session.user.id },
+                                        {
+                                            userMetadata: {
+                                                userId: ctx.session.user.id,
+                                            },
+                                        },
                                         {
                                             organizationId: user
                                                 ? null // if it is users repo, show if the current user has a role, or if it is public
@@ -208,10 +215,9 @@ function search() {
                 },
                 include: {
                     userOrganizationRepo: {
-                        where: { userId: ctx.session.user.id },
-                        select: {
-                            favorite: true,
-                            repoRole: true,
+                        select: { favorite: true, repoRole: true },
+                        where: {
+                            userMetadata: { userId: ctx.session.user.id },
                         },
                     },
                 },
@@ -264,7 +270,7 @@ function reposByOwnerSlug() {
             // if no organization found, try to find user by username
             const user = !organization
                 ? await ctx.prisma.user.findFirst({
-                      where: { username: input.ownerSlug },
+                      where: { name: input.ownerSlug },
                   })
                 : null;
 
@@ -276,7 +282,7 @@ function reposByOwnerSlug() {
             }
 
             const ownerId = organization?.id || user?.id;
-            const ownerName = organization?.name || user?.username;
+            const ownerName = organization?.name || user?.name;
             const ownerImage = organization?.image || user?.image;
             const canSeeRepoIds = await repoIdsUserCanSee(
                 ctx.prisma,
@@ -290,13 +296,13 @@ function reposByOwnerSlug() {
                 },
                 include: {
                     userOrganizationRepo: {
-                        where: {
-                            userId: ctx.session.user.id,
-                        },
                         select: {
                             favorite: true,
                             repoRole: true,
                             pinned: true,
+                        },
+                        where: {
+                            userMetadata: { userId: ctx.session.user.id },
                         },
                     },
                 },
@@ -380,7 +386,10 @@ export async function pinnedRepos(
             organization
                 ? { organizationId: ownerId }
                 : {
-                      AND: [{ userId: ownerId }, { organizationId: null }],
+                      AND: [
+                          { userMetadata: { userId: ownerId } },
+                          { organizationId: null },
+                      ],
                   },
             // if not showPrivate, then return only public, else all
             ...(!showPrivate ? [{ repo: { public: true } }] : []),
@@ -396,14 +405,7 @@ export async function pinnedRepos(
                     public: true,
                 },
             },
-            user: !organization
-                ? {
-                      select: {
-                          username: true,
-                          image: true,
-                      },
-                  }
-                : false,
+            userMetadata: { include: { user: true } },
         },
         orderBy: {
             repo: {
@@ -412,14 +414,14 @@ export async function pinnedRepos(
         },
     });
 
-    return pinnedRepoConnections.map((connection) => ({
-        id: connection.repo.id,
-        name: connection.repo.name,
-        ownerName: organization ? organization.name : connection.user!.username,
+    return pinnedRepoConnections.map(({ repo, userMetadata }) => ({
+        id: repo.id,
+        name: repo.name,
+        ownerName: organization ? organization.name : userMetadata.user.name!,
         ownerImage: organization
             ? organization.image || undefined
-            : connection.user.image || undefined,
-        visibility: connection.repo.public ? "public" : "private",
+            : userMetadata.user.image || undefined,
+        visibility: repo.public ? "public" : "private",
     }));
 }
 
@@ -447,7 +449,7 @@ async function repoIdsUserCanSee(
                             OR: [
                                 // user owns the repo
                                 {
-                                    userId: ownerId,
+                                    userMetadata: { userId: ownerId },
                                     repoRole: $Enums.RepoRole.OWNER,
                                     organizationId: null,
                                 },
@@ -473,7 +475,7 @@ async function repoIdsUserCanSee(
                     {
                         userOrganizationRepo: {
                             some: {
-                                userId: currentUser.id,
+                                userMetadata: { userId: currentUser.id },
                             },
                         },
                     },
@@ -482,19 +484,6 @@ async function repoIdsUserCanSee(
         },
     });
     return repos.map((r) => r.id);
-    // } else if (ownerOrg) {
-    //     const userRoles = await prisma.repoUserOrganization.findMany({
-    //         where: {
-    //             userId: currentUser.id,
-    //             organizationId: ownerOrg.id,
-    //         },
-    //     });
-    //
-    //     // if user has some role, he/she can see the repo
-    //     return userRoles.map((r) => r.repoId);
-    // }
-    //
-    // return [];
 }
 
 async function toggleRepoState(
@@ -504,10 +493,14 @@ async function toggleRepoState(
     favorite?: boolean,
     pinned?: boolean,
 ): Promise<{ favorite: boolean; pinned?: boolean }> {
+    const userMetadata = await prisma.userMetadata.findUniqueOrThrow({
+        where: { userId },
+    });
+
     const userRepo = await prisma.repoUserOrganization.findUnique({
         where: {
-            userId_repoId: {
-                userId,
+            userMetadataId_repoId: {
+                userMetadataId: userMetadata.id,
                 repoId,
             },
         },
@@ -546,8 +539,8 @@ async function toggleRepoState(
 
     const updatedRepo = await prisma.repoUserOrganization.update({
         where: {
-            userId_repoId: {
-                userId,
+            userMetadataId_repoId: {
+                userMetadataId: userMetadata.id,
                 repoId,
             },
         },

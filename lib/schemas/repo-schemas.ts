@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const repoSearchSchema = z.object({
+export const repoBySlugsSchema = z.object({
     ownerSlug: z.string(),
     repositorySlug: z.string(),
 });

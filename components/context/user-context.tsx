@@ -1,11 +1,11 @@
 "use client";
 
 import { api } from "@/lib/trpc/react";
-import { User } from "@/lib/types/user";
+import { OnboardedUser } from "@/lib/types/user";
 import { ReactNode, createContext, useContext } from "react";
 
 type UserContextType = {
-    user: User;
+    user: OnboardedUser;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -17,6 +17,10 @@ interface UserProviderProps {
 
 export function UserProvider({ children, userId }: UserProviderProps) {
     const [user] = api.user.byId.useSuspenseQuery(userId);
+
+    if (!user || user.type !== "onboarded") {
+        throw new Error("expected user not to be undefined or to be onboarded");
+    }
 
     return (
         <UserContext.Provider value={{ user }}>{children}</UserContext.Provider>

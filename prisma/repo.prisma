@@ -7,20 +7,28 @@ model Repo {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([name])
 }
 
 model RepoUserOrganization {
   favorite       Boolean
   pinned 		 Boolean?
-  userId         String        @db.Uuid
-  user           User          @relation(fields: [userId], references: [id])
+  userMetadataId String        @db.Uuid
+  userMetadata   UserMetadata  @relation(fields: [userMetadataId], references: [id])
   organizationId String?       @db.Uuid
   organization   Organization? @relation(fields: [organizationId], references: [id])
   repoId         String        @db.Uuid
   repo           Repo          @relation(fields: [repoId], references: [id])
   repoRole       RepoRole      @default(OWNER)
 
-  @@unique([userId, repoId]) // Ensures a user can have one role per repo
+  // user can have one role per repo, but it doesn't make sense to create
+  // and PK from the unique columns, because searching through this table
+  // will is done by joining either from user, org, or repo, not all
+  @@unique([userMetadataId, repoId])
+  @@index([userMetadataId])
+  @@index([organizationId])
+  @@index([repoId])
 }
 
 enum RepoRole {

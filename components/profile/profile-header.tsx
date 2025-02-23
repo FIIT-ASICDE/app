@@ -1,12 +1,12 @@
 import { imgSrc } from "@/lib/client-file-utils";
-import { User } from "@/lib/types/user";
+import { OnboardedUser } from "@/lib/types/user";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { EditProfileDialog } from "@/components/profile/edit-profile-dialog";
 import { ProfileNavigation } from "@/components/profile/profile-navigation";
 
 interface ProfileHeaderProps {
-    profile: User;
+    profile: OnboardedUser;
     isItMe: boolean;
 }
 
