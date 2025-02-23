@@ -15,6 +15,7 @@ import {
     UsersRound
 } from "lucide-react";
 import { Session } from "next-auth";
+import { Invitation } from "@/lib/types/invitation";
 
 interface CommandOptionsProps {
     user: Session["user"];
@@ -168,3 +169,14 @@ export const getCurrentPage = (
     if (parts.length < sliceIndex) throw new Error("Pathname invalid");
     return parts.length > 1 ? "/" + parts.slice(sliceIndex).join("/") : "/";
 };
+
+export const getInvitationDisplayData = (invitation: Invitation) => {
+    const displayName: string = invitation.type === "repository" ? invitation.repository?.ownerName + "/" + invitation.repository?.name : invitation.organisation?.name || "";
+    const image: string | undefined = invitation.type === "repository" ? invitation.repository?.ownerImage : invitation.organisation?.image;
+    const link: string = invitation.type === "repository" ? "/" + displayName : "/orgs/" + displayName;
+    return {
+        displayName,
+        image,
+        link
+    };
+}

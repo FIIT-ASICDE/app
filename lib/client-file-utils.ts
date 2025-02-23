@@ -35,9 +35,7 @@ export async function fetchFile(filename: string): Promise<File | null> {
 
         const blob = await response.blob();
 
-        const file = new File([blob], filename, { type: blob.type });
-
-        return file;
+        return new File([blob], filename, { type: blob.type });
     } catch (error) {
         console.error("Error fetching file:", error);
         return null;

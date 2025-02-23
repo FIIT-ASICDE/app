@@ -58,7 +58,7 @@ export const AvatarDisplay = ({
             <AvatarImage src={image} alt={name + "'s icon"} />
             <AvatarFallback
                 className={cn(
-                    "text-lg text-muted-foreground",
+                    "text-muted-foreground",
                     avatarProportions.fallbackFontSize,
                     className,
                 )}

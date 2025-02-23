@@ -1,7 +1,7 @@
 "use client";
 
 import { imgSrc } from "@/lib/client-file-utils";
-import { Folders, Home, LogOut, Settings, UsersRound } from "lucide-react";
+import { Folders, Home, LogOut, Mail, Settings, UsersRound } from "lucide-react";
 import { Session } from "next-auth";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
@@ -83,6 +83,16 @@ export const HeaderDropdown = ({
                 </Link>
 
                 <Link
+                    href={"/" + username + "/invitations"}
+                    className="text-sm"
+                >
+                    <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
+                        <span>Invitations</span>
+                        <Mail className="text-muted-foreground" />
+                    </DropdownMenuItem>
+                </Link>
+
+                <Link
                     href={"/" + username + "/settings"}
                     className="text-sm"
                 >
@@ -94,7 +104,7 @@ export const HeaderDropdown = ({
 
                 <DropdownMenuSeparator />
 
-                <button className="w-full" onClick={() => signOut()}>
+                <button className="w-full border border-accent rounded bg-background" onClick={() => signOut()}>
                     <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
                         <span>Log out</span>
                         <LogOut className="text-muted-foreground" />

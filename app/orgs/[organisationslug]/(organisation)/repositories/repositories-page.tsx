@@ -12,7 +12,6 @@ import { Folder, Folders } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { getWidthFromResponsivenessCheckpoint } from "@/components/generic/generic";
-import { LayoutOptions } from "@/components/layout/layout-options";
 import { NoData } from "@/components/no-data/no-data";
 import { CreateRepositoryDialog } from "@/components/repositories/create-repository-dialog";
 import RepositoryCard from "@/components/repositories/repository-card";
@@ -104,11 +103,11 @@ export default function RepositoriesPage({
                             }
                         />
                     </div>
-                    <LayoutOptions
+                    {/*<LayoutOptions
                         layout={repositoriesLayout}
                         setLayout={setRepositoriesLayout}
                         responsivenessCheckpoint={"lg"}
-                    />
+                    />*/}
                 </div>
                 <div className="m-6 mb-0 flex flex-row space-x-3">
                     <RepositoryFilterBadges

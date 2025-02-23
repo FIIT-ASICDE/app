@@ -31,10 +31,7 @@ export default async function OrganisationsPage(props: {
         <div className="bg-background text-foreground">
             <div className="flex items-center justify-between">
                 <div className="m-6 mb-0 flex w-1/2 items-center space-x-5">
-                    <div className="relative w-full">
-                        <UsersRound className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
-                        <Search placeholder="Search organisations..." />
-                    </div>
+                    <Search placeholder="Search organisations..." />
                     <LayoutOptions
                         layout={searchParams?.rows ? "rows" : "grid"}
                         responsivenessCheckpoint={"lg"}

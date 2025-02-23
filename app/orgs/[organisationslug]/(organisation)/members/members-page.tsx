@@ -26,6 +26,7 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
+import { InviteMemberDialog } from "@/components/organisations/members/invite-member-dialog";
 
 interface MembersPageProps {
     orgSlug: string;
@@ -169,6 +170,7 @@ export default function MembersPage(
                         roleFilter={roleFilter}
                         setRoleFilter={setRoleFilter}
                     />
+                    <InviteMemberDialog />
                 </div>
             </div>
 

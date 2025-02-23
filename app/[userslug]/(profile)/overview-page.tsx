@@ -83,6 +83,7 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
     const organisations = overview.organisations;
     const pinnedRepositories = overview.pinnedRepositories;
 
+    /* TODO: this in db */
     const favoriteRepositories = data.favoriteRepositories;
     const recentRepositories = data.recentRepositories;
 

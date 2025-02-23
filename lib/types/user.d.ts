@@ -3,6 +3,7 @@ import { $Enums } from ".prisma/client";
 
 import UserRole = $Enums.UserRole;
 import { OrganisationDisplay } from "@/lib/types/organisation";
+import { InvitationStatus } from "@/lib/types/invitation";
 
 export type User =
     | {
@@ -42,3 +43,5 @@ export interface UsersOverview {
 }
 
 export type UserSettingsTab = "account" | "preferences" | "danger";
+
+export type UserInvitationsTab = InvitationStatus | "all";

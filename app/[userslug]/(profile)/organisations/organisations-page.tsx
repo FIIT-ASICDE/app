@@ -10,7 +10,6 @@ import { UsersRound } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { getWidthFromResponsivenessCheckpoint } from "@/components/generic/generic";
-import { LayoutOptions } from "@/components/layout/layout-options";
 import { NoData } from "@/components/no-data/no-data";
 import { CreateOrganisationDialog } from "@/components/organisations/create-organisation-dialog";
 import { OrganisationCard } from "@/components/organisations/organisation-card";
@@ -126,11 +125,11 @@ export default function OrganisationsPage(
                             }
                         />
                     </div>
-                    <LayoutOptions
+                    {/*<LayoutOptions
                         layout={organisationsLayout}
                         setLayout={setOrganisationsLayout}
                         responsivenessCheckpoint={"lg"}
-                    />
+                    />*/}
                 </div>
                 <div className="m-6 mb-0 flex space-x-3">
                     <OrganisationFilterBadges
