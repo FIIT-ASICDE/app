@@ -33,7 +33,7 @@ export const ReadMeFilePreview = ({
                 </CardTitle>
             </CardHeader>
             <CardContent className="rounded">
-                <div className="prose dark:prose-invert mx-auto p-4">
+                <div className="mx-auto p-4">
                     <MarkdownRenderer content={content} />
                 </div>
             </CardContent>

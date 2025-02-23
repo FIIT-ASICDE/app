@@ -1,23 +1,41 @@
 "use client";
 
-import { CircleX, UserRoundMinus } from "lucide-react";
+import { CircleX, Eye, EyeOff, UserRoundMinus } from "lucide-react";
 
 import { DeleteOrganisationDialog } from "@/components/organisations/delete-organisation-dialog";
 import { LeaveOrganisationDialog } from "@/components/organisations/leave-organisation-dialog";
+import { ToggleMembersVisibilityDialog } from "@/components/organisations/members/toggle-members-visibility-dialog";
 import { Card, CardContent } from "@/components/ui/card";
 
 const data = {
     id: "2daf6c64-2104-4039-a619-b7477d3882bf",
     name: "Google",
+    showMembers: true,
     isUserAdmin: true,
 };
 
 interface SettingsPageProps {
-    userSlug: string;
+    orgSlug: string;
 }
 
-export default function SettingsPage({} /* userSlug */ : SettingsPageProps) {
+export default function SettingsPage({} /* orgSlug */ : SettingsPageProps) {
+    const id: string = data.id;
+    const name: string = data.name;
+    const showMembers = data.showMembers;
     const isUserAdmin: boolean = data.isUserAdmin;
+
+    const getChangeMembersVisibilityMessage = () => {
+        return (
+            <span className="text-sm text-muted-foreground">
+                You are currently{" "}
+                <span className="font-bold">
+                    {showMembers ? "showing" : "hiding"}
+                </span>{" "}
+                the members of your organisation {showMembers ? "to" : "from"}{" "}
+                the public.
+            </span>
+        );
+    };
 
     const getLeaveOrganisationMessage = () => {
         return (
@@ -26,15 +44,15 @@ export default function SettingsPage({} /* userSlug */ : SettingsPageProps) {
                 {isUserAdmin ? (
                     <span>
                         {" "}
-                        an <span className="font-bold">admin</span> of{" "}
+                        an <span className="font-bold">admin</span>{" "}
                     </span>
                 ) : (
                     <span>
                         {" "}
-                        a <span className="font-bold">member</span> in{" "}
+                        a <span className="font-bold">member</span>{" "}
                     </span>
                 )}
-                this organisation.
+                of this organisation.
             </span>
         );
     };
@@ -44,13 +62,32 @@ export default function SettingsPage({} /* userSlug */ : SettingsPageProps) {
             <CardContent className="flex flex-col gap-5 pt-6">
                 <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
                     <div className="flex flex-row items-center space-x-3">
+                        {showMembers ? (
+                            <Eye className="text-muted-foreground" />
+                        ) : (
+                            <EyeOff className="text-muted-foreground" />
+                        )}
+                        <div className="flex flex-col space-y-1">
+                            <span>Change members visibility</span>
+                            {getChangeMembersVisibilityMessage()}
+                        </div>
+                    </div>
+                    <ToggleMembersVisibilityDialog
+                        id={id}
+                        name={name}
+                        showMembers={showMembers}
+                    />
+                </div>
+
+                <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
+                    <div className="flex flex-row items-center space-x-3">
                         <UserRoundMinus className="text-muted-foreground" />
                         <div className="flex flex-col space-y-1">
                             <span>Leave organisation</span>
                             {getLeaveOrganisationMessage()}
                         </div>
                     </div>
-                    <LeaveOrganisationDialog id={data.id} name={data.name} />
+                    <LeaveOrganisationDialog id={id} name={name} />
                 </div>
 
                 <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
@@ -63,7 +100,7 @@ export default function SettingsPage({} /* userSlug */ : SettingsPageProps) {
                             </span>
                         </div>
                     </div>
-                    <DeleteOrganisationDialog id={data.id} name={data.name} />
+                    <DeleteOrganisationDialog id={id} name={name} />
                 </div>
             </CardContent>
         </Card>

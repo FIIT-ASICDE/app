@@ -2,6 +2,8 @@ import { RepositoryDisplay } from "./repository";
 import { $Enums } from ".prisma/client";
 
 import UserRole = $Enums.UserRole;
+import { OrganisationDisplay } from "@/lib/types/organisation";
+import { InvitationStatus } from "@/lib/types/invitation";
 
 export type User =
     | {
@@ -15,6 +17,7 @@ export type User =
           createdAt: Date;
           image?: string;
           bio?: string;
+          theme?: string;
       }
     | {
           type: "non-onboarded";
@@ -38,3 +41,7 @@ export interface UsersOverview {
     organisations: Array<OrganisationDisplay>;
     pinnedRepositories: Array<RepositoryDisplay>;
 }
+
+export type UserSettingsTab = "account" | "preferences" | "danger";
+
+export type UserInvitationsTab = InvitationStatus | "all";

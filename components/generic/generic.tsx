@@ -8,20 +8,24 @@ import {
     FolderPlus,
     Folders,
     Home,
+    Settings,
     SunMoon,
     UserRoundPen,
     UserRoundPlus,
-    UsersRound,
+    UsersRound
 } from "lucide-react";
 import { Session } from "next-auth";
+import { Invitation } from "@/lib/types/invitation";
 
 interface CommandOptionsProps {
     user: Session["user"];
 }
 
-export const CommandOptions = ({
-    user,
-}: CommandOptionsProps): Array<CommandElementGroup> => {
+export const CommandOptions = (
+    {
+        user,
+    }: CommandOptionsProps
+): Array<CommandElementGroup> => {
     return [
         {
             groupDisplayTitle: "Suggestions",
@@ -40,6 +44,11 @@ export const CommandOptions = ({
                     displayTitle: "Organisations",
                     icon: UsersRound,
                     link: "/" + user.username + "/organisations",
+                } satisfies CommandElement,
+                {
+                    displayTitle: "Settings",
+                    icon: Settings,
+                    link: "/" + user.username + "/settings",
                 } satisfies CommandElement,
             ] satisfies Array<CommandElement>,
         } satisfies CommandElementGroup,
@@ -73,7 +82,7 @@ export const CommandOptions = ({
                 {
                     displayTitle: "Change theme",
                     icon: SunMoon,
-                    link: "/" + user.username,
+                    link: "/" + user.username + "/settings",
                     action: "openSettingsTab",
                     shortcut: ["Ctrl", "T"],
                 } satisfies CommandElement,
@@ -151,3 +160,23 @@ export const getBadgeStyle = (badgeType: BadgeType) => {
             return "";
     }
 };
+
+export const getCurrentPage = (
+    pathname: string,
+    sliceIndex: number,
+): string => {
+    const parts: Array<string> = pathname.split("/").filter(Boolean);
+    if (parts.length < sliceIndex) throw new Error("Pathname invalid");
+    return parts.length > 1 ? "/" + parts.slice(sliceIndex).join("/") : "/";
+};
+
+export const getInvitationDisplayData = (invitation: Invitation) => {
+    const displayName: string = invitation.type === "repository" ? invitation.repository?.ownerName + "/" + invitation.repository?.name : invitation.organisation?.name || "";
+    const image: string | undefined = invitation.type === "repository" ? invitation.repository?.ownerImage : invitation.organisation?.image;
+    const link: string = invitation.type === "repository" ? "/" + displayName : "/orgs/" + displayName;
+    return {
+        displayName,
+        image,
+        link
+    };
+}

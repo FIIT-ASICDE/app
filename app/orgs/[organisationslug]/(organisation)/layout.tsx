@@ -1,5 +1,6 @@
 import { api } from "@/lib/trpc/server";
 import { TRPCError } from "@trpc/server";
+import { UserRoundX } from "lucide-react";
 import React from "react";
 
 import { OrganisationHeader } from "@/components/organisations/organisation-header";
@@ -15,6 +16,8 @@ export default async function OrganisationLayout({
     const orgSlug = (await params).organisationslug.replace(/%20/g, " ");
     try {
         const org = await api.org.byName(orgSlug);
+        /* TODO: this in db */
+        org.showMembers = true;
         return (
             <>
                 <OrganisationHeader organisation={org} />
@@ -27,6 +30,7 @@ export default async function OrganisationLayout({
             if (e.code === "NOT_FOUND") {
                 return (
                     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
+                        <UserRoundX className="h-12 w-12 text-muted-foreground" />
                         <h2 className="text-2xl font-bold">
                             Organisation Not Found
                         </h2>

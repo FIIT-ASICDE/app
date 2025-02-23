@@ -3,9 +3,9 @@ import MembersPage from "@/app/orgs/[organisationslug]/(organisation)/members/me
 export default async function OrganisationMembersPage({
     params,
 }: {
-    params: Promise<{ userslug: string }>;
+    params: Promise<{ organisationslug: string }>;
 }) {
-    const userSlug = (await params).userslug;
+    const orgSlug = (await params).organisationslug;
 
-    return <MembersPage userSlug={userSlug} />;
+    return <MembersPage orgSlug={orgSlug} />;
 }

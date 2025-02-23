@@ -9,7 +9,6 @@ import { UsersRound } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { getWidthFromResponsivenessCheckpoint } from "@/components/generic/generic";
-import { LayoutOptions } from "@/components/layout/layout-options";
 import { NoData } from "@/components/no-data/no-data";
 import {
     MemberFilter,
@@ -27,9 +26,10 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
+import { InviteMemberDialog } from "@/components/organisations/members/invite-member-dialog";
 
 interface MembersPageProps {
-    userSlug: string;
+    orgSlug: string;
 }
 
 const data = {
@@ -37,6 +37,7 @@ const data = {
     bio: "",
     createdAt: new Date(),
     userIsAdmin: true,
+    showMembers: true,
     members: [
         {
             id: "86db4870-15bf-4333-8f03-89eb3d66d6a6",
@@ -99,7 +100,7 @@ const data = {
 
 export default function MembersPage(
     {
-        // userSlug
+        // orgSlug
     }: MembersPageProps,
 ) {
     const [membersLayout, setMembersLayout] = useState<LayoutType>("grid");
@@ -132,6 +133,12 @@ export default function MembersPage(
         );
     }, [membersSearchPhrase, roleFilter, members]);
 
+    if (!data.showMembers) {
+        return (
+            <h3>TODO: This organisation is not showing their member list.</h3>
+        );
+    }
+
     return (
         <div className="bg-background text-foreground">
             <div className="flex items-center justify-between">
@@ -148,11 +155,11 @@ export default function MembersPage(
                             }
                         />
                     </div>
-                    <LayoutOptions
+                    {/*<LayoutOptions
                         layout={membersLayout}
                         setLayout={setMembersLayout}
                         responsivenessCheckpoint={"lg"}
-                    />
+                    />*/}
                 </div>
                 <div className="m-6 mb-0 flex space-x-3">
                     <MemberFilterBadges
@@ -163,6 +170,7 @@ export default function MembersPage(
                         roleFilter={roleFilter}
                         setRoleFilter={setRoleFilter}
                     />
+                    <InviteMemberDialog />
                 </div>
             </div>
 

@@ -1,9 +1,10 @@
 "use client";
 
 import { User } from "@/lib/types/user";
-import { BookUser, Folders, Settings, UsersRound } from "lucide-react";
+import { BookUser, Folders, Mail, Settings, Star, UsersRound } from "lucide-react";
 import { usePathname } from "next/navigation";
 
+import { getCurrentPage } from "@/components/generic/generic";
 import { NavigationButton } from "@/components/navigation-button/navigation-button";
 
 interface ProfileNavigationProps {
@@ -16,25 +17,19 @@ export const ProfileNavigation = ({
     isItMe,
 }: ProfileNavigationProps) => {
     const pathname: string = usePathname();
-
-    const getCurrentPage = (): string => {
-        const parts = pathname.split("/").filter(Boolean);
-        return parts.length > 1 ? "/" + parts.slice(1).join("/") : "/";
-    };
-
-    const currentPage: string = getCurrentPage();
+    const currentPage: string = getCurrentPage(pathname, 1);
 
     return (
         <div className="mr-6 flex flex-row justify-end gap-x-1">
             <NavigationButton
-                title="Overview"
+                title="overview"
                 icon={BookUser}
                 variant={currentPage === "/" ? "secondary" : "outline"}
                 link={"/" + profile.username}
                 access="interactive"
             />
             <NavigationButton
-                title="Repositories"
+                title="repositories"
                 icon={Folders}
                 variant={
                     currentPage === "/repositories" ? "secondary" : "outline"
@@ -43,7 +38,7 @@ export const ProfileNavigation = ({
                 access="interactive"
             />
             <NavigationButton
-                title="Organisations"
+                title="organisations"
                 icon={UsersRound}
                 variant={
                     currentPage === "/organisations" ? "secondary" : "outline"
@@ -52,7 +47,21 @@ export const ProfileNavigation = ({
                 access="interactive"
             />
             <NavigationButton
-                title="Settings"
+                title="favorites"
+                icon={Star}
+                variant={currentPage === "/favorites" ? "secondary" : "outline"}
+                link={"/" + profile.username + "/favorites"}
+                access={isItMe ? "interactive" : "none"}
+            />
+            <NavigationButton
+                title="invitations"
+                icon={Mail}
+                variant={currentPage === "/invitations" ? "secondary" : "outline"}
+                link={"/" + profile.username + "/invitations"}
+                access={isItMe ? "interactive" : "none"}
+            />
+            <NavigationButton
+                title="settings"
                 icon={Settings}
                 variant={currentPage === "/settings" ? "secondary" : "outline"}
                 link={"/" + profile.username + "/settings"}

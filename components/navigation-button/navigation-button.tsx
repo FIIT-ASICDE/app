@@ -9,7 +9,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-interface ProfileNavigationButtonProps {
+interface NavigationButtonProps {
     title: string;
     icon: ElementType;
     variant: ButtonVariant;
@@ -23,7 +23,7 @@ export const NavigationButton = ({
     variant,
     link,
     access,
-}: ProfileNavigationButtonProps) => {
+}: NavigationButtonProps) => {
     const displayTitle: string = title.charAt(0).toUpperCase() + title.slice(1);
 
     if (access === "none") return;
@@ -33,7 +33,11 @@ export const NavigationButton = ({
             <Tooltip>
                 <TooltipTrigger asChild>
                     <div className="inline-block cursor-not-allowed">
-                        <Button variant={variant} className="w-full lg:w-auto">
+                        <Button
+                            variant={variant}
+                            className="w-full lg:w-auto"
+                            disabled
+                        >
                             <Icon className="h-4 w-4 lg:mr-2" />
                             <span className="hidden lg:inline">
                                 {displayTitle}
@@ -42,7 +46,7 @@ export const NavigationButton = ({
                     </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                    <p>No access to {title}.</p>
+                    <p>No access to {title}</p>
                 </TooltipContent>
             </Tooltip>
         );

@@ -2,7 +2,7 @@ import {
     FavoriteRepositoriesFilter,
     PinnedRepositoriesFilter,
     VisibilityRepositoriesFilter,
-} from "@/lib/types/repositories";
+} from "@/lib/types/repository";
 import { Globe, Lock, Pin, PinOff, Star, StarOff, X } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 

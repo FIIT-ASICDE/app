@@ -23,7 +23,7 @@ export const OrganisationCardDisplay = ({
     memberCount,
 }: OrganisationCardDisplayProps) => {
     return (
-        <Card className="p-0 shadow-lg">
+        <Card className="p-0">
             <CardHeader className="p-3">
                 <div className="flex flex-row justify-between">
                     <div className="flex flex-row gap-x-3">

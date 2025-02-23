@@ -15,7 +15,7 @@ export const RepositoryHeader = ({
     repository,
 }: RepositoryHeaderProps) => {
     return (
-        <div className="flex flex-row items-center justify-between">
+        <div className="flex flex-col items-center justify-between pb-6 sm:flex-row sm:pb-0">
             <div className="flex flex-row items-center space-x-6 px-6 py-4">
                 <AvatarDisplay
                     displayType={"heading"}

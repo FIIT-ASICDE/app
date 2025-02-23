@@ -10,7 +10,7 @@ import { Suspense } from "react";
 import { getDateString } from "@/components/generic/generic";
 import { NoData } from "@/components/no-data/no-data";
 import { MemberCardDisplay } from "@/components/organisations/members/member-card-display";
-import { PinnedRepositoryCardDisplay } from "@/components/profile/pinned-repository-card-display";
+import { RepositoryCardDisplay } from "@/components/profile/repository-card-display";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Tooltip,
@@ -31,7 +31,9 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                 <Card>
                     <CardContent className="pt-6">
                         <div className="flex flex-col items-start">
-                            <div className="mb-4">{organisation.bio}</div>
+                            {organisation.bio && (
+                                <div className="mb-4">{organisation.bio}</div>
+                            )}
                             <div className="flex items-center text-muted-foreground">
                                 <Calendar className="mr-2 h-5 w-5" />
                                 {getDateString(
@@ -83,7 +85,8 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                                     />
                                 )}
                                 {organisation.repositories.map((repository) => (
-                                    <PinnedRepositoryCardDisplay
+                                    <RepositoryCardDisplay
+                                        type="pinned"
                                         key={repository.id}
                                         id={repository.id}
                                         ownerName={repository.ownerName}
@@ -96,59 +99,66 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                         </Suspense>
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex flex-row items-center justify-between">
-                            Members
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Link
-                                        href={
-                                            "/orgs/" +
-                                            organisation.name +
-                                            "/members"
-                                        }
-                                    >
-                                        <button className="rounded p-1.5 text-muted-foreground hover:bg-accent">
-                                            <Ellipsis />
-                                        </button>
-                                    </Link>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    View all members
-                                </TooltipContent>
-                            </Tooltip>
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Suspense fallback={<div>Loading members...</div>}>
-                            <div className="flex flex-col gap-y-3">
-                                {organisation.members.length === 0 && (
-                                    <NoData
-                                        icon={UsersRound}
-                                        message={"No members found."}
-                                    />
-                                )}
-                                {organisation.members
-                                    .slice(0, 3)
-                                    .map(
-                                        (
-                                            organisationMember: OrganisationMember,
-                                        ) => (
-                                            <MemberCardDisplay
-                                                key={organisationMember.id}
-                                                username={
-                                                    organisationMember.username
-                                                }
-                                                image={organisationMember.image}
-                                                role={organisationMember.role}
-                                            />
-                                        ),
+
+                {organisation.showMembers && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex flex-row items-center justify-between">
+                                Members
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Link
+                                            href={
+                                                "/orgs" +
+                                                organisation.name +
+                                                "/members"
+                                            }
+                                        >
+                                            <button className="rounded p-1.5 text-muted-foreground hover:bg-accent">
+                                                <Ellipsis />
+                                            </button>
+                                        </Link>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        View all members
+                                    </TooltipContent>
+                                </Tooltip>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Suspense fallback={<div>Loading members...</div>}>
+                                <div className="flex flex-col gap-y-3">
+                                    {organisation.members.length === 0 && (
+                                        <NoData
+                                            icon={UsersRound}
+                                            message={"No members found."}
+                                        />
                                     )}
-                            </div>
-                        </Suspense>
-                    </CardContent>
-                </Card>
+                                    {organisation.members
+                                        .slice(0, 3)
+                                        .map(
+                                            (
+                                                organisationMember: OrganisationMember,
+                                            ) => (
+                                                <MemberCardDisplay
+                                                    key={organisationMember.id}
+                                                    username={
+                                                        organisationMember.username
+                                                    }
+                                                    image={
+                                                        organisationMember.image
+                                                    }
+                                                    role={
+                                                        organisationMember.role
+                                                    }
+                                                />
+                                            ),
+                                        )}
+                                </div>
+                            </Suspense>
+                        </CardContent>
+                    </Card>
+                )}
             </main>
         </div>
     );

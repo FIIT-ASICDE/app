@@ -12,6 +12,7 @@ import {
     CommandSeparator,
     CommandShortcut,
 } from "@/components/ui/command";
+import Link from "next/link";
 
 interface CommandBarDialogProps {
     user: Session["user"];
@@ -33,18 +34,19 @@ export const CommandBarDialog = ({
                         <div key={index}>
                             <CommandGroup heading={group.groupDisplayTitle}>
                                 {group.elements.map((element, i) => (
-                                    <CommandItem
-                                        key={i}
-                                        className="cursor-pointer"
-                                    >
-                                        <element.icon className="text-muted-foreground" />
-                                        <span>{element.displayTitle}</span>
-                                        {element.shortcut && (
-                                            <CommandShortcut>
-                                                {element.shortcut.join("+")}
-                                            </CommandShortcut>
-                                        )}
-                                    </CommandItem>
+                                    <Link href={element.link} key={i} onClick={() => setCommandOpen(false)}>
+                                        <CommandItem
+                                            className="cursor-pointer"
+                                        >
+                                            <element.icon className="text-muted-foreground" />
+                                            <span>{element.displayTitle}</span>
+                                            {element.shortcut && (
+                                                <CommandShortcut>
+                                                    {element.shortcut.join("+")}
+                                                </CommandShortcut>
+                                            )}
+                                        </CommandItem>
+                                    </Link>
                                 ))}
                             </CommandGroup>
                             {index < CommandOptions({ user }).length - 1 && (
