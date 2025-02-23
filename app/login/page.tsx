@@ -10,6 +10,7 @@ export default async function LoginPage(props: {
     await redirectIfNotOnboarded(session, "login");
 
     const { callbackUrl } = await props.searchParams;
+    console.log("callbackUrl is", callbackUrl);
 
     return (
         <div className="flex flex-col bg-background">
