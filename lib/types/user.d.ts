@@ -43,6 +43,11 @@ export interface UsersOverview {
     pinnedRepositories: Array<RepositoryDisplay>;
 }
 
+export interface UsersDashboard {
+    favoriteRepositories: Array<RepositoryDisplay>;
+    recentRepositories: Array<RepositoryDisplay>;
+}
+
 export type UserSettingsTab = "account" | "preferences" | "danger";
 
 export type UserInvitationsTab = InvitationStatus | "all";

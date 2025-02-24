@@ -21,6 +21,7 @@ model RepoUserOrganization {
   repoId         String        @db.Uuid
   repo           Repo          @relation(fields: [repoId], references: [id])
   repoRole       RepoRole      @default(OWNER)
+  lastVisitedAt  DateTime      @default(now())
 
   // user can have one role per repo, but it doesn't make sense to create
   // and PK from the unique columns, because searching through this table

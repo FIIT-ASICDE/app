@@ -59,7 +59,8 @@ CREATE TABLE "RepoUserOrganization" (
     "userMetadataId" UUID NOT NULL,
     "organizationId" UUID,
     "repoId" UUID NOT NULL,
-    "repoRole" "RepoRole" NOT NULL DEFAULT 'OWNER'
+    "repoRole" "RepoRole" NOT NULL DEFAULT 'OWNER',
+    "lastVisitedAt" TIMESTAMP NOT NULL
 );
 
 -- CreateTable
