@@ -238,7 +238,8 @@ function byUsername() {
             }),
         )
         .query(async ({ ctx, input }): Promise<OnboardedUser> => {
-            return await userByUsername(ctx.prisma, input.username);
+            const decodedUsername = decodeURIComponent(input.username.trim());
+            return await userByUsername(ctx.prisma, decodedUsername);
         });
 }
 
@@ -250,7 +251,8 @@ function usersOverview() {
             }),
         )
         .query(async ({ ctx, input }): Promise<UsersOverview> => {
-            const user = await userByUsername(ctx.prisma, input.username);
+            const decodedUsername = decodeURIComponent(input.username.trim());
+            const user = await userByUsername(ctx.prisma, decodedUsername);
             const orgs = await getUsersOrgs(ctx.prisma, user.id);
             const pinned = await pinnedRepos(
                 ctx.prisma,
