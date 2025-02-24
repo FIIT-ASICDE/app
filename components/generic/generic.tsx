@@ -4,6 +4,7 @@ import {
     CommandElementGroup,
     ResponsivenessCheckpoint,
 } from "@/lib/types/generic";
+import { Invitation } from "@/lib/types/invitation";
 import {
     FolderPlus,
     Folders,
@@ -12,20 +13,17 @@ import {
     SunMoon,
     UserRoundPen,
     UserRoundPlus,
-    UsersRound
+    UsersRound,
 } from "lucide-react";
 import { Session } from "next-auth";
-import { Invitation } from "@/lib/types/invitation";
 
 interface CommandOptionsProps {
     user: Session["user"];
 }
 
-export const CommandOptions = (
-    {
-        user,
-    }: CommandOptionsProps
-): Array<CommandElementGroup> => {
+export const CommandOptions = ({
+    user,
+}: CommandOptionsProps): Array<CommandElementGroup> => {
     return [
         {
             groupDisplayTitle: "Suggestions",
@@ -156,6 +154,10 @@ export const getBadgeStyle = (badgeType: BadgeType) => {
             return "bg-badge-admin text-badge-admin-foreground hover:bg-badge-admin-hover dark:bg-[var(--badge-admin)] dark:text-[var(--badge-admin-foreground)] dark:hover:bg-[var(--badge-admin-hover)]";
         case "member":
             return "bg-badge-member text-badge-member-foreground hover:bg-badge-member-hover dark:bg-[var(--badge-member)] dark:text-[var(--badge-member-foreground)] dark:hover:bg-[var(--badge-member-hover)]";
+        case "repository":
+            return "bg-badge-repository text-badge-repository-foreground hover:bg-badge-repository-hover dark:bg-[var(--badge-repository)] dark:text-[var(--badge-repository-foreground)] dark:hover:bg-[var(--badge-repository-hover)]";
+        case "organisation":
+            return "bg-badge-organisation text-badge-organisation-foreground hover:bg-badge-organisation-hover dark:bg-[var(--badge-organisation)] dark:text-[var(--badge-organisation-foreground)] dark:hover:bg-[var(--badge-organisation-hover)]";
         default:
             return "";
     }
@@ -171,12 +173,23 @@ export const getCurrentPage = (
 };
 
 export const getInvitationDisplayData = (invitation: Invitation) => {
-    const displayName: string = invitation.type === "repository" ? invitation.repository?.ownerName + "/" + invitation.repository?.name : invitation.organisation?.name || "";
-    const image: string | undefined = invitation.type === "repository" ? invitation.repository?.ownerImage : invitation.organisation?.image;
-    const link: string = invitation.type === "repository" ? "/" + displayName : "/orgs/" + displayName;
+    const displayName: string =
+        invitation.type === "repository"
+            ? invitation.repository?.ownerName +
+              "/" +
+              invitation.repository?.name
+            : invitation.organisation?.name || "";
+    const image: string | undefined =
+        invitation.type === "repository"
+            ? invitation.repository?.ownerImage
+            : invitation.organisation?.image;
+    const link: string =
+        invitation.type === "repository"
+            ? "/" + displayName
+            : "/orgs/" + displayName;
     return {
         displayName,
         image,
-        link
+        link,
     };
-}
+};

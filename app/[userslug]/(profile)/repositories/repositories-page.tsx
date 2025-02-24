@@ -60,7 +60,8 @@ export default function RepositoriesPage({
     }, []);
 
     const [repositories, setRepositories] = useState<Array<Repository>>(repos);
-    const [repositorySearchPhrase, setRepositorySearchPhrase] = useState<string>("");
+    const [repositorySearchPhrase, setRepositorySearchPhrase] =
+        useState<string>("");
 
     const [pinnedFilter, setPinnedFilter] =
         useState<PinnedRepositoriesFilter>("all");

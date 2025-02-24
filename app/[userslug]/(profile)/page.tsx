@@ -1,7 +1,7 @@
 import OverviewPage from "@/app/[userslug]/(profile)/overview-page";
 import { api } from "@/lib/trpc/server";
 
-export default async function UserHome({
+export default async function UserProfile({
     params,
 }: {
     params: Promise<{ userslug: string }>;

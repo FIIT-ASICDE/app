@@ -1,6 +1,15 @@
+import { UserDisplay } from "@/lib/types/user";
 import { Search, UserRoundPlus } from "lucide-react";
+import { useState } from "react";
 
+import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { Button } from "@/components/ui/button";
+import {
+    CommandDialog,
+    CommandEmpty,
+    CommandInput,
+    CommandItem,
+} from "@/components/ui/command";
 import {
     Dialog,
     DialogContent,
@@ -10,15 +19,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { UserDisplay } from "@/lib/types/user";
-import { useState } from "react";
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import {
-    CommandDialog,
-    CommandEmpty,
-    CommandInput,
-    CommandItem,
-} from "@/components/ui/command";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const data = {
@@ -28,54 +28,54 @@ const data = {
         {
             id: "1",
             username: "johndoe1",
-            image: "/avatars/avatar1.png"
+            image: "/avatars/avatar1.png",
         } satisfies UserDisplay,
         {
             id: "2",
             username: "johndoe2",
-            image: "/avatars/avatar2.png"
+            image: "/avatars/avatar2.png",
         } satisfies UserDisplay,
         {
             id: "3",
             username: "johndoe3",
-            image: "/avatars/avatar3.png"
+            image: "/avatars/avatar3.png",
         } satisfies UserDisplay,
         {
             id: "4",
             username: "johndoe4",
-            image: "/avatars/avatar4.png"
+            image: "/avatars/avatar4.png",
         } satisfies UserDisplay,
         {
             id: "5",
             username: "johndoe5",
-            image: "/avatars/avatar5.png"
+            image: "/avatars/avatar5.png",
         } satisfies UserDisplay,
         {
             id: "6",
             username: "johndoe6",
-            image: "/avatars/avatar6.png"
+            image: "/avatars/avatar6.png",
         } satisfies UserDisplay,
         {
             id: "7",
             username: "johndoe7",
-            image: "/avatars/avatar5.png"
+            image: "/avatars/avatar5.png",
         } satisfies UserDisplay,
         {
             id: "8",
             username: "johndoe8",
-            image: "/avatars/avatar4.png"
+            image: "/avatars/avatar4.png",
         } satisfies UserDisplay,
         {
             id: "9",
             username: "johndoe9",
-            image: "/avatars/avatar3.png"
+            image: "/avatars/avatar3.png",
         } satisfies UserDisplay,
         {
             id: "10",
             username: "johndoe10",
-            image: "/avatars/avatar2.png"
+            image: "/avatars/avatar2.png",
         } satisfies UserDisplay,
-    ] satisfies Array<UserDisplay>
+    ] satisfies Array<UserDisplay>,
 };
 
 export const InviteMemberDialog = () => {
@@ -84,10 +84,14 @@ export const InviteMemberDialog = () => {
 
     const handleInviteMember = () => {
         console.log(
-            "User " + selectedUser?.username +
-            " with ID: " + selectedUser?.id +
-            " has been invited to organisation " + data.organisationName +
-            " with ID: "+ data.organisationId
+            "User " +
+                selectedUser?.username +
+                " with ID: " +
+                selectedUser?.id +
+                " has been invited to organisation " +
+                data.organisationName +
+                " with ID: " +
+                data.organisationId,
         );
 
         setSelectedUser(undefined);
@@ -110,12 +114,13 @@ export const InviteMemberDialog = () => {
                         Invite a member
                     </DialogTitle>
                     <DialogDescription>
-                        Please select a member that will get an invite to your organisation.
+                        Please select a member that will get an invite to your
+                        organisation.
                     </DialogDescription>
                 </DialogHeader>
 
                 <Button
-                    className="hover:bg-accent border-accent border bg-transparent font-normal text-muted-foreground py-5"
+                    className="border border-accent bg-transparent py-5 font-normal text-muted-foreground hover:bg-accent"
                     onClick={() => setCommandOpen(true)}
                 >
                     {selectedUser ? (
@@ -148,7 +153,7 @@ export const InviteMemberDialog = () => {
                                     setSelectedUser(member);
                                 }}
                             >
-                                <div className="flex flex-row gap-x-3 items-center">
+                                <div className="flex flex-row items-center gap-x-3">
                                     <AvatarDisplay
                                         displayType="select"
                                         name={member.username}
@@ -162,9 +167,11 @@ export const InviteMemberDialog = () => {
                 </CommandDialog>
 
                 {selectedUser && (
-                    <p className="text-sm text-center">
+                    <p className="text-center text-sm">
                         You are about to invite
-                        <span className="font-bold">{" " + selectedUser.username + " "}</span>
+                        <span className="font-bold">
+                            {" " + selectedUser.username + " "}
+                        </span>
                         to {data.organisationName}.
                     </p>
                 )}

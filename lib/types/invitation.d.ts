@@ -1,6 +1,6 @@
-import { UserDisplay } from "@/lib/types/user";
-import { RepositoryDisplay } from "@/lib/types/repository";
 import { OrganisationDisplay } from "@/lib/types/organisation";
+import { RepositoryDisplay } from "@/lib/types/repository";
+import { UserDisplay } from "@/lib/types/user";
 
 export type Invitation = {
     id: string;

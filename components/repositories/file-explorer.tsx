@@ -1,9 +1,6 @@
 "use client";
 
-import {
-    RepositoryFile,
-    RepositoryFilePreview,
-} from "@/lib/types/repository";
+import { RepositoryFile, RepositoryFilePreview } from "@/lib/types/repository";
 import { File as FileIcon, Folder } from "lucide-react";
 import { Dispatch, SetStateAction, useState } from "react";
 

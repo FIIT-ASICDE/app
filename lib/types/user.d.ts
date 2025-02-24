@@ -1,9 +1,10 @@
+import { InvitationStatus } from "@/lib/types/invitation";
+import { OrganisationDisplay } from "@/lib/types/organisation";
+
 import { RepositoryDisplay } from "./repository";
 import { $Enums } from ".prisma/client";
 
 import UserRole = $Enums.UserRole;
-import { OrganisationDisplay } from "@/lib/types/organisation";
-import { InvitationStatus } from "@/lib/types/invitation";
 
 export type User =
     | {

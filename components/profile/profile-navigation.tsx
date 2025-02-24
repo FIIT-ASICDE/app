@@ -1,7 +1,7 @@
 "use client";
 
 import { User } from "@/lib/types/user";
-import { BookUser, Folders, Mail, Settings, Star, UsersRound } from "lucide-react";
+import { BookUser, Folders, Settings, UsersRound } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { getCurrentPage } from "@/components/generic/generic";
@@ -45,20 +45,6 @@ export const ProfileNavigation = ({
                 }
                 link={"/" + profile.username + "/organisations"}
                 access="interactive"
-            />
-            <NavigationButton
-                title="favorites"
-                icon={Star}
-                variant={currentPage === "/favorites" ? "secondary" : "outline"}
-                link={"/" + profile.username + "/favorites"}
-                access={isItMe ? "interactive" : "none"}
-            />
-            <NavigationButton
-                title="invitations"
-                icon={Mail}
-                variant={currentPage === "/invitations" ? "secondary" : "outline"}
-                link={"/" + profile.username + "/invitations"}
-                access={isItMe ? "interactive" : "none"}
             />
             <NavigationButton
                 title="settings"

@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { api } from "@/lib/trpc/server";
 import Link from "next/link";
 
 import { CommandBar } from "./header-command";
@@ -8,6 +9,13 @@ import LogoIcon from "@/components/icons/logo";
 
 export default async function Header() {
     const session = await auth();
+
+    if (session) {
+        const user = await api.user.byId(session.user.id);
+        if (user?.type === "non-onboarded") {
+            return <></>;
+        }
+    }
 
     return (
         <div>

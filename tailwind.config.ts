@@ -105,6 +105,16 @@ const config: Config = {
                         foreground: "var(--badge-member-foreground)",
                         hover: "var(--badge-member-hover)",
                     },
+                    repository: {
+                        DEFAULT: "var(--badge-repository)",
+                        foreground: "var(--badge-repository-foreground)",
+                        hover: "var(--badge-repository-hover)",
+                    },
+                    organisation: {
+                        DEFAULT: "var(--badge-organisation)",
+                        foreground: "var(--badge-organisation-foreground)",
+                        hover: "var(--badge-organisation-hover)",
+                    },
                 },
             },
             borderRadius: {

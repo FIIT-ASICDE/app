@@ -3,6 +3,7 @@ import {
     RepositoryCardDisplayType,
     RepositoryVisibility,
 } from "@/lib/types/repository";
+import { cn } from "@/lib/utils";
 import { Calendar, Code, Pin, Star } from "lucide-react";
 import Link from "next/link";
 
@@ -19,6 +20,7 @@ interface RepositoryCardDisplayProps {
     name: string;
     visibility: RepositoryVisibility;
     ownerImage?: string;
+    className?: string;
 }
 
 export const RepositoryCardDisplay = ({
@@ -27,12 +29,13 @@ export const RepositoryCardDisplay = ({
     name,
     visibility,
     ownerImage,
+    className,
 }: RepositoryCardDisplayProps) => {
     const repositoryDisplayName: string = ownerName + "/" + name;
 
     if (type === "recent") {
         return (
-            <Card className="p-0">
+            <Card className={cn("p-0", className)}>
                 <CardHeader className="p-3">
                     <div className="flex flex-col gap-y-3">
                         <div className="flex flex-row gap-x-3">
@@ -50,14 +53,20 @@ export const RepositoryCardDisplay = ({
                                 </Button>
                             </Link>
                         </div>
-                        <div className="flex items-center gap-x-2 text-muted-foreground">
-                            <Calendar className="h-4 w-4" />
-                            {getTimeDeltaString(new Date("2023-07-15"))}
+                        <div className="flex flex-row items-center justify-between">
+                            <span className="flex flex-row items-center gap-x-2 text-sm text-muted-foreground">
+                                <Calendar className="h-5 w-5" />
+                                Opened{" "}
+                                {getTimeDeltaString(new Date("2023-07-15"))}
+                            </span>
+                            <Button
+                                variant="default"
+                                className="hover:bg-primary-button-hover"
+                            >
+                                <Code />
+                                Open in IDE
+                            </Button>
                         </div>
-                        <Button variant="outline">
-                            <Code />
-                            Open in IDE
-                        </Button>
                     </div>
                 </CardHeader>
             </Card>
@@ -65,7 +74,7 @@ export const RepositoryCardDisplay = ({
     }
 
     return (
-        <Card className="p-0">
+        <Card className={cn("p-0", className)}>
             <CardHeader className="p-3">
                 <div className="flex justify-between">
                     <div className="flex flex-row gap-x-3">

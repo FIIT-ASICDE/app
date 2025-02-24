@@ -1,7 +1,15 @@
 "use client";
 
 import { imgSrc } from "@/lib/client-file-utils";
-import { Folders, Home, LogOut, Mail, Settings, UsersRound } from "lucide-react";
+import {
+    Folders,
+    LayoutDashboard,
+    LogOut,
+    Mail,
+    Settings,
+    UserRound,
+    UsersRound,
+} from "lucide-react";
 import { Session } from "next-auth";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
@@ -55,10 +63,17 @@ export const HeaderDropdown = ({
 
                 <DropdownMenuSeparator />
 
+                <Link href={"/" + username + "/dashboard"} className="text-sm">
+                    <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
+                        <span>Dashboard</span>
+                        <LayoutDashboard className="text-muted-foreground" />
+                    </DropdownMenuItem>
+                </Link>
+
                 <Link href={"/" + username} className="text-sm">
                     <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
-                        <span>Home</span>
-                        <Home className="text-muted-foreground" />
+                        <span>Profile</span>
+                        <UserRound className="text-muted-foreground" />
                     </DropdownMenuItem>
                 </Link>
 
@@ -92,10 +107,7 @@ export const HeaderDropdown = ({
                     </DropdownMenuItem>
                 </Link>
 
-                <Link
-                    href={"/" + username + "/settings"}
-                    className="text-sm"
-                >
+                <Link href={"/" + username + "/settings"} className="text-sm">
                     <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
                         <span>Settings</span>
                         <Settings className="text-muted-foreground" />
@@ -104,7 +116,10 @@ export const HeaderDropdown = ({
 
                 <DropdownMenuSeparator />
 
-                <button className="w-full border border-accent rounded bg-background" onClick={() => signOut()}>
+                <button
+                    className="w-full rounded border border-accent bg-background"
+                    onClick={() => signOut()}
+                >
                     <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
                         <span>Log out</span>
                         <LogOut className="text-muted-foreground" />

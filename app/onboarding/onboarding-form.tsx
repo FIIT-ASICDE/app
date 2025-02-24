@@ -3,6 +3,7 @@
 import { onboardSchema } from "@/lib/schemas/user-schemas";
 import { api } from "@/lib/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { FileText, Loader2, Save, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -11,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -52,9 +52,18 @@ export function OnboardingForm() {
                             name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>First name</FormLabel>
+                                    <FormLabel className="text-muted-foreground">
+                                        First name
+                                    </FormLabel>
                                     <FormControl>
-                                        <Input placeholder="John" {...field} />
+                                        <div className="relative">
+                                            <UserRound className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                placeholder="* John"
+                                                className="pl-9"
+                                                {...field}
+                                            />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -65,9 +74,18 @@ export function OnboardingForm() {
                             name="surname"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Last name</FormLabel>
+                                    <FormLabel className="text-muted-foreground">
+                                        Last name
+                                    </FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Doe" {...field} />
+                                        <div className="relative">
+                                            <UserRound className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                placeholder="* Doe"
+                                                className="pl-9"
+                                                {...field}
+                                            />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -80,18 +98,19 @@ export function OnboardingForm() {
                         name="bio"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Bio</FormLabel>
+                                <FormLabel className="text-muted-foreground">
+                                    Bio
+                                </FormLabel>
                                 <FormControl>
-                                    <Textarea
-                                        placeholder="Tell us a little bit about yourself"
-                                        className="resize-none"
-                                        {...field}
-                                    />
+                                    <div className="relative">
+                                        <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                        <Textarea
+                                            placeholder="Tell us a little bit about yourself (optional)"
+                                            className="resize-none pl-9 pt-2"
+                                            {...field}
+                                        />
+                                    </div>
                                 </FormControl>
-                                <FormDescription>
-                                    Optional: Share a brief description about
-                                    yourself
-                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -99,12 +118,23 @@ export function OnboardingForm() {
 
                     <Button
                         type="submit"
-                        className="w-full"
-                        disabled={completeOnboardingMutation.isPending}
+                        className="w-full hover:bg-primary-button-hover"
+                        disabled={
+                            completeOnboardingMutation.isPending ||
+                            !form.formState.isDirty
+                        }
                     >
-                        {completeOnboardingMutation.isPending
-                            ? "Saving..."
-                            : "Complete Profile"}
+                        {completeOnboardingMutation.isPending ? (
+                            <>
+                                <Loader2 className="animate-spin" />
+                                Saving...
+                            </>
+                        ) : (
+                            <>
+                                <Save />
+                                Complete account
+                            </>
+                        )}
                     </Button>
                 </form>
             </Form>
