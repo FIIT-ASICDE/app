@@ -77,7 +77,6 @@ function createOrg() {
                     where: { id: organization.id },
                     include: {
                         users: {
-                            select: { role: true },
                             include: {
                                 userMetadata: {
                                     select: {
@@ -274,7 +273,6 @@ async function orgByName(
         where: { name },
         include: {
             users: {
-                select: { role: true },
                 include: { userMetadata: { include: { user: true } } },
             },
         },
