@@ -59,6 +59,12 @@
     --badge-member: #1F2937;
     --badge-member-foreground: #F3F4F6;
     --badge-member-hover: #2F3B4B;
+    --badge-repository: #1F2937;
+    --badge-repository-foreground: #F3F4F6;
+    --badge-repository-hover: #2F3B4B;
+    --badge-organisation: #1F2937;
+    --badge-organisation-foreground: #F3F4F6;
+    --badge-organisation-hover: #111827;
   }
 
   .dark {
@@ -117,6 +123,12 @@
     --badge-member: #1F2937;
     --badge-member-foreground: #F8FAFC;
     --badge-member-hover: #2F3B4B;
+    --badge-repository: #1F2937;
+    --badge-repository-foreground: #F8FAFC;
+    --badge-repository-hover: #2F3B4B;
+    --badge-organisation: #111827;
+    --badge-organisation-foreground: #E5E7EB;
+    --badge-organisation-hover: #0F192F;
   }
 }
 

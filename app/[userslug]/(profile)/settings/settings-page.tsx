@@ -1,9 +1,18 @@
 "use client";
 
-import { CircleUserRound, CircleX, LogOut, Settings2, TriangleAlert } from "lucide-react";
+import { UserSettingsTab } from "@/lib/types/user";
+import { cn } from "@/lib/utils";
+import {
+    CircleUserRound,
+    CircleX,
+    LogOut,
+    Settings2,
+    TriangleAlert,
+} from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import { useUser } from "@/components/context/user-context";
 import { DeleteAccountDialog } from "@/components/profile/delete-account-dialog";
@@ -11,10 +20,11 @@ import { ThemeIcon } from "@/components/profile/theme-icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { useState } from "react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { UserSettingsTab } from "@/lib/types/user";
-import { cn } from "@/lib/utils";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface SettingsPageProps {
     userSlug: string;
@@ -25,7 +35,8 @@ export default function SettingsPage({ userSlug }: SettingsPageProps) {
     const router = useRouter();
     const { theme, setTheme } = useTheme();
 
-    const [activeSettingsTab, setActiveSettingsTab] = useState<UserSettingsTab>("account");
+    const [activeSettingsTab, setActiveSettingsTab] =
+        useState<UserSettingsTab>("account");
 
     if (userSlug !== user.username) {
         router.back();
@@ -35,30 +46,42 @@ export default function SettingsPage({ userSlug }: SettingsPageProps) {
     return (
         <div className="m-6 flex flex-col gap-x-3 md:flex-row">
             <aside className="w-full md:w-1/5">
-                <div className="w-full flex flex-row md:flex-col gap-3">
+                <div className="flex w-full flex-row gap-3 md:flex-col">
                     <Button
-                        variant={activeSettingsTab === "account" ? "secondary" : "outline"}
-                        className="w-1/2 md:w-full flex flex-row gap-x-3"
+                        variant={
+                            activeSettingsTab === "account"
+                                ? "secondary"
+                                : "outline"
+                        }
+                        className="flex w-1/2 flex-row gap-x-3 md:w-full"
                         onClick={() => setActiveSettingsTab("account")}
                     >
                         <CircleUserRound />
                         Account
                     </Button>
                     <Button
-                        variant={activeSettingsTab === "preferences" ? "secondary" : "outline"}
-                        className="w-1/2 md:w-full flex flex-row gap-x-3"
+                        variant={
+                            activeSettingsTab === "preferences"
+                                ? "secondary"
+                                : "outline"
+                        }
+                        className="flex w-1/2 flex-row gap-x-3 md:w-full"
                         onClick={() => setActiveSettingsTab("preferences")}
                     >
                         <Settings2 />
                         Preferences
                     </Button>
                     <Button
-                        variant={activeSettingsTab === "danger" ? "destructive" : "outline"}
+                        variant={
+                            activeSettingsTab === "danger"
+                                ? "destructive"
+                                : "outline"
+                        }
                         className={cn(
-                            "w-1/2 md:w-full flex flex-row gap-x-3 border-destructive hover:bg-destructive-hover",
-                            activeSettingsTab === "danger" ?
-                                "bg-destructive" :
-                                "bg-background"
+                            "flex w-1/2 flex-row gap-x-3 border-destructive hover:bg-destructive-hover md:w-full",
+                            activeSettingsTab === "danger"
+                                ? "bg-destructive"
+                                : "bg-background",
                         )}
                         onClick={() => setActiveSettingsTab("danger")}
                     >
@@ -72,7 +95,7 @@ export default function SettingsPage({ userSlug }: SettingsPageProps) {
                 {activeSettingsTab === "account" && (
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex flex-row gap-3 items-center">
+                            <CardTitle className="flex flex-row items-center gap-3">
                                 <CircleUserRound />
                                 Account
                             </CardTitle>
@@ -85,13 +108,13 @@ export default function SettingsPage({ userSlug }: SettingsPageProps) {
                                         <span>Log out</span>
                                         {user && (
                                             <span className="text-sm text-muted-foreground">
-                                        You are currently logged in as
-                                        <span className="font-bold">
-                                            {" "}
-                                            {user.username}
-                                        </span>
-                                        .
-                                    </span>
+                                                You are currently logged in as
+                                                <span className="font-bold">
+                                                    {" "}
+                                                    {user.username}
+                                                </span>
+                                                .
+                                            </span>
                                         )}
                                     </div>
                                 </div>
@@ -111,7 +134,7 @@ export default function SettingsPage({ userSlug }: SettingsPageProps) {
                 {activeSettingsTab === "preferences" && (
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex flex-row gap-3 items-center">
+                            <CardTitle className="flex flex-row items-center gap-3">
                                 <Settings2 />
                                 Preferences
                             </CardTitle>
@@ -135,7 +158,10 @@ export default function SettingsPage({ userSlug }: SettingsPageProps) {
                                     </div>
                                 </div>
                                 <Tooltip>
-                                    <TooltipTrigger asChild className="px-4 py-2">
+                                    <TooltipTrigger
+                                        asChild
+                                        className="px-4 py-2"
+                                    >
                                         <div className="flex flex-row items-center justify-center space-x-3">
                                             <ThemeIcon
                                                 theme={"light"}
@@ -200,7 +226,7 @@ export default function SettingsPage({ userSlug }: SettingsPageProps) {
                 {activeSettingsTab === "danger" && (
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex flex-row gap-3 items-center">
+                            <CardTitle className="flex flex-row items-center gap-3">
                                 <TriangleAlert />
                                 Danger zone
                             </CardTitle>
@@ -212,8 +238,8 @@ export default function SettingsPage({ userSlug }: SettingsPageProps) {
                                     <div className="flex flex-col space-y-1">
                                         <span>Delete account</span>
                                         <span className="text-sm text-muted-foreground">
-                                    Your account is currently active.
-                                </span>
+                                            Your account is currently active.
+                                        </span>
                                     </div>
                                 </div>
                                 <DeleteAccountDialog />
@@ -224,4 +250,4 @@ export default function SettingsPage({ userSlug }: SettingsPageProps) {
             </main>
         </div>
     );
-};
+}

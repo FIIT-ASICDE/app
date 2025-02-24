@@ -8,6 +8,6 @@ export default async function UserLayout({
     children,
 }: Readonly<{ children: React.ReactNode }>) {
     const session = await auth();
-    await redirectIfNotOnboarded(session, 'home');
+    await redirectIfNotOnboarded(session, "home");
     return <ProtectedLayout>{children}</ProtectedLayout>;
 }

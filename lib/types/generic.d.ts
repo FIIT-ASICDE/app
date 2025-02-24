@@ -18,7 +18,13 @@ export type ResponsivenessCheckpoint =
     | "xl"
     | "2xl";
 
-export type BadgeType = "public" | "private" | "admin" | "member";
+export type BadgeType =
+    | "public"
+    | "private"
+    | "admin"
+    | "member"
+    | "repository"
+    | "organisation";
 
 export type CommandElement = {
     displayTitle: string;

@@ -30,6 +30,7 @@ export interface PaginationWithLinksProps {
     pageSize: number;
     page: number;
     pageSearchParam?: string;
+    className?: string;
 }
 
 /**
@@ -50,6 +51,7 @@ export function PaginationWithLinks({
     totalCount,
     page,
     pageSearchParam,
+    className,
 }: PaginationWithLinksProps) {
     const router = useRouter();
     const pathname = usePathname();
@@ -162,7 +164,12 @@ export function PaginationWithLinks({
     };
 
     return (
-        <div className="flex w-full flex-col items-center gap-3 md:flex-row">
+        <div
+            className={cn(
+                "flex w-full flex-col items-center gap-3 md:flex-row",
+                className,
+            )}
+        >
             {pageSizeSelectOptions && (
                 <div className="flex flex-1 flex-col gap-4">
                     <SelectRowsPerPage

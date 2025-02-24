@@ -1,5 +1,6 @@
 import { CommandElementGroup } from "@/lib/types/generic";
 import { Session } from "next-auth";
+import Link from "next/link";
 import { Dispatch, SetStateAction } from "react";
 
 import { CommandOptions } from "@/components/generic/generic";
@@ -12,7 +13,6 @@ import {
     CommandSeparator,
     CommandShortcut,
 } from "@/components/ui/command";
-import Link from "next/link";
 
 interface CommandBarDialogProps {
     user: Session["user"];
@@ -34,10 +34,12 @@ export const CommandBarDialog = ({
                         <div key={index}>
                             <CommandGroup heading={group.groupDisplayTitle}>
                                 {group.elements.map((element, i) => (
-                                    <Link href={element.link} key={i} onClick={() => setCommandOpen(false)}>
-                                        <CommandItem
-                                            className="cursor-pointer"
-                                        >
+                                    <Link
+                                        href={element.link}
+                                        key={i}
+                                        onClick={() => setCommandOpen(false)}
+                                    >
+                                        <CommandItem className="cursor-pointer">
                                             <element.icon className="text-muted-foreground" />
                                             <span>{element.displayTitle}</span>
                                             {element.shortcut && (

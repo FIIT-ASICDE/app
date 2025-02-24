@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 
 import { getWidthFromResponsivenessCheckpoint } from "@/components/generic/generic";
 import { NoData } from "@/components/no-data/no-data";
+import { InviteMemberDialog } from "@/components/organisations/members/invite-member-dialog";
 import {
     MemberFilter,
     filterMembers,
@@ -26,7 +27,6 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
-import { InviteMemberDialog } from "@/components/organisations/members/invite-member-dialog";
 
 interface MembersPageProps {
     orgSlug: string;

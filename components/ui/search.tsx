@@ -1,10 +1,10 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+import { Search as SearchIcon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
-import { Search as SearchIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 export default function Search({
     placeholder,
@@ -36,11 +36,8 @@ export default function Search({
                     handleSearch(e.target.value);
                 }}
                 defaultValue={searchParams.get("query")?.toString()}
-                className={cn(
-                    "pl-9",
-                    className
-                )}
+                className={cn("pl-9", className)}
             />
         </div>
     );
-};
+}
