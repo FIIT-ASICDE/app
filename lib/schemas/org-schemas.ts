@@ -8,7 +8,12 @@ export const createOrgProcedureSchema = z.object({
 });
 
 export const createOrganisationFormSchema = z.object({
-    name: z.string().min(1, "Organisation name is required."),
+    name: z
+        .string()
+        .min(1, "Organisation name is required.")
+        .refine((value) => !/%|\$|\?/.test(value), {
+            message: "Organisation name cannot contain %, $, or ?",
+        }),
     description: z.string().optional(),
     image: z
         .discriminatedUnion("type", [
