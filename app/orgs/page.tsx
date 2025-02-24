@@ -22,7 +22,7 @@ export default async function OrganisationsPage(props: {
     const pageSize = 20;
 
     const { organizations, pagination } = await api.org.search({
-        searchTerm: query,
+        nameSearchTerm: query,
         page: currentPage,
         pageSize: pageSize,
     });
