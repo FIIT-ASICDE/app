@@ -1,6 +1,6 @@
 "use client";
 
-import { editRepositoryFormSchema } from "@/lib/schemas/edit-repository";
+import { editRepositoryFormSchema } from "@/lib/schemas/repo-schemas";
 import { Repository } from "@/lib/types/repository";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FileText, Pen, Save, UserRound } from "lucide-react";

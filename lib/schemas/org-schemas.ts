@@ -1,20 +1,41 @@
 import { z } from "zod";
 
 export const createOrgProcedureSchema = z.object({
-    name: z.string().min(1, "Organization name is required"),
-    bio: z.string().optional(),
-    image: z.string().optional().nullable(),
-    initialMembers: z.array(z.string().uuid()).optional(),
+    name: z
+        .string()
+        .min(2, "Organisation name must be at least 2 characters long")
+        .max(100, "Organisation name cannot exceed 100 characters")
+        .regex(/^[^%$?]*$/, "Organisation name cannot contain %, $, or ?")
+        .transform((value) => value.trim()),
+    bio: z
+        .string()
+        .max(500, "Bio cannot exceed 500 characters")
+        .optional()
+        .transform((value) => (value ? value.trim() : undefined)),
+    image: z
+        .string()
+        .url()
+        .optional()
+        .nullable()
+        .transform((value) => (value ? value.trim() : null)),
+    initialMembers: z
+        .array(z.string().uuid())
+        .max(20, "Cannot add more than 20 initial members")
+        .optional(),
 });
 
 export const createOrganisationFormSchema = z.object({
     name: z
         .string()
-        .min(1, "Organisation name is required.")
-        .refine((value) => !/%|\$|\?/.test(value), {
-            message: "Organisation name cannot contain %, $, or ?",
-        }),
-    description: z.string().optional(),
+        .min(2, "Organisation name must be at least 2 characters long")
+        .max(100, "Organisation name cannot exceed 100 characters")
+        .regex(/^[^%$?]*$/, "Organisation name cannot contain %, $, or ?")
+        .transform((value) => value.trim()),
+    description: z
+        .string()
+        .max(500, "Description cannot exceed 500 characters")
+        .optional()
+        .transform((value) => (value ? value.trim() : undefined)),
     image: z
         .discriminatedUnion("type", [
             z.object({
@@ -42,7 +63,10 @@ export const createOrganisationFormSchema = z.object({
             }),
             z.object({
                 type: z.literal("remote"),
-                src: z.string(),
+                src: z
+                    .string()
+                    .url("Invalid URL format")
+                    .transform((value) => value.trim()),
             }),
         ])
         .optional(),
@@ -50,28 +74,63 @@ export const createOrganisationFormSchema = z.object({
         .array(
             z.object({
                 id: z.string().uuid(),
-                username: z.string(),
-                image: z.string().optional(),
+                username: z
+                    .string()
+                    .min(2, "Username must be at least 2 character")
+                    .max(50, "Username cannot exceed 50 characters")
+                    .transform((value) => value.trim()),
+                image: z
+                    .string()
+                    .url("Invalid URL format")
+                    .optional()
+                    .transform((value) => (value ? value.trim() : undefined)), // Sanitize image URL
             }),
         )
+        .max(20, "Cannot add more than 20 initial members")
         .optional(),
 });
 
 export const orgSearchSchema = z.object({
-    searchTerm: z.string().optional(),
+    nameSearchTerm: z
+        .string()
+        .max(100, "Search term cannot exceed 100 characters")
+        .transform((value) => value.trim())
+        .optional(),
     page: z.number().int().min(0).default(0),
     pageSize: z.number().int().min(1).max(100).default(10),
 });
 
 export const editOrganisationProcedureSchema = z.object({
-    name: z.string().min(1, "Organisation name is required."),
-    bio: z.string().optional(),
-    image: z.string().optional(),
+    name: z
+        .string()
+        .min(2, "Organisation name must be at least 2 characters long")
+        .max(100, "Organisation name cannot exceed 100 characters")
+        .regex(/^[^%$?]*$/, "Organisation name cannot contain %, $, or ?")
+        .transform((value) => value.trim()),
+    bio: z
+        .string()
+        .max(500, "Bio cannot exceed 500 characters")
+        .optional()
+        .transform((value) => (value ? value.trim() : undefined)),
+    image: z
+        .string()
+        .url("Invalid URL format")
+        .optional()
+        .transform((value) => (value ? value.trim() : undefined)),
 });
 
 export const editOrganisationFormSchema = z.object({
-    name: z.string().min(1, "Organisation name is required."),
-    bio: z.string().optional(),
+    name: z
+        .string()
+        .min(2, "Organisation name must be at least 2 characters long")
+        .max(100, "Organisation name cannot exceed 100 characters")
+        .regex(/^[^%$?]*$/, "Organisation name cannot contain %, $, or ?")
+        .transform((value) => value.trim()),
+    bio: z
+        .string()
+        .max(500, "Bio cannot exceed 500 characters")
+        .optional()
+        .transform((value) => (value ? value.trim() : undefined)),
     image: z
         .instanceof(File)
         .refine((file: File) => file.size < 2000000, {

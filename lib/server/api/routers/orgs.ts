@@ -123,7 +123,7 @@ function search() {
     return protectedProcedure
         .input(orgSearchSchema)
         .query(async ({ ctx, input }) => {
-            const { searchTerm, page, pageSize } = input;
+            const { nameSearchTerm, page, pageSize } = input;
             const offset = page * pageSize;
             const userId = ctx.session.user.id;
 
@@ -132,8 +132,8 @@ function search() {
         select count(*)::int as total
         from "Organization" org
         ${
-            searchTerm
-                ? Prisma.sql`where org.name ilike ${searchTerm + "%"}`
+            nameSearchTerm
+                ? Prisma.sql`where org.name ilike ${nameSearchTerm + "%"}`
                 : Prisma.empty
         }
       `;
@@ -159,8 +159,8 @@ function search() {
         left join "OrganizationUser" ou 
           on ou."organizationId" = org.id and ou."userMetadataId" = ${userId}
         ${
-            searchTerm
-                ? Prisma.sql`where org.name ilike ${searchTerm + "%"}`
+            nameSearchTerm
+                ? Prisma.sql`where org.name ilike ${nameSearchTerm + "%"}`
                 : Prisma.empty
         }
         order by
