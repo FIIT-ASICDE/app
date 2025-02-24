@@ -37,6 +37,7 @@ export function OnboardingForm() {
     async function onSubmit(data: z.infer<typeof onboardSchema>) {
         const onboarded = await completeOnboardingMutation.mutateAsync(data);
         router.replace("/" + onboarded.username);
+        router.refresh();
     }
 
     return (
@@ -61,6 +62,7 @@ export function OnboardingForm() {
                                             <Input
                                                 placeholder="* John"
                                                 className="pl-9"
+                                                autoComplete="given-name"
                                                 {...field}
                                             />
                                         </div>
@@ -83,6 +85,7 @@ export function OnboardingForm() {
                                             <Input
                                                 placeholder="* Doe"
                                                 className="pl-9"
+                                                autoComplete="family-name"
                                                 {...field}
                                             />
                                         </div>
