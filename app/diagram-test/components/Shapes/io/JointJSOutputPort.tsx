@@ -1,5 +1,6 @@
 import { BaseSvgElement } from '../base/BaseSvgElement';
-import { Port } from '../classes/port'; // Ваш класс для хранения данных and
+import { Port } from '../classes/port';
+import { shapes } from "@joint/core"; // Ваш класс для хранения данных and
 
 export const JointJSOutputPort = (output: Port) => {
 
@@ -17,7 +18,7 @@ export const JointJSOutputPort = (output: Port) => {
         }
     });
 
-    return new BaseSvgElement({
+    return new shapes.standard.Path({
         elType: 'output',
         name: output.name,
         bandwidth: output.bandwidth,

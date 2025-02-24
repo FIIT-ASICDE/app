@@ -1,6 +1,7 @@
 // src/components/Shapes/JointJSAnd.tsx
 import { BaseSvgElement } from '../base/BaseSvgElement';
-import { Encoder } from '../classes/encoder'; // Ваш класс для хранения данных and
+import { Encoder } from '../classes/encoder';
+import { shapes } from "@joint/core"; // Ваш класс для хранения данных and
 
 export const JointJSEncoder = (encoder: Encoder) => {
 
@@ -30,7 +31,7 @@ export const JointJSEncoder = (encoder: Encoder) => {
     });
 
 
-    return new BaseSvgElement({
+    return new shapes.standard.Path({
         elType: 'encoder',
         name: encoder.name,
         bandwidth: encoder.dataBandwidth,

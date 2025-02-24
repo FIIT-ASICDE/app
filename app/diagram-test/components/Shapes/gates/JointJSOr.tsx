@@ -1,6 +1,7 @@
 // src/components/Shapes/JointJSAnd.tsx
 import { BaseSvgElement } from '../base/BaseSvgElement';
-import { Or } from '../classes/or'; // Ваш класс для хранения данных and
+import { Or } from '../classes/or';
+import { shapes } from "@joint/core"; // Ваш класс для хранения данных and
 
 export const JointJSOr = (or: Or) => {
     // Минимальный размер, с которого начинаем:
@@ -62,7 +63,7 @@ export const JointJSOr = (or: Or) => {
     });
 
 
-    return new BaseSvgElement({
+    return new shapes.standard.Path({
         elType: 'or',
         name: or.name,
         bandwidth: or.bandwidth,

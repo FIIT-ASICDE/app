@@ -1,29 +1,24 @@
 import { BaseSvgElement } from '../base/BaseSvgElement';
 import { Module } from '../classes/module';
+import { shapes } from "@joint/core";
 
 export const JointJSNewModule = (module: Module) => {
-// Если в module.inPorts или module.outPorts не заданы, присваиваем пустой массив
+
     const moduleInPorts = module.inPorts || [];
     const moduleOutPorts = module.outPorts || [];
 
-
-    // Вычисляем размер элемента
     const inCount = moduleInPorts.length;
     const outCount = moduleOutPorts.length;
 
+    const maxPorts = Math.max(inCount, outCount, 2);
+    const baseWidth = 150;
+    const baseHeight = 100;
+    const stepWidth = 10;
+    const stepHeight = 40;
 
-    const maxPorts = Math.max(inCount, outCount, 2); // минимум 2, чтобы не было нуля
-    const baseWidth = 150;       // Минимальная ширина
-    const baseHeight = 100;       // Минимальная высота
-    const stepWidth = 10;        // Сколько «расширяем» за каждый порт сверх 2
-    const stepHeight = 40;       // Сколько «высоты» на каждый порт
-
-    // Вычисляем конечную ширину и высоту
-    // (можно адаптировать формулы по вкусу)
     const width = baseWidth + stepWidth * (maxPorts - 2);
     const height = baseHeight + stepHeight * (maxPorts - 2);
 
-    // Координаты входных портов
     const portItems = [];
 
     for (let i = 0; i < inCount; i++) {
@@ -47,9 +42,7 @@ export const JointJSNewModule = (module: Module) => {
         });
     }
 
-
-
-    return new BaseSvgElement({
+    return new shapes.standard.Path({
         elType: 'newModule',
         name: module.name,
         instance: module.instance,
@@ -84,11 +77,11 @@ export const JointJSNewModule = (module: Module) => {
                     position: { name: 'absolute' },
                     markup: [
                         {
-                            tagName: 'line',       // непосредственно линия
+                            tagName: 'line',
                             selector: 'portLine'
                         },
                         {
-                            tagName: 'circle',     // кружок на конце
+                            tagName: 'circle',
                             selector: 'portCircle'
                         }
                     ],
@@ -99,13 +92,13 @@ export const JointJSNewModule = (module: Module) => {
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: -20, y2: 0,      // Линия теперь идёт влево
+                            x2: -20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: -20,  // кружок тоже в левом конце
+                            cx: -20,
                             cy: 0,
                             r: 4,
                             fill: '#fff',
@@ -136,13 +129,13 @@ export const JointJSNewModule = (module: Module) => {
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: 20, y2: 0,      // Линия теперь идёт влево
+                            x2: 20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: 20,  // кружок тоже в левом конце
+                            cx: 20,
                             cy: 0,
                             r: 4,
                             fill: '#e3d12d',

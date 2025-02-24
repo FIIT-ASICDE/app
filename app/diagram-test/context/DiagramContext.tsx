@@ -1,6 +1,7 @@
 // pages/diagram-test/context/DiagramContext.tsx
 
 import React, { createContext, useState, ReactNode } from 'react';
+import {customNamespace} from '../hooks/useJointJS'
 import { dia } from "@joint/core";
 import * as joint from "@joint/core";
 
@@ -26,7 +27,12 @@ interface DiagramProviderProps {
 }
 
 export const DiagramProvider = ({ children }: DiagramProviderProps) => {
-    const [graph] = useState(new dia.Graph());
+    const [graph] = useState(
+        () =>
+            new dia.Graph({}, {
+                cellNamespace: customNamespace
+            })
+    );
     const [paper, setPaper] = useState<dia.Paper | null>(null);
     const [selectedElement, setSelectedElement] = useState<dia.Cell | null>(null);
     const [isPanning, setIsPanning] = useState(false);
@@ -41,6 +47,7 @@ export const DiagramProvider = ({ children }: DiagramProviderProps) => {
             paper.scale(scale, scale);
         }
     };
+
 
     const zoomOut = () => {
         if (paper) {

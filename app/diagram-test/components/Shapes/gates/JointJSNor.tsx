@@ -1,6 +1,7 @@
 // src/components/Shapes/JointJSAnd.tsx
 import { BaseSvgElement } from '../base/BaseSvgElement';
-import { Nor } from '../classes/nor'; // Ваш класс для хранения данных and
+import { Nor } from '../classes/nor';
+import { shapes } from "@joint/core"; // Ваш класс для хранения данных and
 
 export const JointJSNor = (nor: Nor) => {
     // Минимальный размер, с которого начинаем:
@@ -62,7 +63,7 @@ export const JointJSNor = (nor: Nor) => {
     });
 
 
-    return new BaseSvgElement({
+    return new shapes.standard.Path({
         elType: 'nor',
         name: nor.name,
         bandwidth: nor.bandwidth,

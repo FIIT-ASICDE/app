@@ -39,6 +39,7 @@
 
 import { BaseSvgElement } from '../base/BaseSvgElement';
 import {Subtractor} from '../classes/subtractor';
+import { shapes } from "@joint/core";
 
 export const JointJSSubtractor = (subtractor: Subtractor) => {
 
@@ -75,7 +76,7 @@ export const JointJSSubtractor = (subtractor: Subtractor) => {
     });
 
 
-    return new BaseSvgElement({
+    return new shapes.standard.Path({
         elType: 'subtractor',
         name: subtractor.name,
         bandwidth: subtractor.dataBandwidth,

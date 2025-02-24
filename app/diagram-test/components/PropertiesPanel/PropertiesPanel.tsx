@@ -20,17 +20,22 @@ import {JointJSNor} from "../Shapes/gates/JointJSNor";
 import {Nor} from "../Shapes/classes/nor";
 import {JointJSNewModule} from "../Shapes/modules/JointJSNewModule";
 import {Module} from "../Shapes/classes/module";
-
+import {JointJSRegister} from "../Shapes/memory/JointJSRegister";
+import {Register} from "../Shapes/classes/register";
+import { MdErrorOutline } from "react-icons/md";
+import { FaEdit, FaTrash } from 'react-icons/fa';
 interface Properties {
     label?: string;
     stroke?: string;
     strokeWidth?: number;
     comparatorType?: string;
     bandwidth?: number;
+    addressBandwidth?: number;
     inputPorts?: number;
     instance?: string;
     inPortsModule?: { name: string; bandwidth: number }[];
     outPortsModule?: { name: string; bandwidth: number }[];
+    resetPort?: boolean;
 }
 
 const PropertiesPanel = () => {
@@ -39,24 +44,26 @@ const PropertiesPanel = () => {
         label: '',
         instance: '',
         bandwidth: 1,
+        addressBandwidth: 8,
         inputPorts: 2,
         stroke: '#000',
         strokeWidth: 2,
         comparatorType: '',
         inPortsModule: [],
         outPortsModule: [],
+        resetPort: false,
     });
     const [isHover, setIsHover] = useState(false);
     const [portWidthMode, setPortWidthMode] = useState<'bit' | 'vector' | 'struct'>('bit');
     const [logicWidthMode, setLogicWidthMode] = useState<'bit' | 'vector'>('bit');
-
-    // Состояние для диалога добавления порта
+    const [errorMessage, setErrorMessage] = useState('');
     const [showAddPortDialog, setShowAddPortDialog] = useState(false);
-    // Тип порта, который добавляем: "input" или "output"
     const [newPortType, setNewPortType] = useState<'input' | 'output'>('input');
-    // Данные для нового порта (например, имя, пропускная способность и т.п.)
     const [newPortData, setNewPortData] = useState({ name: '', bandwidth: 1 });
-
+    const [isEditingPort, setIsEditingPort] = useState(false);
+    const [editPortIndex, setEditPortIndex] = useState<number | null>(null);
+    const [editPortType, setEditPortType] = useState<'input' | 'output'>('input');
+    const [showSaveNotification, setShowSaveNotification] = useState(false);
 
     useEffect(() => {
         if (selectedElement) {
@@ -66,7 +73,9 @@ const PropertiesPanel = () => {
                 inputPorts: selectedElement.attributes.inPorts || 0,
                 inPortsModule: selectedElement.attributes.moduleInPorts || [],
                 outPortsModule: selectedElement.attributes.moduleOutPorts || [],
-                instance: selectedElement.attributes.instance || ''
+                instance: selectedElement.attributes.instance || '',
+                addressBandwidth: selectedElement.attributes.addressBandwidth || 8,
+                resetPort: selectedElement.attributes.resetPort ?? false,
 
             };
             if (selectedElement.isLink()) {
@@ -89,12 +98,14 @@ const PropertiesPanel = () => {
                 label: '',
                 instance: '',
                 bandwidth: 1,
+                addressBandwidth: 8,
                 inputPorts: 2,
                 stroke: '#000',
                 strokeWidth: 2,
                 comparatorType: '',
                 inPortsModule: [],
                 outPortsModule: [],
+                resetPort: false,
             });
         }
     }, [selectedElement]);
@@ -114,7 +125,7 @@ const PropertiesPanel = () => {
                 label: labelLines4[1],
                 comparatorType: labelLines4[0],
             }));
-        } else if (['decoder', 'encoder'].includes(elType)) {
+        } else if (['decoder', 'encoder', 'ram', 'register'].includes(elType)) {
             setProperties(prev => ({
                 ...prev,
                 label: labelLines1[1],
@@ -129,26 +140,41 @@ const PropertiesPanel = () => {
     }, [selectedElement]);
 
 
-    const handleChange = (e: { target: { name: any; value: any; }; }) => {
-        const { name, value } = e.target;
+    const handleChange = (e: { target: { name: string; type: string; checked?: boolean; value?: any; }; }) => {
+        const { name, type, checked, value} = e.target;
         setProperties(prev => ({
             ...prev,
-            [name]: name === 'strokeWidth' || name === 'bandwidth' || name === 'inputPorts' ? Number(value) : value
+            [name]: type === 'checkbox' ? checked :
+                (name === 'strokeWidth' || name === 'bandwidth' || name === 'inputPorts' || name === 'addressBandwidth'
+                    ? Number(value) : value)
         }));
 
     };
+    useEffect(() => {
+        if (showSaveNotification) {
+            const timer = setTimeout(() => {
+                setShowSaveNotification(false);
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [showSaveNotification]);
 
-    // Обработчики открытия модального окна для добавления порта
     const handleAddInputPort = () => {
         setNewPortType('input');
         setNewPortData({ name: '', bandwidth: 1 });
         setShowAddPortDialog(true);
+
+        setIsEditingPort(false);
+        setEditPortIndex(null);
     };
 
     const handleAddOutputPort = () => {
         setNewPortType('output');
         setNewPortData({ name: '', bandwidth: 1 });
         setShowAddPortDialog(true);
+
+        setIsEditingPort(false);
+        setEditPortIndex(null);
     };
 
     // Обработчик изменения данных нового порта
@@ -163,32 +189,76 @@ const PropertiesPanel = () => {
     const handleNewPortSubmit = () => {
         if (!selectedElement) return;
 
-        // В зависимости от newPortType добавляем в properties.inPortsModule или outPortsModule
-        if (newPortType === 'input') {
-            setProperties(prev => ({
-                ...prev,
-                inPortsModule: [
-                    ...prev.inPortsModule,
-                    {
-                        name: newPortData.name || `input${Date.now()}`,
-                        bandwidth: newPortData.bandwidth
-                    }
-                ]
-            }));
-        } else {
-            setProperties(prev => ({
-                ...prev,
-                outPortsModule: [
-                    ...prev.outPortsModule,
-                    {
-                        name: newPortData.name || `output${Date.now()}`,
-                        bandwidth: newPortData.bandwidth
-                    }
-                ]
-            }));
+        // Сброс сообщения
+        setErrorMessage('');
+
+        // Валидация
+        if (!newPortData.name.trim()) {
+            setErrorMessage('Port Name is mandatory');
+            return;
+        }
+        if (newPortData.bandwidth < 1) {
+            setErrorMessage('Bandwidth must be >= 1');
+            return;
         }
 
+        // Если мы РЕДАКТИРУЕМ порт
+        if (isEditingPort && editPortIndex !== null) {
+            if (editPortType === 'input') {
+                const updated = [...properties.inPortsModule];
+                updated[editPortIndex] = {
+                    name: newPortData.name,
+                    bandwidth: newPortData.bandwidth,
+                };
+                setProperties(prev => ({
+                    ...prev,
+                    inPortsModule: updated,
+                }));
+            } else {
+                const updated = [...properties.outPortsModule];
+                updated[editPortIndex] = {
+                    name: newPortData.name,
+                    bandwidth: newPortData.bandwidth,
+                };
+                setProperties(prev => ({
+                    ...prev,
+                    outPortsModule: updated,
+                }));
+            }
+        }
+        else {
+            // Иначе мы ДОБАВЛЯЕМ новый порт
+            if (newPortType === 'input') {
+                setProperties(prev => ({
+                    ...prev,
+                    inPortsModule: [
+                        ...prev.inPortsModule,
+                        {
+                            name: newPortData.name,
+                            bandwidth: newPortData.bandwidth,
+                        }
+                    ]
+                }));
+            } else {
+                setProperties(prev => ({
+                    ...prev,
+                    outPortsModule: [
+                        ...prev.outPortsModule,
+                        {
+                            name: newPortData.name,
+                            bandwidth: newPortData.bandwidth,
+                        }
+                    ]
+                }));
+            }
+        }
+
+        // Закрываем диалог
         setShowAddPortDialog(false);
+
+        // Сбрасываем флаги
+        setIsEditingPort(false);
+        setEditPortIndex(null);
     };
 
     const handleNewPortCancel = () => {
@@ -244,6 +314,52 @@ const PropertiesPanel = () => {
         // Выбираем его
         setSelectedElement(newModuleCell);
     };
+    const handleEditPort = (portType: 'input' | 'output', index: number) => {
+        setIsEditingPort(true);
+        setEditPortIndex(index);
+        setEditPortType(portType);
+        setErrorMessage('');
+
+        // Находим текущий порт
+        const currentPort = portType === 'input'
+            ? properties.inPortsModule[index]
+            : properties.outPortsModule[index];
+
+        // Заполняем форму (modal) данными порта
+        setNewPortData({
+            name: currentPort.name,
+            bandwidth: currentPort.bandwidth,
+        });
+
+        setShowAddPortDialog(true);
+    };
+    const handleDeletePort = (portType: 'input' | 'output', index: number) => {
+        if (portType === 'input') {
+            const updatedInPorts = [...properties.inPortsModule];
+            updatedInPorts.splice(index, 1); // удаляем порт
+            setProperties(prev => ({ ...prev, inPortsModule: updatedInPorts }));
+        } else {
+            const updatedOutPorts = [...properties.outPortsModule];
+            updatedOutPorts.splice(index, 1);
+            setProperties(prev => ({ ...prev, outPortsModule: updatedOutPorts }));
+        }
+    };
+
+    const handleMemoryPortChange = () => {
+        if (selectedElement?.attributes.elType === 'register') {
+            const { x, y } = selectedElement.position();
+            const registerData = new Register();
+            registerData.name = properties.label || '';
+            registerData.resetPort = properties.resetPort;
+            registerData.dataBandwidth = properties.bandwidth || 1;
+            registerData.position = { x, y };
+
+            graph.removeCells([selectedElement]);
+            const newRegister = JointJSRegister(registerData);
+            graph.addCell(newRegister);
+            setSelectedElement(newRegister);
+        }
+    }
 
     const handleLogicPortChange = () => {
 
@@ -357,6 +473,14 @@ const PropertiesPanel = () => {
         else if (selectedElement.attributes.elType === 'decoder') {
             attrsToUpdate.label = { text: 'DECODER\n' + properties.label };
         }
+        else if (selectedElement.attributes.elType === 'ram') {
+            selectedElement.attributes.addressBandwidth = properties.addressBandwidth;
+            attrsToUpdate.label = { text: 'RAM\n' + properties.label };
+        }
+        else if (selectedElement.attributes.elType === 'register') {
+            handleMemoryPortChange();
+            return;
+        }
         else if (selectedElement.attributes.elType === 'encoder') {
             attrsToUpdate.label = { text: 'ENCODER\n' + properties.label };
         }
@@ -405,6 +529,7 @@ const PropertiesPanel = () => {
         selectedElement.attr(attrsToUpdate);
         console.log(selectedElement);
         updateElement(selectedElement);
+        setShowSaveNotification(true);
     };
 
     const handleDelete = () => {
@@ -797,19 +922,145 @@ const PropertiesPanel = () => {
                         {properties.inPortsModule.map((p, idx) => (
                             <div key={idx} className={styles.portItem}>
                                 <span>{p.name} (bw={p.bandwidth})</span>
+
+                                {/* Иконка редактирования */}
+                                <FaEdit
+                                    className={styles.portIcon}
+                                    onClick={() => handleEditPort('input', idx)}
+                                />
+
+                                {/* Иконка удаления */}
+                                <FaTrash
+                                    className={styles.portIcon}
+                                    onClick={() => handleDeletePort('input', idx)}
+                                />
                             </div>
                         ))}
-                        <button onClick={handleAddInputPort} className={styles.addPortButton}>Add Input Port</button>
+                        <button onClick={handleAddInputPort} className={styles.addPortButton}>
+                            Add Input Port
+                        </button>
                     </div>
                     <div className={styles.portSection}>
                         <h4>Output Ports</h4>
                         {properties.outPortsModule.map((p, idx) => (
                             <div key={idx} className={styles.portItem}>
                                 <span>{p.name} (bw={p.bandwidth})</span>
+
+                                <FaEdit
+                                    className={styles.portIcon}
+                                    onClick={() => handleEditPort('output', idx)}
+                                />
+
+                                <FaTrash
+                                    className={styles.portIcon}
+                                    onClick={() => handleDeletePort('output', idx)}
+                                />
                             </div>
                         ))}
-                        <button onClick={handleAddOutputPort} className={styles.addPortButton}>Add Output Port</button>
+                        <button onClick={handleAddOutputPort} className={styles.addPortButton}>
+                            Add Output Port
+                        </button>
                     </div>
+                </>
+            )}
+            {(['ram', 'register'].includes(selectedElement.attributes.elType)) && (
+                <>
+                    <label>
+                        RAM name:
+                        <input
+                            type="text"
+                            name="label"
+                            placeholder="Port's name..."
+                            value={properties.label || ''}
+                            onChange={handleChange}
+                        />
+                    </label>
+                    {(['ram'].includes(selectedElement.attributes.elType)) && (
+                        <label>
+                            Address width:
+                            <input
+                                type="number"
+                                name="addressBandwidth"
+                                placeholder="Insert width..."
+                                value={properties.addressBandwidth || ''}
+                                onChange={handleChange}
+                            />
+                        </label>
+                    )}
+                    {(['register'].includes(selectedElement.attributes.elType)) && (
+                        <label>
+                            Reset Port:
+                            <input
+                                type="checkbox"
+                                name="resetPort"
+                                checked={!!properties.resetPort} // Преобразуем в boolean
+                                onChange={handleChange}
+                            />
+                        </label>
+                    )}
+                    <div className={styles.radioContainer}>
+                        <span>Select DATA width:</span>
+                        <div className={styles.radioOption}>
+                            <input
+                                type="radio"
+                                name="portWidth"
+                                value="bit"
+                                checked={portWidthMode === 'bit'}
+                                onChange={handleBandwidthRadioChange}
+                            />
+                            <label>Bit</label>
+                        </div>
+
+                        <div className={styles.radioOption}>
+                            <input
+                                type="radio"
+                                name="portWidth"
+                                value="vector"
+                                checked={portWidthMode === 'vector'}
+                                onChange={handleBandwidthRadioChange}
+                            />
+                            <label>Vector</label>
+                        </div>
+
+                        <div className={styles.radioOption}>
+                            <input
+                                type="radio"
+                                name="portWidth"
+                                value="struct"
+                                checked={portWidthMode === 'struct'}
+                                onChange={handleBandwidthRadioChange}
+                            />
+                            <label>User defined</label>
+                        </div>
+                    </div>
+
+                    {portWidthMode === 'vector' && (
+                        <label>
+                            Width of vector:
+                            <input
+                                type="number"
+                                name="bandwidth"
+                                value={properties.bandwidth || 0}
+                                onChange={handleChange}
+                            />
+                        </label>
+                    )}
+                    {portWidthMode === 'struct' && (
+                        <label>
+                            Choose package file:
+                            <select
+                                name="packageFile"
+                            >
+                                {/*<option value=">">{'>'}</option>*/}
+                            </select>
+                            Choose user defined type:
+                            <select
+                                name="packageFile"
+                            >
+                                {/*<option value=">">{'>'}</option>*/}
+                            </select>
+                        </label>
+                    )}
                 </>
             )}
 
@@ -848,11 +1099,20 @@ const PropertiesPanel = () => {
                     Delete
                 </button>
             </div>
+            {showSaveNotification && (
+                <div className={styles.saveNotification}>Element saved successfully!</div>
+            )}
             {/* Модальное окно для добавления порта */}
             {showAddPortDialog && (
                 <div className={styles.modalOverlay}>
                     <div className={styles.modal}>
                         <h3>Add {newPortType === 'input' ? 'Input' : 'Output'} Port</h3>
+                        {errorMessage && (
+                            <div className={styles.errorMessage}>
+                                <MdErrorOutline className={styles.errorIcon} />
+                                <span>{errorMessage}</span>
+                            </div>
+                        )}
                         <label>
                             Port Name:
                             <input

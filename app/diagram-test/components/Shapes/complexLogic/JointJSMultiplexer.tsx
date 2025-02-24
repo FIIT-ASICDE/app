@@ -1,5 +1,6 @@
 import { BaseSvgElement } from '../base/BaseSvgElement';
-import { Multiplexer } from '../classes/multiplexer'; // Ваш класс для хранения данных and
+import { Multiplexer } from '../classes/multiplexer';
+import { shapes } from "@joint/core"; // Ваш класс для хранения данных and
 
 export const JointJSMultiplexer = (multiplexer: Multiplexer) => {
     // Минимальный размер, с которого начинаем:
@@ -51,7 +52,7 @@ export const JointJSMultiplexer = (multiplexer: Multiplexer) => {
 
     // Для наглядности можно менять «путь» (Path) или «Image»:
     // Здесь для примера используем «Image» c SVG andIcon, но можем и path-форму применить
-    return new BaseSvgElement({
+    return new shapes.standard.Path({
         elType: 'multiplexer',
         name: multiplexer.name,
         bandwidth: multiplexer.dataBandwidth,

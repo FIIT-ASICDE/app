@@ -1,6 +1,7 @@
 // src/components/Shapes/JointJSAnd.tsx
 import { BaseSvgElement } from '../base/BaseSvgElement';
 import { And } from '../classes/and'; // Ваш класс для хранения данных and
+import { shapes } from "@joint/core";
 
 export const JointJSAnd = (and: And) => {
     // Минимальный размер, с которого начинаем:
@@ -36,7 +37,7 @@ export const JointJSAnd = (and: And) => {
 
     // Для наглядности можно менять «путь» (Path) или «Image»:
     // Здесь для примера используем «Image» c SVG andIcon, но можем и path-форму применить
-    return new BaseSvgElement({
+    return new shapes.standard.Path({
         elType: 'and',
         name: and.name,
         bandwidth: and.bandwidth,

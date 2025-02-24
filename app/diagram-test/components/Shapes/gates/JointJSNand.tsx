@@ -1,6 +1,7 @@
 // src/components/Shapes/JointJSAnd.tsx
 import { BaseSvgElement } from '../base/BaseSvgElement';
-import { Nand } from '../classes/nand'; // Ваш класс для хранения данных and
+import { Nand } from '../classes/nand';
+import { shapes } from "@joint/core"; // Ваш класс для хранения данных and
 
 export const JointJSNand = (nand: Nand) => {
     // Минимальный размер, с которого начинаем:
@@ -32,7 +33,7 @@ export const JointJSNand = (nand: Nand) => {
 
     // Для наглядности можно менять «путь» (Path) или «Image»:
     // Здесь для примера используем «Image» c SVG andIcon, но можем и path-форму применить
-    return new BaseSvgElement({
+    return new shapes.standard.Path({
         elType: 'nand',
         name: nand.name,
         bandwidth: nand.bandwidth,

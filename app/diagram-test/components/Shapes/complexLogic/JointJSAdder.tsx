@@ -1,5 +1,6 @@
 import { BaseSvgElement } from '../base/BaseSvgElement';
 import {Adder} from '../classes/adder';
+import { shapes } from "@joint/core";
 
 export const JointJSAdder = (adder: Adder) => {
 
@@ -36,7 +37,7 @@ export const JointJSAdder = (adder: Adder) => {
     });
 
 
-    return new BaseSvgElement({
+    return new shapes.standard.Path({
         elType: 'adder',
         name: adder.name,
         bandwidth: adder.dataBandwidth,

@@ -31,42 +31,12 @@ const Sidebar = () => {
     const [isSaveLoadCollapsed, setIsSaveLoadCollapsed] = React.useState(false);
     const [isActionsCollapsed, setIsActionsCollapsed] = React.useState(false);
     const [isComplexLogicCollapsed, setIsComplexLogicCollapsed] = React.useState(false);
+    const [isMemoryCollapsed, setIsMemoryCollapsed] = React.useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleDragStart = (event: React.DragEvent, toolType: string) => {
         event.dataTransfer.setData('toolType', toolType);
     };
-
-    // const handleSave = async () => {
-    //     const code = saveDiagramAsCode(graph);
-    //     const name = prompt('Введите имя диаграммы:');
-    //     if (name) {
-    //         try {
-    //             const response = await fetch('/api/saveDiagram', {
-    //                 method: 'POST',
-    //                 headers: {
-    //                     'Content-Type': 'application/json',
-    //                 },
-    //                 body: JSON.stringify({ name, code }),
-    //             });
-    //             const result = await response.json();
-    //             if (response.ok) {
-    //                 alert('Диаграмма успешно сохранена');
-    //             } else {
-    //                 alert(`Ошибка: ${result.error}`);
-    //             }
-    //         } catch (error) {
-    //             alert('Произошла ошибка при сохранении диаграммы');
-    //         }
-    //     }
-    // };
-    //
-    // const handleLoad = () => {
-    //     const code = prompt('Вставьте ваш SystemVerilog код:');
-    //     if (code) {
-    //         loadCodeToDiagram(code, graph);
-    //     }
-    // };
 
     const handleGenerateCode = () => {
         const code = generateSystemVerilogCode(graph);
@@ -360,7 +330,7 @@ const Sidebar = () => {
             <div className={styles.group}>
                 <div className={styles.groupHeader} onClick={() => setIsModulesCollapsed(!isModulesCollapsed)}>
                     <FaPlug className={styles.collapseIcon} />
-                    <h3>I/O</h3>
+                    <h3>Module/Component</h3>
                     <FaBars className={styles.toggleIcon} />
                 </div>
                 {!isModulesCollapsed && (
@@ -387,6 +357,44 @@ const Sidebar = () => {
                                 <img
                                     src="/images/svg/ExistingModule.svg"
                                     alt="Existing Module"
+                                    className={styles.svgIcon}
+                                />
+                            </div>
+                        </Tippy>
+
+                    </div>
+                )}
+            </div>
+            <div className={styles.group}>
+                <div className={styles.groupHeader} onClick={() => setIsModulesCollapsed(!isModulesCollapsed)}>
+                    <FaPlug className={styles.collapseIcon} />
+                    <h3>Memory</h3>
+                    <FaBars className={styles.toggleIcon} />
+                </div>
+                {!isModulesCollapsed && (
+                    <div className={styles.iconList}>
+                        <Tippy content="RAM" placement="right" delay={[500, 0]}>
+                            <div
+                                className={styles.iconItem}
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, 'ram')}
+                            >
+                                <img
+                                    src="/images/svg/Ram.svg"
+                                    alt="RAM"
+                                    className={styles.svgIcon}
+                                />
+                            </div>
+                        </Tippy>
+                        <Tippy content="REGISTER" placement="right" delay={[500, 0]}>
+                            <div
+                                className={styles.iconItem}
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, 'register')}
+                            >
+                                <img
+                                    src="/images/svg/Register.svg"
+                                    alt="REGISTER"
                                     className={styles.svgIcon}
                                 />
                             </div>

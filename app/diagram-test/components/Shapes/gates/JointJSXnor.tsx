@@ -1,6 +1,7 @@
 // src/components/Shapes/JointJSAnd.tsx
 import { BaseSvgElement } from '../base/BaseSvgElement';
-import { Xnor } from '../classes/xnor'; // Ваш класс для хранения данных and
+import { Xnor } from '../classes/xnor';
+import { shapes } from "@joint/core"; // Ваш класс для хранения данных and
 
 export const JointJSXnor = (xnor: Xnor) => {
     // Минимальный размер, с которого начинаем:
@@ -62,7 +63,7 @@ export const JointJSXnor = (xnor: Xnor) => {
     });
 
 
-    return new BaseSvgElement({
+    return new shapes.standard.Path({
         elType: 'xnor',
         name: xnor.name,
         bandwidth: xnor.bandwidth,

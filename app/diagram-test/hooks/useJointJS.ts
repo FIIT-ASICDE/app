@@ -17,7 +17,7 @@ const highlightSettings = {
     }
 };
 
-const customNamespace = Object.assign({}, shapes);
+export const customNamespace = Object.assign({}, shapes);
 customNamespace['custom.BaseSvgElement'] = BaseSvgElement;
 
 const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {

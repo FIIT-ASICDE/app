@@ -1,6 +1,7 @@
 // src/components/Shapes/JointJSAnd.tsx
 import { BaseSvgElement } from '../base/BaseSvgElement';
-import { Xor } from '../classes/xor'; // Ваш класс для хранения данных and
+import { Xor } from '../classes/xor';
+import { shapes } from "@joint/core"; // Ваш класс для хранения данных and
 
 export const JointJSXor = (xor: Xor) => {
     // Минимальный размер, с которого начинаем:
@@ -62,7 +63,7 @@ export const JointJSXor = (xor: Xor) => {
     });
 
 
-    return new BaseSvgElement({
+    return new shapes.standard.Path({
         elType: 'xor',
         name: xor.name,
         bandwidth: xor.bandwidth,

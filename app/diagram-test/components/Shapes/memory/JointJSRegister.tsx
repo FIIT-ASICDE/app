@@ -1,59 +1,115 @@
-// src/components/Shapes/JointJSAnd.tsx
+
 import { BaseSvgElement } from '../base/BaseSvgElement';
-import { Not } from '../classes/not';
-import { shapes } from "@joint/core"; // Ваш класс для хранения данных and
+import { Register } from '../classes/register';
+import { shapes } from "@joint/core";
 
-export const JointJSNot = (not: Not) => {
-    // Минимальный размер, с которого начинаем:
-    // например, 60 + 10 * (количество портов - 2) или любая ваша формула
-    const inCount = 1
-    const dimension = 50; // пример формулы, можно менять по вкусу
+export const JointJSRegister = (register: Register) => {
 
-    // Координаты входных портов
-    // Здесь, для примера, используем «линейный» подход, когда порты равномерно распределены по левой стороне.
+    const dimension = 200;
+
     const portItems = [];
+
+    const inLeftCount = register.resetPort ? 3 : 2;
+
+    const portLeftY = (idx: number) => (dimension / (inLeftCount + 1)) * (idx + 1);
+
+    // input1 => data
     portItems.push({
         id: 'input1',
         group: 'input',
         args: {
             x: 0,
-            y: dimension / 2
+            y: portLeftY(0),
+        },
+        attrs: {
+            portLabel: { text: 'data' }
         }
     });
-    // Выходной порт (один) справа, по центру
+
+    // input3 => we
+    portItems.push({
+        id: 'input2',
+        group: 'input',
+        args: {
+            x: 0,
+            y: portLeftY(1)
+        },
+        attrs: {
+            portLabel: { text: 'we' }
+        }
+    });
+    if (register.resetPort) {
+        // input3 => rst
+        portItems.push({
+            id: 'input3',
+            group: 'input',
+            args: {
+                x: 0,
+                y: portLeftY(2)
+            },
+            attrs: {
+                portLabel: { text: 'rst' }
+            }
+        });
+    }
+
+
+    // ----------------------------------------------------------
+    // 2) input4 => clk (расположен сверху, как раньше)
+    // ----------------------------------------------------------
+    portItems.push({
+        id: 'input4',
+        group: 'input',
+        args: {
+            x: dimension / 4,
+            y: -15
+        },
+        attrs: {
+            portLine: {
+                x1: 0,  y1: 15,
+                x2: 0,  y2: -5,
+            },
+            portCircle: {
+                cx: 0,  cy: -5
+            },
+            portLabel: { text: 'clk' }
+        }
+    });
+
+
+
     portItems.push({
         id: 'output1',
         group: 'output',
         args: {
-            x: dimension,
+            x: dimension / 2,
             y: dimension / 2
         }
     });
 
-    // Для наглядности можно менять «путь» (Path) или «Image»:
-    // Здесь для примера используем «Image» c SVG andIcon, но можем и path-форму применить
+
     return new shapes.standard.Path({
-        elType: 'not',
-        name: not.name,
-        bandwidth: not.bandwidth,
-        inPorts: inCount, // можно сохранить сюда, если нужно
-        position: { x: not.position?.x || 100, y: not.position?.y || 100 },
-        size: { width: dimension, height: dimension},
+        elType: 'register',
+        name: register.name,
+        bandwidth: register.dataBandwidth,
+        resetPort: register.resetPort,
+        position: { x: register.position?.x || 100, y: register.position?.y || 100 },
+        size: { width: dimension/2, height: dimension},
         attrs: {
             body: {
-                refD: 'M 100 50 L 0 0 L 0 100 Z M 120 50 A 10 10 0 1 0 100 50 A 10 10 0 1 0 120 50',
+                refD: 'M 0 0 L 30 0 L 25 10 L 20 0 L 50 0 L 50 100 L 0 100 Z',
                 fill: 'white',
                 stroke: '#000',
                 strokeWidth: 2,
             },
             label: {
-                text: '',
+                text: `REGISTER\n${register.name}`,
                 fontSize: 14,
                 fontFamily: 'Arial',
                 fontWeight: 'bold',
                 fill: '#333',
-                x: dimension / 2,
-                y: dimension + 10,
+                x: dimension / 4,
+                y: dimension + 20,
             },
         },
         ports: {
@@ -62,14 +118,9 @@ export const JointJSNot = (not: Not) => {
                 input: {
                     position: { name: 'absolute' },
                     markup: [
-                        {
-                            tagName: 'line',       // непосредственно линия
-                            selector: 'portLine'
-                        },
-                        {
-                            tagName: 'circle',     // кружок на конце
-                            selector: 'portCircle'
-                        }
+                        { tagName: 'line',   selector: 'portLine' },
+                        { tagName: 'circle', selector: 'portCircle' },
+                        { tagName: 'text',   selector: 'portLabel' }
                     ],
                     attrs: {
                         portBody: {
@@ -92,6 +143,14 @@ export const JointJSNot = (not: Not) => {
                             strokeWidth: 2,
                             magnet: 'passive',
                             'port-group': 'input',
+                        },
+                        portLabel: {
+                            textAnchor: 'start',
+                            fontSize: 12,
+                            fill: '#000',
+
+                            x: 5,
+                            y: 4
                         }
                     }
                 },
@@ -136,3 +195,4 @@ export const JointJSNot = (not: Not) => {
         },
     });
 };
+

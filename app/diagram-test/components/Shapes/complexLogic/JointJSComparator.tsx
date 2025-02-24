@@ -1,5 +1,6 @@
 import { BaseSvgElement } from '../base/BaseSvgElement';
 import {Comparator} from '../classes/comparator';
+import { shapes } from "@joint/core";
 
 export const JointJSComparator = (comparator: Comparator) => {
 
@@ -36,7 +37,7 @@ export const JointJSComparator = (comparator: Comparator) => {
     });
 
 
-    return new BaseSvgElement({
+    return new shapes.standard.Path({
         elType: 'comparator',
         name: comparator.name,
         bandwidth: comparator.dataBandwidth,
