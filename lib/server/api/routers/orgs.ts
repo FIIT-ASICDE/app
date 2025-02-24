@@ -158,7 +158,7 @@ function search() {
           ou."role"
         from "Organization" org
         left join "OrganizationUser" ou 
-          on ou."organizationId" = org.id and ou."userId" = ${userId}
+          on ou."organizationId" = org.id and ou."userMetadataId" = ${userId}
         ${
             searchTerm
                 ? Prisma.sql`where org.name ilike ${searchTerm + "%"}`
