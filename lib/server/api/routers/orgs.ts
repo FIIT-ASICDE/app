@@ -210,9 +210,10 @@ function byName() {
     return publicProcedure
         .input(z.string())
         .query(async ({ ctx, input }): Promise<OrganisationDisplay> => {
+            const decodedInput = decodeURIComponent(input)
             const { org } = await orgByName(
                 ctx.prisma,
-                input,
+                decodedInput,
                 ctx.session?.user,
             );
 
@@ -235,9 +236,10 @@ function orgOverview() {
     return publicProcedure
         .input(z.string())
         .query(async ({ ctx, input }): Promise<OrganisationOverview> => {
+            const decodedInput = decodeURIComponent(input)
             const { isUserAdmin, org } = await orgByName(
                 ctx.prisma,
-                input,
+                decodedInput,
                 ctx.session?.user,
             );
             const pinnedOrgRepos = await pinnedRepos(
