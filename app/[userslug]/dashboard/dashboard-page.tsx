@@ -1,7 +1,7 @@
 import type { Invitation } from "@/lib/types/invitation";
 import type { OrganisationDisplay } from "@/lib/types/organisation";
 import type { RepositoryDisplay } from "@/lib/types/repository";
-import type { UserDisplay } from "@/lib/types/user";
+import { UserDisplay, UsersDashboard } from "@/lib/types/user";
 import {
     CalendarArrowDown,
     CalendarOff,
@@ -25,56 +25,10 @@ import {
 } from "@/components/ui/card";
 
 interface DashboardPageProps {
-    userSlug: string;
+    dashboard: UsersDashboard;
 }
 
 const data = {
-    favoriteRepositories: [
-        {
-            id: "1",
-            ownerName: "johndoe1",
-            ownerImage: undefined,
-            name: "favorite-repo-1",
-            visibility: "public",
-        } satisfies RepositoryDisplay,
-        {
-            id: "2",
-            ownerName: "johndoe2",
-            ownerImage: undefined,
-            name: "favorite-repo-2",
-            visibility: "public",
-        } satisfies RepositoryDisplay,
-        {
-            id: "3",
-            ownerName: "johndoe3",
-            ownerImage: undefined,
-            name: "favorite-repo-3",
-            visibility: "public",
-        } satisfies RepositoryDisplay,
-    ] satisfies Array<RepositoryDisplay>,
-    recentRepositories: [
-        {
-            id: "1",
-            ownerName: "kili",
-            ownerImage: undefined,
-            name: "recent-repo-1-repooooooo",
-            visibility: "public",
-        } satisfies RepositoryDisplay,
-        {
-            id: "2",
-            ownerName: "kili",
-            ownerImage: undefined,
-            name: "recent-repo-2",
-            visibility: "public",
-        } satisfies RepositoryDisplay,
-        {
-            id: "3",
-            ownerName: "kili",
-            ownerImage: undefined,
-            name: "recent-repo-3",
-            visibility: "public",
-        } satisfies RepositoryDisplay,
-    ] satisfies Array<RepositoryDisplay>,
     invitations: [
         {
             id: "1",
@@ -167,11 +121,11 @@ const data = {
     ] satisfies Array<Invitation>,
 };
 
-export default function DashboardPage({} /* userSlug */ : DashboardPageProps) {
+export default function DashboardPage({ dashboard }: DashboardPageProps) {
     const recentRepositories: Array<RepositoryDisplay> =
-        data.recentRepositories;
+        dashboard.recentRepositories
     const favoriteRepositories: Array<RepositoryDisplay> =
-        data.favoriteRepositories;
+        dashboard.favoriteRepositories;
     const invitations: Array<Invitation> = data.invitations;
 
     return (

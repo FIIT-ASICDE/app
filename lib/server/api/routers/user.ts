@@ -8,15 +8,15 @@ import { OrganisationDisplay } from "@/lib/types/organisation";
 import {
     OnboardedUser,
     User,
-    UserDisplay,
-    UsersOverview,
+    UserDisplay, UsersDashboard,
+    UsersOverview
 } from "@/lib/types/user";
 import { PrismaType } from "@/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import { pinnedRepos } from "./repos";
+import { favoriteRepos, pinnedRepos, recentRepos } from "./repos";
 
 export const userRouter = createTRPCRouter({
     completeOnboarding: completeOnboarding(),
@@ -25,6 +25,7 @@ export const userRouter = createTRPCRouter({
     usersOverview: usersOverview(),
     edit: editUser(),
     search: trigramSearch(),
+    usersDashboard: usersDashboard(),
 });
 
 function completeOnboarding() {
@@ -268,6 +269,35 @@ function usersOverview() {
             };
         });
 }
+
+function usersDashboard() {
+    return protectedProcedure
+        .input(
+            z.object({
+                username: z.string(),
+            }),
+        )
+        .query(async ({ ctx, input }): Promise<UsersDashboard> => {
+            const decodedUsername = decodeURIComponent(input.username.trim());
+            const user = await userByUsername(ctx.prisma, decodedUsername);
+            const favorite = await favoriteRepos(
+                ctx.prisma,
+                user.id,
+                ctx.session?.user.id === user.id
+            );
+            const recent = await recentRepos(
+                ctx.prisma,
+                user.id,
+                ctx.session?.user.id === user.id
+            )
+
+            return {
+                favoriteRepositories: favorite,
+                recentRepositories: recent
+            };
+        });
+}
+
 
 async function userByUsername(
     prisma: PrismaType,

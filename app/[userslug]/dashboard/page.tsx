@@ -1,4 +1,5 @@
 import DashboardPage from "@/app/[userslug]/dashboard/dashboard-page";
+import { api } from "@/lib/trpc/server";
 
 export default async function UserDashboard({
     params,
@@ -6,5 +7,7 @@ export default async function UserDashboard({
     params: Promise<{ userslug: string }>;
 }) {
     const userSlug = (await params).userslug;
-    return <DashboardPage userSlug={userSlug} />;
+    const dashboard = await api.user.usersDashboard({ username: userSlug });
+
+    return <DashboardPage dashboard={dashboard} />;
 }

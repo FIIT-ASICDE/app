@@ -428,6 +428,118 @@ export async function pinnedRepos(
     }));
 }
 
+export async function favoriteRepos(
+    prisma: PrismaType,
+    ownerId: string,
+    showPrivate: boolean,
+): Promise<Array<RepositoryDisplay>> {
+    // find if the ownerId is orgs
+    const organization = await prisma.organization.findUnique({
+        where: { id: ownerId },
+        select: { id: true, name: true, image: true },
+    });
+
+    const whereClause = {
+        AND: [
+            { favorite: true },
+            // Filter based on organization or user ownership
+            organization
+                ? { organizationId: ownerId }
+                : {
+                    AND: [
+                        { userMetadata: { userId: ownerId } },
+                        { organizationId: null },
+                    ],
+                },
+            // if not showPrivate, then return only public, else all
+            ...(!showPrivate ? [{ repo: { public: true } }] : []),
+        ],
+    };
+    const favoriteRepoConnections = await prisma.repoUserOrganization.findMany({
+        where: whereClause,
+        select: {
+            repo: {
+                select: {
+                    id: true,
+                    name: true,
+                    public: true,
+                },
+            },
+            userMetadata: { include: { user: true } },
+        },
+        orderBy: {
+            repo: {
+                name: "asc",
+            },
+        },
+    });
+
+    return favoriteRepoConnections.map(({ repo, userMetadata }) => ({
+        id: repo.id,
+        name: repo.name,
+        ownerName: organization ? organization.name : userMetadata.user.name!,
+        ownerImage: organization
+            ? organization.image || undefined
+            : userMetadata.user.image || undefined,
+        visibility: repo.public ? "public" : "private",
+    }));
+}
+
+export async function recentRepos(
+    prisma: PrismaType,
+    ownerId: string,
+    showPrivate: boolean,
+): Promise<Array<RepositoryDisplay>> {
+    // find if the ownerId is orgs
+    const organization = await prisma.organization.findUnique({
+        where: { id: ownerId },
+        select: { id: true, name: true, image: true },
+    });
+
+    const whereClause = {
+        AND: [
+            // Filter based on organization or user ownership
+            organization
+                ? { organizationId: ownerId }
+                : {
+                    AND: [
+                        { userMetadata: { userId: ownerId } },
+                        { organizationId: null },
+                    ],
+                },
+            // if not showPrivate, then return only public, else all
+            ...(!showPrivate ? [{ repo: { public: true } }] : []),
+        ],
+    };
+    const recentRepoConnections = await prisma.repoUserOrganization.findMany({
+        where: whereClause,
+        select: {
+            repo: {
+                select: {
+                    id: true,
+                    name: true,
+                    public: true,
+                },
+            },
+            userMetadata: { include: { user: true } },
+        },
+        orderBy: {
+            lastVisitedAt: "desc",
+        },
+        take: 3
+    });
+
+    return recentRepoConnections.map(({ repo, userMetadata }) => ({
+        id: repo.id,
+        name: repo.name,
+        ownerName: organization ? organization.name : userMetadata.user.name!,
+        ownerImage: organization
+            ? organization.image || undefined
+            : userMetadata.user.image || undefined,
+        visibility: repo.public ? "public" : "private",
+    }));
+}
+
 /**
  * Current user can see repos if they are private, or, when the repos
  * are some users, then the current user must have at least a role, the

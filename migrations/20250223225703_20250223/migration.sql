@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "RepoUserOrganization" ALTER COLUMN "lastVisitedAt" SET DEFAULT CURRENT_TIMESTAMP,
+ALTER COLUMN "lastVisitedAt" SET DATA TYPE TIMESTAMP(3);
