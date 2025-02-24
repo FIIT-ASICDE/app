@@ -8,7 +8,10 @@ export default async function UserRepositoriesPage({
     params: Promise<{ userslug: string }>;
 }) {
     const session = await auth();
+
     const userSlug = (await params).userslug;
+    const user = await api.user.byUsername({ username: userSlug });
+
     const userRepos = await api.repo.ownersRepos({ ownerSlug: userSlug });
     // if the current user is asking for his/her repos, also fetch orgs needed
     // to create a new one, but only those where he/she is admin
@@ -23,8 +26,8 @@ export default async function UserRepositoriesPage({
     return (
         <RepositoriesPage
             repos={userRepos}
+            canUserCreate={session?.user.id === user.id}
             userOrgs={usersOrgs}
-            isUserOwner={usersOrgs !== undefined}
         />
     );
 }

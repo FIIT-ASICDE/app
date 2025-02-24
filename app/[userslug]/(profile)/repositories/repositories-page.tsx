@@ -30,13 +30,13 @@ import {
 
 interface RepositoriesPageProps {
     repos: Array<Repository>;
-    isUserOwner: boolean;
+    canUserCreate: boolean;
     userOrgs?: Array<Omit<OrganisationDisplay, "memberCount">>;
 }
 
 export default function RepositoriesPage({
     repos,
-    isUserOwner,
+    canUserCreate,
     userOrgs,
 }: RepositoriesPageProps) {
     const [repositoriesLayout, setRepositoriesLayout] =
@@ -128,9 +128,9 @@ export default function RepositoriesPage({
                         visibilityFilter={visibilityFilter}
                         setVisibilityFilter={setVisibilityFilter}
                     />
-                    {isUserOwner && userOrgs && (
+                    {canUserCreate && (
                         <CreateRepositoryDialog
-                            usersOrganisations={userOrgs}
+                            usersOrganisations={userOrgs ?? []}
                             repositories={repositories}
                             setRepositories={setRepositories}
                         />
@@ -180,7 +180,7 @@ export default function RepositoriesPage({
                                     ),
                                 );
                             }}
-                            isUserOwner={isUserOwner}
+                            isUserOwner={canUserCreate}
                         />
                     ))}
                 </div>
