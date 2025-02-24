@@ -164,8 +164,9 @@ function searchByOwnerAndRepoSlug() {
     return protectedProcedure
         .input(repoBySlugsSchema)
         .query(async ({ ctx, input }) => {
+            const decodedOwnerSlug = decodeURIComponent(input.ownerSlug.trim());
             const organization = await ctx.prisma.organization.findFirst({
-                where: { name: input.ownerSlug },
+                where: { name: decodedOwnerSlug },
                 select: { id: true, name: true, image: true },
             });
 
@@ -173,7 +174,7 @@ function searchByOwnerAndRepoSlug() {
             const user = !organization
                 ? await ctx.prisma.user.findFirst({
                       select: { id: true, name: true, image: true },
-                      where: { name: input.ownerSlug },
+                      where: { name: decodedOwnerSlug },
                   })
                 : null;
 
@@ -188,9 +189,10 @@ function searchByOwnerAndRepoSlug() {
             const ownerName = organization?.name || user?.name;
             const ownerImage = organization?.image || user?.image;
 
+            const decodedRepositorySlug = decodeURIComponent(input.repositorySlug.trim());
             const repo = await ctx.prisma.repo.findFirst({
                 where: {
-                    name: input.repositorySlug,
+                    name: decodedRepositorySlug,
                     OR: [
                         { public: true },
                         {
@@ -263,14 +265,15 @@ function reposByOwnerSlug() {
             }),
         )
         .query(async ({ ctx, input }): Promise<Array<Repository>> => {
+            const decodedOwnerSlug = decodeURIComponent(input.ownerSlug.trim());
             const organization = await ctx.prisma.organization.findFirst({
-                where: { name: input.ownerSlug },
+                where: { name: decodedOwnerSlug },
             });
 
             // if no organization found, try to find user by username
             const user = !organization
                 ? await ctx.prisma.user.findFirst({
-                      where: { name: input.ownerSlug },
+                      where: { name: decodedOwnerSlug },
                   })
                 : null;
 
