@@ -26,6 +26,7 @@ export const userRouter = createTRPCRouter({
     edit: editUser(),
     search: trigramSearch(),
     usersDashboard: usersDashboard(),
+    usersOrganisations: usersOrganisations()
 });
 
 function completeOnboarding() {
@@ -295,6 +296,22 @@ function usersDashboard() {
                 favoriteRepositories: favorite,
                 recentRepositories: recent
             };
+        });
+}
+
+function usersOrganisations() {
+    return protectedProcedure
+        .input(
+            z.object({
+                username: z.string(),
+            }),
+        )
+        .query(async ({ ctx, input }): Promise<Array<OrganisationDisplay>> => {
+            const decodedUsername = decodeURIComponent(input.username.trim());
+            const user = await userByUsername(ctx.prisma, decodedUsername);
+            const orgs = await getUsersOrgs(ctx.prisma, user.id);
+
+            return orgs
         });
 }
 

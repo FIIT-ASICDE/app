@@ -29,44 +29,14 @@ import {
     PaginationPrevious,
 } from "@/components/ui/pagination";
 
-const data = {
-    usersOrganisations: [
-        {
-            id: "f3f67850-e8cf-428d-84ae-853c46031f46",
-            name: "Google",
-            image: "/avatars/organisation-avatar1.png",
-            userRole: "member",
-            memberCount: 10,
-            bio: "Google is an American search engine company, founded in 1998 by Sergey Brin and Larry Page.",
-        } satisfies OrganisationDisplay,
-        {
-            id: "313b8b5a-6348-4742-a4f8-ce78a0188c70",
-            name: "Microsoft",
-            image: "/avatars/organisation-avatar2.png",
-            userRole: "admin",
-            memberCount: 3,
-            bio: "Microsoft is the largest vendor of computer software in the world.",
-        } satisfies OrganisationDisplay,
-        {
-            id: "c0b62ada-c8c7-4574-91a4-a007a75181f5",
-            name: "ASICDE",
-            image: "/avatars/organisation-avatar3.jpg",
-            userRole: "member",
-            memberCount: 120,
-            bio: "ASICDE is a GitHub organization that provides a development environment for digital system developers.",
-        } satisfies OrganisationDisplay,
-    ] satisfies Array<OrganisationDisplay>,
-    isItMe: true,
-};
+
 
 interface OrganisationsPageProps {
-    userSlug: string;
+    usersOrganisations: Array<OrganisationDisplay>;
 }
 
 export default function OrganisationsPage(
-    {
-        // userSlug
-    }: OrganisationsPageProps,
+    { usersOrganisations }: OrganisationsPageProps,
 ) {
     const [organisationsLayout, setOrganisationsLayout] =
         useState<LayoutType>("grid");
@@ -88,10 +58,10 @@ export default function OrganisationsPage(
 
     const [organisations, setOrganisations] = useState<
         Array<OrganisationDisplay>
-    >(data.usersOrganisations);
+    >(usersOrganisations);
     const [filteredOrganisations, setFilteredOrganisations] = useState<
         Array<OrganisationDisplay>
-    >(data.usersOrganisations);
+    >(usersOrganisations);
     const [organisationSearchPhrase, setOrganisationSearchPhrase] =
         useState<string>("");
     const [roleFilter, setRoleFilter] = useState<RoleOrganisationFilter>("all");
