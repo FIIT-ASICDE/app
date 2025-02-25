@@ -12,8 +12,8 @@ export const repoBySlugsSchema = z.object({
         .min(1, "Repository slug must be at least 1 character")
         .max(100, "Repository slug cannot exceed 100 characters")
         .regex(
-            /^[a-z0-9-]+$/,
-            "Repository slug must be lowercase and contain only letters, numbers, and hyphens",
+            /^[a-zA-Z0-9-]+$/,
+            "Repository slug must contain only letters, numbers, and hyphens",
         )
         .transform((value) => value.trim()),
 });
