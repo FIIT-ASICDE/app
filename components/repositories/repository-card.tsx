@@ -25,10 +25,6 @@ interface RepositoryCardProps {
     favorite: boolean;
     pinned: boolean;
     ownerImage?: string;
-    onStateChange: (
-        repoId: string,
-        state: { favorite: boolean; pinned?: boolean },
-    ) => void;
     isUserOwner?: boolean | null;
 }
 
@@ -42,31 +38,26 @@ export default function RepositoryCard({
     favorite,
     pinned,
     ownerImage,
-    onStateChange,
     isUserOwner,
 }: RepositoryCardProps) {
     const repositoryDisplayName: string = ownerName + "/" + name;
 
     const handleStarClick = async () => {
-        const newState = await toggleRepoState.mutateAsync({
+        await toggleRepoState.mutateAsync({
             ownerId: ownerId,
             repoId: id,
             favorite: !favorite,
         });
-
-        onStateChange(id, newState);
     };
 
     const toggleRepoState = api.repo.toggleState.useMutation();
 
     const handlePinClicked = async () => {
-        const newState = await toggleRepoState.mutateAsync({
+        await toggleRepoState.mutateAsync({
             ownerId: ownerId,
             repoId: id,
             pinned: !pinned,
         });
-
-        onStateChange(id, newState);
     };
 
     return (

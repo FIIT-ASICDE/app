@@ -4,7 +4,7 @@ import { UsersRound } from "lucide-react";
 
 import { LayoutOptions } from "@/components/layout/layout-options";
 import { NoData } from "@/components/no-data/no-data";
-import { PaginationWithLinks } from "@/components/pagination-with-links/pagination-with-links";
+import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
 import { OrganisationCardDisplay } from "@/components/profile/organisation-card-display";
 import Search from "@/components/ui/search";
 
@@ -55,36 +55,39 @@ export default async function OrganisationsPage(props: {
             </div>
 
             <main>
-                <div
-                    className={cn(
-                        "m-6 grid grid-cols-1 gap-3",
-                        !searchParams?.rows ? "lg:grid-cols-2" : "",
-                    )}
-                >
-                    {organizations.length === 0 && (
-                        <NoData
-                            icon={UsersRound}
-                            message={"No organisations found."}
-                        />
-                    )}
-                    {organizations.map((org) => (
-                        <OrganisationCardDisplay
-                            key={org.id}
-                            id={org.id}
-                            name={org.name}
-                            image={org.image}
-                            role={org.userRole}
-                            memberCount={org.memberCount}
-                        />
-                    ))}
-                </div>
-                <div className="mb-6">
-                    <PaginationWithLinks
-                        totalCount={pagination.pageCount}
-                        pageSize={pagination.pageSize}
-                        page={pagination.page}
+                {organizations.length === 0 ? (
+                    <NoData
+                        icon={UsersRound}
+                        message={"No organisations found."}
+                        className="m-6"
                     />
-                </div>
+                ) : (
+                    <>
+                        <div
+                            className={cn(
+                            "m-6 grid grid-cols-1 gap-3",
+                            !searchParams?.rows ? "lg:grid-cols-2" : "",
+                            )}
+                        >
+                            {organizations.map((org) => (
+                                <OrganisationCardDisplay
+                                    key={org.id}
+                                    id={org.id}
+                                    name={org.name}
+                                    image={org.image}
+                                    role={org.userRole}
+                                    memberCount={org.memberCount}
+                                />
+                            ))}
+                        </div>
+                        <DynamicPagination
+                            totalCount={pagination.pageCount}
+                            pageSize={pagination.pageSize}
+                            page={pagination.page}
+                            className="mb-6"
+                        />
+                    </>
+                )}
             </main>
         </div>
     );

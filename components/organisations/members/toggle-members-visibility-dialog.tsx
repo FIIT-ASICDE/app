@@ -56,8 +56,17 @@ export const ToggleMembersVisibilityDialog = ({
                     variant="default"
                     className="w-60 hover:bg-primary-button-hover"
                 >
-                    {showMembers ? <EyeOff /> : <Eye />}
-                    Change members visibility
+                    {showMembers ? (
+                        <>
+                            <EyeOff />
+                            Hide members
+                        </>
+                    ) : (
+                        <>
+                            <Eye />
+                            Show members
+                        </>
+                    )}
                 </Button>
             </DialogTrigger>
             <DialogContent>

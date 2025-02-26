@@ -54,9 +54,11 @@ export const OrganisationCard = ({
                     </div>
                 </div>
             </CardHeader>
-            <CardContent className="space-y-2">
-                <p>{description}</p>
-            </CardContent>
+            {description && (
+                <CardContent className="space-y-2">
+                    <p>{description}</p>
+                </CardContent>
+            )}
         </Card>
     );
 };

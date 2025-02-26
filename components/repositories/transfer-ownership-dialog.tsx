@@ -137,8 +137,7 @@ export const TransferOwnershipDialog = ({
                 </DialogHeader>
                 <span>
                     To confirm this action, please select an organisation that
-                    you are a part of or the next owner from your followed
-                    users.
+                    you are a part of.
                 </span>
                 <Select
                     onValueChange={(newOwnerId) => setNewOwnerId(newOwnerId)}

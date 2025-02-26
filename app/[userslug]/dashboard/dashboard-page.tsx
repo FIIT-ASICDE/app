@@ -13,7 +13,7 @@ import {
 import { Suspense } from "react";
 
 import { NoData } from "@/components/no-data/no-data";
-import { PaginationWithLinks } from "@/components/pagination-with-links/pagination-with-links";
+import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
 import { InvitationCardDisplay } from "@/components/profile/invitation-card-display";
 import { RepositoryCardDisplay } from "@/components/profile/repository-card-display";
 import {
@@ -210,12 +210,14 @@ export default function DashboardPage({ dashboard }: DashboardPageProps) {
                                 ))}
                             </div>
                         </Suspense>
-                        <PaginationWithLinks
-                            totalCount={150}
-                            pageSize={5}
-                            page={2}
-                            className="pt-3"
-                        />
+                        {favoriteRepositories.length !== 0 && (
+                            <DynamicPagination
+                                totalCount={150}
+                                pageSize={5}
+                                page={2}
+                                className="pt-3"
+                            />
+                        )}
                     </CardContent>
                 </Card>
 
