@@ -1,7 +1,8 @@
+"use client";
+
 import { imgSrc } from "@/lib/client-file-utils";
 import { Invitation } from "@/lib/types/invitation";
 import { Calendar, CircleCheck, CircleX } from "lucide-react";
-import Link from "next/link";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import {
@@ -11,6 +12,7 @@ import {
 import { InvitationBadge } from "@/components/profile/invitation-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
+import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
 
 interface InvitationCardDisplayProps {
     invitation: Invitation;
@@ -23,10 +25,26 @@ export const InvitationCardDisplay = ({
 }: InvitationCardDisplayProps) => {
     const invitationDisplayData = getInvitationDisplayData(invitation);
 
+    const handleDeclineInvitation = () => {
+        console.log(
+            "User declined an invitation from " + invitation.sender.username +
+            "to join " + invitation.type +
+            "called" + invitationDisplayData.displayName
+        );
+    };
+
+    const handleAcceptInvitation = () => {
+        console.log(
+            "User accepted an invitation from " + invitation.sender.username +
+            "to join " + invitation.type +
+            "called" + invitationDisplayData.displayName
+        );
+    };
+
     return (
         <Card className={className}>
             <CardHeader className="flex flex-row items-center justify-between p-3">
-                <div className="flex flex-row items-center gap-x-3">
+                <div className="flex flex-row items-center gap-x-3 min-w-0">
                     <AvatarDisplay
                         displayType={"card"}
                         image={imgSrc(invitationDisplayData.image)}
@@ -36,17 +54,14 @@ export const InvitationCardDisplay = ({
                             ""
                         }
                     />
-                    <Link href={invitationDisplayData.link}>
-                        <Button
-                            variant="link"
-                            className="m-0 max-w-full overflow-hidden truncate whitespace-nowrap p-0 text-xl font-semibold leading-none tracking-tight"
-                        >
-                            {invitationDisplayData.displayName}
-                        </Button>
-                    </Link>
+                    <DynamicTitleLink
+                        title={invitationDisplayData.displayName}
+                        link={invitationDisplayData.link}
+                        tooltipVisible
+                    />
                     <InvitationBadge invitationType={invitation.type} />
                 </div>
-                <div className="flex flex-row items-center gap-x-3 pr-3">
+                <div className="flex flex-row items-center gap-x-3 pr-3 flex-shrink-0">
                     <span className="flex flex-row gap-x-2 text-sm text-muted-foreground">
                         <Calendar className="h-5 w-5" />
                         {getTimeDeltaString(invitation.createdAt)}
@@ -68,13 +83,17 @@ export const InvitationCardDisplay = ({
                     </div>
                 </div>
                 <div className="flex flex-row gap-x-3">
-                    <Button variant="outline">
+                    <Button
+                        variant="outline"
+                        onClick={handleDeclineInvitation}
+                    >
                         <CircleX />
                         Decline
                     </Button>
                     <Button
                         variant="default"
                         className="hover:bg-primary-button-hover"
+                        onClick={handleAcceptInvitation}
                     >
                         <CircleCheck />
                         Accept

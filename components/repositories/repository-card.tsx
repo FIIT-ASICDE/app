@@ -1,48 +1,33 @@
 import { imgSrc } from "@/lib/client-file-utils";
-import { api } from "@/lib/trpc/react";
-import { RepositoryVisibility } from "@/lib/types/repository";
+import { Repository } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { Pin, Star } from "lucide-react";
-import Link from "next/link";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { VisibilityBadge } from "@/components/repositories/visibility-badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
 
 interface RepositoryCardProps {
-    id: string;
-    ownerId: string;
-    ownerName: string;
-    name: string;
-    visibility: RepositoryVisibility;
-    description: string | undefined;
-    favorite: boolean;
-    pinned: boolean;
-    ownerImage?: string;
-    isUserOwner?: boolean | null;
+    repository: Repository;
+    isUserOwner: boolean;
+    className?: string;
 }
 
 export default function RepositoryCard({
-    id,
-    ownerId,
-    ownerName,
-    name,
-    visibility,
-    description,
-    favorite,
-    pinned,
-    ownerImage,
+    repository,
     isUserOwner,
+    className,
 }: RepositoryCardProps) {
-    const repositoryDisplayName: string = ownerName + "/" + name;
+    const repositoryDisplayName: string = repository.ownerName + "/" + repository.name;
+    const repositoryLink: string = "/" + repositoryDisplayName;
 
-    const handleStarClick = async () => {
+    /*const handleStarClick = async () => {
         await toggleRepoState.mutateAsync({
             ownerId: ownerId,
             repoId: id,
@@ -58,93 +43,78 @@ export default function RepositoryCard({
             repoId: id,
             pinned: !pinned,
         });
-    };
+    };*/
 
     return (
-        <Card className="min-w-fit shadow-lg">
+        <Card className={cn("max-w-full shadow-lg", className)}>
             <CardHeader>
-                <div className="flex flex-row justify-between">
-                    <div className="flex flex-row gap-x-3">
+                <div className="flex flex-row justify-between gap-x-5">
+                    <div className="flex flex-row items-center gap-x-3 min-w-0">
                         <AvatarDisplay
                             displayType={"card"}
-                            image={imgSrc(ownerImage)}
-                            name={ownerName}
+                            image={imgSrc(repository.ownerImage)}
+                            name={repository.ownerName}
                         />
-                        <Link href={"/" + ownerName + "/" + name}>
-                            <Button
-                                variant="link"
-                                className="m-0 p-0 text-xl font-semibold leading-none tracking-tight"
-                            >
-                                {repositoryDisplayName}
-                            </Button>
-                        </Link>
+                        <DynamicTitleLink
+                            title={repositoryDisplayName}
+                            link={repositoryLink}
+                            tooltipVisible
+                        />
                     </div>
-                    <div className="flex items-center justify-center gap-x-3">
-                        <VisibilityBadge visibility={visibility} />
+                    <div className="flex items-center justify-center gap-x-3 flex-shrink-0">
+                        <VisibilityBadge visibility={repository.visibility} />
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <button
-                                    disabled={toggleRepoState.isPending}
+                                    disabled={false}
                                     className={cn(
                                         "flex items-center justify-center rounded p-1.5",
                                         "hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent",
                                     )}
-                                    onClick={handleStarClick}
                                 >
                                     <Star
-                                        fill={
-                                            favorite ? "currentColor" : "none"
-                                        }
+                                        fill={repository.favorite ? "currentColor" : "none"}
                                         className={cn(
                                             "h-5 w-5 text-foreground",
-                                            favorite
-                                                ? "text-foreground"
-                                                : "text-muted-foreground",
+                                            repository.favorite ? "text-foreground" : "text-muted-foreground",
                                             "disabled:text-muted-foreground",
                                         )}
                                     />
                                 </button>
                             </TooltipTrigger>
-                            <TooltipContent>
-                                {favorite ? "Favorite" : "Not favorite"}
-                            </TooltipContent>
+                            <TooltipContent>{repository.favorite ? "Favorite" : "Not favorite"}</TooltipContent>
                         </Tooltip>
                         {isUserOwner && (
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <button
-                                        disabled={toggleRepoState.isPending}
+                                        disabled={false}
                                         className={cn(
                                             "flex items-center justify-center rounded p-1.5",
                                             "hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent",
                                         )}
-                                        onClick={handlePinClicked}
                                     >
                                         <Pin
-                                            fill={
-                                                pinned ? "currentColor" : "none"
-                                            }
+                                            fill={repository.pinned ? "currentColor" : "none"}
                                             className={cn(
                                                 "h-5 w-5 text-foreground",
-                                                pinned
-                                                    ? "text-foreground"
-                                                    : "text-muted-foreground",
+                                                repository.pinned ? "text-foreground" : "text-muted-foreground",
                                                 "disabled:text-muted-foreground",
                                             )}
                                         />
                                     </button>
                                 </TooltipTrigger>
-                                <TooltipContent>
-                                    {pinned ? "Pinned" : "Not pinned"}
-                                </TooltipContent>
+                                <TooltipContent>{repository.pinned ? "Pinned" : "Not pinned"}</TooltipContent>
                             </Tooltip>
                         )}
                     </div>
                 </div>
             </CardHeader>
-            <CardContent>
-                <p>{description}</p>
-            </CardContent>
+            {repository.description && (
+                <CardContent>
+                    <p>{repository.description}</p>
+                </CardContent>
+            )}
         </Card>
     );
 }

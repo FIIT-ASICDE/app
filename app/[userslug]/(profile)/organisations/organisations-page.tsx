@@ -140,12 +140,7 @@ export default function OrganisationsPage(
                     {filteredOrganisations.map((organisation) => (
                         <OrganisationCard
                             key={organisation.id}
-                            id={organisation.id}
-                            name={organisation.name}
-                            image={organisation.image}
-                            role={organisation.userRole}
-                            memberCount={organisation.memberCount}
-                            description={organisation.bio}
+                            organisation={organisation}
                         />
                     ))}
                 </div>

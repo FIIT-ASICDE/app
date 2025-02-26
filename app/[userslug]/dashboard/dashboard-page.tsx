@@ -15,7 +15,6 @@ import { Suspense } from "react";
 import { NoData } from "@/components/no-data/no-data";
 import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
 import { InvitationCardDisplay } from "@/components/profile/invitation-card-display";
-import { RepositoryCardDisplay } from "@/components/profile/repository-card-display";
 import {
     Card,
     CardContent,
@@ -23,6 +22,8 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { RecentRepositoryCardDisplay } from "@/components/profile/recent-repository-card-display";
+import { FavoriteRepositoryCardDisplay } from "@/components/profile/favorite-repository-card-display";
 
 interface DashboardPageProps {
     dashboard: UsersDashboard;
@@ -155,14 +156,9 @@ export default function DashboardPage({ dashboard }: DashboardPageProps) {
                                     />
                                 )}
                                 {recentRepositories.map((repository) => (
-                                    <RepositoryCardDisplay
-                                        type="recent"
+                                    <RecentRepositoryCardDisplay
                                         key={"recent" + repository.id}
-                                        id={repository.id}
-                                        ownerName={repository.ownerName}
-                                        name={repository.name}
-                                        visibility={repository.visibility}
-                                        ownerImage={repository.ownerImage}
+                                        repository={repository}
                                         className="w-full"
                                     />
                                 ))}
@@ -197,14 +193,9 @@ export default function DashboardPage({ dashboard }: DashboardPageProps) {
                                     />
                                 )}
                                 {favoriteRepositories.map((repository) => (
-                                    <RepositoryCardDisplay
-                                        type="favorite"
+                                    <FavoriteRepositoryCardDisplay
                                         key={"favorite" + repository.id}
-                                        id={repository.id}
-                                        ownerName={repository.ownerName}
-                                        name={repository.name}
-                                        visibility={repository.visibility}
-                                        ownerImage={repository.ownerImage}
+                                        repository={repository}
                                         className="w-full"
                                     />
                                 ))}

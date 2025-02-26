@@ -41,3 +41,5 @@ export type RoleOrganisationFilter = "all" | "admin" | "member";
 export type MemberCountSort = "none" | "asc" | "desc";
 
 export type OrganisationSettingsTab = "general" | "danger";
+
+export type ManageMemberTab = "promote" | "expel";

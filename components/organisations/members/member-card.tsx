@@ -1,27 +1,31 @@
 import { imgSrc } from "@/lib/client-file-utils";
 import { OrganisationMember } from "@/lib/types/organisation";
-import Link from "next/link";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { ManageMemberDialog } from "@/components/organisations/members/manage-member-dialog";
 import { RoleBadge } from "@/components/organisations/members/role-badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
 
 interface OrganisationMemberCardProps {
     organisationId: string;
     organisationMember: OrganisationMember;
     userIsAdmin: boolean;
+    className?: string;
 }
 
-export const OrganisationMemberCard = ({
+export const MemberCard = ({
     organisationId,
     organisationMember,
     userIsAdmin,
+    className
 }: OrganisationMemberCardProps) => {
+    const memberLink: string = "/" + organisationMember.username;
+
     return (
-        <Card key={organisationMember.id} className="min-w-[380px]">
+        <Card key={organisationMember.id} className={className}>
             <CardContent className="flex flex-row items-center justify-between p-4">
-                <div className="flex flex-row items-center gap-x-3">
+                <div className="flex flex-row items-center gap-x-3 min-w-0">
                     <AvatarDisplay
                         displayType={"card"}
                         image={imgSrc(organisationMember.image)}
@@ -33,14 +37,14 @@ export const OrganisationMemberCard = ({
                                 " " +
                                 organisationMember.surname}
                         </span>
-                        <Link href={"/" + organisationMember.username}>
-                            <span className="m-0 max-w-full overflow-hidden truncate whitespace-nowrap p-0 text-sm font-semibold leading-none tracking-tight text-primary underline-offset-4 hover:underline">
-                                {organisationMember.username}
-                            </span>
-                        </Link>
+                        <DynamicTitleLink
+                            title={organisationMember.username}
+                            link={memberLink}
+                            className="text-sm tracking-normal"
+                        />
                     </div>
                 </div>
-                <div className="flex flex-row space-x-3">
+                <div className="flex flex-row space-x-3 flex-shrink-0">
                     {userIsAdmin && organisationMember.role === "member" && (
                         <ManageMemberDialog
                             organisationId={organisationId}

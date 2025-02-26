@@ -16,7 +16,7 @@ import {
     filterMembers,
 } from "@/components/organisations/members/member-filter";
 import { MemberFilterBadges } from "@/components/organisations/members/member-filter-badges";
-import { OrganisationMemberCard } from "@/components/organisations/members/organisation-member-card";
+import { MemberCard } from "@/components/organisations/members/member-card";
 import { Input } from "@/components/ui/input";
 import {
     Pagination,
@@ -192,7 +192,7 @@ export default function MembersPage(
                     )}
                     {filteredMembers.map(
                         (organisationMember: OrganisationMember) => (
-                            <OrganisationMemberCard
+                            <MemberCard
                                 key={organisationMember.id}
                                 organisationId={data.id}
                                 organisationMember={organisationMember}

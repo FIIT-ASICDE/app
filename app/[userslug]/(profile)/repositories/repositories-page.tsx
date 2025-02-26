@@ -60,8 +60,6 @@ export default async function RepositoriesPage({
     //     repositories,
     // ]);
 
-    console.log(reposSearchParams?.rows);
-
     return (
         <div className="bg-background text-foreground">
             <div className="flex items-center justify-between">
@@ -115,15 +113,7 @@ export default async function RepositoriesPage({
                             {repos.map((repository: Repository) => (
                                 <RepositoryCard
                                     key={repository.id}
-                                    id={repository.id}
-                                    ownerId={repository.ownerId}
-                                    ownerName={repository.ownerName}
-                                    ownerImage={repository.ownerImage}
-                                    name={repository.name}
-                                    visibility={repository.visibility}
-                                    description={repository.description}
-                                    favorite={repository.favorite}
-                                    pinned={repository.pinned}
+                                    repository={repository}
                                     isUserOwner={canUserCreate}
                                 />
                             ))}

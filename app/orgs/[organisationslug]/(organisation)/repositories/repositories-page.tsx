@@ -129,8 +129,6 @@ export default function RepositoriesPage({
                     {org.userRole === "admin" && (
                         <CreateRepositoryDialog
                             usersOrganisations={[org]}
-                            repositories={repositories}
-                            setRepositories={setRepositories}
                         />
                     )}
                 </div>
@@ -155,16 +153,8 @@ export default function RepositoriesPage({
                     {repositories.map((repository: Repository) => (
                         <RepositoryCard
                             key={repository.id}
-                            id={repository.id}
-                            ownerId={repository.ownerId}
-                            ownerName={repository.ownerName}
-                            ownerImage={repository.ownerImage}
-                            name={repository.name}
-                            visibility={repository.visibility}
-                            description={repository.description}
-                            favorite={repository.favorite}
-                            pinned={repository.pinned}
-                            onStateChange={() => {}}
+                            repository={repository}
+                            isUserOwner={repository.userRole === "admin"}
                         />
                     ))}
                 </div>

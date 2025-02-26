@@ -50,5 +50,3 @@ export type PinnedRepositoriesFilter = "all" | "pinned" | "notPinned";
 export type FavoriteRepositoriesFilter = "all" | "favorite" | "notFavorite";
 
 export type VisibilityRepositoriesFilter = "all" | "public" | "private";
-
-export type RepositoryCardDisplayType = "pinned" | "favorite" | "recent";

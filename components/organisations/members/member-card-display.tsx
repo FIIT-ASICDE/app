@@ -1,53 +1,48 @@
 import { imgSrc } from "@/lib/client-file-utils";
-import { OrganisationRole } from "@/lib/types/organisation";
-import Link from "next/link";
+import { OrganisationMember } from "@/lib/types/organisation";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { RoleIcon } from "@/components/organisations/role-icon";
-import { Button } from "@/components/ui/button";
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
 
 interface MemberCardDisplayProps {
-    username: string;
-    image: string | undefined;
-    role: OrganisationRole;
+    member: OrganisationMember;
 }
 
-export const MemberCardDisplay = ({
-    username,
-    image,
-    role,
-}: MemberCardDisplayProps) => {
+export const MemberCardDisplay = (
+    {
+        member
+    }: MemberCardDisplayProps
+) => {
+    const memberLink: string = "/" + member.username;
+
     return (
         <div className="flex flex-row items-center justify-between">
-            <div className="flex flex-row items-center gap-x-3">
+            <div className="flex flex-row items-center gap-x-3 min-w-0">
                 <AvatarDisplay
                     displayType={"card"}
-                    image={imgSrc(image)}
-                    name={username}
+                    image={imgSrc(member.image)}
+                    name={member.username}
                 />
-                <Link href={"/" + username}>
-                    <Button
-                        variant="link"
-                        className="m-0 max-w-full overflow-hidden truncate whitespace-nowrap p-0 text-base font-semibold leading-none tracking-tight"
-                    >
-                        {username}
-                    </Button>
-                </Link>
+                <DynamicTitleLink
+                    title={member.username}
+                    link={memberLink}
+                />
             </div>
             <Tooltip>
                 <TooltipTrigger asChild>
                     <RoleIcon
-                        role={role}
-                        className="text-muted-foreground hover:opacity-70"
+                        role={member.role}
+                        className="text-muted-foreground hover:opacity-70 flex-shrink-0"
                     />
                 </TooltipTrigger>
                 <TooltipContent>
-                    {role[0].toUpperCase() + role.slice(1)}
+                    {member.role === "admin" ? "Admin" : "Member"}
                 </TooltipContent>
             </Tooltip>
         </div>
