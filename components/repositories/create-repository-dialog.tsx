@@ -13,6 +13,8 @@ import {
     Lock,
     UserRound,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Dispatch, SetStateAction } from "react";
 import { UseFormReturn, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -58,6 +60,7 @@ export const CreateRepositoryDialog = ({
     usersOrganisations,
 }: CreateRepositoryDialogProps) => {
     const { user } = useUser();
+    const router = useRouter();
 
     const form = useForm<z.infer<typeof createRepositoryFormSchema>>({
         resolver: zodResolver(createRepositoryFormSchema),
@@ -73,12 +76,8 @@ export const CreateRepositoryDialog = ({
     const onCreateRepository = async (
         data: z.infer<typeof createRepositoryFormSchema>,
     ) => {
-        // TODO kili here you have a new repo, there are multiple errors that can
-        //  occur, first the user is not a USER of the org, so there will be
-        //  code FORBIDDEN in createRepoMutation.error?.data?.code and then
-        //  there can be CONFLICT which means the owner already has a repo with
-        //  the same name
-        await createRepoMutation.mutateAsync(data);
+        const newRepo = await createRepoMutation.mutateAsync(data);
+        router.push(`/${newRepo.ownerName}/${newRepo.name}`);
     };
 
     const getValidFormMessage = (
@@ -269,6 +268,7 @@ export const CreateRepositoryDialog = ({
                                                         />
                                                     </div>
                                                 </FormControl>
+                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
