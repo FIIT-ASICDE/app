@@ -1,5 +1,3 @@
-"use client";
-
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import { Repository, RepositoryFile } from "@/lib/types/repository";
 import { Calendar } from "lucide-react";
@@ -9,7 +7,7 @@ import { getDateString } from "@/components/generic/generic";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface OverviewPageProps {
-    userSlug: string;
+    repository: Repository;
 }
 
 const data = {
@@ -153,134 +151,7 @@ const data = {
     ] satisfies Array<OrganisationDisplay>,
 };
 
-const markdownContentExample: string = `# 🚀 Complete Markdown Demo
-
-## Text Formatting
-
-This is a paragraph with **bold text**, *italic text*, and ***bold italic text***. You can also use __underscores__ for _italics_ and **_bold italics_**.
-
-You can also add \`inline code\` like this.
-
-## Links and Images
-
-[Visit Next.js](https://nextjs.org) - External link example
-
-## Lists
-
-### Unordered List
-- First item
-- Second item
-  - Nested item 1
-  - Nested item 2
-- Third item
-
-### Ordered List
-1. First step
-2. Second step
-   1. Nested step 1
-   2. Nested step 2
-3. Third step
-
-## Blockquotes
-
-> This is a blockquote. You can use it to emphasize some text or show quotes.
-> 
-> It can span multiple paragraphs if you add a > on the empty line
->
-> - You can also use other markdown elements inside blockquotes
-> - Like lists
-> - And **bold** text
-
-## Code Blocks
-
-Here's some inline code: \`const greeting = "Hello, World!"\`
-
-And here's a code block with syntax highlighting:
-
-\`\`\`typescript
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
-
-const getUser = async (id: string): Promise<User> => {
-  try {
-    const response = await fetch(\`/api/users/\${id}\`);
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching user:', error);
-    throw error;
-  }
-};
-\`\`\`
-
-Here's some CSS:
-
-\`\`\`css
-.container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-}
-\`\`\`
-
-## Tables (GitHub Flavored Markdown)
-
-| Feature | Description | Status |
-|---------|-------------|--------|
-| Tables | GFM tables support | ✅ |
-| Lists | Ordered and unordered lists | ✅ |
-| Code Blocks | Syntax highlighting | ✅ |
-| Blockquotes | Quote formatting | ✅ |
-
-## Task Lists (GitHub Flavored Markdown)
-
-- [x] Implement markdown renderer
-- [x] Add syntax highlighting
-- [x] Support GitHub Flavored Markdown
-- [ ] Add more features
-
-## Line Breaks and Horizontal Rules
-
-This is a paragraph with a line break.  
-This is the next line (using two spaces at the end of the previous line).
-
----
-
-## Special Characters & Escaping
-
-You can use special characters by escaping them: \* \` \# \[ \]
-
-## Mathematical Expressions (if supported)
-
-Here's an example of inline math: \`$E = mc^2$\`
-
-And block math:
-
-\`\`\`math
-\\sum_{n=1}^\\infty \\frac{1}{n^2} = \\frac{\\pi^2}{6}
-\`\`\`
-
-## Emoji Support 
-
-- 👋 Hello
-- 🎉 Celebration
-- 💻 Coding
-- 🚀 Launch
-- ✨ Sparkles
-
----
-
-> 💡 **Pro Tip:** This markdown example showcases all the features supported by our MarkdownRenderer component.
-`;
-
-export default function OverviewPage({} /* userSlug */ : OverviewPageProps) {
-    const repository: Repository = data.repository;
-
+export default function OverviewPage({ repository }: OverviewPageProps) {
     function findReadMe(
         tree: Array<RepositoryFile>,
     ): RepositoryFile | undefined {
@@ -301,11 +172,6 @@ export default function OverviewPage({} /* userSlug */ : OverviewPageProps) {
     const readMeFile: RepositoryFile | undefined = findReadMe(
         data.repository.tree,
     );
-    console.log(readMeFile);
-
-    if (!repository) {
-        return <>Loading repository...</>;
-    }
 
     return (
         <div className="m-6 flex flex-col gap-x-3 md:flex-row">
@@ -329,8 +195,8 @@ export default function OverviewPage({} /* userSlug */ : OverviewPageProps) {
             </aside>
 
             <main className="mt-3 flex w-full flex-col gap-y-3 md:mt-0 md:w-2/3">
-                {readMeFile && (
-                    <MarkdownRenderer content={markdownContentExample} />
+                {readMeFile && readMeFile.content && (
+                    <MarkdownRenderer content={readMeFile.content} />
                 )}
             </main>
         </div>
