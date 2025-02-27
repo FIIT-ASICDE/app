@@ -1,6 +1,6 @@
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
-import { UsersRound } from "lucide-react";
+import { Building } from "lucide-react";
 
 import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
 import { LayoutOptions } from "@/components/layout/layout-options";
@@ -70,7 +70,7 @@ export default function OrganisationsPage({
             <main>
                 {usersOrganisations.length === 0 ? (
                     <NoData
-                        icon={UsersRound}
+                        icon={Building}
                         message={"No organisations found."}
                         className="m-6"
                     />

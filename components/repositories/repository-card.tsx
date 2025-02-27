@@ -77,7 +77,6 @@ export default function RepositoryCard({
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <button
-                                    disabled={false}
                                     className={cn(
                                         "flex items-center justify-center rounded p-1.5",
                                         "hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent",
@@ -106,7 +105,6 @@ export default function RepositoryCard({
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <button
-                                        disabled={false}
                                         className={cn(
                                             "flex items-center justify-center rounded p-1.5",
                                             "hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent",

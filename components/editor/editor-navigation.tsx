@@ -3,6 +3,7 @@
 import { imgSrc } from "@/lib/client-file-utils";
 import { cn } from "@/lib/utils";
 import {
+    Building,
     Command,
     File,
     Folders,
@@ -11,7 +12,6 @@ import {
     Search,
     Settings,
     Terminal,
-    UsersRound,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
@@ -164,7 +164,7 @@ export default function EditorNavigation({
                                 >
                                     <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
                                         <span>Organisations</span>
-                                        <UsersRound className="text-muted-foreground" />
+                                        <Building className="text-muted-foreground" />
                                     </DropdownMenuItem>
                                 </Link>
                                 <DropdownMenuSeparator />

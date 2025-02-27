@@ -2,7 +2,7 @@
 
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import { UsersOverview } from "@/lib/types/user";
-import { Calendar, Ellipsis, PinOff, UsersRound } from "lucide-react";
+import { Building, Calendar, Ellipsis, PinOff } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -124,7 +124,7 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                             <div className="flex flex-col gap-y-3">
                                 {organisations.length === 0 && (
                                     <NoData
-                                        icon={UsersRound}
+                                        icon={Building}
                                         message={"No organisations found."}
                                     />
                                 )}

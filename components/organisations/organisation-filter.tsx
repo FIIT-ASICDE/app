@@ -5,12 +5,11 @@ import {
 } from "@/lib/types/organisation";
 import {
     ArrowDown01,
-    ArrowUp10,
+    ArrowUp10, Building,
     RotateCcw,
     Shield,
     SlidersHorizontal,
     UserRound,
-    UsersRound,
 } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 import * as React from "react";
@@ -95,7 +94,7 @@ export const OrganisationFilter = ({
                             <Button variant="ghost" className="w-full">
                                 {roleFilter === "all" ? (
                                     <>
-                                        <UsersRound className="text-muted-foreground" />
+                                        <Building className="text-muted-foreground" />
                                         All
                                     </>
                                 ) : roleFilter === "admin" ? (
@@ -115,7 +114,7 @@ export const OrganisationFilter = ({
                             <DropdownMenuItem
                                 onClick={() => setRoleFilter("all")}
                             >
-                                <UsersRound className="text-muted-foreground" />
+                                <Building className="text-muted-foreground" />
                                 All
                             </DropdownMenuItem>
                             <DropdownMenuItem
@@ -143,7 +142,7 @@ export const OrganisationFilter = ({
                             <Button variant="ghost" className="w-full">
                                 {memberCountSort === "none" ? (
                                     <>
-                                        <UsersRound className="text-muted-foreground" />
+                                        <Building className="text-muted-foreground" />
                                         None
                                     </>
                                 ) : memberCountSort === "asc" ? (
@@ -163,7 +162,7 @@ export const OrganisationFilter = ({
                             <DropdownMenuItem
                                 onClick={() => setMemberCountSort("none")}
                             >
-                                <UsersRound className="text-muted-foreground" />
+                                <Building className="text-muted-foreground" />
                                 None
                             </DropdownMenuItem>
                             <DropdownMenuItem

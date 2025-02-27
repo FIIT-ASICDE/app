@@ -6,6 +6,7 @@ import {
 } from "@/lib/types/generic";
 import { Invitation } from "@/lib/types/invitation";
 import {
+    Building,
     FolderPlus,
     Folders,
     Home,
@@ -13,7 +14,6 @@ import {
     SunMoon,
     UserRoundPen,
     UserRoundPlus,
-    UsersRound,
 } from "lucide-react";
 import { Session } from "next-auth";
 
@@ -40,7 +40,7 @@ export const CommandOptions = ({
                 } satisfies CommandElement,
                 {
                     displayTitle: "Organisations",
-                    icon: UsersRound,
+                    icon: Building,
                     link: "/" + user.username + "/organisations",
                 } satisfies CommandElement,
                 {
