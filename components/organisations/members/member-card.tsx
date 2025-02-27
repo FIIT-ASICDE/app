@@ -6,6 +6,8 @@ import { ManageMemberDialog } from "@/components/organisations/members/manage-me
 import { RoleBadge } from "@/components/organisations/members/role-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
+import { cn } from "@/lib/utils";
+import { getCardStripe } from "@/components/generic/generic";
 
 interface OrganisationMemberCardProps {
     organisationId: string;
@@ -23,7 +25,13 @@ export const MemberCard = ({
     const memberLink: string = "/" + organisationMember.username;
 
     return (
-        <Card key={organisationMember.id} className={className}>
+        <Card
+            className={cn(
+                "max-w-full shadow-lg pl-1.5",
+                getCardStripe("member"),
+                className
+            )}
+        >
             <CardContent className="flex flex-row items-center justify-between p-4">
                 <div className="flex flex-row items-center gap-x-3 min-w-0">
                     <AvatarDisplay

@@ -7,6 +7,7 @@ import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { VisibilityBadge } from "@/components/repositories/visibility-badge";
 import { Card, CardHeader } from "@/components/ui/card";
 import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
+import { getCardStripe } from "@/components/generic/generic";
 
 interface FavoriteRepositoryCardDisplayProps {
     repository: RepositoryDisplay;
@@ -23,7 +24,13 @@ export const FavoriteRepositoryCardDisplay = (
     const repositoryLink: string = "/" + repositoryDisplayName;
 
     return (
-        <Card className={cn("p-0", className)}>
+        <Card
+            className={cn(
+                "max-w-full shadow-lg p-0 pl-1.5",
+                getCardStripe("favoriteRepository"),
+                className
+            )}
+        >
             <CardHeader className="p-3">
                 <div className="flex justify-between">
                     <div className="flex flex-row gap-x-3 items-center min-w-0">

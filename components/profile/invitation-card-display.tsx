@@ -6,13 +6,15 @@ import { Calendar, CircleCheck, CircleX } from "lucide-react";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import {
+    getCardStripe,
     getInvitationDisplayData,
-    getTimeDeltaString,
+    getTimeDeltaString
 } from "@/components/generic/generic";
 import { InvitationBadge } from "@/components/profile/invitation-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
+import { cn } from "@/lib/utils";
 
 interface InvitationCardDisplayProps {
     invitation: Invitation;
@@ -42,7 +44,13 @@ export const InvitationCardDisplay = ({
     };
 
     return (
-        <Card className={className}>
+        <Card
+            className={cn(
+                "max-w-full shadow-lg pl-1.5",
+                getCardStripe("invitation"),
+                className
+            )}
+        >
             <CardHeader className="flex flex-row items-center justify-between p-3">
                 <div className="flex flex-row items-center gap-x-3 min-w-0">
                     <AvatarDisplay

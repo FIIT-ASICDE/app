@@ -1,8 +1,7 @@
 import {
-    BadgeType,
+    BadgeType, CardType,
     CommandElement,
     CommandElementGroup,
-    ResponsivenessCheckpoint,
 } from "@/lib/types/generic";
 import { Invitation } from "@/lib/types/invitation";
 import {
@@ -123,27 +122,6 @@ export const getDateString = (actionType: string, date: Date) => {
     return actionType + " " + monthLong + " " + yearFull;
 };
 
-export const getWidthFromResponsivenessCheckpoint = (
-    checkpoint: ResponsivenessCheckpoint,
-) => {
-    switch (checkpoint) {
-        case "2xs":
-            return 320;
-        case "xs":
-            return 480;
-        case "sm":
-            return 640;
-        case "md":
-            return 768;
-        case "lg":
-            return 1024;
-        case "xl":
-            return 1280;
-        case "2xl":
-            return 1536;
-    }
-};
-
 export const getBadgeStyle = (badgeType: BadgeType) => {
     switch (badgeType) {
         case "public":
@@ -192,4 +170,33 @@ export const getInvitationDisplayData = (invitation: Invitation) => {
         image,
         link,
     };
+};
+
+const getCardStripeColor = (cardType: CardType) => {
+    switch (cardType) {
+        case "repository":
+            return "before:bg-badge-repository";
+        case "favoriteRepository":
+            return "before:bg-primary";
+        case "pinnedRepository":
+            return "before:bg-badge-admin-hover";
+        case "recentRepository":
+            return "before:bg-card-hover";
+        case "organisation":
+            return "before:bg-badge-organisation";
+        case "member":
+            return "before:bg-badge-member";
+        case "invitation":
+            return "before:bg-chart-1 before:bg-dark:chart-3";
+        default:
+            return "before:bg-transparent";
+    }
+};
+
+export const getCardStripe = (cardType: CardType) => {
+    const color: string = getCardStripeColor(cardType);
+
+    return (
+        `relative before:absolute before:inset-y-0 before:left-0 before:w-1.5 ${color} before:rounded-l-2xl`
+    );
 };

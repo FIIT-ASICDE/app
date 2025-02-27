@@ -1,70 +1,31 @@
-"use client";
-
-import { LayoutType } from "@/lib/types/generic";
-import {
-    MemberCountSort,
-    OrganisationDisplay,
-    RoleOrganisationFilter,
-} from "@/lib/types/organisation";
+import { OrganisationDisplay } from "@/lib/types/organisation";
 import { UsersRound } from "lucide-react";
-import { useEffect, useState } from "react";
 
-import { getWidthFromResponsivenessCheckpoint } from "@/components/generic/generic";
 import { NoData } from "@/components/no-data/no-data";
 import { CreateOrganisationDialog } from "@/components/organisations/create-organisation-dialog";
 import { OrganisationCard } from "@/components/organisations/organisation-card";
-import {
-    OrganisationFilter,
-    filterOrganisations,
-} from "@/components/organisations/organisation-filter";
-import { OrganisationFilterBadges } from "@/components/organisations/organisation-filter-badges";
-import { Input } from "@/components/ui/input";
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from "@/components/ui/pagination";
-
-
+import Search from "@/components/ui/search";
+import { LayoutOptions } from "@/components/layout/layout-options";
+import { cn } from "@/lib/utils";
+import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
 
 interface OrganisationsPageProps {
     usersOrganisations: Array<OrganisationDisplay>;
+    searchParams: {
+        query: string;
+        currentPage: number;
+        rows: boolean;
+    };
 }
 
-export default function OrganisationsPage(
-    { usersOrganisations }: OrganisationsPageProps,
-) {
-    const [organisationsLayout, setOrganisationsLayout] =
-        useState<LayoutType>("grid");
-    const [isLg, setIsLg] = useState<boolean>(false);
+export default function OrganisationsPage({
+    usersOrganisations,
+    searchParams,
+}: OrganisationsPageProps) {
+    const pageSize: number = 6;
 
-    useEffect(() => {
-        const handleResize = () => {
-            const lg =
-                window.innerWidth < getWidthFromResponsivenessCheckpoint("lg");
-            setIsLg(lg);
-            if (lg) {
-                setOrganisationsLayout("rows");
-            }
-        };
-        handleResize();
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
-
-    const [organisations, setOrganisations] = useState<
-        Array<OrganisationDisplay>
-    >(usersOrganisations);
-    const [filteredOrganisations, setFilteredOrganisations] = useState<
-        Array<OrganisationDisplay>
-    >(usersOrganisations);
-    const [organisationSearchPhrase, setOrganisationSearchPhrase] =
-        useState<string>("");
-    const [roleFilter, setRoleFilter] = useState<RoleOrganisationFilter>("all");
+    // TODO: move org filters to server side
+    /*const [roleFilter, setRoleFilter] = useState<RoleOrganisationFilter>("all");
     const [memberCountSort, setMemberCountSort] =
         useState<MemberCountSort>("none");
 
@@ -77,32 +38,20 @@ export default function OrganisationsPage(
                 memberCountSort,
             ),
         );
-    }, [organisationSearchPhrase, roleFilter, memberCountSort, organisations]);
+    }, [organisationSearchPhrase, roleFilter, memberCountSort, organisations]);*/
 
     return (
         <div className="bg-background text-foreground">
             <div className="flex items-center justify-between">
                 <div className="m-6 mb-0 flex w-1/2 items-center space-x-5">
-                    <div className="relative w-full">
-                        <UsersRound className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            type="search"
-                            placeholder="Search organisations..."
-                            className="pl-8"
-                            value={organisationSearchPhrase}
-                            onChange={(event) =>
-                                setOrganisationSearchPhrase(event.target.value)
-                            }
-                        />
-                    </div>
-                    {/*<LayoutOptions
-                        layout={organisationsLayout}
-                        setLayout={setOrganisationsLayout}
-                        responsivenessCheckpoint={"lg"}
-                    />*/}
+                    <Search placeholder="Search organisations..." />
+                    <LayoutOptions
+                        layout={searchParams.rows ? "rows" : "grid"}
+                        className="hidden lg:flex"
+                    />
                 </div>
-                <div className="m-6 mb-0 flex space-x-3">
-                    <OrganisationFilterBadges
+                <div className="m-6 mb-0 flex flex-row space-x-3">
+                    {/*<OrganisationFilterBadges
                         roleFilter={roleFilter}
                         setRoleFilter={setRoleFilter}
                         memberCountSort={memberCountSort}
@@ -113,53 +62,41 @@ export default function OrganisationsPage(
                         setRoleFilter={setRoleFilter}
                         memberCountSort={memberCountSort}
                         setMemberCountSort={setMemberCountSort}
-                    />
-                    <CreateOrganisationDialog
-                        organisations={organisations}
-                        setOrganisations={setOrganisations}
-                    />
+                    />*/}
+                    <CreateOrganisationDialog />
                 </div>
             </div>
 
             <main>
-                <div
-                    className={
-                        filteredOrganisations.length === 0
-                            ? "m-6 flex flex-col"
-                            : isLg || organisationsLayout === "grid"
-                              ? "m-6 grid grid-cols-1 gap-3 lg:grid-cols-2"
-                              : "m-6 grid grid-cols-1 gap-3"
-                    }
-                >
-                    {filteredOrganisations.length === 0 && (
-                        <NoData
-                            icon={UsersRound}
-                            message={"No organisations found."}
+                {usersOrganisations.length === 0 ? (
+                    <NoData
+                        icon={UsersRound}
+                        message={"No organisations found."}
+                        className="m-6"
+                    />
+                ) : (
+                    <>
+                        <div
+                            className={cn(
+                                "m-6 grid grid-cols-1 gap-3",
+                                !searchParams.rows ? "lg:grid-cols-2" : ""
+                            )}
+                        >
+                            {usersOrganisations.map((organisation: OrganisationDisplay) => (
+                                <OrganisationCard
+                                    key={organisation.id}
+                                    organisation={organisation}
+                                />
+                            ))}
+                        </div>
+                        <DynamicPagination
+                            totalCount={2}
+                            pageSize={pageSize}
+                            page={searchParams.currentPage}
+                            className="my-3"
                         />
-                    )}
-                    {filteredOrganisations.map((organisation) => (
-                        <OrganisationCard
-                            key={organisation.id}
-                            organisation={organisation}
-                        />
-                    ))}
-                </div>
-                <Pagination>
-                    <PaginationContent>
-                        <PaginationItem>
-                            <PaginationPrevious href="#" />
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationLink href="#">1</PaginationLink>
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationEllipsis />
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationNext href="#" />
-                        </PaginationItem>
-                    </PaginationContent>
-                </Pagination>
+                    </>
+                )}
             </main>
         </div>
     );

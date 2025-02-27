@@ -132,13 +132,7 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                                     (organisation: OrganisationDisplay) => (
                                         <OrganisationCardDisplay
                                             key={organisation.id}
-                                            id={organisation.id}
-                                            image={organisation.image}
-                                            name={organisation.name}
-                                            role={organisation.userRole}
-                                            memberCount={
-                                                organisation.memberCount
-                                            }
+                                            organisation={organisation}
                                         />
                                     ),
                                 )}

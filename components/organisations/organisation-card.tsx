@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { getCardStripe } from "@/components/generic/generic";
 
 interface OrganisationCardProps {
     organisation: OrganisationDisplay;
@@ -21,7 +22,13 @@ export const OrganisationCard = ({
     const organisationLink: string = "/orgs/" + organisation.name;
 
     return (
-        <Card className={cn("shadow-lg", className)}>
+        <Card
+            className={cn(
+                "max-w-full shadow-lg pl-1.5",
+                getCardStripe("organisation"),
+                className
+            )}
+        >
             <CardHeader>
                 <div className="flex flex-row items-center justify-between">
                     <div className="flex flex-row items-center gap-x-3 min-w-0">
@@ -43,7 +50,7 @@ export const OrganisationCard = ({
                                 <TooltipTrigger asChild>
                                     <div className="flex w-12 flex-row items-center gap-x-1 text-muted-foreground">
                                         <UsersRound className="h-5 w-5" />
-                                        {organisation.memberCount}
+                                        <div className="w-8">{organisation.memberCount}</div>
                                     </div>
                                 </TooltipTrigger>
                                 <TooltipContent className="text-muted-foreground">

@@ -1,3 +1,5 @@
+"use client";
+
 import { imgSrc } from "@/lib/client-file-utils";
 import { Repository } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
@@ -12,6 +14,8 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
+import { api } from "@/lib/trpc/react";
+import { getCardStripe } from "@/components/generic/generic";
 
 interface RepositoryCardProps {
     repository: Repository;
@@ -27,26 +31,32 @@ export default function RepositoryCard({
     const repositoryDisplayName: string = repository.ownerName + "/" + repository.name;
     const repositoryLink: string = "/" + repositoryDisplayName;
 
-    /*const handleStarClick = async () => {
+    const toggleRepoState = api.repo.toggleState.useMutation();
+
+    const handleStarClick = async () => {
         await toggleRepoState.mutateAsync({
-            ownerId: ownerId,
-            repoId: id,
-            favorite: !favorite,
+            ownerId: repository.ownerId,
+            repoId: repository.id,
+            favorite: !repository.favorite,
         });
     };
 
-    const toggleRepoState = api.repo.toggleState.useMutation();
-
     const handlePinClicked = async () => {
         await toggleRepoState.mutateAsync({
-            ownerId: ownerId,
-            repoId: id,
-            pinned: !pinned,
+            ownerId: repository.ownerId,
+            repoId: repository.id,
+            pinned: !repository.pinned,
         });
-    };*/
+    };
 
     return (
-        <Card className={cn("max-w-full shadow-lg", className)}>
+        <Card
+            className={cn(
+                "max-w-full shadow-lg pl-1.5",
+                getCardStripe("repository"),
+                className
+            )}
+        >
             <CardHeader>
                 <div className="flex flex-row justify-between gap-x-5">
                     <div className="flex flex-row items-center gap-x-3 min-w-0">
@@ -71,6 +81,7 @@ export default function RepositoryCard({
                                         "flex items-center justify-center rounded p-1.5",
                                         "hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent",
                                     )}
+                                    onClick={handleStarClick}
                                 >
                                     <Star
                                         fill={repository.favorite ? "currentColor" : "none"}
@@ -82,7 +93,7 @@ export default function RepositoryCard({
                                     />
                                 </button>
                             </TooltipTrigger>
-                            <TooltipContent>{repository.favorite ? "Favorite" : "Not favorite"}</TooltipContent>
+                            <TooltipContent>Toggle favorite</TooltipContent>
                         </Tooltip>
                         {isUserOwner && (
                             <Tooltip>
@@ -93,6 +104,7 @@ export default function RepositoryCard({
                                             "flex items-center justify-center rounded p-1.5",
                                             "hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent",
                                         )}
+                                        onClick={handlePinClicked}
                                     >
                                         <Pin
                                             fill={repository.pinned ? "currentColor" : "none"}
@@ -104,7 +116,7 @@ export default function RepositoryCard({
                                         />
                                     </button>
                                 </TooltipTrigger>
-                                <TooltipContent>{repository.pinned ? "Pinned" : "Not pinned"}</TooltipContent>
+                                <TooltipContent>Toggle pinned</TooltipContent>
                             </Tooltip>
                         )}
                     </div>

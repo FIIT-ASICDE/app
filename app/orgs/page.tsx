@@ -7,6 +7,7 @@ import { NoData } from "@/components/no-data/no-data";
 import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
 import { OrganisationCardDisplay } from "@/components/profile/organisation-card-display";
 import Search from "@/components/ui/search";
+import { OrganisationDisplay } from "@/lib/types/organisation";
 
 export default async function OrganisationsPage(props: {
     searchParams?: Promise<{
@@ -34,7 +35,7 @@ export default async function OrganisationsPage(props: {
                     <Search placeholder="Search organisations..." />
                     <LayoutOptions
                         layout={searchParams?.rows ? "rows" : "grid"}
-                        responsivenessCheckpoint={"lg"}
+                        className="hidden lg:flex"
                     />
                 </div>
                 <div className="m-6 mb-0 flex space-x-3">
@@ -69,14 +70,10 @@ export default async function OrganisationsPage(props: {
                             !searchParams?.rows ? "lg:grid-cols-2" : "",
                             )}
                         >
-                            {organizations.map((org) => (
+                            {organizations.map((organisation: OrganisationDisplay) => (
                                 <OrganisationCardDisplay
-                                    key={org.id}
-                                    id={org.id}
-                                    name={org.name}
-                                    image={org.image}
-                                    role={org.userRole}
-                                    memberCount={org.memberCount}
+                                    key={organisation.id}
+                                    organisation={organisation}
                                 />
                             ))}
                         </div>
@@ -84,7 +81,7 @@ export default async function OrganisationsPage(props: {
                             totalCount={pagination.pageCount}
                             pageSize={pagination.pageSize}
                             page={pagination.page}
-                            className="mb-6"
+                            className="my-3"
                         />
                     </>
                 )}

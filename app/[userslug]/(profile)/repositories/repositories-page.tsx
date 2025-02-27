@@ -14,27 +14,22 @@ interface RepositoriesPageProps {
     repos: Array<Repository>;
     canUserCreate: boolean;
     userOrgs?: Array<Omit<OrganisationDisplay, "memberCount">>;
-    searchParams?: Promise<{
-        query?: string;
-        page?: string;
-        rows?: boolean;
-    }>;
+    searchParams: {
+        query: string;
+        currentPage: number;
+        rows: boolean;
+    };
 }
 
 export default async function RepositoriesPage({
     repos,
     canUserCreate,
     userOrgs,
-    searchParams
+    searchParams,
 }: RepositoriesPageProps) {
-    const reposSearchParams = await searchParams;
-    const query: string = reposSearchParams?.query || "";
-    const currentPage: number = Number(reposSearchParams?.page) || 0;
-    const rows: boolean = reposSearchParams?.rows || false;
-
     const pageSize: number = 6;
 
-    // TODO move to server side
+    // TODO: move repo filters to server side
     /*const [pinnedFilter, setPinnedFilter] =
         useState<PinnedRepositoriesFilter>("all");
     const [favoriteFilter, setFavoriteFilter] =
@@ -66,8 +61,8 @@ export default async function RepositoriesPage({
                 <div className="m-6 mb-0 flex w-1/2 items-center space-x-5">
                     <Search placeholder="Search repositories..." />
                     <LayoutOptions
-                        layout={reposSearchParams?.rows ? "rows" : "grid"}
-                        responsivenessCheckpoint={"lg"}
+                        layout={searchParams.rows ? "rows" : "grid"}
+                        className="hidden lg:flex"
                     />
                 </div>
                 <div className="m-6 mb-0 flex flex-row space-x-3">
@@ -107,7 +102,7 @@ export default async function RepositoriesPage({
                         <div
                             className={cn(
                                 "m-6 grid grid-cols-1 gap-3",
-                                !reposSearchParams?.rows ? "lg:grid-cols-2" : ""
+                                !searchParams.rows ? "lg:grid-cols-2" : ""
                             )}
                         >
                             {repos.map((repository: Repository) => (
@@ -119,14 +114,14 @@ export default async function RepositoriesPage({
                             ))}
                         </div>
                         <DynamicPagination
-                            totalCount={1}
-                            pageSize={10}
-                            page={1}
-                            className="m-6"
+                            totalCount={2}
+                            pageSize={pageSize}
+                            page={searchParams.currentPage}
+                            className="my-3"
                         />
                     </>
                 )}
             </main>
         </div>
     );
-}
+};

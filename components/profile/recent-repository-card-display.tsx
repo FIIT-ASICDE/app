@@ -4,7 +4,7 @@ import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { imgSrc } from "@/lib/client-file-utils";
 import { Button } from "@/components/ui/button";
 import { Calendar, Code } from "lucide-react";
-import { getTimeDeltaString } from "@/components/generic/generic";
+import { getCardStripe, getTimeDeltaString } from "@/components/generic/generic";
 import { RepositoryDisplay } from "@/lib/types/repository";
 import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
 import Link from "next/link";
@@ -25,7 +25,13 @@ export const RecentRepositoryCardDisplay = (
     const editorLink: string = repositoryLink + "/editor";
 
     return (
-        <Card className={cn("p-0", className)}>
+        <Card
+            className={cn(
+                "max-w-full shadow-lg p-0 pl-1.5",
+                getCardStripe("recentRepository"),
+                className
+            )}
+        >
             <CardHeader className="p-3">
                 <div className="flex flex-col gap-y-3">
                     <div className="flex flex-row gap-x-3 items-center">

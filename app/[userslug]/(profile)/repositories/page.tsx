@@ -2,11 +2,21 @@ import RepositoriesPage from "@/app/[userslug]/(profile)/repositories/repositori
 import { auth } from "@/auth";
 import { api } from "@/lib/trpc/server";
 
+interface UserRepositoriesPageProps {
+    params: Promise<{
+        userslug: string
+    }>,
+    searchParams?: Promise<{
+        query?: string;
+        page?: string;
+        rows?: boolean;
+    }>;
+}
+
 export default async function UserRepositoriesPage({
     params,
-}: {
-    params: Promise<{ userslug: string }>;
-}) {
+    searchParams,
+}: UserRepositoriesPageProps) {
     const session = await auth();
 
     const userSlug = (await params).userslug;
@@ -23,11 +33,21 @@ export default async function UserRepositoriesPage({
               })
             : undefined;
 
+    const reposSearchParams = await searchParams;
+    const query: string = reposSearchParams?.query || "";
+    const currentPage: number = Number(reposSearchParams?.page) || 1;
+    const rows: boolean = reposSearchParams?.rows || false;
+
     return (
         <RepositoriesPage
             repos={userRepos}
             canUserCreate={session?.user.id === user.id}
             userOrgs={usersOrgs}
+            searchParams={{
+                query,
+                currentPage,
+                rows,
+            }}
         />
     );
 }
