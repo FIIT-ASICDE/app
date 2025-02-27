@@ -1,5 +1,6 @@
 import {
-    BadgeType, CardType,
+    BadgeType,
+    CardType,
     CommandElement,
     CommandElementGroup,
 } from "@/lib/types/generic";
@@ -196,7 +197,5 @@ const getCardStripeColor = (cardType: CardType) => {
 export const getCardStripe = (cardType: CardType) => {
     const color: string = getCardStripeColor(cardType);
 
-    return (
-        `relative before:absolute before:inset-y-0 before:left-0 before:w-1.5 ${color} before:rounded-l-2xl`
-    );
+    return `relative before:absolute before:inset-y-0 before:left-0 before:w-1.5 ${color} before:rounded-l-2xl`;
 };

@@ -1,15 +1,15 @@
 "use client";
 
 import { OrganisationMember } from "@/lib/types/organisation";
+import { cn } from "@/lib/utils";
 import { UsersRound } from "lucide-react";
 
+import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
+import { LayoutOptions } from "@/components/layout/layout-options";
 import { NoData } from "@/components/no-data/no-data";
 import { InviteMemberDialog } from "@/components/organisations/members/invite-member-dialog";
 import { MemberCard } from "@/components/organisations/members/member-card";
 import Search from "@/components/ui/search";
-import { LayoutOptions } from "@/components/layout/layout-options";
-import { cn } from "@/lib/utils";
-import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
 
 interface MembersPageProps {
     orgSlug: string;
@@ -86,12 +86,10 @@ const data = {
     ] satisfies Array<OrganisationMember>,
 };
 
-export default function MembersPage(
-    {
-        // orgSlug,
-        searchParams,
-    }: MembersPageProps,
-) {
+export default function MembersPage({
+    // orgSlug,
+    searchParams,
+}: MembersPageProps) {
     const pageSize: number = 6;
 
     // still dummy data
@@ -132,9 +130,7 @@ export default function MembersPage(
                         roleFilter={roleFilter}
                         setRoleFilter={setRoleFilter}
                     />*/}
-                    {userIsAdmin && (
-                        <InviteMemberDialog />
-                    )}
+                    {userIsAdmin && <InviteMemberDialog />}
                 </div>
             </div>
 
@@ -150,17 +146,19 @@ export default function MembersPage(
                         <div
                             className={cn(
                                 "m-6 grid grid-cols-1 gap-3",
-                                !searchParams.rows ? "lg:grid-cols-2" : ""
+                                !searchParams.rows ? "lg:grid-cols-2" : "",
                             )}
                         >
-                            {members.map((organisationMember: OrganisationMember) => (
-                                <MemberCard
-                                    key={organisationMember.id}
-                                    organisationId={data.id}
-                                    organisationMember={organisationMember}
-                                    userIsAdmin={data.userIsAdmin}
-                                />
-                            ))}
+                            {members.map(
+                                (organisationMember: OrganisationMember) => (
+                                    <MemberCard
+                                        key={organisationMember.id}
+                                        organisationId={data.id}
+                                        organisationMember={organisationMember}
+                                        userIsAdmin={data.userIsAdmin}
+                                    />
+                                ),
+                            )}
                         </div>
                         <DynamicPagination
                             totalCount={2}
@@ -173,4 +171,4 @@ export default function MembersPage(
             </main>
         </div>
     );
-};
+}

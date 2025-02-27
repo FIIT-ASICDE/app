@@ -4,36 +4,35 @@ import { cn } from "@/lib/utils";
 import { Star } from "lucide-react";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { VisibilityBadge } from "@/components/repositories/visibility-badge";
-import { Card, CardHeader } from "@/components/ui/card";
 import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
 import { getCardStripe } from "@/components/generic/generic";
+import { VisibilityBadge } from "@/components/repositories/visibility-badge";
+import { Card, CardHeader } from "@/components/ui/card";
 
 interface FavoriteRepositoryCardDisplayProps {
     repository: RepositoryDisplay;
     className?: string;
 }
 
-export const FavoriteRepositoryCardDisplay = (
-    {
-        repository,
-        className,
-    }: FavoriteRepositoryCardDisplayProps
-) => {
-    const repositoryDisplayName: string = repository.ownerName + "/" + repository.name;
+export const FavoriteRepositoryCardDisplay = ({
+    repository,
+    className,
+}: FavoriteRepositoryCardDisplayProps) => {
+    const repositoryDisplayName: string =
+        repository.ownerName + "/" + repository.name;
     const repositoryLink: string = "/" + repositoryDisplayName;
 
     return (
         <Card
             className={cn(
-                "max-w-full shadow-lg p-0 pl-1.5",
+                "max-w-full p-0 pl-1.5 shadow-lg",
                 getCardStripe("favoriteRepository"),
-                className
+                className,
             )}
         >
             <CardHeader className="p-3">
                 <div className="flex justify-between">
-                    <div className="flex flex-row gap-x-3 items-center min-w-0">
+                    <div className="flex min-w-0 flex-row items-center gap-x-3">
                         <AvatarDisplay
                             displayType={"card"}
                             image={imgSrc(repository.ownerImage)}
@@ -45,7 +44,7 @@ export const FavoriteRepositoryCardDisplay = (
                             tooltipVisible
                         />
                     </div>
-                    <div className="flex items-center justify-center gap-x-3 flex-shrink-0">
+                    <div className="flex flex-shrink-0 items-center justify-center gap-x-3">
                         <VisibilityBadge visibility={repository.visibility} />
                         <Star
                             fill="currentColor"

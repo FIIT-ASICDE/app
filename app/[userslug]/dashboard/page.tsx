@@ -3,8 +3,8 @@ import { api } from "@/lib/trpc/server";
 
 interface UserDashboardPageProps {
     params: Promise<{
-        userslug: string
-    }>,
+        userslug: string;
+    }>;
     searchParams?: Promise<{
         page?: string;
     }>;

@@ -12,9 +12,11 @@ import {
 } from "lucide-react";
 import { Suspense } from "react";
 
-import { NoData } from "@/components/no-data/no-data";
 import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
+import { NoData } from "@/components/no-data/no-data";
+import { FavoriteRepositoryCardDisplay } from "@/components/profile/favorite-repository-card-display";
 import { InvitationCardDisplay } from "@/components/profile/invitation-card-display";
+import { RecentRepositoryCardDisplay } from "@/components/profile/recent-repository-card-display";
 import {
     Card,
     CardContent,
@@ -22,8 +24,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { RecentRepositoryCardDisplay } from "@/components/profile/recent-repository-card-display";
-import { FavoriteRepositoryCardDisplay } from "@/components/profile/favorite-repository-card-display";
 
 interface DashboardPageProps {
     dashboard: UsersDashboard;
@@ -132,14 +132,14 @@ export default function DashboardPage({
     const pageSize: number = 6;
 
     const recentRepositories: Array<RepositoryDisplay> =
-        dashboard.recentRepositories
+        dashboard.recentRepositories;
     const favoriteRepositories: Array<RepositoryDisplay> =
         dashboard.favoriteRepositories;
     // still dummy data
     const invitations: Array<Invitation> = data.invitations;
 
     return (
-        <div className="bg-background text-foreground m-6 flex flex-col gap-6 lg:flex-row">
+        <div className="m-6 flex flex-col gap-6 bg-background text-foreground lg:flex-row">
             <aside className="w-full lg:w-1/3">
                 <Card>
                     <CardHeader className="flex flex-col space-y-3">
@@ -201,13 +201,18 @@ export default function DashboardPage({
                             ) : (
                                 <>
                                     <div className="flex flex-col gap-y-3">
-                                        {favoriteRepositories.map((repository) => (
-                                            <FavoriteRepositoryCardDisplay
-                                                key={"favorite" + repository.id}
-                                                repository={repository}
-                                                className="w-full"
-                                            />
-                                        ))}
+                                        {favoriteRepositories.map(
+                                            (repository) => (
+                                                <FavoriteRepositoryCardDisplay
+                                                    key={
+                                                        "favorite" +
+                                                        repository.id
+                                                    }
+                                                    repository={repository}
+                                                    className="w-full"
+                                                />
+                                            ),
+                                        )}
                                     </div>
                                     <DynamicPagination
                                         totalCount={2}
@@ -241,13 +246,15 @@ export default function DashboardPage({
                                 />
                             ) : (
                                 <div className="flex flex-col gap-y-3">
-                                    {invitations.map((invitation: Invitation) => (
-                                        <InvitationCardDisplay
-                                            key={invitation.id}
-                                            invitation={invitation}
-                                            className="w-full"
-                                        />
-                                    ))}
+                                    {invitations.map(
+                                        (invitation: Invitation) => (
+                                            <InvitationCardDisplay
+                                                key={invitation.id}
+                                                invitation={invitation}
+                                                className="w-full"
+                                            />
+                                        ),
+                                    )}
                                 </div>
                             )}
                         </Suspense>

@@ -10,13 +10,13 @@ import { Suspense } from "react";
 import { getDateString } from "@/components/generic/generic";
 import { NoData } from "@/components/no-data/no-data";
 import { MemberCardDisplay } from "@/components/organisations/members/member-card-display";
+import { PinnedRepositoryCardDisplay } from "@/components/profile/pinned-repository-card-display";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { PinnedRepositoryCardDisplay } from "@/components/profile/pinned-repository-card-display";
 
 interface OverviewPageProps {
     overview: OrganisationOverview;
@@ -132,12 +132,11 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                                     {organisation.members
                                         .slice(0, 3)
                                         .map((member: OrganisationMember) => (
-                                                <MemberCardDisplay
-                                                    key={member.id}
-                                                    member={member}
-                                                />
-                                            ),
-                                        )}
+                                            <MemberCardDisplay
+                                                key={member.id}
+                                                member={member}
+                                            />
+                                        ))}
                                 </div>
                             </Suspense>
                         </CardContent>

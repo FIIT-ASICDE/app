@@ -2,19 +2,19 @@
 
 import { imgSrc } from "@/lib/client-file-utils";
 import { Invitation } from "@/lib/types/invitation";
+import { cn } from "@/lib/utils";
 import { Calendar, CircleCheck, CircleX } from "lucide-react";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
+import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
 import {
     getCardStripe,
     getInvitationDisplayData,
-    getTimeDeltaString
+    getTimeDeltaString,
 } from "@/components/generic/generic";
 import { InvitationBadge } from "@/components/profile/invitation-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
-import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
-import { cn } from "@/lib/utils";
 
 interface InvitationCardDisplayProps {
     invitation: Invitation;
@@ -29,30 +29,36 @@ export const InvitationCardDisplay = ({
 
     const handleDeclineInvitation = () => {
         console.log(
-            "User declined an invitation from " + invitation.sender.username +
-            "to join " + invitation.type +
-            "called" + invitationDisplayData.displayName
+            "User declined an invitation from " +
+                invitation.sender.username +
+                "to join " +
+                invitation.type +
+                "called" +
+                invitationDisplayData.displayName,
         );
     };
 
     const handleAcceptInvitation = () => {
         console.log(
-            "User accepted an invitation from " + invitation.sender.username +
-            "to join " + invitation.type +
-            "called" + invitationDisplayData.displayName
+            "User accepted an invitation from " +
+                invitation.sender.username +
+                "to join " +
+                invitation.type +
+                "called" +
+                invitationDisplayData.displayName,
         );
     };
 
     return (
         <Card
             className={cn(
-                "max-w-full shadow-lg pl-1.5",
+                "max-w-full pl-1.5 shadow-lg",
                 getCardStripe("invitation"),
-                className
+                className,
             )}
         >
             <CardHeader className="flex flex-row items-center justify-between p-3">
-                <div className="flex flex-row items-center gap-x-3 min-w-0">
+                <div className="flex min-w-0 flex-row items-center gap-x-3">
                     <AvatarDisplay
                         displayType={"card"}
                         image={imgSrc(invitationDisplayData.image)}
@@ -69,7 +75,7 @@ export const InvitationCardDisplay = ({
                     />
                     <InvitationBadge invitationType={invitation.type} />
                 </div>
-                <div className="flex flex-row items-center gap-x-3 pr-3 flex-shrink-0">
+                <div className="flex flex-shrink-0 flex-row items-center gap-x-3 pr-3">
                     <span className="flex flex-row gap-x-2 text-sm text-muted-foreground">
                         <Calendar className="h-5 w-5" />
                         {getTimeDeltaString(invitation.createdAt)}
@@ -91,10 +97,7 @@ export const InvitationCardDisplay = ({
                     </div>
                 </div>
                 <div className="flex flex-row gap-x-3">
-                    <Button
-                        variant="outline"
-                        onClick={handleDeclineInvitation}
-                    >
+                    <Button variant="outline" onClick={handleDeclineInvitation}>
                         <CircleX />
                         Decline
                     </Button>

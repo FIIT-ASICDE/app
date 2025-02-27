@@ -1,40 +1,43 @@
-import { Card, CardHeader } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { imgSrc } from "@/lib/client-file-utils";
-import { Button } from "@/components/ui/button";
-import { Calendar, Code } from "lucide-react";
-import { getCardStripe, getTimeDeltaString } from "@/components/generic/generic";
 import { RepositoryDisplay } from "@/lib/types/repository";
-import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
+import { cn } from "@/lib/utils";
+import { Calendar, Code } from "lucide-react";
 import Link from "next/link";
+
+import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
+import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
+import {
+    getCardStripe,
+    getTimeDeltaString,
+} from "@/components/generic/generic";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader } from "@/components/ui/card";
 
 interface RecentRepositoryCardDisplayProps {
     repository: RepositoryDisplay;
     className?: string;
 }
 
-export const RecentRepositoryCardDisplay = (
-    {
-        repository,
-        className,
-    } : RecentRepositoryCardDisplayProps
-) => {
-    const repositoryDisplayName: string = repository.ownerName + "/" + repository.name;
+export const RecentRepositoryCardDisplay = ({
+    repository,
+    className,
+}: RecentRepositoryCardDisplayProps) => {
+    const repositoryDisplayName: string =
+        repository.ownerName + "/" + repository.name;
     const repositoryLink: string = "/" + repositoryDisplayName;
     const editorLink: string = repositoryLink + "/editor";
 
     return (
         <Card
             className={cn(
-                "max-w-full shadow-lg p-0 pl-1.5",
+                "max-w-full p-0 pl-1.5 shadow-lg",
                 getCardStripe("recentRepository"),
-                className
+                className,
             )}
         >
             <CardHeader className="p-3">
                 <div className="flex flex-col gap-y-3">
-                    <div className="flex flex-row gap-x-3 items-center">
+                    <div className="flex flex-row items-center gap-x-3">
                         <AvatarDisplay
                             displayType={"card"}
                             image={imgSrc(repository.ownerImage)}
@@ -49,8 +52,7 @@ export const RecentRepositoryCardDisplay = (
                     <div className="flex flex-row items-center justify-between">
                         <span className="flex flex-row items-center gap-x-2 text-sm text-muted-foreground">
                             <Calendar className="h-5 w-5" />
-                            Opened{" "}
-                            {getTimeDeltaString(new Date("2023-07-15"))}
+                            Opened {getTimeDeltaString(new Date("2023-07-15"))}
                         </span>
                         <Link href={editorLink}>
                             <Button

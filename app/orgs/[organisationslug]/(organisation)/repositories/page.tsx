@@ -3,8 +3,8 @@ import { api } from "@/lib/trpc/server";
 
 interface OrganisationRepositoriesPageProps {
     params: Promise<{
-        organisationslug: string
-    }>,
+        organisationslug: string;
+    }>;
     searchParams?: Promise<{
         query?: string;
         page?: string;
@@ -14,7 +14,7 @@ interface OrganisationRepositoriesPageProps {
 
 export default async function OrganisationRepositoriesPage({
     params,
-    searchParams
+    searchParams,
 }: OrganisationRepositoriesPageProps) {
     const orgSlug = (await params).organisationslug.replace(/%20/g, " ");
     const orgsRepos = await api.repo.ownersRepos({ ownerSlug: orgSlug });

@@ -2,8 +2,8 @@ import MembersPage from "@/app/orgs/[organisationslug]/(organisation)/members/me
 
 interface OrganisationMembersPageProps {
     params: Promise<{
-        organisationslug: string
-    }>,
+        organisationslug: string;
+    }>;
     searchParams?: Promise<{
         query?: string;
         page?: string;

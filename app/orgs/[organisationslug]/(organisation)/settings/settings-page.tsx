@@ -1,23 +1,23 @@
 "use client";
 
+import { OrganisationSettingsTab } from "@/lib/types/organisation";
+import { UserDisplay } from "@/lib/types/user";
+import { cn } from "@/lib/utils";
 import {
     BookUser,
     CircleX,
     Eye,
     EyeOff,
     TriangleAlert,
-    UserRoundMinus
+    UserRoundMinus,
 } from "lucide-react";
+import { useState } from "react";
 
 import { DeleteOrganisationDialog } from "@/components/organisations/delete-organisation-dialog";
 import { LeaveOrganisationDialog } from "@/components/organisations/leave-organisation-dialog";
 import { ToggleMembersVisibilityDialog } from "@/components/organisations/members/toggle-members-visibility-dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState } from "react";
-import { OrganisationSettingsTab } from "@/lib/types/organisation";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { UserDisplay } from "@/lib/types/user";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const data = {
     id: "2daf6c64-2104-4039-a619-b7477d3882bf",
@@ -28,16 +28,16 @@ const data = {
     possibleAdmins: [
         {
             id: "1",
-            username: "jozko"
-        } satisfies UserDisplay
-    ] satisfies Array<UserDisplay>
+            username: "jozko",
+        } satisfies UserDisplay,
+    ] satisfies Array<UserDisplay>,
 };
 
 interface SettingsPageProps {
     orgSlug: string;
 }
 
-export default function SettingsPage({/* orgSlug */} : SettingsPageProps) {
+export default function SettingsPage({} /* orgSlug */ : SettingsPageProps) {
     const id: string = data.id;
     const name: string = data.name;
     const showMembers = data.showMembers;
@@ -45,7 +45,8 @@ export default function SettingsPage({/* orgSlug */} : SettingsPageProps) {
     const isUserOnlyAdmin: boolean = data.isUserOnlyAdmin;
     const possibleAdmins: Array<UserDisplay> = data.possibleAdmins;
 
-    const [activeSettingsTab, setActiveSettingsTab] = useState<OrganisationSettingsTab>("general");
+    const [activeSettingsTab, setActiveSettingsTab] =
+        useState<OrganisationSettingsTab>("general");
 
     const getChangeMembersVisibilityMessage = () => {
         return (
@@ -66,11 +67,13 @@ export default function SettingsPage({/* orgSlug */} : SettingsPageProps) {
                 You are currently
                 {isUserAdmin ? (
                     <span>
-                        {" "}an <span className="font-bold">admin</span>{" "}
+                        {" "}
+                        an <span className="font-bold">admin</span>{" "}
                     </span>
                 ) : (
                     <span>
-                        {" "}a <span className="font-bold">member</span>{" "}
+                        {" "}
+                        a <span className="font-bold">member</span>{" "}
                     </span>
                 )}
                 of this organisation.
@@ -163,7 +166,12 @@ export default function SettingsPage({/* orgSlug */} : SettingsPageProps) {
                                         {getLeaveOrganisationMessage()}
                                     </div>
                                 </div>
-                                <LeaveOrganisationDialog id={id} name={name} isUserOnlyAdmin={isUserOnlyAdmin} possibleAdmins={possibleAdmins} />
+                                <LeaveOrganisationDialog
+                                    id={id}
+                                    name={name}
+                                    isUserOnlyAdmin={isUserOnlyAdmin}
+                                    possibleAdmins={possibleAdmins}
+                                />
                             </div>
 
                             <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
@@ -172,7 +180,8 @@ export default function SettingsPage({/* orgSlug */} : SettingsPageProps) {
                                     <div className="flex flex-col space-y-1">
                                         <span>Delete organisation</span>
                                         <span className="text-sm text-muted-foreground">
-                                            This organisation is currently active.
+                                            This organisation is currently
+                                            active.
                                         </span>
                                     </div>
                                 </div>

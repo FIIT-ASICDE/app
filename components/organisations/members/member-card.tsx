@@ -1,13 +1,13 @@
 import { imgSrc } from "@/lib/client-file-utils";
 import { OrganisationMember } from "@/lib/types/organisation";
+import { cn } from "@/lib/utils";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
+import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
+import { getCardStripe } from "@/components/generic/generic";
 import { ManageMemberDialog } from "@/components/organisations/members/manage-member-dialog";
 import { RoleBadge } from "@/components/organisations/members/role-badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
-import { cn } from "@/lib/utils";
-import { getCardStripe } from "@/components/generic/generic";
 
 interface OrganisationMemberCardProps {
     organisationId: string;
@@ -20,20 +20,20 @@ export const MemberCard = ({
     organisationId,
     organisationMember,
     userIsAdmin,
-    className
+    className,
 }: OrganisationMemberCardProps) => {
     const memberLink: string = "/" + organisationMember.username;
 
     return (
         <Card
             className={cn(
-                "max-w-full shadow-lg pl-1.5",
+                "max-w-full pl-1.5 shadow-lg",
                 getCardStripe("member"),
-                className
+                className,
             )}
         >
             <CardContent className="flex flex-row items-center justify-between p-4">
-                <div className="flex flex-row items-center gap-x-3 min-w-0">
+                <div className="flex min-w-0 flex-row items-center gap-x-3">
                     <AvatarDisplay
                         displayType={"card"}
                         image={imgSrc(organisationMember.image)}
@@ -52,7 +52,7 @@ export const MemberCard = ({
                         />
                     </div>
                 </div>
-                <div className="flex flex-row space-x-3 flex-shrink-0">
+                <div className="flex flex-shrink-0 flex-row space-x-3">
                     {userIsAdmin && organisationMember.role === "member" && (
                         <ManageMemberDialog
                             organisationId={organisationId}

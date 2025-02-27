@@ -1,8 +1,16 @@
+import { UserDisplay } from "@/lib/types/user";
 import { Search, UserRoundMinus } from "lucide-react";
 import { useState } from "react";
 
+import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { useUser } from "@/components/context/user-context";
 import { Button } from "@/components/ui/button";
+import {
+    CommandDialog,
+    CommandEmpty,
+    CommandInput,
+    CommandItem,
+} from "@/components/ui/command";
 import {
     Dialog,
     DialogContent,
@@ -13,10 +21,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { CommandDialog, CommandEmpty, CommandInput, CommandItem } from "@/components/ui/command";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { UserDisplay } from "@/lib/types/user";
 
 interface LeaveOrganisationDialogProps {
     id: string;
@@ -29,7 +34,7 @@ export const LeaveOrganisationDialog = ({
     id,
     name,
     isUserOnlyAdmin,
-    possibleAdmins
+    possibleAdmins,
 }: LeaveOrganisationDialogProps) => {
     const { user } = useUser();
 
@@ -49,7 +54,7 @@ export const LeaveOrganisationDialog = ({
                 " left an organisation called: " +
                 name +
                 " with ID: " +
-                id
+                id,
         );
         console.log("IsUserOnlyAdmin: " + isUserOnlyAdmin);
         console.log("Newly selected admin: " + selectedUser);
@@ -79,7 +84,9 @@ export const LeaveOrganisationDialog = ({
                 {isUserOnlyAdmin && possibleAdmins !== undefined && (
                     <div className="flex flex-col space-y-3">
                         <span>
-                            Since you are the only admin, please choose another member that will get promoted to an admin after you leave this organisation.
+                            Since you are the only admin, please choose another
+                            member that will get promoted to an admin after you
+                            leave this organisation.
                         </span>
                         <Button
                             className="border border-accent bg-transparent py-5 font-normal text-muted-foreground hover:bg-accent"
@@ -102,7 +109,10 @@ export const LeaveOrganisationDialog = ({
                             )}
                         </Button>
 
-                        <CommandDialog open={commandOpen} onOpenChange={setCommandOpen}>
+                        <CommandDialog
+                            open={commandOpen}
+                            onOpenChange={setCommandOpen}
+                        >
                             <CommandInput placeholder="Select a user or search..." />
                             <ScrollArea className="h-full max-h-60">
                                 <CommandEmpty>No users found.</CommandEmpty>
@@ -148,7 +158,8 @@ export const LeaveOrganisationDialog = ({
                             className="w-full hover:bg-destructive-hover"
                             variant="destructive"
                             disabled={
-                                leaveOrganisationInput !== leaveOrganisationPhrase ||
+                                leaveOrganisationInput !==
+                                    leaveOrganisationPhrase ||
                                 selectedUser === undefined
                             }
                         >

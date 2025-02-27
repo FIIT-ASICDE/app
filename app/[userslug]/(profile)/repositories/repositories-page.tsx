@@ -1,13 +1,13 @@
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import { Repository } from "@/lib/types/repository";
+import { cn } from "@/lib/utils";
 import { Folders } from "lucide-react";
 
+import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
+import { LayoutOptions } from "@/components/layout/layout-options";
 import { NoData } from "@/components/no-data/no-data";
 import { CreateRepositoryDialog } from "@/components/repositories/create-repository-dialog";
 import RepositoryCard from "@/components/repositories/repository-card";
-import { LayoutOptions } from "@/components/layout/layout-options";
-import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
-import { cn } from "@/lib/utils";
 import Search from "@/components/ui/search";
 
 interface RepositoriesPageProps {
@@ -102,7 +102,7 @@ export default async function RepositoriesPage({
                         <div
                             className={cn(
                                 "m-6 grid grid-cols-1 gap-3",
-                                !searchParams.rows ? "lg:grid-cols-2" : ""
+                                !searchParams.rows ? "lg:grid-cols-2" : "",
                             )}
                         >
                             {repos.map((repository: Repository) => (
@@ -124,4 +124,4 @@ export default async function RepositoriesPage({
             </main>
         </div>
     );
-};
+}

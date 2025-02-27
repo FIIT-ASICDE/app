@@ -2,15 +2,15 @@
 
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import { Repository } from "@/lib/types/repository";
+import { cn } from "@/lib/utils";
 import { Folders } from "lucide-react";
 
+import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
+import { LayoutOptions } from "@/components/layout/layout-options";
 import { NoData } from "@/components/no-data/no-data";
 import { CreateRepositoryDialog } from "@/components/repositories/create-repository-dialog";
 import RepositoryCard from "@/components/repositories/repository-card";
 import Search from "@/components/ui/search";
-import { LayoutOptions } from "@/components/layout/layout-options";
-import { cn } from "@/lib/utils";
-import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
 
 interface RepositoriesPageProps {
     repos: Array<Repository>;
@@ -83,9 +83,7 @@ export default function RepositoriesPage({
                         setVisibilityFilter={setVisibilityFilter}
                     />*/}
                     {org.userRole === "admin" && (
-                        <CreateRepositoryDialog
-                            usersOrganisations={[org]}
-                        />
+                        <CreateRepositoryDialog usersOrganisations={[org]} />
                     )}
                 </div>
             </div>
@@ -102,7 +100,7 @@ export default function RepositoriesPage({
                         <div
                             className={cn(
                                 "m-6 grid grid-cols-1 gap-3",
-                                !searchParams.rows ? "lg:grid-cols-2" : ""
+                                !searchParams.rows ? "lg:grid-cols-2" : "",
                             )}
                         >
                             {repos.map((repository: Repository) => (
@@ -124,4 +122,4 @@ export default function RepositoriesPage({
             </main>
         </div>
     );
-};
+}

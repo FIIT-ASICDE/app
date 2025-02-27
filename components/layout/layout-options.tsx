@@ -16,10 +16,7 @@ interface LayoutOptionsProps {
     className?: string;
 }
 
-export const LayoutOptions = ({
-    layout,
-    className,
-}: LayoutOptionsProps) => {
+export const LayoutOptions = ({ layout, className }: LayoutOptionsProps) => {
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();
@@ -38,20 +35,18 @@ export const LayoutOptions = ({
         <div className={cn("flex items-center space-x-1", className)}>
             <Tooltip>
                 <TooltipTrigger
-                    className={cn(
-                        "rounded bg-transparent p-2 hover:bg-accent",
-                    )}
+                    className={cn("rounded bg-transparent p-2 hover:bg-accent")}
                     onClick={() => handleLayoutChange("grid")}
                 >
                     <LayoutGrid
                         className={
-                            layout === "grid" ? "text-foreground" : "text-muted-foreground"
+                            layout === "grid"
+                                ? "text-foreground"
+                                : "text-muted-foreground"
                         }
                     />
                 </TooltipTrigger>
-                <TooltipContent>
-                    Grid layout
-                </TooltipContent>
+                <TooltipContent>Grid layout</TooltipContent>
             </Tooltip>
             <Tooltip>
                 <TooltipTrigger
@@ -60,7 +55,9 @@ export const LayoutOptions = ({
                 >
                     <Rows3
                         className={
-                            layout === "rows" ? "text-foreground" : "text-muted-foreground"
+                            layout === "rows"
+                                ? "text-foreground"
+                                : "text-muted-foreground"
                         }
                     />
                 </TooltipTrigger>

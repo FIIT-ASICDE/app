@@ -1,13 +1,13 @@
 import { api } from "@/lib/trpc/server";
+import { OrganisationDisplay } from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 import { UsersRound } from "lucide-react";
 
+import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
 import { LayoutOptions } from "@/components/layout/layout-options";
 import { NoData } from "@/components/no-data/no-data";
-import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
 import { OrganisationCardDisplay } from "@/components/profile/organisation-card-display";
 import Search from "@/components/ui/search";
-import { OrganisationDisplay } from "@/lib/types/organisation";
 
 export default async function OrganisationsPage(props: {
     searchParams?: Promise<{
@@ -66,16 +66,18 @@ export default async function OrganisationsPage(props: {
                     <>
                         <div
                             className={cn(
-                            "m-6 grid grid-cols-1 gap-3",
-                            !searchParams?.rows ? "lg:grid-cols-2" : "",
+                                "m-6 grid grid-cols-1 gap-3",
+                                !searchParams?.rows ? "lg:grid-cols-2" : "",
                             )}
                         >
-                            {organizations.map((organisation: OrganisationDisplay) => (
-                                <OrganisationCardDisplay
-                                    key={organisation.id}
-                                    organisation={organisation}
-                                />
-                            ))}
+                            {organizations.map(
+                                (organisation: OrganisationDisplay) => (
+                                    <OrganisationCardDisplay
+                                        key={organisation.id}
+                                        organisation={organisation}
+                                    />
+                                ),
+                            )}
                         </div>
                         <DynamicPagination
                             totalCount={pagination.pageCount}

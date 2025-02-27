@@ -3,8 +3,8 @@ import { api } from "@/lib/trpc/server";
 
 interface UserOrganisationsPageProps {
     params: Promise<{
-        userslug: string
-    }>,
+        userslug: string;
+    }>;
     searchParams?: Promise<{
         query?: string;
         page?: string;
@@ -17,19 +17,23 @@ export default async function UserOrganisationsPage({
     searchParams,
 }: UserOrganisationsPageProps) {
     const userSlug = (await params).userslug;
-    const usersOrganisations = await api.user.usersOrganisations({ username: userSlug });
+    const usersOrganisations = await api.user.usersOrganisations({
+        username: userSlug,
+    });
 
     const orgsSearchParams = await searchParams;
     const query: string = orgsSearchParams?.query || "";
     const currentPage: number = Number(orgsSearchParams?.page) || 1;
     const rows: boolean = orgsSearchParams?.rows || false;
 
-    return <OrganisationsPage
-        usersOrganisations={usersOrganisations}
-        searchParams={{
-            query,
-            currentPage,
-            rows
-        }}
-    />;
+    return (
+        <OrganisationsPage
+            usersOrganisations={usersOrganisations}
+            searchParams={{
+                query,
+                currentPage,
+                rows,
+            }}
+        />
+    );
 }

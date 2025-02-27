@@ -4,8 +4,8 @@ import { api } from "@/lib/trpc/server";
 
 interface UserRepositoriesPageProps {
     params: Promise<{
-        userslug: string
-    }>,
+        userslug: string;
+    }>;
     searchParams?: Promise<{
         query?: string;
         page?: string;

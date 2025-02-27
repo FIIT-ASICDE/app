@@ -1,5 +1,6 @@
 import { ManageMemberTab, OrganisationMember } from "@/lib/types/organisation";
 import { CircleFadingArrowUp, CircleX, Pen } from "lucide-react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +16,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useState } from "react";
 
 interface ManageMemberDialogProps {
     organisationId: string;
@@ -26,7 +26,8 @@ export const ManageMemberDialog = ({
     organisationId,
     organisationMember,
 }: ManageMemberDialogProps) => {
-    const [activeManageMemberTab, setActiveManageMemberTab] = useState<ManageMemberTab>("promote");
+    const [activeManageMemberTab, setActiveManageMemberTab] =
+        useState<ManageMemberTab>("promote");
 
     /* TODO: connect handlePromote with be */
     const handlePromote = () => {
@@ -75,9 +76,13 @@ export const ManageMemberDialog = ({
                         expel a member from your organisation.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="w-full flex flex-row gap-x-3">
+                <div className="flex w-full flex-row gap-x-3">
                     <Button
-                        variant={activeManageMemberTab === "promote" ? "secondary" : "outline"}
+                        variant={
+                            activeManageMemberTab === "promote"
+                                ? "secondary"
+                                : "outline"
+                        }
                         onClick={() => setActiveManageMemberTab("promote")}
                         className="flex w-1/2 flex-row items-center justify-center gap-x-2"
                     >
@@ -85,7 +90,11 @@ export const ManageMemberDialog = ({
                         <span>Promote</span>
                     </Button>
                     <Button
-                        variant={activeManageMemberTab === "expel" ? "destructive" : "outline"}
+                        variant={
+                            activeManageMemberTab === "expel"
+                                ? "destructive"
+                                : "outline"
+                        }
                         onClick={() => setActiveManageMemberTab("expel")}
                         className="flex w-1/2 flex-row items-center justify-center gap-x-2 border-destructive hover:bg-destructive-hover"
                     >
@@ -96,10 +105,11 @@ export const ManageMemberDialog = ({
 
                 {activeManageMemberTab === "promote" && (
                     <>
-                        <div className="mb-1 mx-5 text-center">
+                        <div className="mx-5 mb-1 text-center">
                             You are about to promote
                             <span className="font-bold">
-                                {" "}{organisationMember.username}{" "}
+                                {" "}
+                                {organisationMember.username}{" "}
                             </span>
                             to an admin.
                         </div>
@@ -117,12 +127,12 @@ export const ManageMemberDialog = ({
                 )}
                 {activeManageMemberTab === "expel" && (
                     <>
-                        <div className="mb-1 mx-5 text-center">
+                        <div className="mx-5 mb-1 text-center">
                             You are about to expel
                             <span className="font-bold">
-                            {" "}
+                                {" "}
                                 {organisationMember.username}{" "}
-                        </span>
+                            </span>
                             from your organisation.
                         </div>
                         <DialogTrigger asChild>
