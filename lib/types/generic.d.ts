@@ -64,3 +64,5 @@ export type CardType =
     | "organisation"
     | "member"
     | "invitation";
+
+export type FilterType = "pinned" | "favorite" | "public" | "role";

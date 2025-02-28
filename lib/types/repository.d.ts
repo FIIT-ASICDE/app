@@ -49,4 +49,4 @@ export type PinnedRepositoriesFilter = "all" | "pinned" | "notPinned";
 
 export type FavoriteRepositoriesFilter = "all" | "favorite" | "notFavorite";
 
-export type VisibilityRepositoriesFilter = "all" | "public" | "private";
+export type PublicRepositoriesFilter = "all" | "public" | "private";

@@ -2,7 +2,7 @@ import {
     BadgeType,
     CardType,
     CommandElement,
-    CommandElementGroup,
+    CommandElementGroup, FilterType
 } from "@/lib/types/generic";
 import { Invitation } from "@/lib/types/invitation";
 import {
@@ -198,4 +198,18 @@ export const getCardStripe = (cardType: CardType) => {
     const color: string = getCardStripeColor(cardType);
 
     return `relative before:absolute before:inset-y-0 before:left-0 before:w-1.5 ${color} before:rounded-l-2xl`;
+};
+
+export const parseBoolean = (value: string | undefined) => {
+    return value === "true" ? true : value === "false" ? false : undefined;
+};
+
+export const parseFilterValue = (filterType: FilterType, value: string | undefined) => {
+    return parseBoolean(value) === undefined
+        ? "all"
+        : parseBoolean(value)
+            ? filterType === "role" ? "admin" : filterType
+            : filterType === "public" ? "private" :
+                filterType === "role" ? "member" :
+                "not" + filterType;
 };

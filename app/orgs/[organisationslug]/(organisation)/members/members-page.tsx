@@ -1,6 +1,6 @@
 "use client";
 
-import { OrganisationMember } from "@/lib/types/organisation";
+import { OrganisationMember, RoleOrganisationFilter } from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 import { UsersRound } from "lucide-react";
 
@@ -10,6 +10,7 @@ import { NoData } from "@/components/no-data/no-data";
 import { InviteMemberDialog } from "@/components/organisations/members/invite-member-dialog";
 import { MemberCard } from "@/components/organisations/members/member-card";
 import Search from "@/components/ui/search";
+import { MemberFilterUrl } from "@/components/organisations/members/member-filter-url";
 
 interface MembersPageProps {
     orgSlug: string;
@@ -17,6 +18,7 @@ interface MembersPageProps {
         query: string;
         currentPage: number;
         rows: boolean;
+        role: RoleOrganisationFilter;
     };
 }
 
@@ -96,15 +98,6 @@ export default function MembersPage({
     const userIsAdmin: boolean = data.userIsAdmin;
     const members: Array<OrganisationMember> = data.members;
 
-    // TODO: move member filters to server side
-    /*const [roleFilter, setRoleFilter] = useState<RoleOrganisationFilter>("all");
-
-    useEffect(() => {
-        setFilteredMembers(
-            filterMembers(members, membersSearchPhrase, roleFilter),
-        );
-    }, [membersSearchPhrase, roleFilter, members]);*/
-
     if (!data.showMembers) {
         return (
             <h3>TODO: This organisation is not showing their member list.</h3>
@@ -122,14 +115,11 @@ export default function MembersPage({
                     />
                 </div>
                 <div className="m-6 mb-0 flex flex-row space-x-3">
-                    {/*<MemberFilterBadges
-                        roleFilter={roleFilter}
-                        setRoleFilter={setRoleFilter}
+                    <MemberFilterUrl
+                        filters={{
+                            role: searchParams.role
+                        }}
                     />
-                    <MemberFilter
-                        roleFilter={roleFilter}
-                        setRoleFilter={setRoleFilter}
-                    />*/}
                     {userIsAdmin && <InviteMemberDialog />}
                 </div>
             </div>

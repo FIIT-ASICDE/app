@@ -1,7 +1,12 @@
 "use client";
 
 import { OrganisationDisplay } from "@/lib/types/organisation";
-import { Repository } from "@/lib/types/repository";
+import {
+    FavoriteRepositoriesFilter,
+    PinnedRepositoriesFilter,
+    PublicRepositoriesFilter,
+    Repository
+} from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { Folders } from "lucide-react";
 
@@ -11,6 +16,7 @@ import { NoData } from "@/components/no-data/no-data";
 import { CreateRepositoryDialog } from "@/components/repositories/create-repository-dialog";
 import RepositoryCard from "@/components/repositories/repository-card";
 import Search from "@/components/ui/search";
+import { RepositoryFilter } from "@/components/repositories/repository-filter";
 
 interface RepositoriesPageProps {
     repos: Array<Repository>;
@@ -19,6 +25,9 @@ interface RepositoriesPageProps {
         query: string;
         currentPage: number;
         rows: boolean;
+        pinned: PinnedRepositoriesFilter;
+        favorite: FavoriteRepositoriesFilter;
+        public: PublicRepositoriesFilter;
     };
 }
 
@@ -28,32 +37,6 @@ export default function RepositoriesPage({
     searchParams,
 }: RepositoriesPageProps) {
     const pageSize: number = 6;
-
-    // TODO: move repo filters to server side
-    /*const [pinnedFilter, setPinnedFilter] =
-        useState<PinnedRepositoriesFilter>("all");
-    const [favoriteFilter, setFavoriteFilter] =
-        useState<FavoriteRepositoriesFilter>("all");
-    const [visibilityFilter, setVisibilityFilter] =
-        useState<VisibilityRepositoriesFilter>("all");*/
-
-    // useEffect(() => {
-    //     setFilteredRepositories(
-    //         filterRepositories(
-    //             repositories,
-    //             repositorySearchPhrase,
-    //             pinnedFilter,
-    //             favoriteFilter,
-    //             visibilityFilter,
-    //         ),
-    //     );
-    // }, [
-    //     repositorySearchPhrase,
-    //     pinnedFilter,
-    //     favoriteFilter,
-    //     visibilityFilter,
-    //     repositories,
-    // ]);
 
     return (
         <div className="bg-background text-foreground">
@@ -66,22 +49,13 @@ export default function RepositoriesPage({
                     />
                 </div>
                 <div className="m-6 mb-0 flex flex-row space-x-3">
-                    {/*<RepositoryFilterBadges
-                        pinnedFilter={pinnedFilter}
-                        setPinnedFilter={setPinnedFilter}
-                        favoriteFilter={favoriteFilter}
-                        setFavoriteFilter={setFavoriteFilter}
-                        visibilityFilter={visibilityFilter}
-                        setVisibilityFilter={setVisibilityFilter}
-                    />
                     <RepositoryFilter
-                        pinnedFilter={pinnedFilter}
-                        setPinnedFilter={setPinnedFilter}
-                        favoriteFilter={favoriteFilter}
-                        setFavoriteFilter={setFavoriteFilter}
-                        visibilityFilter={visibilityFilter}
-                        setVisibilityFilter={setVisibilityFilter}
-                    />*/}
+                        filters={{
+                            pinned: searchParams.pinned,
+                            favorite: searchParams.favorite,
+                            public: searchParams.public,
+                        }}
+                    />
                     {org.userRole === "admin" && (
                         <CreateRepositoryDialog usersOrganisations={[org]} />
                     )}
@@ -122,4 +96,4 @@ export default function RepositoriesPage({
             </main>
         </div>
     );
-}
+};
