@@ -24,11 +24,12 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { PaginationResult } from "@/lib/types/generic";
 
 interface DashboardPageProps {
     dashboard: UsersDashboard;
     searchParams: {
-        currentPage: number;
+        pagination: PaginationResult;
     };
 }
 
@@ -129,8 +130,6 @@ export default function DashboardPage({
     dashboard,
     searchParams,
 }: DashboardPageProps) {
-    const pageSize: number = 6;
-
     const recentRepositories: Array<RepositoryDisplay> =
         dashboard.recentRepositories;
     const favoriteRepositories: Array<RepositoryDisplay> =
@@ -215,9 +214,9 @@ export default function DashboardPage({
                                         )}
                                     </div>
                                     <DynamicPagination
-                                        totalCount={2}
-                                        pageSize={pageSize}
-                                        page={searchParams.currentPage}
+                                        totalCount={searchParams.pagination.total}
+                                        pageSize={searchParams.pagination.pageSize}
+                                        page={searchParams.pagination.page}
                                         className="my-3"
                                     />
                                 </>

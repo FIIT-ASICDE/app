@@ -15,6 +15,7 @@ import { CreateRepositoryDialog } from "@/components/repositories/create-reposit
 import RepositoryCard from "@/components/repositories/repository-card";
 import Search from "@/components/ui/search";
 import { RepositoryFilter } from "@/components/repositories/repository-filter";
+import { PaginationResult } from "@/lib/types/generic";
 
 interface RepositoriesPageProps {
     repos: Array<Repository>;
@@ -22,11 +23,11 @@ interface RepositoriesPageProps {
     userOrgs?: Array<Omit<OrganisationDisplay, "memberCount">>;
     searchParams: {
         query: string;
-        currentPage: number;
         rows: boolean;
         pinned: PinnedRepositoriesFilter;
         favorite: FavoriteRepositoriesFilter;
         public: PublicRepositoriesFilter;
+        pagination: PaginationResult;
     };
 }
 
@@ -36,8 +37,6 @@ export default async function RepositoriesPage({
     userOrgs,
     searchParams,
 }: RepositoriesPageProps) {
-    const pageSize: number = 6;
-
     return (
         <div className="bg-background text-foreground">
             <div className="flex items-center justify-between">
@@ -88,9 +87,9 @@ export default async function RepositoriesPage({
                             ))}
                         </div>
                         <DynamicPagination
-                            totalCount={2}
-                            pageSize={pageSize}
-                            page={searchParams.currentPage}
+                            totalCount={searchParams.pagination.total}
+                            pageSize={searchParams.pagination.pageSize}
+                            page={searchParams.pagination.page}
                             className="my-3"
                         />
                     </>

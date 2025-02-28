@@ -1,19 +1,18 @@
-import { OrganisationDisplay, RoleOrganisationFilter } from "@/lib/types/organisation";
-import { cn } from "@/lib/utils";
-import { Building } from "lucide-react";
-
-import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
+import Search from "@/components/ui/search";
 import { LayoutOptions } from "@/components/layout/layout-options";
 import { NoData } from "@/components/no-data/no-data";
-import { CreateOrganisationDialog } from "@/components/organisations/create-organisation-dialog";
-import { OrganisationCard } from "@/components/organisations/organisation-card";
-import Search from "@/components/ui/search";
-import { OrganisationFilter } from "@/components/organisations/organisation-filter";
+import { Building } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { OrganisationDisplay, RoleOrganisationFilter } from "@/lib/types/organisation";
+import { OrganisationCardDisplay } from "@/components/profile/organisation-card-display";
+import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
 import { PaginationResult } from "@/lib/types/generic";
+import { OrganisationFilter } from "@/components/organisations/organisation-filter";
+import { CreateOrganisationDialog } from "@/components/organisations/create-organisation-dialog";
 
 interface OrganisationsPageProps {
-    usersOrganisations: Array<OrganisationDisplay>;
-    searchParams: {
+    organisations: Array<OrganisationDisplay>;
+    searchParams : {
         query: string;
         rows: boolean;
         role: RoleOrganisationFilter;
@@ -21,21 +20,21 @@ interface OrganisationsPageProps {
     };
 }
 
-export default function OrganisationsPage({
-    usersOrganisations,
+export const OrganisationsPage = ({
+    organisations,
     searchParams,
-}: OrganisationsPageProps) {
+}: OrganisationsPageProps) => {
     return (
         <div className="bg-background text-foreground">
             <div className="flex items-center justify-between">
                 <div className="m-6 mb-0 flex w-1/2 items-center space-x-5">
                     <Search placeholder="Search organisations..." />
                     <LayoutOptions
-                        layout={searchParams.rows ? "rows" : "grid"}
+                        layout={searchParams?.rows ? "rows" : "grid"}
                         className="hidden lg:flex"
                     />
                 </div>
-                <div className="m-6 mb-0 flex flex-row space-x-3">
+                <div className="m-6 mb-0 flex space-x-3">
                     <OrganisationFilter
                         type="organisations"
                         filters={{
@@ -47,7 +46,7 @@ export default function OrganisationsPage({
             </div>
 
             <main>
-                {usersOrganisations.length === 0 ? (
+                {organisations.length === 0 ? (
                     <NoData
                         icon={Building}
                         message={"No organisations found."}
@@ -58,12 +57,12 @@ export default function OrganisationsPage({
                         <div
                             className={cn(
                                 "m-6 grid grid-cols-1 gap-3",
-                                !searchParams.rows ? "lg:grid-cols-2" : "",
+                                !searchParams?.rows ? "lg:grid-cols-2" : "",
                             )}
                         >
-                            {usersOrganisations.map(
+                            {organisations.map(
                                 (organisation: OrganisationDisplay) => (
-                                    <OrganisationCard
+                                    <OrganisationCardDisplay
                                         key={organisation.id}
                                         organisation={organisation}
                                     />
@@ -81,4 +80,4 @@ export default function OrganisationsPage({
             </main>
         </div>
     );
-}
+};

@@ -1,5 +1,3 @@
-"use client";
-
 import { OrganisationMember, RoleOrganisationFilter } from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 import { UsersRound } from "lucide-react";
@@ -10,15 +8,16 @@ import { NoData } from "@/components/no-data/no-data";
 import { InviteMemberDialog } from "@/components/organisations/members/invite-member-dialog";
 import { MemberCard } from "@/components/organisations/members/member-card";
 import Search from "@/components/ui/search";
-import { MemberFilterUrl } from "@/components/organisations/members/member-filter-url";
+import { OrganisationFilter } from "@/components/organisations/organisation-filter";
+import { PaginationResult } from "@/lib/types/generic";
 
 interface MembersPageProps {
-    orgSlug: string;
+    members: Array<OrganisationMember>;
     searchParams: {
         query: string;
-        currentPage: number;
         rows: boolean;
         role: RoleOrganisationFilter;
+        pagination: PaginationResult;
     };
 }
 
@@ -89,14 +88,9 @@ const data = {
 };
 
 export default function MembersPage({
-    // orgSlug,
+    members,
     searchParams,
 }: MembersPageProps) {
-    const pageSize: number = 6;
-
-    // still dummy data
-    const userIsAdmin: boolean = data.userIsAdmin;
-    const members: Array<OrganisationMember> = data.members;
 
     if (!data.showMembers) {
         return (
@@ -115,12 +109,13 @@ export default function MembersPage({
                     />
                 </div>
                 <div className="m-6 mb-0 flex flex-row space-x-3">
-                    <MemberFilterUrl
+                    <OrganisationFilter
+                        type="members"
                         filters={{
-                            role: searchParams.role
+                            role: searchParams.role,
                         }}
                     />
-                    {userIsAdmin && <InviteMemberDialog />}
+                    {data.userIsAdmin && <InviteMemberDialog />}
                 </div>
             </div>
 
@@ -151,9 +146,9 @@ export default function MembersPage({
                             )}
                         </div>
                         <DynamicPagination
-                            totalCount={2}
-                            pageSize={pageSize}
-                            page={searchParams.currentPage}
+                            totalCount={searchParams.pagination.total}
+                            pageSize={searchParams.pagination.pageSize}
+                            page={searchParams.pagination.page}
                             className="my-3"
                         />
                     </>

@@ -1,93 +1,64 @@
 import { api } from "@/lib/trpc/server";
-import { OrganisationDisplay } from "@/lib/types/organisation";
-import { cn } from "@/lib/utils";
-import { Building } from "lucide-react";
+import { OrganisationsPage } from "@/app/orgs/organisations-page";
+import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
+import { OrganisationDisplay, RoleOrganisationFilter } from "@/lib/types/organisation";
+import { PaginationResult } from "@/lib/types/generic";
 
-import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
-import { LayoutOptions } from "@/components/layout/layout-options";
-import { NoData } from "@/components/no-data/no-data";
-import { OrganisationCardDisplay } from "@/components/profile/organisation-card-display";
-import Search from "@/components/ui/search";
-
-export default async function OrganisationsPage(props: {
+interface AllOrganisationsPageProps {
     searchParams?: Promise<{
         query?: string;
         page?: string;
-        rows?: boolean;
+        rows?: string;
+        role?: string;
     }>;
-}) {
-    const searchParams = await props.searchParams;
-    const query = searchParams?.query || "";
-    const currentPage = Number(searchParams?.page) || 0;
+}
 
-    const pageSize = 20;
+export default async function AllOrganisationsPage({
+    searchParams,
+}: AllOrganisationsPageProps) {
+    const orgsSearchParams = await searchParams;
 
-    const { organizations, pagination } = await api.org.search({
+    const query = orgsSearchParams?.query || "";
+    const currentPage = Number(orgsSearchParams?.page) || 0;
+    const rows: boolean = parseBoolean(orgsSearchParams?.rows) ?? false;
+
+    const roleFilter: RoleOrganisationFilter = parseFilterValue("role", orgsSearchParams?.role) as RoleOrganisationFilter;
+
+    const pageSize: number = 8;
+
+    /*
+    * TODO: this method on BE
+    * Explanation: Here I need all organisations,
+    * filtered by nameSearchTerm,
+    * filtered by role filter ("all" = no need to filter),
+    * and the pagination object (PaginationResult),
+    * the method's name or path can be customized.
+    */
+    /*const { organisations, pagination } = await api.org.search({
         nameSearchTerm: query,
+        roleFilter: roleFilter,
         page: currentPage,
         pageSize: pageSize,
-    });
+    });*/
+
+    // dummy data so it does not break
+    const organisations: Array<OrganisationDisplay> = [];
+    const pagination: PaginationResult = {
+        total: 0,
+        pageCount: 0,
+        page: currentPage,
+        pageSize: pageSize,
+    };
 
     return (
-        <div className="bg-background text-foreground">
-            <div className="flex items-center justify-between">
-                <div className="m-6 mb-0 flex w-1/2 items-center space-x-5">
-                    <Search placeholder="Search organisations..." />
-                    <LayoutOptions
-                        layout={searchParams?.rows ? "rows" : "grid"}
-                        className="hidden lg:flex"
-                    />
-                </div>
-                <div className="m-6 mb-0 flex space-x-3">
-                    {/*<OrganisationFilterBadges
-                        roleFilter={roleFilter}
-                        setRoleFilter={setRoleFilter}
-                        memberCountSort={memberCountSort}
-                        setMemberCountSort={setMemberCountSort}
-                    />
-                    <OrganisationFilter
-                        roleFilter={roleFilter}
-                        setRoleFilter={setRoleFilter}
-                        memberCountSort={memberCountSort}
-                        setMemberCountSort={setMemberCountSort}
-                    />
-                    */}
-                </div>
-            </div>
-
-            <main>
-                {organizations.length === 0 ? (
-                    <NoData
-                        icon={Building}
-                        message={"No organisations found."}
-                        className="m-6"
-                    />
-                ) : (
-                    <>
-                        <div
-                            className={cn(
-                                "m-6 grid grid-cols-1 gap-3",
-                                !searchParams?.rows ? "lg:grid-cols-2" : "",
-                            )}
-                        >
-                            {organizations.map(
-                                (organisation: OrganisationDisplay) => (
-                                    <OrganisationCardDisplay
-                                        key={organisation.id}
-                                        organisation={organisation}
-                                    />
-                                ),
-                            )}
-                        </div>
-                        <DynamicPagination
-                            totalCount={pagination.pageCount}
-                            pageSize={pagination.pageSize}
-                            page={pagination.page}
-                            className="my-3"
-                        />
-                    </>
-                )}
-            </main>
-        </div>
+        <OrganisationsPage
+            organisations={organisations}
+            searchParams={{
+                query,
+                rows,
+                role: roleFilter,
+                pagination,
+            }}
+        />
     );
 }

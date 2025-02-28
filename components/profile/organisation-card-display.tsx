@@ -23,7 +23,7 @@ export const OrganisationCardDisplay = ({
     organisation,
     className,
 }: OrganisationCardDisplayProps) => {
-    const organisationLink: string = "/orgs" + organisation.name;
+    const organisationLink: string = "/orgs/" + organisation.name;
 
     return (
         <Card

@@ -1,3 +1,5 @@
+"use client";
+
 import { ManageMemberTab, OrganisationMember } from "@/lib/types/organisation";
 import { CircleFadingArrowUp, CircleX, Pen } from "lucide-react";
 import { useState } from "react";
