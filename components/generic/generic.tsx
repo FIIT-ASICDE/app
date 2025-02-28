@@ -1,93 +1,9 @@
 import {
     BadgeType,
     CardType,
-    CommandElement,
-    CommandElementGroup, FilterType
+    FilterType
 } from "@/lib/types/generic";
 import { Invitation } from "@/lib/types/invitation";
-import {
-    Building,
-    FolderPlus,
-    Folders,
-    Home,
-    Settings,
-    SunMoon,
-    UserRoundPen,
-    UserRoundPlus,
-} from "lucide-react";
-import { Session } from "next-auth";
-
-interface CommandOptionsProps {
-    user: Session["user"];
-}
-
-export const CommandOptions = ({
-    user,
-}: CommandOptionsProps): Array<CommandElementGroup> => {
-    return [
-        {
-            groupDisplayTitle: "Suggestions",
-            elements: [
-                {
-                    displayTitle: "Home",
-                    icon: Home,
-                    link: "/" + user.username,
-                } satisfies CommandElement,
-                {
-                    displayTitle: "Repositories",
-                    icon: Folders,
-                    link: "/" + user.username + "/repositories",
-                } satisfies CommandElement,
-                {
-                    displayTitle: "Organisations",
-                    icon: Building,
-                    link: "/" + user.username + "/organisations",
-                } satisfies CommandElement,
-                {
-                    displayTitle: "Settings",
-                    icon: Settings,
-                    link: "/" + user.username + "/settings",
-                } satisfies CommandElement,
-            ] satisfies Array<CommandElement>,
-        } satisfies CommandElementGroup,
-        {
-            groupDisplayTitle: "Actions",
-            elements: [
-                {
-                    displayTitle: "Create repository",
-                    icon: FolderPlus,
-                    link: "/" + user.username + "/repositories",
-                    action: "openCreateRepositoryDialog",
-                } satisfies CommandElement,
-                {
-                    displayTitle: "Create organisation",
-                    icon: UserRoundPlus,
-                    link: "/" + user.username + "/organisations",
-                    action: "openCreateOrganisationDialog",
-                } satisfies CommandElement,
-            ] satisfies Array<CommandElement>,
-        } satisfies CommandElementGroup,
-        {
-            groupDisplayTitle: "Settings",
-            elements: [
-                {
-                    displayTitle: "Edit profile",
-                    icon: UserRoundPen,
-                    link: "/" + user.username,
-                    action: "openEditProfileDialog",
-                    shortcut: ["Ctrl", "E"],
-                } satisfies CommandElement,
-                {
-                    displayTitle: "Change theme",
-                    icon: SunMoon,
-                    link: "/" + user.username + "/settings",
-                    action: "openSettingsTab",
-                    shortcut: ["Ctrl", "T"],
-                } satisfies CommandElement,
-            ] satisfies Array<CommandElement>,
-        } satisfies CommandElementGroup,
-    ] satisfies Array<CommandElementGroup>;
-};
 
 export const getTimeDeltaString = (lastActivity: Date): string => {
     const now = new Date();

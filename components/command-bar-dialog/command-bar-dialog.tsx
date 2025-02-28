@@ -3,7 +3,6 @@ import { Session } from "next-auth";
 import Link from "next/link";
 import { Dispatch, SetStateAction } from "react";
 
-import { CommandOptions } from "@/components/generic/generic";
 import {
     CommandDialog,
     CommandGroup,
@@ -13,6 +12,7 @@ import {
     CommandSeparator,
     CommandShortcut,
 } from "@/components/ui/command";
+import { CommandOptions } from "@/components/command-options/command-options";
 
 interface CommandBarDialogProps {
     user: Session["user"];
