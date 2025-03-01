@@ -1,10 +1,10 @@
 model Organization {
-  id                   String @db.Uuid                 @id @default(uuid())
-  name                 String
-  image				   String?
-  bio				   String?
-  users                OrganizationUser[]
-  userOrganizationRepo RepoUserOrganization[]
+  id                         String                       @id @default(uuid()) @db.Uuid
+  name                       String                       @unique
+  image                      String?
+  bio                        String?
+  users                      OrganizationUser[]
+  userOrganizationRepo       RepoUserOrganization[]
   OrganizationUserInvitation OrganizationUserInvitation[]
 
   createdAt DateTime @default(now())
@@ -20,22 +20,30 @@ model OrganizationUser {
   organization   Organization     @relation(fields: [organizationId], references: [id])
   role           OrganizationRole
 
- // user can have one role per organization
+  // user can have one role per organization
   @@id([userMetadataId, organizationId])
   @@index([userMetadataId])
   @@index([organizationId])
 }
 
 model OrganizationUserInvitation {
-  userMetadataId        String           @db.Uuid
-  userMetadata          UserMetadata     @relation(fields: [userMetadataId], references: [id])
-  organizationId 		String           @db.Uuid
-  organization   		Organization     @relation(fields: [organizationId], references: [id])
-  isPending      		Boolean          @default(true)
-  role           		OrganizationRole @default(MEMBER)
+  userMetadataId String       @db.Uuid
+  userMetadata   UserMetadata @relation("UserInvitations", fields: [userMetadataId], references: [id], map: "fk_invitation_user")
 
- // user can have one invitation per organization
+  senderMetadataId String       @db.Uuid
+  senderMetadata   UserMetadata @relation("SenderInvitations", fields: [senderMetadataId], references: [id], map: "fk_invitation_sender")
+
+  organizationId String       @db.Uuid
+  organization   Organization @relation(fields: [organizationId], references: [id], map: "fk_invitation_organization")
+
+  isPending    Boolean          @default(true)
+  role         OrganizationRole @default(MEMBER)
+  createdAt    DateTime         @default(now())
+  UserMetadata UserMetadata     @relation(fields: [userMetadataId], references: [id])
+
   @@id([userMetadataId, organizationId])
+  @@index([senderMetadataId])
+  @@index([organizationId])
 }
 
 enum OrganizationRole {

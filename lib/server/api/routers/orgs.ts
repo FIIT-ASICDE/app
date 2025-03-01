@@ -24,7 +24,59 @@ export const orgRouter = createTRPCRouter({
     search: search(),
     byName: byName(),
     userOrgs: usersOrgs(),
+    getMembers: getMembers()
 });
+
+function getMembers() {
+    return protectedProcedure
+        .input(
+            z.object({
+                organisationName: z.string()
+            })
+        )
+        .query(async ({ ctx, input }): Promise<OrganisationMember[]> => {
+            const { organisationName } = input;
+            const decodedOrganisationName = decodeURIComponent(organisationName.trim());
+            const prisma: PrismaType = ctx.prisma;
+
+            const organisation = await prisma.organization.findUnique({
+                where: {name: decodedOrganisationName},
+                select: {id: true}
+            })
+
+            if(!organisation) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Organisation not found",
+                })
+            }
+
+            const members = await prisma.organizationUser.findMany({
+                where: { organizationId: organisation.id },
+                include: {
+                    userMetadata: {
+                        include: {
+                            user: true,
+                        },
+                    },
+                },
+                orderBy: {
+                    userMetadata: {
+                        firstName: "asc",
+                    },
+                },
+            });
+
+            return members.map((member) => ({
+                id: member.userMetadata.user.id,
+                username: member.userMetadata.user.name ?? "",
+                image: member.userMetadata.user.image ?? "/avatars/default.png",
+                name: member.userMetadata.firstName,
+                surname: member.userMetadata.surname,
+                role: member.role === "ADMIN" ? "admin" : "member",
+            }));
+        });
+}
 
 function createOrg() {
     return protectedProcedure

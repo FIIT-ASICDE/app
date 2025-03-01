@@ -1,4 +1,4 @@
-import { InvitationStatus } from "@/lib/types/invitation";
+import { Invitation, InvitationStatus } from "@/lib/types/invitation";
 import { OrganisationDisplay } from "@/lib/types/organisation";
 
 import { RepositoryDisplay } from "./repository";
@@ -10,6 +10,7 @@ export type User =
     | {
           type: "onboarded";
           id: string;
+        userMetadataId: string;
           name: string;
           surname: string;
           username: string;
@@ -46,6 +47,7 @@ export interface UsersOverview {
 export interface UsersDashboard {
     favoriteRepositories: Array<RepositoryDisplay>;
     recentRepositories: Array<RepositoryDisplay>;
+    invitations: Array<Invitation>
 }
 
 export type UserSettingsTab = "account" | "preferences" | "danger";

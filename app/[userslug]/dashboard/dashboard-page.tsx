@@ -1,8 +1,9 @@
+"use client"
 import { PaginationResult } from "@/lib/types/generic";
+
 import type { Invitation } from "@/lib/types/invitation";
-import type { OrganisationDisplay } from "@/lib/types/organisation";
 import type { RepositoryDisplay } from "@/lib/types/repository";
-import { UserDisplay, UsersDashboard } from "@/lib/types/user";
+import { UsersDashboard } from "@/lib/types/user";
 import {
     CalendarArrowDown,
     CalendarOff,
@@ -11,7 +12,7 @@ import {
     Star,
     StarOff,
 } from "lucide-react";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 
 import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
 import { NoData } from "@/components/no-data/no-data";
@@ -33,98 +34,6 @@ interface DashboardPageProps {
     };
 }
 
-const data = {
-    invitations: [
-        {
-            id: "1",
-            type: "repository",
-            sender: {
-                id: "1",
-                username: "johndoe",
-                image: "/avatars/avatar1.png",
-            } satisfies UserDisplay,
-            repository: {
-                id: "1",
-                name: "repository-1",
-                ownerName: "john-the-owner",
-                ownerImage: "/avatars/avatar5.png",
-                visibility: "public",
-            } satisfies RepositoryDisplay,
-            status: "pending",
-            createdAt: new Date(),
-        } satisfies Invitation,
-        {
-            id: "2",
-            type: "repository",
-            sender: {
-                id: "2",
-                username: "johndoeeeee",
-                image: "/avatars/avatar3.png",
-            } satisfies UserDisplay,
-            repository: {
-                id: "2",
-                name: "repo-repo",
-                ownerName: "john-the-owner-2",
-                ownerImage: "/avatars/avatar4.png",
-                visibility: "private",
-            },
-            status: "pending",
-            createdAt: new Date(),
-        } satisfies Invitation,
-        {
-            id: "3",
-            type: "repository",
-            sender: {
-                id: "3",
-                username: "johndoe",
-                image: "/avatars/avatar3.png",
-            } satisfies UserDisplay,
-            repository: {
-                id: "3",
-                name: "repository-3",
-                ownerName: "john",
-                ownerImage: "/avatars/avatar2.png",
-                visibility: "public",
-            },
-            status: "pending",
-            createdAt: new Date(),
-        } satisfies Invitation,
-        {
-            id: "4",
-            type: "organisation",
-            sender: {
-                id: "4",
-                username: "ceo-googlu",
-                image: "/avatars/avatar4.png",
-            } satisfies UserDisplay,
-            organisation: {
-                id: "4",
-                name: "Google",
-                image: "/avatars/organisation-avatar1.png",
-                memberCount: 20,
-            } satisfies OrganisationDisplay,
-            status: "pending",
-            createdAt: new Date(),
-        } satisfies Invitation,
-        {
-            id: "5",
-            type: "organisation",
-            sender: {
-                id: "5",
-                username: "microsoft-hr-guy",
-                image: "/avatars/avatar5.png",
-            } satisfies UserDisplay,
-            organisation: {
-                id: "5",
-                name: "Microsoft",
-                image: "/avatars/organisation-avatar2.png",
-                memberCount: 150,
-            } satisfies OrganisationDisplay,
-            status: "accepted",
-            createdAt: new Date(),
-        } satisfies Invitation,
-    ] satisfies Array<Invitation>,
-};
 
 export default function DashboardPage({
     dashboard,
@@ -134,8 +43,7 @@ export default function DashboardPage({
         dashboard.recentRepositories;
     const favoriteRepositories: Array<RepositoryDisplay> =
         dashboard.favoriteRepositories;
-    // still dummy data
-    const invitations: Array<Invitation> = data.invitations;
+    const [invitations, setInvitations] = useState<Invitation[]>(dashboard.invitations);
 
     return (
         <div className="m-6 flex flex-col gap-6 bg-background text-foreground lg:flex-row">
@@ -255,6 +163,7 @@ export default function DashboardPage({
                                                 key={invitation.id}
                                                 invitation={invitation}
                                                 className="w-full"
+                                                setInvitations={setInvitations}
                                             />
                                         ),
                                     )}
