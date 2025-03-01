@@ -1,19 +1,14 @@
-
-import { BaseSvgElement } from '../base/BaseSvgElement';
 import { Register } from '../classes/register';
 import { shapes } from "@joint/core";
 
 export const JointJSRegister = (register: Register) => {
 
     const dimension = 200;
-
     const portItems = [];
-
     const inLeftCount = register.resetPort ? 3 : 2;
-
+    const registerRefD = register.resetPort ? 'M 0 0 L 50 0 L 50 100 L 0 100 L 0 70 L 10 75 L 0 80 Z' : 'M 0 0 L 50 0 L 50 100 L 0 100 Z';
     const portLeftY = (idx: number) => (dimension / (inLeftCount + 1)) * (idx + 1);
 
-    // input1 => data
     portItems.push({
         id: 'input1',
         group: 'input',
@@ -22,11 +17,10 @@ export const JointJSRegister = (register: Register) => {
             y: portLeftY(0),
         },
         attrs: {
-            portLabel: { text: 'data' }
+            portLabel: { text: 'D' }
         }
     });
 
-    // input3 => we
     portItems.push({
         id: 'input2',
         group: 'input',
@@ -35,11 +29,10 @@ export const JointJSRegister = (register: Register) => {
             y: portLeftY(1)
         },
         attrs: {
-            portLabel: { text: 'we' }
+            portLabel: { text: 'EN' }
         }
     });
     if (register.resetPort) {
-        // input3 => rst
         portItems.push({
             id: 'input3',
             group: 'input',
@@ -48,15 +41,14 @@ export const JointJSRegister = (register: Register) => {
                 y: portLeftY(2)
             },
             attrs: {
-                portLabel: { text: 'rst' }
+                portLabel: {
+                    text: 'RST',
+                    x: 25
+                }
             }
         });
     }
 
-
-    // ----------------------------------------------------------
-    // 2) input4 => clk (расположен сверху, как раньше)
-    // ----------------------------------------------------------
     portItems.push({
         id: 'input4',
         group: 'input',
@@ -72,11 +64,13 @@ export const JointJSRegister = (register: Register) => {
             portCircle: {
                 cx: 0,  cy: -5
             },
-            portLabel: { text: 'clk' }
+            portLabel: {
+                text: 'CLK',
+                x: -10,
+                y: 30
+            }
         }
     });
-
-
 
     portItems.push({
         id: 'output1',
@@ -84,9 +78,11 @@ export const JointJSRegister = (register: Register) => {
         args: {
             x: dimension / 2,
             y: dimension / 2
+        },
+        attrs: {
+            portLabel: { text: 'Q' }
         }
     });
-
 
     return new shapes.standard.Path({
         elType: 'register',
@@ -97,7 +93,7 @@ export const JointJSRegister = (register: Register) => {
         size: { width: dimension/2, height: dimension},
         attrs: {
             body: {
-                refD: 'M 0 0 L 30 0 L 25 10 L 20 0 L 50 0 L 50 100 L 0 100 Z',
+                refD: registerRefD,
                 fill: 'white',
                 stroke: '#000',
                 strokeWidth: 2,
@@ -124,18 +120,16 @@ export const JointJSRegister = (register: Register) => {
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: -20, y2: 0,      // Линия теперь идёт влево
+                            x2: -20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: -20,  // кружок тоже в левом конце
+                            cx: -20,
                             cy: 0,
                             r: 4,
                             fill: '#fff',
@@ -148,7 +142,6 @@ export const JointJSRegister = (register: Register) => {
                             textAnchor: 'start',
                             fontSize: 12,
                             fill: '#000',
-
                             x: 5,
                             y: 4
                         }
@@ -158,29 +151,22 @@ export const JointJSRegister = (register: Register) => {
                     position: { name: 'absolute' },
 
                     markup: [
-                        {
-                            tagName: 'line',
-                            selector: 'portLine'
-                        },
-                        {
-                            tagName: 'circle',
-                            selector: 'portCircle'
-                        }
+                        { tagName: 'line',   selector: 'portLine' },
+                        { tagName: 'circle', selector: 'portCircle' },
+                        { tagName: 'text',   selector: 'portLabel' }
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: 20, y2: 0,      // Линия теперь идёт влево
+                            x2: 20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: 20,  // кружок тоже в левом конце
+                            cx: 20,
                             cy: 0,
                             r: 4,
                             fill: '#e3d12d',
@@ -188,6 +174,13 @@ export const JointJSRegister = (register: Register) => {
                             strokeWidth: 2,
                             magnet: true,
                             'port-group': 'output',
+                        },
+                        portLabel: {
+                            textAnchor: 'start',
+                            fontSize: 12,
+                            fill: '#000',
+                            x: -15,
+                            y: 4
                         }
                     }
                 },

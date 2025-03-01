@@ -36,7 +36,7 @@ import { JointJSComparator } from '../Shapes/complexLogic/JointJSComparator';
 import { Comparator } from '../Shapes/classes/comparator';
 import { JointJSNewModule } from '../Shapes/modules/JointJSNewModule';
 import { Module } from '../Shapes/classes/module';
-import { JointJSRam } from '../Shapes/memory/JointJSRam';
+import { JointJSSRam } from '../Shapes/memory/JointJSSRam';
 import { Ram } from '../Shapes/classes/ram';
 import { JointJSRegister } from '../Shapes/memory/JointJSRegister';
 import { Register } from '../Shapes/classes/register';
@@ -171,8 +171,8 @@ const DiagramArea = () => {
             break;
         case 'ram':
             const ram = new Ram();
-            ram.name = "New RAM";
-            element = JointJSRam(ram);
+            ram.name = "New SRAM";
+            element = JointJSSRam(ram);
             break;
         case 'register':
             const register = new Register();

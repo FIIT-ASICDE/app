@@ -1,52 +1,10 @@
-// // src/components/Shapes/JointJSComparator.tsx
-// import {BaseComplexLogic} from '../base/BaseComplexLogic';
-// import {Subtractor} from '../classes/subtractor';
-//
-// let width = 100;
-// let height = 127;
-//
-// export const JointJSSubtractor = (subtractor: Subtractor) => {
-//
-//     return new BaseComplexLogic({
-//         elType: 'subtractor',
-//         name: subtractor.name,
-//         bandwidth: subtractor.dataBandwidth,
-//         attrs: {
-//             image: {
-//                 href: '/images/svg/adder.svg',
-//                 width: width,
-//                 height: height,
-//             },
-//             label: {
-//                 text: `-\n\n\n\n\n${subtractor.name}`,
-//                 fontSize: 14,
-//                 fontFamily: 'Arial',
-//                 fontWeight: 'bold',
-//                 fill: '#333',
-//                 x: width/2 + 5,
-//                 y: height/2 - 5,
-//             },
-//         },
-//         ports: {
-//             items: [
-//                 { id: 'input1', group: 'input', args: { x: 7, y: 27.5 } }, // Верхний вход
-//                 { id: 'input2', group: 'input', args: { x: 7, y: 101 } }, // Верхний вход
-//                 { id: 'output1', group: 'output', args: { x: 100, y: 65.5 } }, // Выход
-//             ],
-//         },
-//     });
-// };
-
-import { BaseSvgElement } from '../base/BaseSvgElement';
 import {Subtractor} from '../classes/subtractor';
 import { shapes } from "@joint/core";
 
 export const JointJSSubtractor = (subtractor: Subtractor) => {
 
     const dimension = 100;
-
     const portItems = [];
-
 
     portItems.push({
         id: 'input1',
@@ -65,7 +23,7 @@ export const JointJSSubtractor = (subtractor: Subtractor) => {
             y: dimension - 25
         }
     });
-    // Выходной порт (один) справа, по центру
+
     portItems.push({
         id: 'output1',
         group: 'output',
@@ -106,28 +64,26 @@ export const JointJSSubtractor = (subtractor: Subtractor) => {
                     position: { name: 'absolute' },
                     markup: [
                         {
-                            tagName: 'line',       // непосредственно линия
+                            tagName: 'line',
                             selector: 'portLine'
                         },
                         {
-                            tagName: 'circle',     // кружок на конце
+                            tagName: 'circle',
                             selector: 'portCircle'
                         }
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: -20, y2: 0,      // Линия теперь идёт влево
+                            x2: -20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: -20,  // кружок тоже в левом конце
+                            cx: -20,
                             cy: 0,
                             r: 4,
                             fill: '#fff',
@@ -153,18 +109,16 @@ export const JointJSSubtractor = (subtractor: Subtractor) => {
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: 20, y2: 0,      // Линия теперь идёт влево
+                            x2: 20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: 20,  // кружок тоже в левом конце
+                            cx: 20,
                             cy: 0,
                             r: 4,
                             fill: '#e3d12d',

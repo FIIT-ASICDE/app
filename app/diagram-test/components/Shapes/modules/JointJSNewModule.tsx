@@ -1,4 +1,3 @@
-import { BaseSvgElement } from '../base/BaseSvgElement';
 import { Module } from '../classes/module';
 import { shapes } from "@joint/core";
 
@@ -87,8 +86,6 @@ export const JointJSNewModule = (module: Module) => {
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
@@ -124,8 +121,6 @@ export const JointJSNewModule = (module: Module) => {
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,

@@ -1,10 +1,9 @@
 // pages/diagram-test/hooks/useJointJS.ts
 
 import { useEffect, useRef } from 'react';
-import { dia, shapes } from "@joint/core";
+import { dia, shapes, linkTools, elementTools } from "@joint/core";
 import { useDiagramContext } from '../context/useDiagramContext';
 import './jointjs.css'
-import { BaseSvgElement } from "@/app/diagram-test/components/Shapes/base/BaseSvgElement";
 
 const highlightSettings = {
     name: 'stroke',
@@ -17,9 +16,6 @@ const highlightSettings = {
     }
 };
 
-export const customNamespace = Object.assign({}, shapes);
-customNamespace['custom.BaseSvgElement'] = BaseSvgElement;
-
 const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
     const { graph, setSelectedElement, setPaper, isPanning } = useDiagramContext();
     const paperRef = useRef<dia.Paper | null>(null);
@@ -27,8 +23,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
     const isDragging = useRef(false);
     const lastClientX = useRef(0);
     const lastClientY = useRef(0);
-    const translation = useRef({ x: 0, y: 0 }); // Текущее смещение
-    const originalPortStyles = useRef<Map<string, string>>(new Map());
+    const translation = useRef({ x: 0, y: 0 });
 
 
     useEffect(() => {
@@ -41,8 +36,20 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                 gridSize: 10,
                 drawGrid: true,
                 background: { color: '#f9f9f9' },
-                interactive: true,
-                cellViewNamespace: customNamespace, // Используем кастомные формы
+                interactive: function(cellView) {
+                    if (cellView.model.isLink()) {
+                        // Разрешаем взаимодействие с вершинами соединения
+                        return {
+                            vertexAdd: true,     // добавление новых вершин
+                            vertexMove: true,    // перемещение вершин
+                            vertexRemove: true,  // удаление вершин
+                            arrowheadMove: false, // перемещение стрелок
+                            labelMove: false      // перемещение меток
+                        };
+                    }
+                    return true; // Для остальных элементов
+                },
+                cellViewNamespace: shapes, // Используем кастомные формы
                 defaultLink: () => new shapes.standard.Link({
                     // router: {
                     //     name: 'manhattan',  // или 'metro' / 'orthogonal' / 'manhattan' / etc.
@@ -50,6 +57,12 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                     //
                     // }, // Линии пойдут с изломами, как угловые пути
                     // connector: { name: 'normal' },   // Можно также использовать 'rounded', 'smooth' или другой тип
+                    interactive: {
+                        vertexAdd: true,
+                        vertexMove: true,
+                        vertexRemove: true,
+                        arrowheadMove: false
+                    },
                     attrs: {
                         line: {
                             stroke: '#000',
@@ -59,6 +72,12 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                                 stroke: '#000',
                                 fill: '#000'
                             }
+                        },
+                        vertex: {
+                            r: 5,
+                            fill: '#33a1ff',
+                            stroke: '#000',
+                            strokeWidth: 1
                         }
                     }
                 }),
@@ -84,7 +103,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                 defaultLinkAnchor: {
                     name: 'connectionPerpendicular'
                 },
-                linkPinning: false,
+                linkPinning: true,
                 markAvailable: true,
                 snapLinks: { radius: 75 },
                 validateConnection: function (
@@ -156,18 +175,12 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                     return true;
 
                 },
-            })
-            console.log("Namespace keys:", Object.keys(customNamespace));
-            ;
+            });
 
-
-            // Устанавливаем Paper в контекст
             setPaper(paper);
 
             paper.on('cell:pointerclick', (cellView) => {
-                console.log(cellView)
                 if (selectedCellViewRef.current) {
-                    console.log(selectedCellViewRef.current);
                     selectedCellViewRef.current.unhighlight('image', { highlighter: highlightSettings });
 
                 }
@@ -176,6 +189,67 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
 
                 selectedCellViewRef.current = cellView;
                 setSelectedElement(cellView.model);
+            });
+
+            const linkTool = new dia.ToolsView({
+                tools: [
+                    new linkTools.Vertices(),
+                    new linkTools.Remove()
+                ]
+            });
+
+            paper.on('link:pointerclick', (linkView) => {
+                linkView.addTools(linkTool);
+            });
+
+            paper.on('blank:pointerclick', () => {
+                const elements = graph.getElements();
+                elements.forEach(element => {
+                    const elementView = paper.findViewByModel(element);
+                    if (elementView) elementView.removeTools();
+                });
+
+                const links = graph.getLinks();
+                links.forEach(link => {
+                    const linkView = paper.findViewByModel(link);
+                    if (linkView) linkView.removeTools();
+                });
+            });
+
+            const elementTool = new dia.ToolsView({
+                tools: [
+                    new elementTools.Remove({
+                        x: '100%',
+                        y: 0,
+                        offset: { x: 10, y: -10 },
+                        markup: [
+                            {
+                                tagName: 'circle',
+                                selector: 'button',
+                                attributes: {
+                                    'r': 7,
+                                    'fill': '#FF1D00',
+                                    'cursor': 'pointer'
+                                }
+                            },
+                            {
+                                tagName: 'path',
+                                selector: 'icon',
+                                attributes: {
+                                    'd': 'M -3 -3 3 3 M -3 3 3 -3',
+                                    'fill': 'none',
+                                    'stroke': '#FFFFFF',
+                                    'stroke-width': 2,
+                                    'pointer-events': 'none'
+                                }
+                            }
+                        ]
+                    })
+                ]
+            });
+
+            paper.on('element:pointerclick', (elementView) => {
+                elementView.addTools(elementTool);
             });
 
 

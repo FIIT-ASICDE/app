@@ -1,27 +1,23 @@
-
-import { BaseSvgElement } from '../base/BaseSvgElement';
 import { Ram } from '../classes/ram';
 import { shapes } from "@joint/core";
 
-export const JointJSRam = (ram: Ram) => {
+export const JointJSSRam = (ram: Ram) => {
 
     const dimension = 200;
-
     const portItems = [];
 
-    // input1 => data
     portItems.push({
         id: 'input1',
         group: 'input',
         args: {
             x: 0,
-            y: (dimension/2 / (3 - 1)) * 1
+            y: (dimension/2 / (3 - 1))
         },
         attrs: {
-            portLabel: { text: 'data' }
+            portLabel: { text: 'data_in' }
         }
     });
-    // input2 => addr
+
     portItems.push({
         id: 'input2',
         group: 'input',
@@ -33,7 +29,7 @@ export const JointJSRam = (ram: Ram) => {
             portLabel: { text: 'addr' }
         }
     });
-    // input3 => we
+
     portItems.push({
         id: 'input3',
         group: 'input',
@@ -46,7 +42,6 @@ export const JointJSRam = (ram: Ram) => {
         }
     });
 
-    // input4 => clk (расположен сверху)
     portItems.push({
         id: 'input4',
         group: 'input',
@@ -72,6 +67,9 @@ export const JointJSRam = (ram: Ram) => {
         args: {
             x: dimension / 2,
             y: dimension / 2
+        },
+        attrs: {
+            portLabel: { text: 'data_out' }
         }
     });
 
@@ -91,7 +89,7 @@ export const JointJSRam = (ram: Ram) => {
                 strokeWidth: 2,
             },
             label: {
-                text: `RAM\n${ram.name}`,
+                text: `SRAM\n${ram.name}`,
                 fontSize: 14,
                 fontFamily: 'Arial',
                 fontWeight: 'bold',
@@ -112,18 +110,16 @@ export const JointJSRam = (ram: Ram) => {
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: -20, y2: 0,      // Линия теперь идёт влево
+                            x2: -20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: -20,  // кружок тоже в левом конце
+                            cx: -20,
                             cy: 0,
                             r: 4,
                             fill: '#fff',
@@ -146,29 +142,22 @@ export const JointJSRam = (ram: Ram) => {
                     position: { name: 'absolute' },
 
                     markup: [
-                        {
-                            tagName: 'line',
-                            selector: 'portLine'
-                        },
-                        {
-                            tagName: 'circle',
-                            selector: 'portCircle'
-                        }
+                        { tagName: 'line',   selector: 'portLine' },
+                        { tagName: 'circle', selector: 'portCircle' },
+                        { tagName: 'text',   selector: 'portLabel' }
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: 20, y2: 0,      // Линия теперь идёт влево
+                            x2: 20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: 20,  // кружок тоже в левом конце
+                            cx: 20,
                             cy: 0,
                             r: 4,
                             fill: '#e3d12d',
@@ -176,6 +165,13 @@ export const JointJSRam = (ram: Ram) => {
                             strokeWidth: 2,
                             magnet: true,
                             'port-group': 'output',
+                        },
+                        portLabel: {
+                            textAnchor: 'start',
+                            fontSize: 12,
+                            fill: '#000',
+                            x: -55,
+                            y: 4
                         }
                     }
                 },

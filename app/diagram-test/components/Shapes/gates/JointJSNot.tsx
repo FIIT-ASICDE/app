@@ -1,17 +1,12 @@
-// src/components/Shapes/JointJSAnd.tsx
-import { BaseSvgElement } from '../base/BaseSvgElement';
 import { Not } from '../classes/not';
-import { shapes } from "@joint/core"; // Ваш класс для хранения данных and
+import { shapes } from "@joint/core";
 
 export const JointJSNot = (not: Not) => {
-    // Минимальный размер, с которого начинаем:
-    // например, 60 + 10 * (количество портов - 2) или любая ваша формула
-    const inCount = 1
-    const dimension = 50; // пример формулы, можно менять по вкусу
 
-    // Координаты входных портов
-    // Здесь, для примера, используем «линейный» подход, когда порты равномерно распределены по левой стороне.
+    const inCount = 1
+    const dimension = 50;
     const portItems = [];
+
     portItems.push({
         id: 'input1',
         group: 'input',
@@ -20,7 +15,7 @@ export const JointJSNot = (not: Not) => {
             y: dimension / 2
         }
     });
-    // Выходной порт (один) справа, по центру
+
     portItems.push({
         id: 'output1',
         group: 'output',
@@ -30,13 +25,11 @@ export const JointJSNot = (not: Not) => {
         }
     });
 
-    // Для наглядности можно менять «путь» (Path) или «Image»:
-    // Здесь для примера используем «Image» c SVG andIcon, но можем и path-форму применить
     return new shapes.standard.Path({
         elType: 'not',
         name: not.name,
         bandwidth: not.bandwidth,
-        inPorts: inCount, // можно сохранить сюда, если нужно
+        inPorts: inCount,
         position: { x: not.position?.x || 100, y: not.position?.y || 100 },
         size: { width: dimension, height: dimension},
         attrs: {
@@ -63,28 +56,26 @@ export const JointJSNot = (not: Not) => {
                     position: { name: 'absolute' },
                     markup: [
                         {
-                            tagName: 'line',       // непосредственно линия
+                            tagName: 'line',
                             selector: 'portLine'
                         },
                         {
-                            tagName: 'circle',     // кружок на конце
+                            tagName: 'circle',
                             selector: 'portCircle'
                         }
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: -20, y2: 0,      // Линия теперь идёт влево
+                            x2: -20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: -20,  // кружок тоже в левом конце
+                            cx: -20,
                             cy: 0,
                             r: 4,
                             fill: '#fff',
@@ -110,18 +101,17 @@ export const JointJSNot = (not: Not) => {
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
+
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: 20, y2: 0,      // Линия теперь идёт влево
+                            x2: 20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: 20,  // кружок тоже в левом конце
+                            cx: 20,
                             cy: 0,
                             r: 4,
                             fill: '#e3d12d',

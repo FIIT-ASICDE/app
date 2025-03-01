@@ -1,12 +1,8 @@
-import { BaseSvgElement } from '../base/BaseSvgElement';
 import { Port } from '../classes/port';
-import { shapes } from "@joint/core"; // Ваш класс для хранения данных and
+import { shapes } from "@joint/core";
 
 export const JointJSOutputPort = (output: Port) => {
-
-    const dimension = 60; // пример формулы, можно менять по вкусу
-
-
+    const dimension = 40;
     const portItems = [];
 
     portItems.push({
@@ -14,7 +10,7 @@ export const JointJSOutputPort = (output: Port) => {
         group: 'input',
         args: {
             x: 0,
-            y: dimension / 6
+            y: dimension / 4
         }
     });
 
@@ -23,11 +19,11 @@ export const JointJSOutputPort = (output: Port) => {
         name: output.name,
         bandwidth: output.bandwidth,
         position: { x: output.position?.x || 100, y: output.position?.y || 100 },
-        size: { width: dimension, height: dimension/3},
+        size: { width: dimension, height: dimension/2},
         attrs: {
             body: {
                 refD: 'M 5 0 L 15 0 15 10 5 10 0 5 z',
-                fill: 'white',
+                fill: '#ededed',
                 stroke: '#000',
                 strokeWidth: 2,
             },
@@ -48,28 +44,26 @@ export const JointJSOutputPort = (output: Port) => {
                     position: { name: 'absolute' },
                     markup: [
                         {
-                            tagName: 'line',       // непосредственно линия
+                            tagName: 'line',
                             selector: 'portLine'
                         },
                         {
-                            tagName: 'circle',     // кружок на конце
+                            tagName: 'circle',
                             selector: 'portCircle'
                         }
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: -20, y2: 0,      // Линия теперь идёт влево
+                            x2: -20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: -20,  // кружок тоже в левом конце
+                            cx: -20,
                             cy: 0,
                             r: 4,
                             fill: '#fff',

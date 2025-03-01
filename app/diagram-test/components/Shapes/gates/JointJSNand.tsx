@@ -1,27 +1,21 @@
-// src/components/Shapes/JointJSAnd.tsx
-import { BaseSvgElement } from '../base/BaseSvgElement';
 import { Nand } from '../classes/nand';
-import { shapes } from "@joint/core"; // Ваш класс для хранения данных and
+import { shapes } from "@joint/core";
 
 export const JointJSNand = (nand: Nand) => {
-    // Минимальный размер, с которого начинаем:
-    // например, 60 + 10 * (количество портов - 2) или любая ваша формула
-    const inCount = nand.inPorts || 2;         // если inPorts не задан, пусть будет хотя бы 2
-    const dimension = 50 + (inCount - 2) * 20; // пример формулы, можно менять по вкусу
 
-    // Координаты входных портов
-    // Здесь, для примера, используем «линейный» подход, когда порты равномерно распределены по левой стороне.
+    const inCount = nand.inPorts || 2;
+    const dimension = 50 + (inCount - 2) * 20;
     const portItems = [];
+
     for (let i = 1; i <= inCount; i++) {
         const portY = (dimension / (inCount + 1)) * i;
         portItems.push({
             id: `input${i}`,
             group: 'input',
-            args: { x: 0, y: portY } // абсолютная позиция: (0, portY)
+            args: { x: 0, y: portY }
         });
     }
 
-    // Выходной порт (один) справа, по центру
     portItems.push({
         id: 'output1',
         group: 'output',
@@ -31,13 +25,11 @@ export const JointJSNand = (nand: Nand) => {
         }
     });
 
-    // Для наглядности можно менять «путь» (Path) или «Image»:
-    // Здесь для примера используем «Image» c SVG andIcon, но можем и path-форму применить
     return new shapes.standard.Path({
         elType: 'nand',
         name: nand.name,
         bandwidth: nand.bandwidth,
-        inPorts: inCount, // можно сохранить сюда, если нужно
+        inPorts: inCount,
         position: { x: nand.position?.x || 100, y: nand.position?.y || 100 },
         size: { width: dimension, height: dimension},
         attrs: {
@@ -64,28 +56,26 @@ export const JointJSNand = (nand: Nand) => {
                     position: { name: 'absolute' },
                     markup: [
                         {
-                            tagName: 'line',       // непосредственно линия
+                            tagName: 'line',
                             selector: 'portLine'
                         },
                         {
-                            tagName: 'circle',     // кружок на конце
+                            tagName: 'circle',
                             selector: 'portCircle'
                         }
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: -20, y2: 0,      // Линия теперь идёт влево
+                            x2: -20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: -20,  // кружок тоже в левом конце
+                            cx: -20,
                             cy: 0,
                             r: 4,
                             fill: '#fff',
@@ -111,18 +101,16 @@ export const JointJSNand = (nand: Nand) => {
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: 20, y2: 0,      // Линия теперь идёт влево
+                            x2: 20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: 20,  // кружок тоже в левом конце
+                            cx: 20,
                             cy: 0,
                             r: 4,
                             fill: '#e3d12d',

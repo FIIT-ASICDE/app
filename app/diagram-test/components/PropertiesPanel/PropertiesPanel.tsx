@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useHotkeys } from '../../hooks/useHotkeys';
 import { useDiagramContext } from '../../context/useDiagramContext';
 import styles from './PropertiesPanel.module.css';
+import ResizablePanel from '../common/ResizablePanel';
 import {Multiplexer} from "../Shapes/classes/multiplexer";
 import {JointJSComparator} from "../Shapes/complexLogic/JointJSComparator";
 import {JointJSMultiplexer} from "../Shapes/complexLogic/JointJSMultiplexer";
@@ -64,6 +65,12 @@ const PropertiesPanel = () => {
     const [editPortIndex, setEditPortIndex] = useState<number | null>(null);
     const [editPortType, setEditPortType] = useState<'input' | 'output'>('input');
     const [showSaveNotification, setShowSaveNotification] = useState(false);
+    const [panelWidth, setPanelWidth] = useState(300);
+
+
+    const handleWidthChange = (newWidth: number) => {
+        setPanelWidth(newWidth);
+    };
 
     useEffect(() => {
         if (selectedElement) {
@@ -266,7 +273,7 @@ const PropertiesPanel = () => {
     };
 
 
-    const handlePortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const handleMultiplexerPortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const portCount = parseInt(event.target.value);
         if (selectedElement?.attributes.elType === 'multiplexer') {
             const { x, y } = selectedElement.position();
@@ -576,23 +583,25 @@ const PropertiesPanel = () => {
 
     if (!selectedElement) {
         return (
-            <div className={styles.propertiesPanel}>
+            <ResizablePanel
+                className={styles.propertiesPanel}
+                defaultWidth={300}
+                direction="left"
+                onWidthChange={handleWidthChange}
+            >
                 <h3>Properties</h3>
                 <p>Select an element to see its properties.</p>
-            </div>
+            </ResizablePanel>
         );
     }
 
     return (
-        <div
+        <ResizablePanel
             className={styles.propertiesPanel}
-            onMouseEnter={() => setIsHover(true)}
-            onMouseLeave={() => setIsHover(false)}
+            defaultWidth={300}
+            direction="left"
+            onWidthChange={handleWidthChange}
         >
-
-
-
-
             <h3>Properties</h3>
             {/* Пример для I/O портов */}
             {(['output', 'input'].includes(selectedElement.attributes.elType)) && (
@@ -818,7 +827,7 @@ const PropertiesPanel = () => {
 
                     <label>
                         Multiplexer type:
-                        <select onChange={handlePortChange} defaultValue="2" name="inputPorts">
+                        <select onChange={handleMultiplexerPortChange} defaultValue="2" name="inputPorts">
                             <option value="2">2-to-1</option>
                             <option value="4">4-to-1</option>
                             <option value="8">8-to-1</option>
@@ -966,11 +975,11 @@ const PropertiesPanel = () => {
             {(['ram', 'register'].includes(selectedElement.attributes.elType)) && (
                 <>
                     <label>
-                        RAM name:
+                        SRAM name:
                         <input
                             type="text"
                             name="label"
-                            placeholder="Port's name..."
+                            placeholder="Insert name..."
                             value={properties.label || ''}
                             onChange={handleChange}
                         />
@@ -1138,7 +1147,7 @@ const PropertiesPanel = () => {
                     </div>
                 </div>
             )}
-        </div>
+        </ResizablePanel>
     );
 };
 

@@ -4,18 +4,15 @@ import { Xor } from '../classes/xor';
 import { shapes } from "@joint/core"; // Ваш класс для хранения данных and
 
 export const JointJSXor = (xor: Xor) => {
-    // Минимальный размер, с которого начинаем:
-    // например, 60 + 10 * (количество портов - 2) или любая ваша формула
-    const inCount = xor.inPorts || 2;         // если inPorts не задан, пусть будет хотя бы 2
-    const dimension = 50 + (inCount - 2) * 20; // пример формулы, можно менять по вкусу
 
-    // Координаты входных портов
-    // Здесь, для примера, используем «линейный» подход, когда порты равномерно распределены по левой стороне.
+    const inCount = xor.inPorts || 2;
+    const dimension = 50 + (inCount - 2) * 20;
+
     function bezierX(t: number): number {
         const mt = 1 - t;
         // p0=0, p1=5, p2=5, p3=0
         // x(t) = 3 * mt^2 * t * 5 + 3 * mt * t^2 * 5
-        return 9 * mt * mt * t + 9 * mt * t * t;  // (просто вынесли 3*5=15)
+        return 9 * mt * mt * t + 9 * mt * t * t;
     }
     function bezierY(t: number): number {
         const mt = 1 - t;
@@ -26,7 +23,6 @@ export const JointJSXor = (xor: Xor) => {
             + 39 * (mt * t**2);   // 3*13=39
     }
 
-    // 3) Создаём массив портов. Для каждого i (1..inCount) считаем параметр t = i/(inCount+1).
     const portItems = [];
     const stepT = 1 / (inCount + 1);
 
@@ -35,11 +31,9 @@ export const JointJSXor = (xor: Xor) => {
         const xLocal = bezierX(t);
         const yLocal = bezierY(t);
 
-        // Простейшее «мягкое» масштабирование под dimension
         const scaleX = dimension / 24;
         const scaleY = dimension / 40;
 
-        // Формируем окончательные координаты (некоторый отступ -20 по X, чтобы линия порта не «прилипала» к фигуре)
         const finalX = (xLocal * scaleX);
         const finalY = (yLocal * scaleY);
 
@@ -50,9 +44,6 @@ export const JointJSXor = (xor: Xor) => {
         });
     }
 
-
-
-    // Выходной порт (один) справа, по центру
     portItems.push({
         id: 'output1',
         group: 'output',
@@ -62,12 +53,11 @@ export const JointJSXor = (xor: Xor) => {
         }
     });
 
-
     return new shapes.standard.Path({
         elType: 'xor',
         name: xor.name,
         bandwidth: xor.bandwidth,
-        inPorts: inCount, // можно сохранить сюда, если нужно
+        inPorts: inCount,
         position: { x: xor.position?.x || 100, y: xor.position?.y || 100 },
         size: { width: dimension, height: dimension},
         attrs: {
@@ -94,28 +84,26 @@ export const JointJSXor = (xor: Xor) => {
                     position: { name: 'absolute' },
                     markup: [
                         {
-                            tagName: 'line',       // непосредственно линия
+                            tagName: 'line',
                             selector: 'portLine'
                         },
                         {
-                            tagName: 'circle',     // кружок на конце
+                            tagName: 'circle',
                             selector: 'portCircle'
                         }
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: -20, y2: 0,      // Линия теперь идёт влево
+                            x2: -20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: -20,  // кружок тоже в левом конце
+                            cx: -20,
                             cy: 0,
                             r: 4,
                             fill: '#fff',
@@ -141,18 +129,16 @@ export const JointJSXor = (xor: Xor) => {
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: 20, y2: 0,      // Линия теперь идёт влево
+                            x2: 20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: 20,  // кружок тоже в левом конце
+                            cx: 20,
                             cy: 0,
                             r: 4,
                             fill: '#e3d12d',

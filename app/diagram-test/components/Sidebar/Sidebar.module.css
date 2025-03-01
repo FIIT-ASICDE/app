@@ -1,7 +1,5 @@
 /* pages/diagram-test/components/Sidebar/Sidebar.module.css */
-
 .sidebar {
-    width: 240px; /* Увеличиваем ширину для размещения двух рядов */
     background-color: #f6f6f6; /* Тёмный фон для контраста */
     color: #333; /* Светлый текст */
     padding: 10px;
@@ -10,35 +8,24 @@
     flex-direction: column;
     height: 100vh;
     overflow-y: auto;
-    /* Кастомный scrollbar для Chrome/Edge/Safari */
-    /* Ширина полосы прокрутки */
+    position: relative;
     &::-webkit-scrollbar {
-        width: 8px; /* Толщина скроллбара */
+        width: 8px;
     }
-    /* Фон трека (полоса за скроллбаром) */
     &::-webkit-scrollbar-track {
         background: #f8f8f8;
     }
-    /* Ползунок */
     &::-webkit-scrollbar-thumb {
         background-color: #ccc;
         border-radius: 4px;
-        border: 1px solid #f8f8f8; /* небольшая «обводка» */
+        border: 1px solid #f8f8f8;
     }
-    /* Ховер ползунка */
     &::-webkit-scrollbar-thumb:hover {
         background-color: #999;
     }
 
-    /* Для Firefox */
     scrollbar-width: thin;             /* тонкий вариант */
     scrollbar-color: #ccc #f8f8f8;     /* ползунок / трек */
-}
-
-.group {
-    margin-bottom: 20px;
-    border-bottom: 1px solid #e4e4e4; /* Визуальный разделитель между группами */
-    padding-bottom: 10px;
 }
 
 .groupHeader {
@@ -74,12 +61,6 @@
     flex-grow: 1;
 }
 
-.iconList {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Всегда 2 колонки */
-    gap: 8px;
-    padding: 4px;
-}
 
 .iconItem {
     display: flex;
@@ -123,7 +104,7 @@
 }
 
 .svgIcon {
-    width: 70px;
+    width: 40px;
     height: auto;
 }
 

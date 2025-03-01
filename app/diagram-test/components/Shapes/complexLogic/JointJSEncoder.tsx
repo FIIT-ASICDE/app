@@ -1,17 +1,11 @@
-// src/components/Shapes/JointJSAnd.tsx
-import { BaseSvgElement } from '../base/BaseSvgElement';
 import { Encoder } from '../classes/encoder';
-import { shapes } from "@joint/core"; // Ваш класс для хранения данных and
+import { shapes } from "@joint/core";
 
 export const JointJSEncoder = (encoder: Encoder) => {
 
-    const dimension = 100; // пример формулы, можно менять по вкусу
-
-    // Координаты входных портов
-    // Здесь, для примера, используем «линейный» подход, когда порты равномерно распределены по левой стороне.
+    const dimension = 100;
     const portItems = [];
 
-    // Выходной порт (один) справа, по центру
     portItems.push({
         id: 'input1',
         group: 'input',
@@ -20,7 +14,7 @@ export const JointJSEncoder = (encoder: Encoder) => {
             y: dimension / 2
         }
     });
-    // Выходной порт (один) справа, по центру
+
     portItems.push({
         id: 'output1',
         group: 'output',
@@ -29,7 +23,6 @@ export const JointJSEncoder = (encoder: Encoder) => {
             y: dimension / 2
         }
     });
-
 
     return new shapes.standard.Path({
         elType: 'encoder',
@@ -61,28 +54,26 @@ export const JointJSEncoder = (encoder: Encoder) => {
                     position: { name: 'absolute' },
                     markup: [
                         {
-                            tagName: 'line',       // непосредственно линия
+                            tagName: 'line',
                             selector: 'portLine'
                         },
                         {
-                            tagName: 'circle',     // кружок на конце
+                            tagName: 'circle',
                             selector: 'portCircle'
                         }
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: -20, y2: 0,      // Линия теперь идёт влево
+                            x2: -20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: -20,  // кружок тоже в левом конце
+                            cx: -20,
                             cy: 0,
                             r: 4,
                             fill: '#fff',
@@ -108,18 +99,16 @@ export const JointJSEncoder = (encoder: Encoder) => {
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: 20, y2: 0,      // Линия теперь идёт влево
+                            x2: 20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: 20,  // кружок тоже в левом конце
+                            cx: 20,
                             cy: 0,
                             r: 4,
                             fill: '#e3d12d',

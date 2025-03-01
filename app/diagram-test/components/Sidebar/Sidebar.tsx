@@ -1,8 +1,7 @@
 // pages/diagram-test/components/Sidebar/Sidebar.tsx
-
-import React, { useRef } from "react";
+import Image from 'next/image';
+import React, { useRef, useState, useEffect } from "react";
 import {
-    FaShapes,
     FaSearchPlus,
     FaSearchMinus,
     FaExpand,
@@ -16,31 +15,50 @@ import {
     FaRegFileCode
 } from 'react-icons/fa';
 import Tippy from '@tippyjs/react';
-import 'tippy.js/dist/tippy.css'; // Импорт стилей Tippy
+import 'tippy.js/dist/tippy.css';
 import { useDiagramContext } from '../../context/useDiagramContext';
 import { generateSystemVerilogCode } from '../../utils/codeGenerator';
-import { saveDiagram, loadDiagram } from '../../utils/diagramStorage';
+import ResizablePanel from '../common/ResizablePanel';
 import styles from './Sidebar.module.css';
 
 const Sidebar = () => {
     const { zoomIn, zoomOut, fitToView, graph, isPanning, togglePanning } = useDiagramContext();
-    const [isLogicCollapsed, setIsLogicCollapsed] = React.useState(false);
-    const [isIOCollapsed, setIsIOCollapsed] = React.useState(false);
-    const [isModulesCollapsed, setIsModulesCollapsed] = React.useState(false);
-    const [isToolsCollapsed, setIsToolsCollapsed] = React.useState(false);
-    const [isSaveLoadCollapsed, setIsSaveLoadCollapsed] = React.useState(false);
-    const [isActionsCollapsed, setIsActionsCollapsed] = React.useState(false);
-    const [isComplexLogicCollapsed, setIsComplexLogicCollapsed] = React.useState(false);
-    const [isMemoryCollapsed, setIsMemoryCollapsed] = React.useState(false);
+    const [isLogicCollapsed, setIsLogicCollapsed] = useState(true);
+    const [isIOCollapsed, setIsIOCollapsed] = useState(true);
+    const [isModulesCollapsed, setIsModulesCollapsed] = useState(true);
+    const [isToolsCollapsed, setIsToolsCollapsed] = useState(true);
+    const [isSaveLoadCollapsed, setIsSaveLoadCollapsed] = useState(true);
+    const [isActionsCollapsed, setIsActionsCollapsed] = useState(true);
+    const [isComplexLogicCollapsed, setIsComplexLogicCollapsed] = useState(true);
+    const [isMemoryCollapsed, setIsMemoryCollapsed] = useState(true);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [gridColumns, setGridColumns] = useState(3);
+
+    const calculateGridColumns = (width: number) => {
+        if (width < 200) return 1;
+        if (width < 350) return 2;
+        if (width < 450) return 3;
+        return 4;
+    };
+
+    const iconListStyle = {
+        display: 'grid',
+        gridTemplateColumns: `repeat(${gridColumns}, 1fr)`,
+        gap: '8px',
+        padding: '4px'
+    };
+
+    const handleWidthChange = (newWidth: number) => {
+        setGridColumns(calculateGridColumns(newWidth));
+    };
 
     const handleDragStart = (event: React.DragEvent, toolType: string) => {
         event.dataTransfer.setData('toolType', toolType);
     };
 
+
     const handleGenerateCode = () => {
         const code = generateSystemVerilogCode(graph);
-        // Создаем Blob и ссылку для скачивания
         const blob = new Blob([code], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -49,7 +67,7 @@ const Sidebar = () => {
         a.click();
         URL.revokeObjectURL(url);
     };
-    // Сохранение диаграммы в файл
+
     const handleSaveDiagram = () => {
         const diagramJSON = JSON.stringify(graph.toJSON(), null, 2);
         const blob = new Blob([diagramJSON], { type: 'application/json' });
@@ -61,7 +79,6 @@ const Sidebar = () => {
         URL.revokeObjectURL(url);
     };
 
-    // Обработчик выбора файла для загрузки диаграммы
     const handleLoadDiagram = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -70,17 +87,14 @@ const Sidebar = () => {
                 try {
                     const json = JSON.parse(event.target?.result as string);
                     graph.fromJSON(json);
-                    alert('Диаграмма загружена');
-                } catch (error) {
-                    console.error("Error parsing file", error);
-                    alert("Ошибка при загрузке диаграммы");
+                } catch {
+                    alert("Error parsing file");
                 }
             };
             reader.readAsText(file);
         }
     };
 
-    // Функция для запуска выбора файла
     const triggerLoadDiagram = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click();
@@ -92,26 +106,32 @@ const Sidebar = () => {
     };
 
     return (
-        <div className={styles.sidebar}>
+        <ResizablePanel
+            className={styles.sidebar}
+            onWidthChange={handleWidthChange}
+            direction="right"
+        >
             {/* Logic Elements Group */}
-            <div className={styles.group}>
+            <div>
                 <div className={styles.groupHeader} onClick={() => setIsLogicCollapsed(!isLogicCollapsed)}>
                     <FaPlug className={styles.collapseIcon} />
                     <h3>Logic</h3>
                     <FaBars className={styles.toggleIcon} />
                 </div>
                 {!isLogicCollapsed && (
-                    <div className={styles.iconList}>
+                    <div style={iconListStyle}>
                         <Tippy content="AND Gate" placement="right" delay={[500, 0]}>
                             <div
                                 className={styles.iconItem}
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, 'and')}
                             >
-                                <img
+                                <Image
                                     src="/images/svg/andIcon.svg"
                                     alt="AND Gate"
                                     className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
                                 />
                             </div>
                         </Tippy>
@@ -121,10 +141,12 @@ const Sidebar = () => {
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, 'or')}
                             >
-                                <img
+                                <Image
                                     src="/images/svg/orIcon.svg"
                                     alt="OR Gate"
                                     className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
                                 />
                             </div>
                         </Tippy>
@@ -134,10 +156,12 @@ const Sidebar = () => {
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, 'xor')}
                             >
-                                <img
+                                <Image
                                     src="/images/svg/xorIcon.svg"
                                     alt="XOR Gate"
                                     className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
                                 />
                             </div>
                         </Tippy>
@@ -147,10 +171,12 @@ const Sidebar = () => {
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, 'xnor')}
                             >
-                                <img
+                                <Image
                                     src="/images/svg/xnorIcon.svg"
                                     alt="XNOR Gate"
                                     className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
                                 />
                             </div>
                         </Tippy>
@@ -160,10 +186,12 @@ const Sidebar = () => {
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, 'nand')}
                             >
-                                <img
+                                <Image
                                     src="/images/svg/nandIcon.svg"
                                     alt="NAND Gate"
                                     className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
                                 />
                             </div>
                         </Tippy>
@@ -173,10 +201,12 @@ const Sidebar = () => {
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, 'nor')}
                             >
-                                <img
+                                <Image
                                     src="/images/svg/norIcon.svg"
                                     alt="NOR Gate"
                                     className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
                                 />
                             </div>
                         </Tippy>
@@ -186,36 +216,39 @@ const Sidebar = () => {
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, 'not')}
                             >
-                                <img
+                                <Image
                                     src="/images/svg/notIcon.svg"
                                     alt="NOT Gate"
                                     className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
                                 />
                             </div>
                         </Tippy>
-                        {/* Добавьте другие логические элементы по мере необходимости */}
                     </div>
                 )}
             </div>
             {/* Complex Logic Elements Group */}
-            <div className={styles.group}>
+            <div>
                 <div className={styles.groupHeader} onClick={() => setIsComplexLogicCollapsed(!isComplexLogicCollapsed)}>
                     <FaPlug className={styles.collapseIcon} />
                     <h3>Complex Logic</h3>
                     <FaBars className={styles.toggleIcon} />
                 </div>
                 {!isComplexLogicCollapsed && (
-                    <div className={styles.iconList}>
+                    <div style={iconListStyle}>
                         <Tippy content="Multiplexer" placement="right" delay={[500, 0]}>
                             <div
                                 className={styles.iconItem}
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, 'multiplexer')}
                             >
-                                <img
+                                <Image
                                     src="/images/svg/multiplexer_2_ports.svg"
                                     alt="Multiplexer"
                                     className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
                                 />
                             </div>
                         </Tippy>
@@ -225,10 +258,12 @@ const Sidebar = () => {
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, 'decoder')}
                             >
-                                <img
+                                <Image
                                     src="/images/svg/decoder.svg"
                                     alt="Decoder"
                                     className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
                                 />
                             </div>
                         </Tippy>
@@ -238,10 +273,12 @@ const Sidebar = () => {
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, 'encoder')}
                             >
-                                <img
+                                <Image
                                     src="/images/svg/encoder.svg"
                                     alt="Encoder"
                                     className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
                                 />
                             </div>
                         </Tippy>
@@ -251,10 +288,12 @@ const Sidebar = () => {
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, 'adder')}
                             >
-                                <img
+                                <Image
                                     src="/images/svg/adderIcon.svg"
                                     alt="Adder"
                                     className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
                                 />
                             </div>
                         </Tippy>
@@ -264,10 +303,12 @@ const Sidebar = () => {
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, 'sub')}
                             >
-                                <img
+                                <Image
                                     src="/images/svg/subtractorIcon.svg"
                                     alt="Subtractor"
                                     className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
                                 />
                             </div>
                         </Tippy>
@@ -277,10 +318,12 @@ const Sidebar = () => {
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, 'comp')}
                             >
-                                <img
+                                <Image
                                     src="/images/svg/comparatorIcon.svg"
                                     alt="Comparator"
                                     className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
                                 />
                             </div>
                         </Tippy>
@@ -288,24 +331,27 @@ const Sidebar = () => {
                 )}
             </div>
             {/* I/O Elements Group */}
-            <div className={styles.group}>
+            <div>
                 <div className={styles.groupHeader} onClick={() => setIsIOCollapsed(!isIOCollapsed)}>
                     <FaPlug className={styles.collapseIcon} />
-                    <h3>I/O</h3>
+                    <h3>I / O</h3>
                     <FaBars className={styles.toggleIcon} />
                 </div>
                 {!isIOCollapsed && (
-                    <div className={styles.iconList}>
+                    <div style={iconListStyle}>
                         <Tippy content="Input Port" placement="right" delay={[500, 0]}>
                             <div
                                 className={styles.iconItem}
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, 'input')}
                             >
-                                <img
+                                <Image
                                     src="/images/svg/inputPort.svg"
                                     alt="Input Port"
                                     className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
+
                                 />
                             </div>
                         </Tippy>
@@ -315,36 +361,39 @@ const Sidebar = () => {
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, 'output')}
                             >
-                                <img
+                                <Image
                                     src="/images/svg/outputPort.svg"
                                     alt="Output Port"
                                     className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
                                 />
                             </div>
                         </Tippy>
-                        {/* Добавьте другие I/O элементы по мере необходимости */}
                     </div>
                 )}
             </div>
             {/* Module Group */}
-            <div className={styles.group}>
+            <div>
                 <div className={styles.groupHeader} onClick={() => setIsModulesCollapsed(!isModulesCollapsed)}>
                     <FaPlug className={styles.collapseIcon} />
-                    <h3>Module/Component</h3>
+                    <h3>Module / Component</h3>
                     <FaBars className={styles.toggleIcon} />
                 </div>
                 {!isModulesCollapsed && (
-                    <div className={styles.iconList}>
+                    <div style={iconListStyle}>
                         <Tippy content="New Module" placement="right" delay={[500, 0]}>
                             <div
                                 className={styles.iconItem}
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, 'newModule')}
                             >
-                                <img
+                                <Image
                                     src="/images/svg/NewModule.svg"
                                     alt="New Module"
                                     className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
                                 />
                             </div>
                         </Tippy>
@@ -354,10 +403,12 @@ const Sidebar = () => {
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, 'newModule')}
                             >
-                                <img
+                                <Image
                                     src="/images/svg/ExistingModule.svg"
                                     alt="Existing Module"
                                     className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
                                 />
                             </div>
                         </Tippy>
@@ -365,24 +416,26 @@ const Sidebar = () => {
                     </div>
                 )}
             </div>
-            <div className={styles.group}>
-                <div className={styles.groupHeader} onClick={() => setIsModulesCollapsed(!isModulesCollapsed)}>
+            <div>
+                <div className={styles.groupHeader} onClick={() => setIsMemoryCollapsed(!isMemoryCollapsed)}>
                     <FaPlug className={styles.collapseIcon} />
                     <h3>Memory</h3>
                     <FaBars className={styles.toggleIcon} />
                 </div>
-                {!isModulesCollapsed && (
-                    <div className={styles.iconList}>
-                        <Tippy content="RAM" placement="right" delay={[500, 0]}>
+                {!isMemoryCollapsed && (
+                    <div style={iconListStyle}>
+                        <Tippy content="SRAM" placement="right" delay={[500, 0]}>
                             <div
                                 className={styles.iconItem}
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, 'ram')}
                             >
-                                <img
+                                <Image
                                     src="/images/svg/Ram.svg"
-                                    alt="RAM"
+                                    alt="SRAM"
                                     className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
                                 />
                             </div>
                         </Tippy>
@@ -392,10 +445,12 @@ const Sidebar = () => {
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, 'register')}
                             >
-                                <img
+                                <Image
                                     src="/images/svg/Register.svg"
                                     alt="REGISTER"
                                     className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
                                 />
                             </div>
                         </Tippy>
@@ -405,14 +460,14 @@ const Sidebar = () => {
             </div>
 
             {/* Tools Group */}
-            <div className={styles.group}>
+            <div>
                 <div className={styles.groupHeader} onClick={() => setIsToolsCollapsed(!isToolsCollapsed)}>
                     <FaTools className={styles.collapseIcon} />
                     <h3>Tools</h3>
                     <FaBars className={styles.toggleIcon} />
                 </div>
                 {!isToolsCollapsed && (
-                    <div className={styles.iconList}>
+                    <div style={iconListStyle}>
                         <Tippy content={isPanning ? "Disable Panning" : "Enable Panning"} placement="right" delay={[500, 0]}>
                             <div
                                 className={`${styles.iconItem} ${isPanning ? styles.active : ''}`}
@@ -426,14 +481,14 @@ const Sidebar = () => {
             </div>
 
             {/* Paper Actions Group */}
-            <div className={styles.group}>
+            <div>
                 <div className={styles.groupHeader} onClick={() => setIsActionsCollapsed(!isActionsCollapsed)}>
                     <FaExpand className={styles.collapseIcon} />
                     <h3>Paper Actions</h3>
                     <FaBars className={styles.toggleIcon} />
                 </div>
                 {!isActionsCollapsed && (
-                    <div className={styles.iconList}>
+                    <div style={iconListStyle}>
                         <Tippy content="Zoom In" placement="right" delay={[500, 0]}>
                             <div
                                 className={styles.iconItem}
@@ -458,20 +513,19 @@ const Sidebar = () => {
                                 <FaExpand size={24} />
                             </div>
                         </Tippy>
-                        {/* Добавьте другие действия по мере необходимости */}
                     </div>
                 )}
             </div>
 
             {/* Save & Load Group */}
-            <div className={styles.group}>
+            <div>
                 <div className={styles.groupHeader} onClick={() => setIsSaveLoadCollapsed(!isSaveLoadCollapsed)}>
                     <FaRegFileCode className={styles.collapseIcon} />
                     <h3>Generate</h3>
                     <FaBars className={styles.toggleIcon} />
                 </div>
                 {!isSaveLoadCollapsed && (
-                    <div className={styles.iconList}>
+                    <div style={iconListStyle}>
                         <Tippy content="Generate Code" placement="right" delay={[500, 0]}>
                             <div
                                 className={styles.iconItem}
@@ -494,7 +548,7 @@ const Sidebar = () => {
                                 <span>Load Diagram</span>
                             </div>
                         </Tippy>
-                        {/* Скрытый input для загрузки файла */}
+                        {/* Hidder input for loading */}
                         <input
                             type="file"
                             accept=".json"
@@ -505,7 +559,8 @@ const Sidebar = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </ResizablePanel>
+
     );
 
 };

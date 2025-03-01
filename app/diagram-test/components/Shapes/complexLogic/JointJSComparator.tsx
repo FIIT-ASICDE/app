@@ -1,13 +1,10 @@
-import { BaseSvgElement } from '../base/BaseSvgElement';
 import {Comparator} from '../classes/comparator';
 import { shapes } from "@joint/core";
 
 export const JointJSComparator = (comparator: Comparator) => {
 
     const dimension = 100;
-
     const portItems = [];
-
 
     portItems.push({
         id: 'input1',
@@ -26,7 +23,7 @@ export const JointJSComparator = (comparator: Comparator) => {
             y: dimension - 25
         }
     });
-    // Выходной порт (один) справа, по центру
+
     portItems.push({
         id: 'output1',
         group: 'output',
@@ -35,7 +32,6 @@ export const JointJSComparator = (comparator: Comparator) => {
             y: dimension / 2
         }
     });
-
 
     return new shapes.standard.Path({
         elType: 'comparator',
@@ -67,28 +63,26 @@ export const JointJSComparator = (comparator: Comparator) => {
                     position: { name: 'absolute' },
                     markup: [
                         {
-                            tagName: 'line',       // непосредственно линия
+                            tagName: 'line',
                             selector: 'portLine'
                         },
                         {
-                            tagName: 'circle',     // кружок на конце
+                            tagName: 'circle',
                             selector: 'portCircle'
                         }
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: -20, y2: 0,      // Линия теперь идёт влево
+                            x2: -20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: -20,  // кружок тоже в левом конце
+                            cx: -20,
                             cy: 0,
                             r: 4,
                             fill: '#fff',
@@ -114,18 +108,16 @@ export const JointJSComparator = (comparator: Comparator) => {
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: 20, y2: 0,      // Линия теперь идёт влево
+                            x2: 20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: 20,  // кружок тоже в левом конце
+                            cx: 20,
                             cy: 0,
                             r: 4,
                             fill: '#e3d12d',

@@ -1,26 +1,21 @@
-import { BaseSvgElement } from '../base/BaseSvgElement';
 import { Multiplexer } from '../classes/multiplexer';
-import { shapes } from "@joint/core"; // Ваш класс для хранения данных and
+import { shapes } from "@joint/core";
 
 export const JointJSMultiplexer = (multiplexer: Multiplexer) => {
-    // Минимальный размер, с которого начинаем:
-    // например, 60 + 10 * (количество портов - 2) или любая ваша формула
-    const inCount = multiplexer.dataPorts || 2;         // если inPorts не задан, пусть будет хотя бы 2
-    const dimension = 100 + (inCount - 2) * 20; // пример формулы, можно менять по вкусу
 
-    // Координаты входных портов
-    // Здесь, для примера, используем «линейный» подход, когда порты равномерно распределены по левой стороне.
+    const inCount = multiplexer.dataPorts || 2;
+    const dimension = 100 + (inCount - 2) * 20;
+
     const portItems = [];
     for (let i = 1; i <= inCount; i++) {
         const portY = (dimension / (inCount + 1)) * i;
         portItems.push({
             id: `input${i}`,
             group: 'input',
-            args: { x: 0, y: portY } // абсолютная позиция: (0, portY)
+            args: { x: 0, y: portY }
         });
     }
 
-    // Выходной порт (один) справа, по центру
     portItems.push({
         id: 'output1',
         group: 'output',
@@ -38,8 +33,6 @@ export const JointJSMultiplexer = (multiplexer: Multiplexer) => {
             y: 0
         },
         attrs: {
-            // Переопределяем именно line и circle
-            // Линию делаем «вертикальной вверх»
             portLine: {
                 x1: 0,    y1: 15,
                 x2: 0,    y2: -5
@@ -50,13 +43,11 @@ export const JointJSMultiplexer = (multiplexer: Multiplexer) => {
         }
     });
 
-    // Для наглядности можно менять «путь» (Path) или «Image»:
-    // Здесь для примера используем «Image» c SVG andIcon, но можем и path-форму применить
     return new shapes.standard.Path({
         elType: 'multiplexer',
         name: multiplexer.name,
         bandwidth: multiplexer.dataBandwidth,
-        inPorts: inCount, // можно сохранить сюда, если нужно
+        inPorts: inCount,
         position: { x: multiplexer.position?.x || 100, y: multiplexer.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {
@@ -83,28 +74,26 @@ export const JointJSMultiplexer = (multiplexer: Multiplexer) => {
                     position: { name: 'absolute' },
                     markup: [
                         {
-                            tagName: 'line',       // непосредственно линия
+                            tagName: 'line',
                             selector: 'portLine'
                         },
                         {
-                            tagName: 'circle',     // кружок на конце
+                            tagName: 'circle',
                             selector: 'portCircle'
                         }
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: -20, y2: 0,      // Линия теперь идёт влево
+                            x2: -20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: -20,  // кружок тоже в левом конце
+                            cx: -20,
                             cy: 0,
                             r: 4,
                             fill: '#fff',
@@ -130,18 +119,16 @@ export const JointJSMultiplexer = (multiplexer: Multiplexer) => {
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: 20, y2: 0,      // Линия теперь идёт влево
+                            x2: 20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: 20,  // кружок тоже в левом конце
+                            cx: 20,
                             cy: 0,
                             r: 4,
                             fill: '#e3d12d',

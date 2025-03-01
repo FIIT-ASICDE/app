@@ -10,11 +10,7 @@ const operatorMap: { [key: string]: string } = {
     xnor: '~^'
 };
 
-/**
- * Генерирует SystemVerilog‑код, представляющий всю диаграмму в виде одного модуля.
- * I/O‑элементы (elType 'input' и 'output') становятся портами модуля.
- * Логические элементы (например, and, or, ...) обрабатываются через assign‑выражения.
- */
+
 export function generateSystemVerilogCode(graph: dia.Graph): string {
     const cells = graph.getCells();
 
@@ -63,8 +59,9 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
     // 2. Для логических элементов создаем внутренние сигналы (nets).
     const logicNetNames: { [key: string]: string } = {};
     logicCells.forEach(cell => {
-        const netName = `${cell.attributes.elType}_${cell.id.slice(0, 5)}_net`;
+        const netName = `${cell.attributes?.attrs?.label?.text}`;
         logicNetNames[cell.id] = netName;
+        console.log(logicNetNames);
         // Объявляем внутренний сигнал (предполагаем 1 бит, можно расширить)
         code += `logic ${netName};\n`;
     });
@@ -77,12 +74,7 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
     // Вспомогательная функция: если элемент является I/O, то возвращаем его портовое имя, иначе — его внутренний net.
     function getSignalName(cell: dia.Cell | null, port: any): string {
         if (!cell) return '';
-        const elType = cell.attributes.elType;
-        if (elType === 'input' || elType === 'output') {
-            return getPortName(cell);
-        } else {
-            return logicNetNames[cell.id];
-        }
+        return getPortName(cell);
     }
 
     links.forEach(link => {
@@ -90,10 +82,15 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         const target = link.get('target');
         const sourceCell = graph.getCell(source.id);
         const targetCell = graph.getCell(target.id);
-
+        // console.log('SOURCE TARGET')
+        // console.log(source);
+        // console.log(target);
+        // console.log('SOURCECELL TARGETCELL')
+        // console.log(sourceCell);
+        // console.log(targetCell);
         const srcSignal = getSignalName(sourceCell, source);
         const tgtSignal = getSignalName(targetCell, target);
-
+        console.log(`${srcSignal}:${tgtSignal}`);
         if (source.id && source.port) {
             connectionMap[`${source.id}:${source.port}`] = srcSignal;
         }

@@ -1,12 +1,8 @@
-import { BaseSvgElement } from '../base/BaseSvgElement';
 import { Port } from '../classes/port';
-import { shapes } from "@joint/core"; // Ваш класс для хранения данных and
+import { shapes } from "@joint/core";
 
 export const JointJSInputPort = (input: Port) => {
-
-    const dimension = 60; // пример формулы, можно менять по вкусу
-
-
+    const dimension = 40;
     const portItems = [];
 
     portItems.push({
@@ -14,7 +10,7 @@ export const JointJSInputPort = (input: Port) => {
         group: 'output',
         args: {
             x: dimension,
-            y: dimension / 6
+            y: dimension / 4
         }
     });
 
@@ -23,11 +19,11 @@ export const JointJSInputPort = (input: Port) => {
         name: input.name,
         bandwidth: input.bandwidth,
         position: { x: input.position?.x || 100, y: input.position?.y || 100 },
-        size: { width: dimension, height: dimension/3},
+        size: { width: dimension, height: dimension/2},
         attrs: {
             body: {
                 refD: 'M 0 0 L 10 0 15 5 10 10 0 10 z',
-                fill: 'white',
+                fill: '#ededed',
                 stroke: '#000',
                 strokeWidth: 2,
             },
@@ -59,18 +55,16 @@ export const JointJSInputPort = (input: Port) => {
                     ],
                     attrs: {
                         portBody: {
-                            // Объект-атрибуты для <g>
-                            // (дополнительно стили, transform, если надо)
                         },
                         portLine: {
                             x1: 0,   y1: 0,
-                            x2: 20, y2: 0,      // Линия теперь идёт влево
+                            x2: 20, y2: 0,
                             stroke: '#000',
                             strokeWidth: 2,
 
                         },
                         portCircle: {
-                            cx: 20,  // кружок тоже в левом конце
+                            cx: 20,
                             cy: 0,
                             r: 4,
                             fill: '#e3d12d',
