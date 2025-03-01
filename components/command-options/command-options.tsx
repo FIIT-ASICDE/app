@@ -1,4 +1,3 @@
-import { Session } from "next-auth";
 import { CommandElement, CommandElementGroup } from "@/lib/types/generic";
 import {
     Building,
@@ -6,10 +5,12 @@ import {
     Folders,
     LayoutDashboard,
     Settings,
-    SunMoon, UserRound,
+    SunMoon,
+    UserRound,
     UserRoundPen,
-    UserRoundPlus
+    UserRoundPlus,
 } from "lucide-react";
+import { Session } from "next-auth";
 
 interface CommandOptionsProps {
     user: Session["user"];

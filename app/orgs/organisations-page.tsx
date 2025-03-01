@@ -1,18 +1,22 @@
-import Search from "@/components/ui/search";
+import { PaginationResult } from "@/lib/types/generic";
+import {
+    OrganisationDisplay,
+    RoleOrganisationFilter,
+} from "@/lib/types/organisation";
+import { cn } from "@/lib/utils";
+import { Building } from "lucide-react";
+
+import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
 import { LayoutOptions } from "@/components/layout/layout-options";
 import { NoData } from "@/components/no-data/no-data";
-import { Building } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { OrganisationDisplay, RoleOrganisationFilter } from "@/lib/types/organisation";
-import { OrganisationCardDisplay } from "@/components/profile/organisation-card-display";
-import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
-import { PaginationResult } from "@/lib/types/generic";
-import { OrganisationFilter } from "@/components/organisations/organisation-filter";
 import { CreateOrganisationDialog } from "@/components/organisations/create-organisation-dialog";
+import { OrganisationFilter } from "@/components/organisations/organisation-filter";
+import { OrganisationCardDisplay } from "@/components/profile/organisation-card-display";
+import Search from "@/components/ui/search";
 
 interface OrganisationsPageProps {
     organisations: Array<OrganisationDisplay>;
-    searchParams : {
+    searchParams: {
         query: string;
         rows: boolean;
         role: RoleOrganisationFilter;

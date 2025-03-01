@@ -5,8 +5,9 @@ import {
     Building,
     Folders,
     LayoutDashboard,
-    LogOut, Settings,
-    UserRound
+    LogOut,
+    Settings,
+    UserRound,
 } from "lucide-react";
 import { Session } from "next-auth";
 import { signOut } from "next-auth/react";
@@ -14,15 +15,16 @@ import Link from "next/link";
 import * as React from "react";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
+import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
 import {
     DropdownMenu,
-    DropdownMenuContent, DropdownMenuGroup,
+    DropdownMenuContent,
+    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
-    DropdownMenuTrigger
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface HeaderDropdownProps {
@@ -115,7 +117,10 @@ export const HeaderDropdown = ({
                         </DropdownMenuItem>
                     </Link>
 
-                    <Link href={"/" + username + "/settings"} className="text-sm">
+                    <Link
+                        href={"/" + username + "/settings"}
+                        className="text-sm"
+                    >
                         <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
                             <span>Settings</span>
                             <Settings className="text-muted-foreground" />

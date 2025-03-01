@@ -1,7 +1,11 @@
 import { OrganisationsPage } from "@/app/orgs/organisations-page";
-import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
-import { OrganisationDisplay, RoleOrganisationFilter } from "@/lib/types/organisation";
 import { PaginationResult } from "@/lib/types/generic";
+import {
+    OrganisationDisplay,
+    RoleOrganisationFilter,
+} from "@/lib/types/organisation";
+
+import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
 
 interface AllOrganisationsPageProps {
     searchParams?: Promise<{
@@ -21,18 +25,21 @@ export default async function AllOrganisationsPage({
     const currentPage = Number(orgsSearchParams?.page) || 0;
     const rows: boolean = parseBoolean(orgsSearchParams?.rows) ?? false;
 
-    const roleFilter: RoleOrganisationFilter = parseFilterValue("role", orgsSearchParams?.role) as RoleOrganisationFilter;
+    const roleFilter: RoleOrganisationFilter = parseFilterValue(
+        "role",
+        orgsSearchParams?.role,
+    ) as RoleOrganisationFilter;
 
     const pageSize: number = 8;
 
     /*
-    * TODO: this method on BE
-    * Explanation: Here I need all organisations,
-    * filtered by nameSearchTerm,
-    * filtered by role filter ("all" = no need to filter),
-    * and the pagination object (PaginationResult),
-    * the method's name or path can be customized.
-    */
+     * TODO: this method on BE
+     * Explanation: Here I need all organisations,
+     * filtered by nameSearchTerm,
+     * filtered by role filter ("all" = no need to filter),
+     * and the pagination object (PaginationResult),
+     * the method's name or path can be customized.
+     */
     /*const { organisations, pagination } = await api.org.search({
         nameSearchTerm: query,
         roleFilter: roleFilter,

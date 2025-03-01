@@ -1,4 +1,8 @@
-import { OrganisationMember, RoleOrganisationFilter } from "@/lib/types/organisation";
+import { PaginationResult } from "@/lib/types/generic";
+import {
+    OrganisationMember,
+    RoleOrganisationFilter,
+} from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 import { UsersRound } from "lucide-react";
 
@@ -7,9 +11,8 @@ import { LayoutOptions } from "@/components/layout/layout-options";
 import { NoData } from "@/components/no-data/no-data";
 import { InviteMemberDialog } from "@/components/organisations/members/invite-member-dialog";
 import { MemberCard } from "@/components/organisations/members/member-card";
-import Search from "@/components/ui/search";
 import { OrganisationFilter } from "@/components/organisations/organisation-filter";
-import { PaginationResult } from "@/lib/types/generic";
+import Search from "@/components/ui/search";
 
 interface MembersPageProps {
     members: Array<OrganisationMember>;
@@ -91,7 +94,6 @@ export default function MembersPage({
     members,
     searchParams,
 }: MembersPageProps) {
-
     if (!data.showMembers) {
         return (
             <h3>TODO: This organisation is not showing their member list.</h3>

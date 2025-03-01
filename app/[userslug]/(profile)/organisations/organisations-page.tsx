@@ -1,4 +1,8 @@
-import { OrganisationDisplay, RoleOrganisationFilter } from "@/lib/types/organisation";
+import { PaginationResult } from "@/lib/types/generic";
+import {
+    OrganisationDisplay,
+    RoleOrganisationFilter,
+} from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 import { Building } from "lucide-react";
 
@@ -7,9 +11,8 @@ import { LayoutOptions } from "@/components/layout/layout-options";
 import { NoData } from "@/components/no-data/no-data";
 import { CreateOrganisationDialog } from "@/components/organisations/create-organisation-dialog";
 import { OrganisationCard } from "@/components/organisations/organisation-card";
-import Search from "@/components/ui/search";
 import { OrganisationFilter } from "@/components/organisations/organisation-filter";
-import { PaginationResult } from "@/lib/types/generic";
+import Search from "@/components/ui/search";
 
 interface OrganisationsPageProps {
     usersOrganisations: Array<OrganisationDisplay>;

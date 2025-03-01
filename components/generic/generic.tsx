@@ -1,8 +1,4 @@
-import {
-    BadgeType,
-    CardType,
-    FilterType
-} from "@/lib/types/generic";
+import { BadgeType, CardType, FilterType } from "@/lib/types/generic";
 import { Invitation } from "@/lib/types/invitation";
 
 export const getTimeDeltaString = (lastActivity: Date): string => {
@@ -120,12 +116,19 @@ export const parseBoolean = (value: string | undefined) => {
     return value === "true" ? true : value === "false" ? false : undefined;
 };
 
-export const parseFilterValue = (filterType: FilterType, value: string | undefined) => {
+export const parseFilterValue = (
+    filterType: FilterType,
+    value: string | undefined,
+) => {
     return parseBoolean(value) === undefined
         ? "all"
         : parseBoolean(value)
-            ? filterType === "role" ? "admin" : filterType
-            : filterType === "public" ? "private" :
-                filterType === "role" ? "member" :
-                "not" + filterType;
+          ? filterType === "role"
+              ? "admin"
+              : filterType
+          : filterType === "public"
+            ? "private"
+            : filterType === "role"
+              ? "member"
+              : "not" + filterType;
 };

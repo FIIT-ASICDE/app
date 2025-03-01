@@ -1,9 +1,10 @@
+import { PaginationResult } from "@/lib/types/generic";
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import {
     FavoriteRepositoriesFilter,
     PinnedRepositoriesFilter,
     PublicRepositoriesFilter,
-    Repository
+    Repository,
 } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { Folders } from "lucide-react";
@@ -13,9 +14,8 @@ import { LayoutOptions } from "@/components/layout/layout-options";
 import { NoData } from "@/components/no-data/no-data";
 import { CreateRepositoryDialog } from "@/components/repositories/create-repository-dialog";
 import RepositoryCard from "@/components/repositories/repository-card";
-import Search from "@/components/ui/search";
 import { RepositoryFilter } from "@/components/repositories/repository-filter";
-import { PaginationResult } from "@/lib/types/generic";
+import Search from "@/components/ui/search";
 
 interface RepositoriesPageProps {
     repos: Array<Repository>;
@@ -97,4 +97,4 @@ export default async function RepositoriesPage({
             </main>
         </div>
     );
-};
+}

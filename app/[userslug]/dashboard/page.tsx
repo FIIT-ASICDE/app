@@ -24,21 +24,21 @@ export default async function UserDashboardPage({
     const pageSize: number = 3;
 
     /*
-    * TODO: this method on BE
-    * Explanation: The recent repositories are alright,
-    * but I need favorites that will return
-    * a pagination object (PaginationResult)
-    */
+     * TODO: this method on BE
+     * Explanation: The recent repositories are alright,
+     * but I need favorites that will return
+     * a pagination object (PaginationResult)
+     */
     /*const { favoriteRepositories, pagination } = await api.user.favoriteRepositories({
         page: currentPage,
         pageSize: pageSize,
     });*/
 
     /* I also need invitations, but they don't need to be paginated,
-    * so just a regular call.
-    * Everything can be inside the dashboard variable,
-    * it doesn't need to be 3 different API calls.
-    */
+     * so just a regular call.
+     * Everything can be inside the dashboard variable,
+     * it doesn't need to be 3 different API calls.
+     */
 
     // dummy data so it does not break
     const pagination: PaginationResult = {

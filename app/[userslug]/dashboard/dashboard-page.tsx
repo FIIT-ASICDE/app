@@ -1,3 +1,4 @@
+import { PaginationResult } from "@/lib/types/generic";
 import type { Invitation } from "@/lib/types/invitation";
 import type { OrganisationDisplay } from "@/lib/types/organisation";
 import type { RepositoryDisplay } from "@/lib/types/repository";
@@ -24,7 +25,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { PaginationResult } from "@/lib/types/generic";
 
 interface DashboardPageProps {
     dashboard: UsersDashboard;
@@ -214,8 +214,12 @@ export default function DashboardPage({
                                         )}
                                     </div>
                                     <DynamicPagination
-                                        totalCount={searchParams.pagination.total}
-                                        pageSize={searchParams.pagination.pageSize}
+                                        totalCount={
+                                            searchParams.pagination.total
+                                        }
+                                        pageSize={
+                                            searchParams.pagination.pageSize
+                                        }
                                         page={searchParams.pagination.page}
                                         className="my-3"
                                     />
