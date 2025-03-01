@@ -16,10 +16,10 @@ interface OrganisationMembersPageProps {
 }
 
 export default async function OrganisationMembersPage({
-    params,
+    // params,
     searchParams,
 }: OrganisationMembersPageProps) {
-    const orgSlug = (await params).organisationslug;
+    // const orgSlug = (await params).organisationslug;
 
     const membersSearchParams = await searchParams;
 

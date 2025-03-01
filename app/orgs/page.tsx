@@ -1,4 +1,3 @@
-import { api } from "@/lib/trpc/server";
 import { OrganisationsPage } from "@/app/orgs/organisations-page";
 import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
 import { OrganisationDisplay, RoleOrganisationFilter } from "@/lib/types/organisation";
