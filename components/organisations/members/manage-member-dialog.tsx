@@ -1,5 +1,8 @@
-import { OrganisationMember } from "@/lib/types/organisation";
+"use client";
+
+import { ManageMemberTab, OrganisationMember } from "@/lib/types/organisation";
 import { CircleFadingArrowUp, CircleX, Pen } from "lucide-react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +13,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
     Tooltip,
     TooltipContent,
@@ -26,22 +28,25 @@ export const ManageMemberDialog = ({
     organisationId,
     organisationMember,
 }: ManageMemberDialogProps) => {
+    const [activeManageMemberTab, setActiveManageMemberTab] =
+        useState<ManageMemberTab>("promote");
+
     /* TODO: connect handlePromote with be */
-    const handlePromote = (organisationMember: OrganisationMember) => {
+    const handlePromote = () => {
         console.log(
             "Promote member with ID: " +
                 organisationMember.id +
-                " to an admin in organisations with ID: " +
+                " to an admin in organisation with ID: " +
                 organisationId,
         );
     };
 
     /* TODO: connect handleExpel with be */
-    const handleExpel = (organisationMember: OrganisationMember) => {
+    const handleExpel = () => {
         console.log(
             "Expel member with ID: " +
                 organisationMember.id +
-                " from organisations with ID: " +
+                " from organisation with ID: " +
                 organisationId,
         );
     };
@@ -73,25 +78,36 @@ export const ManageMemberDialog = ({
                         expel a member from your organisation.
                     </DialogDescription>
                 </DialogHeader>
-                <Tabs defaultValue="promote">
-                    <TabsList className="w-full bg-card pb-10 pt-7">
-                        <TabsTrigger
-                            value="promote"
-                            className="flex w-1/2 flex-row items-center justify-center gap-x-2"
-                        >
-                            <CircleFadingArrowUp />
-                            <span>Promote</span>
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="expel"
-                            className="flex w-1/2 flex-row items-center justify-center gap-x-2"
-                        >
-                            <CircleX />
-                            <span>Expel</span>
-                        </TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="promote" className="mx-5">
-                        <div className="mb-7 text-center">
+                <div className="flex w-full flex-row gap-x-3">
+                    <Button
+                        variant={
+                            activeManageMemberTab === "promote"
+                                ? "secondary"
+                                : "outline"
+                        }
+                        onClick={() => setActiveManageMemberTab("promote")}
+                        className="flex w-1/2 flex-row items-center justify-center gap-x-2"
+                    >
+                        <CircleFadingArrowUp />
+                        <span>Promote</span>
+                    </Button>
+                    <Button
+                        variant={
+                            activeManageMemberTab === "expel"
+                                ? "destructive"
+                                : "outline"
+                        }
+                        onClick={() => setActiveManageMemberTab("expel")}
+                        className="flex w-1/2 flex-row items-center justify-center gap-x-2 border-destructive hover:bg-destructive-hover"
+                    >
+                        <CircleX />
+                        <span>Expel</span>
+                    </Button>
+                </div>
+
+                {activeManageMemberTab === "promote" && (
+                    <>
+                        <div className="mx-5 mb-1 text-center">
                             You are about to promote
                             <span className="font-bold">
                                 {" "}
@@ -101,9 +117,7 @@ export const ManageMemberDialog = ({
                         </div>
                         <DialogTrigger asChild>
                             <Button
-                                onClick={() =>
-                                    handlePromote(organisationMember)
-                                }
+                                onClick={() => handlePromote()}
                                 className="w-full hover:bg-primary-button-hover"
                                 variant="default"
                             >
@@ -111,9 +125,11 @@ export const ManageMemberDialog = ({
                                 Promote
                             </Button>
                         </DialogTrigger>
-                    </TabsContent>
-                    <TabsContent value="expel" className="mx-5">
-                        <div className="mb-7 text-center">
+                    </>
+                )}
+                {activeManageMemberTab === "expel" && (
+                    <>
+                        <div className="mx-5 mb-1 text-center">
                             You are about to expel
                             <span className="font-bold">
                                 {" "}
@@ -123,7 +139,7 @@ export const ManageMemberDialog = ({
                         </div>
                         <DialogTrigger asChild>
                             <Button
-                                onClick={() => handleExpel(organisationMember)}
+                                onClick={() => handleExpel()}
                                 className="w-full hover:bg-destructive-hover"
                                 variant="destructive"
                             >
@@ -131,8 +147,8 @@ export const ManageMemberDialog = ({
                                 Expel
                             </Button>
                         </DialogTrigger>
-                    </TabsContent>
-                </Tabs>
+                    </>
+                )}
             </DialogContent>
         </Dialog>
     );

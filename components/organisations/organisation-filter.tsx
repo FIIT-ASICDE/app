@@ -1,21 +1,19 @@
+"use client";
+
+import { RoleOrganisationFilter } from "@/lib/types/organisation";
 import {
-    MemberCountSort,
-    OrganisationDisplay,
-    RoleOrganisationFilter,
-} from "@/lib/types/organisation";
-import {
-    ArrowDown01,
-    ArrowUp10,
     RotateCcw,
     Shield,
     SlidersHorizontal,
     UserRound,
     UsersRound,
+    X,
 } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
-import * as React from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { TooltipDropdown } from "@/components/tooltip-dropdown/tooltip-dropdown";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -27,176 +25,136 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface OrganisationFilterProps {
-    roleFilter: RoleOrganisationFilter;
-    setRoleFilter: Dispatch<SetStateAction<RoleOrganisationFilter>>;
-    memberCountSort: MemberCountSort;
-    setMemberCountSort: Dispatch<SetStateAction<MemberCountSort>>;
+    type: "organisations" | "members";
+    filters: {
+        role: RoleOrganisationFilter;
+    };
 }
 
-export const filterOrganisations = (
-    organisations: Array<OrganisationDisplay>,
-    organisationSearchPhrase: string,
-    roleFilter: RoleOrganisationFilter,
-    memberCountSort: MemberCountSort,
-) => {
-    let newFilteredOrganisations: Array<OrganisationDisplay> =
-        organisations.filter((organisation: OrganisationDisplay) =>
-            organisation.name
-                .toLowerCase()
-                .includes(organisationSearchPhrase.toLowerCase()),
-        );
-
-    if (roleFilter !== "all") {
-        newFilteredOrganisations = newFilteredOrganisations.filter(
-            (organisation: OrganisationDisplay) => {
-                if (roleFilter === organisation.userRole) {
-                    return organisation;
-                }
-            },
-        );
-    }
-
-    if (memberCountSort !== "none") {
-        newFilteredOrganisations = newFilteredOrganisations.sort(
-            (a: OrganisationDisplay, b: OrganisationDisplay) => {
-                if (memberCountSort === "asc") {
-                    return a.memberCount - b.memberCount;
-                } else {
-                    return b.memberCount - a.memberCount;
-                }
-            },
-        );
-    }
-
-    return newFilteredOrganisations;
-};
-
 export const OrganisationFilter = ({
-    roleFilter,
-    setRoleFilter,
-    memberCountSort,
-    setMemberCountSort,
+    type,
+    filters,
 }: OrganisationFilterProps) => {
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
+    const router = useRouter();
+
+    const [roleFilter, setRoleFilter] = useState<RoleOrganisationFilter>(
+        filters.role,
+    );
+
+    useEffect(() => {
+        setRoleFilter(filters.role);
+    }, [filters]);
+
+    const updateFilter = (key: string, value: string | null) => {
+        const params = new URLSearchParams(searchParams);
+        if (value === null) {
+            params.delete(key);
+        } else {
+            params.set(key, value);
+        }
+        router.replace(`${pathname}?${params.toString()}`);
+    };
+
+    const handleRoleFilterClick = (newRole: RoleOrganisationFilter) => {
+        setRoleFilter(newRole);
+        updateFilter(
+            "role",
+            newRole === "all" ? null : newRole === "admin" ? "true" : "false",
+        );
+    };
+
+    const handleResetFilters = () => {
+        setRoleFilter("all");
+        router.replace(pathname);
+    };
+
     return (
-        <TooltipDropdown
-            tooltip="Filter organisations"
-            dropdownTrigger={
-                <button className="rounded bg-transparent p-2 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                    <SlidersHorizontal />
-                </button>
-            }
-            dropdownContent={
-                <DropdownMenuContent className="w-52 space-y-1">
-                    <DropdownMenuLabel className="text-center">
-                        Filter by role
-                    </DropdownMenuLabel>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full">
-                                {roleFilter === "all" ? (
-                                    <>
-                                        <UsersRound className="text-muted-foreground" />
-                                        All
-                                    </>
-                                ) : roleFilter === "admin" ? (
-                                    <>
-                                        <Shield className="text-muted-foreground" />
-                                        Admin
-                                    </>
-                                ) : (
-                                    <>
-                                        <UserRound className="text-muted-foreground" />
-                                        Member
-                                    </>
-                                )}
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            <DropdownMenuItem
-                                onClick={() => setRoleFilter("all")}
-                            >
-                                <UsersRound className="text-muted-foreground" />
-                                All
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() => setRoleFilter("admin")}
-                            >
-                                <Shield className="text-muted-foreground" />
-                                Admin
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() => setRoleFilter("member")}
-                            >
-                                <UserRound className="text-muted-foreground" />
-                                Member
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-
-                    <DropdownMenuSeparator />
-
-                    <DropdownMenuLabel className="text-center">
-                        Sort by member count
-                    </DropdownMenuLabel>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="w-full">
-                                {memberCountSort === "none" ? (
-                                    <>
-                                        <UsersRound className="text-muted-foreground" />
-                                        None
-                                    </>
-                                ) : memberCountSort === "asc" ? (
-                                    <>
-                                        <ArrowDown01 className="text-muted-foreground" />
-                                        Ascending
-                                    </>
-                                ) : (
-                                    <>
-                                        <ArrowUp10 className="text-muted-foreground" />
-                                        Descending
-                                    </>
-                                )}
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            <DropdownMenuItem
-                                onClick={() => setMemberCountSort("none")}
-                            >
-                                <UsersRound className="text-muted-foreground" />
-                                None
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() => setMemberCountSort("asc")}
-                            >
-                                <ArrowDown01 className="text-muted-foreground" />
-                                Ascending
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() => setMemberCountSort("desc")}
-                            >
-                                <ArrowUp10 className="text-muted-foreground" />
-                                Descending
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-
-                    <DropdownMenuSeparator />
-
-                    <Button
-                        variant="outline"
-                        className="w-full cursor-pointer text-muted-foreground"
-                        onClick={() => {
-                            setRoleFilter("all");
-                            setMemberCountSort("none");
-                        }}
+        <div className="mb-0 flex flex-row space-x-3">
+            <div className="hidden h-8 flex-row justify-center gap-x-2 md:flex">
+                {roleFilter !== "all" && (
+                    <Badge
+                        variant="secondary"
+                        className="h-10 cursor-pointer space-x-1"
+                        onClick={() => handleRoleFilterClick("all")}
                     >
-                        <RotateCcw />
-                        Reset filter
-                    </Button>
-                </DropdownMenuContent>
-            }
-            tooltipSide="top"
-        />
+                        {roleFilter === "admin" ? (
+                            <Shield className="h-5 w-5 text-muted-foreground" />
+                        ) : (
+                            <UserRound className="h-5 w-5 text-muted-foreground" />
+                        )}
+                        <X className="h-4 w-4 text-muted-foreground" />
+                    </Badge>
+                )}
+            </div>
+            <TooltipDropdown
+                tooltip={"Filter " + type}
+                dropdownTrigger={
+                    <button className="rounded bg-transparent p-2 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                        <SlidersHorizontal />
+                    </button>
+                }
+                dropdownContent={
+                    <DropdownMenuContent className="w-52 space-y-1">
+                        <DropdownMenuLabel className="text-center">
+                            Filter by role
+                        </DropdownMenuLabel>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="w-full">
+                                    {roleFilter === "all" ? (
+                                        <>
+                                            <UsersRound /> All
+                                        </>
+                                    ) : roleFilter === "admin" ? (
+                                        <>
+                                            <Shield /> Admin
+                                        </>
+                                    ) : (
+                                        <>
+                                            <UserRound /> Member
+                                        </>
+                                    )}
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem
+                                    onClick={() => handleRoleFilterClick("all")}
+                                >
+                                    <UsersRound /> All
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={() =>
+                                        handleRoleFilterClick("admin")
+                                    }
+                                >
+                                    <Shield /> Admin
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={() =>
+                                        handleRoleFilterClick("member")
+                                    }
+                                >
+                                    <UserRound /> Member
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <DropdownMenuSeparator />
+
+                        <Button
+                            variant="outline"
+                            className="w-full cursor-pointer text-muted-foreground"
+                            onClick={handleResetFilters}
+                            disabled={roleFilter === "all"}
+                        >
+                            <RotateCcw /> Reset filter
+                        </Button>
+                    </DropdownMenuContent>
+                }
+                tooltipSide="top"
+            />
+        </div>
     );
 };

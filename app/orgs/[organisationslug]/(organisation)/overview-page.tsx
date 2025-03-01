@@ -10,7 +10,7 @@ import { Suspense } from "react";
 import { getDateString } from "@/components/generic/generic";
 import { NoData } from "@/components/no-data/no-data";
 import { MemberCardDisplay } from "@/components/organisations/members/member-card-display";
-import { RepositoryCardDisplay } from "@/components/profile/repository-card-display";
+import { PinnedRepositoryCardDisplay } from "@/components/profile/pinned-repository-card-display";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Tooltip,
@@ -85,14 +85,9 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                                     />
                                 )}
                                 {organisation.repositories.map((repository) => (
-                                    <RepositoryCardDisplay
-                                        type="pinned"
-                                        key={repository.id}
-                                        id={repository.id}
-                                        ownerName={repository.ownerName}
-                                        name={repository.name}
-                                        visibility={repository.visibility}
-                                        ownerImage={repository.ownerImage}
+                                    <PinnedRepositoryCardDisplay
+                                        key={"pinned" + repository.id}
+                                        repository={repository}
                                     />
                                 ))}
                             </div>
@@ -109,7 +104,7 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                                     <TooltipTrigger asChild>
                                         <Link
                                             href={
-                                                "/orgs" +
+                                                "/orgs/" +
                                                 organisation.name +
                                                 "/members"
                                             }
@@ -136,24 +131,12 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                                     )}
                                     {organisation.members
                                         .slice(0, 3)
-                                        .map(
-                                            (
-                                                organisationMember: OrganisationMember,
-                                            ) => (
-                                                <MemberCardDisplay
-                                                    key={organisationMember.id}
-                                                    username={
-                                                        organisationMember.username
-                                                    }
-                                                    image={
-                                                        organisationMember.image
-                                                    }
-                                                    role={
-                                                        organisationMember.role
-                                                    }
-                                                />
-                                            ),
-                                        )}
+                                        .map((member: OrganisationMember) => (
+                                            <MemberCardDisplay
+                                                key={member.id}
+                                                member={member}
+                                            />
+                                        ))}
                                 </div>
                             </Suspense>
                         </CardContent>

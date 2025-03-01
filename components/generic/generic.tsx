@@ -1,93 +1,5 @@
-import {
-    BadgeType,
-    CommandElement,
-    CommandElementGroup,
-    ResponsivenessCheckpoint,
-} from "@/lib/types/generic";
+import { BadgeType, CardType, FilterType } from "@/lib/types/generic";
 import { Invitation } from "@/lib/types/invitation";
-import {
-    FolderPlus,
-    Folders,
-    Home,
-    Settings,
-    SunMoon,
-    UserRoundPen,
-    UserRoundPlus,
-    UsersRound,
-} from "lucide-react";
-import { Session } from "next-auth";
-
-interface CommandOptionsProps {
-    user: Session["user"];
-}
-
-export const CommandOptions = ({
-    user,
-}: CommandOptionsProps): Array<CommandElementGroup> => {
-    return [
-        {
-            groupDisplayTitle: "Suggestions",
-            elements: [
-                {
-                    displayTitle: "Home",
-                    icon: Home,
-                    link: "/" + user.username,
-                } satisfies CommandElement,
-                {
-                    displayTitle: "Repositories",
-                    icon: Folders,
-                    link: "/" + user.username + "/repositories",
-                } satisfies CommandElement,
-                {
-                    displayTitle: "Organisations",
-                    icon: UsersRound,
-                    link: "/" + user.username + "/organisations",
-                } satisfies CommandElement,
-                {
-                    displayTitle: "Settings",
-                    icon: Settings,
-                    link: "/" + user.username + "/settings",
-                } satisfies CommandElement,
-            ] satisfies Array<CommandElement>,
-        } satisfies CommandElementGroup,
-        {
-            groupDisplayTitle: "Actions",
-            elements: [
-                {
-                    displayTitle: "Create repository",
-                    icon: FolderPlus,
-                    link: "/" + user.username + "/repositories",
-                    action: "openCreateRepositoryDialog",
-                } satisfies CommandElement,
-                {
-                    displayTitle: "Create organisation",
-                    icon: UserRoundPlus,
-                    link: "/" + user.username + "/organisations",
-                    action: "openCreateOrganisationDialog",
-                } satisfies CommandElement,
-            ] satisfies Array<CommandElement>,
-        } satisfies CommandElementGroup,
-        {
-            groupDisplayTitle: "Settings",
-            elements: [
-                {
-                    displayTitle: "Edit profile",
-                    icon: UserRoundPen,
-                    link: "/" + user.username,
-                    action: "openEditProfileDialog",
-                    shortcut: ["Ctrl", "E"],
-                } satisfies CommandElement,
-                {
-                    displayTitle: "Change theme",
-                    icon: SunMoon,
-                    link: "/" + user.username + "/settings",
-                    action: "openSettingsTab",
-                    shortcut: ["Ctrl", "T"],
-                } satisfies CommandElement,
-            ] satisfies Array<CommandElement>,
-        } satisfies CommandElementGroup,
-    ] satisfies Array<CommandElementGroup>;
-};
 
 export const getTimeDeltaString = (lastActivity: Date): string => {
     const now = new Date();
@@ -121,27 +33,6 @@ export const getDateString = (actionType: string, date: Date) => {
         year: "numeric",
     });
     return actionType + " " + monthLong + " " + yearFull;
-};
-
-export const getWidthFromResponsivenessCheckpoint = (
-    checkpoint: ResponsivenessCheckpoint,
-) => {
-    switch (checkpoint) {
-        case "2xs":
-            return 320;
-        case "xs":
-            return 480;
-        case "sm":
-            return 640;
-        case "md":
-            return 768;
-        case "lg":
-            return 1024;
-        case "xl":
-            return 1280;
-        case "2xl":
-            return 1536;
-    }
 };
 
 export const getBadgeStyle = (badgeType: BadgeType) => {
@@ -192,4 +83,52 @@ export const getInvitationDisplayData = (invitation: Invitation) => {
         image,
         link,
     };
+};
+
+const getCardStripeColor = (cardType: CardType) => {
+    switch (cardType) {
+        case "repository":
+            return "before:bg-badge-repository";
+        case "favoriteRepository":
+            return "before:bg-primary";
+        case "pinnedRepository":
+            return "before:bg-badge-admin-hover";
+        case "recentRepository":
+            return "before:bg-card-hover";
+        case "organisation":
+            return "before:bg-badge-organisation";
+        case "member":
+            return "before:bg-badge-member";
+        case "invitation":
+            return "before:bg-chart-1 before:bg-dark:chart-3";
+        default:
+            return "before:bg-transparent";
+    }
+};
+
+export const getCardStripe = (cardType: CardType) => {
+    const color: string = getCardStripeColor(cardType);
+
+    return `relative before:absolute before:inset-y-0 before:left-0 before:w-1.5 ${color} before:rounded-l-2xl`;
+};
+
+export const parseBoolean = (value: string | undefined) => {
+    return value === "true" ? true : value === "false" ? false : undefined;
+};
+
+export const parseFilterValue = (
+    filterType: FilterType,
+    value: string | undefined,
+) => {
+    return parseBoolean(value) === undefined
+        ? "all"
+        : parseBoolean(value)
+          ? filterType === "role"
+              ? "admin"
+              : filterType
+          : filterType === "public"
+            ? "private"
+            : filterType === "role"
+              ? "member"
+              : "not" + filterType;
 };

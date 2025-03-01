@@ -3,7 +3,7 @@ import { Session } from "next-auth";
 import Link from "next/link";
 import { Dispatch, SetStateAction } from "react";
 
-import { CommandOptions } from "@/components/generic/generic";
+import { CommandOptions } from "@/components/command-options/command-options";
 import {
     CommandDialog,
     CommandGroup,

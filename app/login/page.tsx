@@ -1,18 +1,25 @@
-import { auth, signIn, providerMap } from "@/auth";
+import { auth, providerMap, signIn } from "@/auth";
 import { redirectIfNotOnboarded } from "@/lib/onboarding-guard";
 import { AuthError } from "next-auth";
 import Image from "next/image";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
 import GithubIcon from "@/components/icons/github";
-import { MicrosoftIcon } from "@/components/icons/microsoft";
 import GoogleIcon from "@/components/icons/google";
-import { Button } from "@/components/ui/button";
 import LogoIcon from "@/components/icons/logo";
+import { MicrosoftIcon } from "@/components/icons/microsoft";
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
 
 export default async function LoginPage({
     searchParams,
 }: {
-    searchParams: Promise<{ callbackUrl: string | undefined }>
+    searchParams: Promise<{ callbackUrl: string | undefined }>;
 }) {
     const session = await auth();
     await redirectIfNotOnboarded(session, "login");
@@ -35,7 +42,8 @@ export default async function LoginPage({
             <div className="relative hidden w-1/2 lg:block">
                 <Image
                     src="/images/duotone.webp"
-                    alt="Duotone" layout="fill"
+                    alt="Duotone"
+                    layout="fill"
                     objectFit="cover"
                     className="dark:opacity-50"
                 />
@@ -45,8 +53,7 @@ export default async function LoginPage({
                     <CardHeader>
                         <CardTitle className="flex flex-row items-center gap-x-2">
                             <span>Welcome to</span>
-                            <div
-                                className="bg-secondary text-secondary-foreground flex flex-row items-center gap-x-1 p-2 rounded border border-accent">
+                            <div className="flex flex-row items-center gap-x-1 rounded border border-accent bg-secondary p-2 text-secondary-foreground">
                                 <LogoIcon />
                                 ASICDE
                             </div>
@@ -61,22 +68,22 @@ export default async function LoginPage({
                                 <form
                                     key={provider.id}
                                     action={async () => {
-                                        "use server"
+                                        "use server";
                                         try {
                                             await signIn(provider.id, {
                                                 redirectTo: callbackUrl ?? "",
-                                            })
+                                            });
                                         } catch (error) {
                                             if (error instanceof AuthError) {
-                                                console.error(error)
+                                                console.error(error);
                                             }
-                                            throw error
+                                            throw error;
                                         }
                                     }}
                                 >
                                     <Button
                                         variant="outline"
-                                        className="w-full flex flex-row justify-start"
+                                        className="flex w-full flex-row justify-start"
                                         type="submit"
                                     >
                                         <div className="pl-12">
@@ -92,4 +99,4 @@ export default async function LoginPage({
             </div>
         </div>
     );
-};
+}

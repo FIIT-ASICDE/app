@@ -2,13 +2,12 @@
 
 import { imgSrc } from "@/lib/client-file-utils";
 import {
+    Building,
     Folders,
     LayoutDashboard,
     LogOut,
-    Mail,
     Settings,
     UserRound,
-    UsersRound,
 } from "lucide-react";
 import { Session } from "next-auth";
 import { signOut } from "next-auth/react";
@@ -16,14 +15,17 @@ import Link from "next/link";
 import * as React from "react";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
+import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface HeaderDropdownProps {
     user: Session["user"];
@@ -42,7 +44,7 @@ export const HeaderDropdown = ({
                     className="bg-header-button-hover text-header-foreground"
                 />
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            <DropdownMenuContent className="min-w-44">
                 <DropdownMenuLabel>
                     <div className="flex flex-row items-center gap-x-3">
                         <AvatarDisplay
@@ -54,9 +56,13 @@ export const HeaderDropdown = ({
                             <span className="text-sm">
                                 {name} {surname}
                             </span>
-                            <span className="text-xs text-muted-foreground">
-                                {username}
-                            </span>
+                            <TooltipProvider delayDuration={0}>
+                                <DynamicTitleLink
+                                    title={username}
+                                    link={"/" + username}
+                                    className="text-sm"
+                                />
+                            </TooltipProvider>
                         </div>
                     </div>
                 </DropdownMenuLabel>
@@ -72,7 +78,7 @@ export const HeaderDropdown = ({
 
                 <Link href={"/" + username} className="text-sm">
                     <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
-                        <span>Profile</span>
+                        <span>My profile</span>
                         <UserRound className="text-muted-foreground" />
                     </DropdownMenuItem>
                 </Link>
@@ -82,7 +88,7 @@ export const HeaderDropdown = ({
                     className="text-sm"
                 >
                     <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
-                        <span>Repositories</span>
+                        <span>My repositories</span>
                         <Folders className="text-muted-foreground" />
                     </DropdownMenuItem>
                 </Link>
@@ -92,27 +98,35 @@ export const HeaderDropdown = ({
                     className="text-sm"
                 >
                     <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
-                        <span>Organisations</span>
-                        <UsersRound className="text-muted-foreground" />
+                        <span>My organisations</span>
+                        <Building className="text-muted-foreground" />
                     </DropdownMenuItem>
                 </Link>
 
-                <Link
-                    href={"/" + username + "/invitations"}
-                    className="text-sm"
-                >
-                    <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
-                        <span>Invitations</span>
-                        <Mail className="text-muted-foreground" />
-                    </DropdownMenuItem>
-                </Link>
+                <DropdownMenuSeparator />
 
-                <Link href={"/" + username + "/settings"} className="text-sm">
-                    <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
-                        <span>Settings</span>
-                        <Settings className="text-muted-foreground" />
-                    </DropdownMenuItem>
-                </Link>
+                <DropdownMenuGroup>
+                    <DropdownMenuLabel className="text-xs text-muted-foreground">
+                        General
+                    </DropdownMenuLabel>
+
+                    <Link href={"/orgs"} className="text-sm">
+                        <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
+                            <span>All organisations</span>
+                            <Building className="text-muted-foreground" />
+                        </DropdownMenuItem>
+                    </Link>
+
+                    <Link
+                        href={"/" + username + "/settings"}
+                        className="text-sm"
+                    >
+                        <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
+                            <span>Settings</span>
+                            <Settings className="text-muted-foreground" />
+                        </DropdownMenuItem>
+                    </Link>
+                </DropdownMenuGroup>
 
                 <DropdownMenuSeparator />
 

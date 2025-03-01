@@ -1,3 +1,5 @@
+"use client";
+
 import { UserDisplay } from "@/lib/types/user";
 import { Search, UserRoundPlus } from "lucide-react";
 import { useState } from "react";

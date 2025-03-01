@@ -21,7 +21,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-export interface PaginationWithLinksProps {
+export interface DynamicPaginationProps {
     pageSizeSelectOptions?: {
         pageSizeSearchParam?: string;
         pageSizeOptions: number[];
@@ -38,21 +38,21 @@ export interface PaginationWithLinksProps {
  *
  * @example
  * ```
- * <PaginationWithLinks
+ * <DynamicPagination
  page={1}
  pageSize={20}
  totalCount={500}
  />
  * ```
  */
-export function PaginationWithLinks({
+export function DynamicPagination({
     pageSizeSelectOptions,
     pageSize,
     totalCount,
     page,
     pageSearchParam,
     className,
-}: PaginationWithLinksProps) {
+}: DynamicPaginationProps) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();

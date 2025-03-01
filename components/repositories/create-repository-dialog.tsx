@@ -1,7 +1,8 @@
+"use client";
+
 import { createRepositoryFormSchema } from "@/lib/schemas/repo-schemas";
 import { api } from "@/lib/trpc/react";
 import { OrganisationDisplay } from "@/lib/types/organisation";
-import { Repository } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -12,7 +13,6 @@ import {
     Lock,
     UserRound,
 } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
 import { UseFormReturn, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -52,14 +52,10 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface CreateRepositoryDialogProps {
     usersOrganisations: Array<Omit<OrganisationDisplay, "memberCount">>;
-    repositories: Array<Repository>;
-    setRepositories: Dispatch<SetStateAction<Array<Repository>>>;
 }
 
 export const CreateRepositoryDialog = ({
     usersOrganisations,
-    repositories,
-    setRepositories,
 }: CreateRepositoryDialogProps) => {
     const { user } = useUser();
 
@@ -82,8 +78,7 @@ export const CreateRepositoryDialog = ({
         //  code FORBIDDEN in createRepoMutation.error?.data?.code and then
         //  there can be CONFLICT which means the owner already has a repo with
         //  the same name
-        const newRepo = await createRepoMutation.mutateAsync(data);
-        setRepositories([...repositories, newRepo]);
+        await createRepoMutation.mutateAsync(data);
     };
 
     const getValidFormMessage = (

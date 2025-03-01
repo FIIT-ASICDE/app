@@ -1,7 +1,7 @@
 "use client";
 
 import { User } from "@/lib/types/user";
-import { BookUser, Folders, Settings, UsersRound } from "lucide-react";
+import { BookUser, Building, Folders, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { getCurrentPage } from "@/components/generic/generic";
@@ -39,7 +39,7 @@ export const ProfileNavigation = ({
             />
             <NavigationButton
                 title="organisations"
-                icon={UsersRound}
+                icon={Building}
                 variant={
                     currentPage === "/organisations" ? "secondary" : "outline"
                 }

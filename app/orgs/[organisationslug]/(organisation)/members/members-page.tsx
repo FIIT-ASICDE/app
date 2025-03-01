@@ -1,35 +1,27 @@
-"use client";
-
-import { LayoutType } from "@/lib/types/generic";
+import { PaginationResult } from "@/lib/types/generic";
 import {
     OrganisationMember,
     RoleOrganisationFilter,
 } from "@/lib/types/organisation";
+import { cn } from "@/lib/utils";
 import { UsersRound } from "lucide-react";
-import { useEffect, useState } from "react";
 
-import { getWidthFromResponsivenessCheckpoint } from "@/components/generic/generic";
+import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
+import { LayoutOptions } from "@/components/layout/layout-options";
 import { NoData } from "@/components/no-data/no-data";
 import { InviteMemberDialog } from "@/components/organisations/members/invite-member-dialog";
-import {
-    MemberFilter,
-    filterMembers,
-} from "@/components/organisations/members/member-filter";
-import { MemberFilterBadges } from "@/components/organisations/members/member-filter-badges";
-import { OrganisationMemberCard } from "@/components/organisations/members/organisation-member-card";
-import { Input } from "@/components/ui/input";
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from "@/components/ui/pagination";
+import { MemberCard } from "@/components/organisations/members/member-card";
+import { OrganisationFilter } from "@/components/organisations/organisation-filter";
+import Search from "@/components/ui/search";
 
 interface MembersPageProps {
-    orgSlug: string;
+    members: Array<OrganisationMember>;
+    searchParams: {
+        query: string;
+        rows: boolean;
+        role: RoleOrganisationFilter;
+        pagination: PaginationResult;
+    };
 }
 
 const data = {
@@ -98,41 +90,10 @@ const data = {
     ] satisfies Array<OrganisationMember>,
 };
 
-export default function MembersPage(
-    {
-        // orgSlug
-    }: MembersPageProps,
-) {
-    const [membersLayout, setMembersLayout] = useState<LayoutType>("grid");
-    const [isLg, setIsLg] = useState<boolean>(false);
-
-    useEffect(() => {
-        const handleResize = () => {
-            const lg =
-                window.innerWidth < getWidthFromResponsivenessCheckpoint("lg");
-            setIsLg(lg);
-            if (lg) {
-                setMembersLayout("rows");
-            }
-        };
-        handleResize();
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
-
-    const members: Array<OrganisationMember> = data.members;
-    const [filteredMembers, setFilteredMembers] = useState<
-        Array<OrganisationMember>
-    >(data.members);
-    const [membersSearchPhrase, setMembersSearchPhrase] = useState<string>("");
-    const [roleFilter, setRoleFilter] = useState<RoleOrganisationFilter>("all");
-
-    useEffect(() => {
-        setFilteredMembers(
-            filterMembers(members, membersSearchPhrase, roleFilter),
-        );
-    }, [membersSearchPhrase, roleFilter, members]);
-
+export default function MembersPage({
+    members,
+    searchParams,
+}: MembersPageProps) {
     if (!data.showMembers) {
         return (
             <h3>TODO: This organisation is not showing their member list.</h3>
@@ -143,80 +104,57 @@ export default function MembersPage(
         <div className="bg-background text-foreground">
             <div className="flex items-center justify-between">
                 <div className="m-6 mb-0 flex w-1/2 items-center space-x-5">
-                    <div className="relative w-full">
-                        <UsersRound className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            type="search"
-                            placeholder="Search members..."
-                            className="pl-8"
-                            value={membersSearchPhrase}
-                            onChange={(event) =>
-                                setMembersSearchPhrase(event.target.value)
-                            }
-                        />
-                    </div>
-                    {/*<LayoutOptions
-                        layout={membersLayout}
-                        setLayout={setMembersLayout}
-                        responsivenessCheckpoint={"lg"}
-                    />*/}
+                    <Search placeholder="Search members..." />
+                    <LayoutOptions
+                        layout={searchParams.rows ? "rows" : "grid"}
+                        className="hidden lg:flex"
+                    />
                 </div>
-                <div className="m-6 mb-0 flex space-x-3">
-                    <MemberFilterBadges
-                        roleFilter={roleFilter}
-                        setRoleFilter={setRoleFilter}
+                <div className="m-6 mb-0 flex flex-row space-x-3">
+                    <OrganisationFilter
+                        type="members"
+                        filters={{
+                            role: searchParams.role,
+                        }}
                     />
-                    <MemberFilter
-                        roleFilter={roleFilter}
-                        setRoleFilter={setRoleFilter}
-                    />
-                    <InviteMemberDialog />
+                    {data.userIsAdmin && <InviteMemberDialog />}
                 </div>
             </div>
 
             <main>
-                <div
-                    className={
-                        filteredMembers.length === 0
-                            ? "m-6 flex flex-col"
-                            : isLg || membersLayout === "grid"
-                              ? "m-6 grid grid-cols-1 gap-3 lg:grid-cols-2"
-                              : "m-6 grid grid-cols-1 gap-3"
-                    }
-                >
-                    {filteredMembers.length === 0 && (
-                        <NoData
-                            icon={UsersRound}
-                            message={"No organisations found."}
+                {members.length === 0 ? (
+                    <NoData
+                        icon={UsersRound}
+                        message={"No members found."}
+                        className="m-6"
+                    />
+                ) : (
+                    <>
+                        <div
+                            className={cn(
+                                "m-6 grid grid-cols-1 gap-3",
+                                !searchParams.rows ? "lg:grid-cols-2" : "",
+                            )}
+                        >
+                            {members.map(
+                                (organisationMember: OrganisationMember) => (
+                                    <MemberCard
+                                        key={organisationMember.id}
+                                        organisationId={data.id}
+                                        organisationMember={organisationMember}
+                                        userIsAdmin={data.userIsAdmin}
+                                    />
+                                ),
+                            )}
+                        </div>
+                        <DynamicPagination
+                            totalCount={searchParams.pagination.total}
+                            pageSize={searchParams.pagination.pageSize}
+                            page={searchParams.pagination.page}
+                            className="my-3"
                         />
-                    )}
-                    {filteredMembers.map(
-                        (organisationMember: OrganisationMember) => (
-                            <OrganisationMemberCard
-                                key={organisationMember.id}
-                                organisationId={data.id}
-                                organisationMember={organisationMember}
-                                userIsAdmin={data.userIsAdmin}
-                            />
-                        ),
-                    )}
-                </div>
-                <Pagination>
-                    <PaginationContent>
-                        <PaginationItem>
-                            <PaginationPrevious href="#" />
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationLink href="#">1</PaginationLink>
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationEllipsis />
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationNext href="#" />
-                        </PaginationItem>
-                    </PaginationContent>
-                </Pagination>
+                    </>
+                )}
             </main>
         </div>
     );

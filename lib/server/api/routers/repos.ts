@@ -189,7 +189,9 @@ function searchByOwnerAndRepoSlug() {
             const ownerName = organization?.name || user?.name;
             const ownerImage = organization?.image || user?.image;
 
-            const decodedRepositorySlug = decodeURIComponent(input.repositorySlug.trim());
+            const decodedRepositorySlug = decodeURIComponent(
+                input.repositorySlug.trim(),
+            );
             const repo = await ctx.prisma.repo.findFirst({
                 where: {
                     name: decodedRepositorySlug,
@@ -446,11 +448,11 @@ export async function favoriteRepos(
             organization
                 ? { organizationId: ownerId }
                 : {
-                    AND: [
-                        { userMetadata: { userId: ownerId } },
-                        { organizationId: null },
-                    ],
-                },
+                      AND: [
+                          { userMetadata: { userId: ownerId } },
+                          { organizationId: null },
+                      ],
+                  },
             // if not showPrivate, then return only public, else all
             ...(!showPrivate ? [{ repo: { public: true } }] : []),
         ],
@@ -502,11 +504,11 @@ export async function recentRepos(
             organization
                 ? { organizationId: ownerId }
                 : {
-                    AND: [
-                        { userMetadata: { userId: ownerId } },
-                        { organizationId: null },
-                    ],
-                },
+                      AND: [
+                          { userMetadata: { userId: ownerId } },
+                          { organizationId: null },
+                      ],
+                  },
             // if not showPrivate, then return only public, else all
             ...(!showPrivate ? [{ repo: { public: true } }] : []),
         ],
@@ -526,7 +528,7 @@ export async function recentRepos(
         orderBy: {
             lastVisitedAt: "desc",
         },
-        take: 3
+        take: 3,
     });
 
     return recentRepoConnections.map(({ repo, userMetadata }) => ({

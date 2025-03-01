@@ -8,8 +8,9 @@ import { OrganisationDisplay } from "@/lib/types/organisation";
 import {
     OnboardedUser,
     User,
-    UserDisplay, UsersDashboard,
-    UsersOverview
+    UserDisplay,
+    UsersDashboard,
+    UsersOverview,
 } from "@/lib/types/user";
 import { PrismaType } from "@/prisma";
 import { TRPCError } from "@trpc/server";
@@ -26,7 +27,7 @@ export const userRouter = createTRPCRouter({
     edit: editUser(),
     search: trigramSearch(),
     usersDashboard: usersDashboard(),
-    usersOrganisations: usersOrganisations()
+    usersOrganisations: usersOrganisations(),
 });
 
 function completeOnboarding() {
@@ -284,17 +285,17 @@ function usersDashboard() {
             const favorite = await favoriteRepos(
                 ctx.prisma,
                 user.id,
-                ctx.session?.user.id === user.id
+                ctx.session?.user.id === user.id,
             );
             const recent = await recentRepos(
                 ctx.prisma,
                 user.id,
-                ctx.session?.user.id === user.id
-            )
+                ctx.session?.user.id === user.id,
+            );
 
             return {
                 favoriteRepositories: favorite,
-                recentRepositories: recent
+                recentRepositories: recent,
             };
         });
 }
@@ -311,10 +312,9 @@ function usersOrganisations() {
             const user = await userByUsername(ctx.prisma, decodedUsername);
             const orgs = await getUsersOrgs(ctx.prisma, user.id);
 
-            return orgs
+            return orgs;
         });
 }
-
 
 async function userByUsername(
     prisma: PrismaType,

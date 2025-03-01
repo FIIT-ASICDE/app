@@ -1,3 +1,4 @@
+import { PaginationResult } from "@/lib/types/generic";
 import type { Invitation } from "@/lib/types/invitation";
 import type { OrganisationDisplay } from "@/lib/types/organisation";
 import type { RepositoryDisplay } from "@/lib/types/repository";
@@ -12,10 +13,11 @@ import {
 } from "lucide-react";
 import { Suspense } from "react";
 
+import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
 import { NoData } from "@/components/no-data/no-data";
-import { PaginationWithLinks } from "@/components/pagination-with-links/pagination-with-links";
+import { FavoriteRepositoryCardDisplay } from "@/components/profile/favorite-repository-card-display";
 import { InvitationCardDisplay } from "@/components/profile/invitation-card-display";
-import { RepositoryCardDisplay } from "@/components/profile/repository-card-display";
+import { RecentRepositoryCardDisplay } from "@/components/profile/recent-repository-card-display";
 import {
     Card,
     CardContent,
@@ -26,6 +28,9 @@ import {
 
 interface DashboardPageProps {
     dashboard: UsersDashboard;
+    searchParams: {
+        pagination: PaginationResult;
+    };
 }
 
 const data = {
@@ -121,15 +126,19 @@ const data = {
     ] satisfies Array<Invitation>,
 };
 
-export default function DashboardPage({ dashboard }: DashboardPageProps) {
+export default function DashboardPage({
+    dashboard,
+    searchParams,
+}: DashboardPageProps) {
     const recentRepositories: Array<RepositoryDisplay> =
-        dashboard.recentRepositories
+        dashboard.recentRepositories;
     const favoriteRepositories: Array<RepositoryDisplay> =
         dashboard.favoriteRepositories;
+    // still dummy data
     const invitations: Array<Invitation> = data.invitations;
 
     return (
-        <div className="m-6 flex flex-col gap-6 lg:flex-row">
+        <div className="m-6 flex flex-col gap-6 bg-background text-foreground lg:flex-row">
             <aside className="w-full lg:w-1/3">
                 <Card>
                     <CardHeader className="flex flex-col space-y-3">
@@ -145,35 +154,30 @@ export default function DashboardPage({ dashboard }: DashboardPageProps) {
                         <Suspense
                             fallback={<div>Loading recent activity...</div>}
                         >
-                            <div className="flex flex-col gap-y-3">
-                                {recentRepositories.length === 0 && (
-                                    <NoData
-                                        icon={CalendarOff}
-                                        message={
-                                            "No recent repositories found."
-                                        }
-                                    />
-                                )}
-                                {recentRepositories.map((repository) => (
-                                    <RepositoryCardDisplay
-                                        type="recent"
-                                        key={"recent" + repository.id}
-                                        id={repository.id}
-                                        ownerName={repository.ownerName}
-                                        name={repository.name}
-                                        visibility={repository.visibility}
-                                        ownerImage={repository.ownerImage}
-                                        className="w-full"
-                                    />
-                                ))}
-                            </div>
+                            {recentRepositories.length === 0 ? (
+                                <NoData
+                                    icon={CalendarOff}
+                                    message={"No recent repositories found."}
+                                    className="mb-6"
+                                />
+                            ) : (
+                                <div className="flex flex-col gap-y-3">
+                                    {recentRepositories.map((repository) => (
+                                        <RecentRepositoryCardDisplay
+                                            key={"recent" + repository.id}
+                                            repository={repository}
+                                            className="w-full"
+                                        />
+                                    ))}
+                                </div>
+                            )}
                         </Suspense>
                     </CardContent>
                 </Card>
             </aside>
 
             <main className="flex w-full flex-col gap-6 lg:w-2/3">
-                <Card className="border-none bg-transparent">
+                <Card className="bg-transparent">
                     <CardHeader>
                         <div className="flex flex-col space-y-3">
                             <CardTitle className="flex flex-row items-center gap-x-3">
@@ -187,39 +191,45 @@ export default function DashboardPage({ dashboard }: DashboardPageProps) {
                     </CardHeader>
                     <CardContent className="pb-0">
                         <Suspense fallback={<div>Loading my favorites...</div>}>
-                            <div className="flex flex-col gap-y-3">
-                                {favoriteRepositories.length === 0 && (
-                                    <NoData
-                                        icon={StarOff}
-                                        message={
-                                            "No favorite repositories found."
+                            {favoriteRepositories.length !== 0 ? (
+                                <NoData
+                                    icon={StarOff}
+                                    message={"No favorite repositories found."}
+                                    className="mb-6"
+                                />
+                            ) : (
+                                <>
+                                    <div className="flex flex-col gap-y-3">
+                                        {favoriteRepositories.map(
+                                            (repository) => (
+                                                <FavoriteRepositoryCardDisplay
+                                                    key={
+                                                        "favorite" +
+                                                        repository.id
+                                                    }
+                                                    repository={repository}
+                                                    className="w-full"
+                                                />
+                                            ),
+                                        )}
+                                    </div>
+                                    <DynamicPagination
+                                        totalCount={
+                                            searchParams.pagination.total
                                         }
+                                        pageSize={
+                                            searchParams.pagination.pageSize
+                                        }
+                                        page={searchParams.pagination.page}
+                                        className="my-3"
                                     />
-                                )}
-                                {favoriteRepositories.map((repository) => (
-                                    <RepositoryCardDisplay
-                                        type="favorite"
-                                        key={"favorite" + repository.id}
-                                        id={repository.id}
-                                        ownerName={repository.ownerName}
-                                        name={repository.name}
-                                        visibility={repository.visibility}
-                                        ownerImage={repository.ownerImage}
-                                        className="w-full"
-                                    />
-                                ))}
-                            </div>
+                                </>
+                            )}
                         </Suspense>
-                        <PaginationWithLinks
-                            totalCount={150}
-                            pageSize={5}
-                            page={2}
-                            className="pt-3"
-                        />
                     </CardContent>
                 </Card>
 
-                <Card className="border-none bg-transparent">
+                <Card className="bg-transparent">
                     <CardHeader className="flex flex-col space-y-3">
                         <CardTitle className="flex flex-row items-center gap-x-3">
                             <Mail />
@@ -232,21 +242,24 @@ export default function DashboardPage({ dashboard }: DashboardPageProps) {
                     </CardHeader>
                     <CardContent>
                         <Suspense fallback={<div>Loading invitations...</div>}>
-                            <div className="flex flex-col gap-y-3">
-                                {invitations.length === 0 && (
-                                    <NoData
-                                        icon={MailX}
-                                        message={"No invitations found."}
-                                    />
-                                )}
-                                {invitations.map((invitation: Invitation) => (
-                                    <InvitationCardDisplay
-                                        key={invitation.id}
-                                        invitation={invitation}
-                                        className="w-full"
-                                    />
-                                ))}
-                            </div>
+                            {invitations.length === 0 ? (
+                                <NoData
+                                    icon={MailX}
+                                    message={"No invitations found."}
+                                />
+                            ) : (
+                                <div className="flex flex-col gap-y-3">
+                                    {invitations.map(
+                                        (invitation: Invitation) => (
+                                            <InvitationCardDisplay
+                                                key={invitation.id}
+                                                invitation={invitation}
+                                                className="w-full"
+                                            />
+                                        ),
+                                    )}
+                                </div>
+                            )}
                         </Suspense>
                     </CardContent>
                 </Card>

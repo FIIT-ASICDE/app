@@ -2,14 +2,14 @@
 
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import { UsersOverview } from "@/lib/types/user";
-import { Calendar, Ellipsis, PinOff, UsersRound } from "lucide-react";
+import { Building, Calendar, Ellipsis, PinOff } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
 import { getDateString } from "@/components/generic/generic";
 import { NoData } from "@/components/no-data/no-data";
 import { OrganisationCardDisplay } from "@/components/profile/organisation-card-display";
-import { RepositoryCardDisplay } from "@/components/profile/repository-card-display";
+import { PinnedRepositoryCardDisplay } from "@/components/profile/pinned-repository-card-display";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Tooltip,
@@ -83,14 +83,9 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                                     />
                                 )}
                                 {pinnedRepositories.map((repository) => (
-                                    <RepositoryCardDisplay
-                                        type="pinned"
+                                    <PinnedRepositoryCardDisplay
                                         key={"pinned" + repository.id}
-                                        id={repository.id}
-                                        ownerName={repository.ownerName}
-                                        name={repository.name}
-                                        visibility={repository.visibility}
-                                        ownerImage={repository.ownerImage}
+                                        repository={repository}
                                     />
                                 ))}
                             </div>
@@ -129,7 +124,7 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                             <div className="flex flex-col gap-y-3">
                                 {organisations.length === 0 && (
                                     <NoData
-                                        icon={UsersRound}
+                                        icon={Building}
                                         message={"No organisations found."}
                                     />
                                 )}
@@ -137,13 +132,7 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                                     (organisation: OrganisationDisplay) => (
                                         <OrganisationCardDisplay
                                             key={organisation.id}
-                                            id={organisation.id}
-                                            image={organisation.image}
-                                            name={organisation.name}
-                                            role={organisation.userRole}
-                                            memberCount={
-                                                organisation.memberCount
-                                            }
+                                            organisation={organisation}
                                         />
                                     ),
                                 )}

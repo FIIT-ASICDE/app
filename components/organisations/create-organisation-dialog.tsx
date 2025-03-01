@@ -1,10 +1,11 @@
+"use client";
+
 import { handleUpload, imgSrc } from "@/lib/client-file-utils";
 import {
     createOrgProcedureSchema,
     createOrganisationFormSchema,
 } from "@/lib/schemas/org-schemas";
 import { api } from "@/lib/trpc/react";
-import { OrganisationDisplay } from "@/lib/types/organisation";
 import { UserDisplay } from "@/lib/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -15,7 +16,7 @@ import {
     UserRoundPlus,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ChangeEvent, Dispatch, SetStateAction, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { UseFormReturn, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -78,12 +79,7 @@ const data = {
     ] satisfies Array<UserDisplay>,
 };
 
-interface CreateOrganisationDialogProps {
-    organisations: Array<OrganisationDisplay>;
-    setOrganisations: Dispatch<SetStateAction<Array<OrganisationDisplay>>>;
-}
-
-export const CreateOrganisationDialog = ({}: CreateOrganisationDialogProps) => {
+export const CreateOrganisationDialog = () => {
     const router = useRouter();
     const [open, setOpen] = useState<boolean>(false);
 
