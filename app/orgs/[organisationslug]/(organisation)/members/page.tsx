@@ -1,11 +1,11 @@
 import MembersPage from "@/app/orgs/[organisationslug]/(organisation)/members/members-page";
 import { PaginationResult } from "@/lib/types/generic";
 import {
-    OrganisationMember,
     RoleOrganisationFilter,
 } from "@/lib/types/organisation";
 
 import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
+import { api } from "@/lib/trpc/server";
 
 interface OrganisationMembersPageProps {
     params: Promise<{
@@ -20,10 +20,10 @@ interface OrganisationMembersPageProps {
 }
 
 export default async function OrganisationMembersPage({
-    // params,
+    params,
     searchParams,
 }: OrganisationMembersPageProps) {
-    // const orgSlug = (await params).organisationslug;
+    const orgSlug = (await params).organisationslug;
 
     const membersSearchParams = await searchParams;
 
@@ -55,7 +55,8 @@ export default async function OrganisationMembersPage({
     });*/
 
     // dummy data so it does not break
-    const members: Array<OrganisationMember> = [];
+    const members = await api.org.getMembers({organisationName: orgSlug})
+
     const pagination: PaginationResult = {
         total: 0,
         pageCount: 0,
@@ -72,6 +73,7 @@ export default async function OrganisationMembersPage({
                 role: roleFilter,
                 pagination,
             }}
+            orgSlut={orgSlug}
         />
     );
 }

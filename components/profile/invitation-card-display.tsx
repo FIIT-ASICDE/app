@@ -1,5 +1,5 @@
 "use client";
-
+import { api } from "@/lib/trpc/react";
 import { imgSrc } from "@/lib/client-file-utils";
 import { Invitation } from "@/lib/types/invitation";
 import { cn } from "@/lib/utils";
@@ -19,35 +19,21 @@ import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 interface InvitationCardDisplayProps {
     invitation: Invitation;
     className?: string;
+    setInvitations: (invitations: Invitation[]) => void;
 }
 
 export const InvitationCardDisplay = ({
     invitation,
     className,
+    setInvitations
 }: InvitationCardDisplayProps) => {
     const invitationDisplayData = getInvitationDisplayData(invitation);
-
-    const handleDeclineInvitation = () => {
-        console.log(
-            "User declined an invitation from " +
-                invitation.sender.username +
-                "to join " +
-                invitation.type +
-                "called" +
-                invitationDisplayData.displayName,
-        );
-    };
-
-    const handleAcceptInvitation = () => {
-        console.log(
-            "User accepted an invitation from " +
-                invitation.sender.username +
-                "to join " +
-                invitation.type +
-                "called" +
-                invitationDisplayData.displayName,
-        );
-    };
+    const acceptMutation = api.user.acceptInvitation.useMutation({
+        onSuccess: (newInvitations) => setInvitations(newInvitations),
+    });
+    const declineMutation = api.user.declineInvitation.useMutation({
+        onSuccess: (newInvitations) => setInvitations(newInvitations),
+    });
 
     return (
         <Card
@@ -97,17 +83,36 @@ export const InvitationCardDisplay = ({
                     </div>
                 </div>
                 <div className="flex flex-row gap-x-3">
-                    <Button variant="outline" onClick={handleDeclineInvitation}>
+                    <Button
+                        variant="outline"
+                        onClick={() => {
+                            if (!invitation.organisation?.id) return;
+                            declineMutation.mutate({
+                                organizationId: invitation.organisation.id,
+                            });
+                        }}
+                        disabled={declineMutation.isPending}
+                    >
+                        {declineMutation.isPending ? "Declining..." : <>
                         <CircleX />
                         Decline
+                        </>}
                     </Button>
                     <Button
                         variant="default"
                         className="hover:bg-primary-button-hover"
-                        onClick={handleAcceptInvitation}
+                        onClick={() => {
+                            if (!invitation.organisation?.id) return;
+                            acceptMutation.mutate({
+                                organizationId: invitation.organisation.id,
+                            });
+                        }}
+                        disabled={acceptMutation.isPending}
                     >
-                        <CircleCheck />
-                        Accept
+                        {acceptMutation.isPending ? "Accepting..." : <>
+                            <CircleCheck />
+                            Accept
+                        </>}
                     </Button>
                 </div>
             </CardFooter>

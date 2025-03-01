@@ -12,12 +12,14 @@ import {
     UsersDashboard,
     UsersOverview,
 } from "@/lib/types/user";
-import { PrismaType } from "@/prisma";
+import prisma, { PrismaType } from "@/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { favoriteRepos, pinnedRepos, recentRepos } from "./repos";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { Invitation, InvitationStatus, InvitationType } from "@/lib/types/invitation";
 
 export const userRouter = createTRPCRouter({
     completeOnboarding: completeOnboarding(),
@@ -28,6 +30,10 @@ export const userRouter = createTRPCRouter({
     search: trigramSearch(),
     usersDashboard: usersDashboard(),
     usersOrganisations: usersOrganisations(),
+    fulltextSearchUsers: fulltextSearchUsers(),
+    inviteUserToOrganization: inviteUserToOrganization(),
+    acceptInvitation: acceptInvitation(),
+    declineInvitation: declineInvitation()
 });
 
 function completeOnboarding() {
@@ -64,6 +70,7 @@ function completeOnboarding() {
             return {
                 type: "onboarded",
                 id: user.id,
+                userMetadataId: userMetadata.id,
                 username: user.name!,
                 name: userMetadata.firstName,
                 surname: userMetadata.surname,
@@ -102,6 +109,7 @@ function userById() {
                 return {
                     type: "onboarded",
                     id: user.id,
+                    userMetadataId: user.metadata.id,
                     username: user.name!,
                     name: user.metadata.firstName,
                     surname: user.metadata.surname,
@@ -169,12 +177,14 @@ function editUser() {
                     surname: true,
                     bio: true,
                     role: true,
+                    id: true
                 },
             });
 
             return {
                 type: "onboarded",
                 id: updatedUser.id,
+                userMetadataId: updatedUserMetadata.id,
                 name: updatedUserMetadata.firstName,
                 surname: updatedUserMetadata.surname,
                 username: updatedUser.name!,
@@ -281,21 +291,31 @@ function usersDashboard() {
         )
         .query(async ({ ctx, input }): Promise<UsersDashboard> => {
             const decodedUsername = decodeURIComponent(input.username.trim());
-            const user = await userByUsername(ctx.prisma, decodedUsername);
-            const favorite = await favoriteRepos(
-                ctx.prisma,
-                user.id,
-                ctx.session?.user.id === user.id,
-            );
-            const recent = await recentRepos(
-                ctx.prisma,
-                user.id,
-                ctx.session?.user.id === user.id,
-            );
+            const prisma = ctx.prisma;
+
+            const userMetadata = await prisma.userMetadata.findFirst({
+                where: { user: { name: decodedUsername } },
+                select: {
+                    id: true, userId: true
+                },
+            });
+
+            if (!userMetadata) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "User not found",
+                });
+            }
+
+            const invitations: Invitation[] = await getUserInvitations(userMetadata.id)
+
+            const favorite = await favoriteRepos(prisma, userMetadata.userId, ctx.session?.user.id === userMetadata.userId);
+            const recent = await recentRepos(prisma, userMetadata.userId, ctx.session?.user.id === userMetadata.userId);
 
             return {
                 favoriteRepositories: favorite,
                 recentRepositories: recent,
+                invitations: invitations,
             };
         });
 }
@@ -316,6 +336,221 @@ function usersOrganisations() {
         });
 }
 
+function fulltextSearchUsers() {
+    return protectedProcedure
+        .input(
+            z.object({
+                query: z.string().min(1).max(50),
+                limit: z.number().min(1).max(10).default(10),
+            })
+        )
+        .query(async ({ ctx, input }) => {
+            const { query, limit } = input;
+            const decodedQuery = decodeURIComponent(query.trim())
+
+            const users = await ctx.prisma.user.findMany({
+                where: {
+                    name: {
+                        contains: decodedQuery,
+                        mode: "insensitive",
+                    },
+                },
+                take: limit,
+                orderBy: {
+                    name: "asc",
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    image: true,
+                },
+            });
+
+            return users.map((user) => ({
+                id: user.id,
+                username: user.name ?? "",
+                image: user.image || "/avatars/default.png",
+            }));
+        });
+}
+
+function acceptInvitation() {
+    return protectedProcedure
+        .input(
+            z.object({
+                organizationId: z.string().uuid(),
+            })
+        )
+        .mutation(async ({ ctx, input }) => {
+            const { organizationId } = input;
+            const prisma = ctx.prisma;
+            const userId = ctx.session.user.id
+
+            const userMetadata = await prisma.userMetadata.findUnique({
+                where: { userId },
+                select: { id: true },
+            });
+
+            if(!userMetadata) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "User not found",
+                });
+            }
+
+            const invitation = await prisma.organizationUserInvitation.findUnique({
+                where: { userMetadataId_organizationId: { userMetadataId: userMetadata.id, organizationId } },
+            });
+
+            if (!invitation) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Invitation not found or already accepted.",
+                });
+            }
+
+            try {
+                await prisma.$transaction([
+                    prisma.organizationUser.create({
+                        data: {
+                            userMetadataId: userMetadata.id,
+                            organizationId,
+                            role: invitation.role,
+                        },
+                    }),
+
+                    prisma.organizationUserInvitation.update({
+                        where: { userMetadataId_organizationId: { userMetadataId: userMetadata.id, organizationId } },
+                        data: { isPending: false },
+                    }),
+                ]);
+
+                return getUserInvitations(userMetadata.id)
+            } catch (error) {
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Could not accept invitation: " + error,
+                });
+            }
+        });
+}
+
+function declineInvitation() {
+    return protectedProcedure
+        .input(
+            z.object({
+                organizationId: z.string().uuid(),
+            })
+        )
+        .mutation(async ({ ctx, input }) => {
+            const { organizationId } = input;
+            const prisma = ctx.prisma;
+            const userId = ctx.session.user.id;
+
+            const userMetadata = await prisma.userMetadata.findUnique({
+                where: { userId },
+                select: { id: true },
+            });
+
+            if (!userMetadata) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "User not found",
+                });
+            }
+
+            const invitation = await prisma.organizationUserInvitation.findUnique({
+                where: { userMetadataId_organizationId: { userMetadataId: userMetadata.id, organizationId } },
+            });
+
+            if (!invitation) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Invitation not found or already processed.",
+                });
+            }
+
+            try {
+                await prisma.organizationUserInvitation.update({
+                    where: { userMetadataId_organizationId: { userMetadataId: userMetadata.id, organizationId } },
+                    data: { isPending: false },
+                });
+
+                return getUserInvitations(userMetadata.id)
+            } catch (error) {
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Could not decline invitation: " + error,
+                });
+            }
+        });
+}
+
+function inviteUserToOrganization() {
+    return protectedProcedure
+        .input(
+            z.object({
+                userId: z.string().uuid(),
+                organisationName: z.string(),
+            })
+        )
+        .mutation(async ({ ctx, input }) => {
+            const { userId, organisationName } = input;
+            const decodedOrganisationName = decodeURIComponent(organisationName)
+            const prisma = ctx.prisma;
+            const senderId = ctx.session.user.id
+
+            const userMetadata = await prisma.userMetadata.findUnique({
+                where: { userId },
+                select: { id: true },
+            });
+
+            const senderMetadata = await prisma.userMetadata.findUnique({
+                where: { userId: senderId },
+                select: { id: true },
+            });
+
+            const organization = await prisma.organization.findUnique({
+                where: { name: decodedOrganisationName },
+                select: {
+                    id: true,
+                    name: true,
+                },
+            });
+
+            if (!userMetadata || !organization || !senderMetadata) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "User or organisation not found",
+                });
+            }
+
+            try {
+                await prisma.organizationUserInvitation.create({
+                    data: {
+                        userMetadataId: userMetadata.id,
+                        organizationId: organization.id,
+                        senderMetadataId: senderMetadata.id
+                    },
+                });
+            } catch (error) {
+                if (error instanceof PrismaClientKnownRequestError) {
+                    if (error.code === "P2002") {
+                        throw new TRPCError({
+                            code: "CONFLICT",
+                            message: "User is already invited to this organization",
+                        });
+                    }
+                }
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Could not create invitation",
+                });
+            }
+            return { success: true };
+        });
+}
+
 async function userByUsername(
     prisma: PrismaType,
     username: string,
@@ -323,6 +558,7 @@ async function userByUsername(
     const userMetadata = await prisma.userMetadata.findFirst({
         where: { user: { name: username } },
         select: {
+            id: true,
             firstName: true,
             surname: true,
             role: true,
@@ -340,6 +576,7 @@ async function userByUsername(
 
     return {
         type: "onboarded",
+        userMetadataId: userMetadata.id,
         id: userMetadata.user.id,
         username: userMetadata.user.name!,
         name: userMetadata.firstName,
@@ -382,4 +619,42 @@ async function getUsersOrgs(
         if (a.userRole !== "admin" && b.userRole === "admin") return 1;
         return a.name.localeCompare(b.name);
     });
+}
+
+async function getUserInvitations(userMetadataId: string): Promise<Invitation[]> {
+    const invitations = await prisma.organizationUserInvitation.findMany({
+        where: { userMetadataId, isPending: true },
+        include: {
+            organization: {
+                include: {
+                    _count: {
+                        select: { users: true },
+                    },
+                },
+            },
+            senderMetadata: {
+                include: { user: true },
+            },
+        },
+        orderBy: { createdAt: "desc" },
+    });
+
+    return invitations.map((inv) => ({
+        id: `${inv.userMetadataId}-${inv.organizationId}`,
+        type: "organisation" as InvitationType,
+        sender: {
+            id: inv.senderMetadata.user.id,
+            username: inv.senderMetadata.user.name ?? "",
+            image: inv.senderMetadata.user.image ?? "/avatars/default.png",
+        },
+        organisation: {
+            id: inv.organization.id,
+            name: inv.organization.name,
+            image: inv.organization.image ?? "/avatars/default.png",
+            bio: inv.organization.bio ?? undefined,
+            memberCount: inv.organization._count.users,
+        },
+        status: "pending" as InvitationStatus,
+        createdAt: inv.createdAt,
+    }));
 }

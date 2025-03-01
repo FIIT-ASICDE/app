@@ -3,7 +3,6 @@
 import { UserDisplay } from "@/lib/types/user";
 import { Search, UserRoundPlus } from "lucide-react";
 import { useState } from "react";
-
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,90 +21,52 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { api } from "@/lib/trpc/react";
+import { useDebounce } from "@/lib/hooks/useDebounce";
 
-const data = {
-    organisationId: "1",
-    organisationName: "Google",
-    possibleMembers: [
-        {
-            id: "1",
-            username: "johndoe1",
-            image: "/avatars/avatar1.png",
-        } satisfies UserDisplay,
-        {
-            id: "2",
-            username: "johndoe2",
-            image: "/avatars/avatar2.png",
-        } satisfies UserDisplay,
-        {
-            id: "3",
-            username: "johndoe3",
-            image: "/avatars/avatar3.png",
-        } satisfies UserDisplay,
-        {
-            id: "4",
-            username: "johndoe4",
-            image: "/avatars/avatar4.png",
-        } satisfies UserDisplay,
-        {
-            id: "5",
-            username: "johndoe5",
-            image: "/avatars/avatar5.png",
-        } satisfies UserDisplay,
-        {
-            id: "6",
-            username: "johndoe6",
-            image: "/avatars/avatar6.png",
-        } satisfies UserDisplay,
-        {
-            id: "7",
-            username: "johndoe7",
-            image: "/avatars/avatar5.png",
-        } satisfies UserDisplay,
-        {
-            id: "8",
-            username: "johndoe8",
-            image: "/avatars/avatar4.png",
-        } satisfies UserDisplay,
-        {
-            id: "9",
-            username: "johndoe9",
-            image: "/avatars/avatar3.png",
-        } satisfies UserDisplay,
-        {
-            id: "10",
-            username: "johndoe10",
-            image: "/avatars/avatar2.png",
-        } satisfies UserDisplay,
-    ] satisfies Array<UserDisplay>,
-};
-
-export const InviteMemberDialog = () => {
+export const InviteMemberDialog = ({ organisationName }: { organisationName: string }) => {
+    const [query, setQuery] = useState("");
     const [selectedUser, setSelectedUser] = useState<UserDisplay>();
     const [commandOpen, setCommandOpen] = useState<boolean>(false);
+    const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+    const decodedOrganisationName = decodeURIComponent(organisationName.trim());
+
+    const debouncedQuery = useDebounce(query, 500);
+
+    const { data: users = [], isFetching } = api.user.fulltextSearchUsers.useQuery(
+        { query: debouncedQuery },
+        {
+            enabled: !!debouncedQuery,
+            staleTime: 0,
+        }
+    );
+
+    const inviteMutation = api.user.inviteUserToOrganization.useMutation({
+        onSuccess: () => {
+            setDialogOpen(false);
+            setSelectedUser(undefined);
+        },
+    });
 
     const handleInviteMember = () => {
-        console.log(
-            "User " +
-                selectedUser?.username +
-                " with ID: " +
-                selectedUser?.id +
-                " has been invited to organisation " +
-                data.organisationName +
-                " with ID: " +
-                data.organisationId,
-        );
-
-        setSelectedUser(undefined);
+        if (!selectedUser) return;
+        inviteMutation.mutate({
+            userId: selectedUser.id,
+            organisationName: organisationName
+        });
     };
 
     return (
-        <Dialog>
+        <Dialog
+            open={dialogOpen}
+            onOpenChange={(isOpen) => {
+                setDialogOpen(isOpen);
+                if (!isOpen) {
+                    setSelectedUser(undefined);
+                }
+            }}>
             <DialogTrigger asChild>
-                <Button
-                    variant="default"
-                    className="hover:bg-primary-button-hover"
-                >
+                <Button variant="default" className="hover:bg-primary-button-hover">
                     <UserRoundPlus />
                     Invite member
                 </Button>
@@ -116,11 +77,11 @@ export const InviteMemberDialog = () => {
                         Invite a member
                     </DialogTitle>
                     <DialogDescription>
-                        Please select a member that will get an invite to your
-                        organisation.
+                        Please select a member that will get an invite to your organisation.
                     </DialogDescription>
                 </DialogHeader>
 
+                {/* Tlačidlo na otvorenie search dialogu */}
                 <Button
                     className="border border-accent bg-transparent py-5 font-normal text-muted-foreground hover:bg-accent"
                     onClick={() => setCommandOpen(true)}
@@ -142,54 +103,66 @@ export const InviteMemberDialog = () => {
                     )}
                 </Button>
 
+                {/* Search dialog */}
                 <CommandDialog open={commandOpen} onOpenChange={setCommandOpen}>
-                    <CommandInput placeholder="Select a user or search..." />
+                    <CommandInput
+                        placeholder="Search users..."
+                        value={query}
+                        onValueChange={(value: string) => setQuery(value)}
+                    />
                     <ScrollArea className="h-full max-h-60">
-                        <CommandEmpty>No users found.</CommandEmpty>
-                        {data.possibleMembers.map((member: UserDisplay) => (
-                            <CommandItem
-                                key={member.id}
-                                className="cursor-pointer"
-                                onSelect={() => {
-                                    setCommandOpen(false);
-                                    setSelectedUser(member);
-                                }}
-                            >
-                                <div className="flex flex-row items-center gap-x-3">
-                                    <AvatarDisplay
-                                        displayType="select"
-                                        name={member.username}
-                                        image={member.image}
-                                    />
-                                    {member.username}
-                                </div>
-                            </CommandItem>
-                        ))}
+                        {isFetching ? (
+                            <p className="text-center">Loading...</p>
+                        ) : users.length > 0 ? (
+                            users.map((member) => (
+                                <CommandItem
+                                    key={member.id}
+                                    value={member.username}
+                                    className="cursor-pointer"
+                                    onSelect={() => {
+                                        setCommandOpen(false);
+                                        setSelectedUser(member);
+                                    }}
+                                >
+                                    <div className="flex flex-row items-center gap-x-3">
+                                        <AvatarDisplay
+                                            displayType="select"
+                                            name={member.username}
+                                            image={member.image}
+                                        />
+                                        {member.username}
+                                    </div>
+                                </CommandItem>
+                            ))
+                        ) : (
+                            <CommandEmpty>No users found.</CommandEmpty>
+                        )}
                     </ScrollArea>
                 </CommandDialog>
 
+                {/* Info o vybranom užívateľovi */}
                 {selectedUser && (
                     <p className="text-center text-sm">
                         You are about to invite
                         <span className="font-bold">
                             {" " + selectedUser.username + " "}
                         </span>
-                        to {data.organisationName}.
+                        your organization
+                        <span className="font-bold">
+                            {" " + decodedOrganisationName + " "}
+                        </span>.
                     </p>
                 )}
 
                 <DialogFooter className="justify-center">
-                    <DialogTrigger asChild>
-                        <Button
-                            onClick={() => handleInviteMember()}
-                            className="w-full hover:bg-primary-button-hover"
-                            variant="default"
-                            disabled={!selectedUser}
-                        >
-                            <UserRoundPlus />
-                            Send an invitation
-                        </Button>
-                    </DialogTrigger>
+                    <Button
+                        onClick={handleInviteMember}
+                        className="w-full hover:bg-primary-button-hover"
+                        variant="default"
+                        disabled={!selectedUser || inviteMutation.isPending}
+                    >
+                        {inviteMutation.isPending ? "Sending..." : "Send an invitation"}
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
