@@ -37,7 +37,7 @@ export default async function UserRepositoriesPage({
     // if the current user is asking for his/her repos, also fetch orgs needed
     // to create a new one, but only those where he/she is admin
     const usersOrgs =
-        session?.user.username === userSlug
+        session?.user.id === user.id
             ? await api.org.userOrgs({
                   usersId: session.user.id,
                   role: "ADMIN",
@@ -47,7 +47,7 @@ export default async function UserRepositoriesPage({
     const reposSearchParams = await searchParams;
 
     const query: string = reposSearchParams?.query || "";
-    const currentPage: number = Number(reposSearchParams?.page) || 1;
+    const currentPage: number = Number(reposSearchParams?.page) || 0;
     const rows: boolean = parseBoolean(reposSearchParams?.rows) ?? false;
 
     const pinnedFilter: PinnedRepositoriesFilter = parseFilterValue(
