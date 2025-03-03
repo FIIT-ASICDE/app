@@ -1,5 +1,5 @@
 import { CommandElementGroup } from "@/lib/types/generic";
-import { Session } from "next-auth";
+import { OnboardedUser } from "@/lib/types/user";
 import Link from "next/link";
 import { Dispatch, SetStateAction } from "react";
 
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/command";
 
 interface CommandBarDialogProps {
-    user: Session["user"];
+    user: OnboardedUser;
     commandOpen: boolean;
     setCommandOpen: Dispatch<SetStateAction<boolean>>;
 }
