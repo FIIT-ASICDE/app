@@ -1,11 +1,14 @@
+import { loadRepoDirOrFile, loadRepoItems } from "@/lib/files/repo-files";
 import {
     createRepositoryFormSchema,
     repoBySlugsSchema,
+    repoItemSchema,
 } from "@/lib/schemas/repo-schemas";
 import {
     RepoUserRole,
     Repository,
     RepositoryDisplay,
+    RepositoryItem,
 } from "@/lib/types/repository";
 import { PrismaType } from "@/prisma";
 import { $Enums } from "@prisma/client";
@@ -20,6 +23,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 export const repoRouter = createTRPCRouter({
     create: create(),
     search: searchByOwnerAndRepoSlug(),
+    loadRepoItem: loadRepoItem(),
     ownersRepos: reposByOwnerSlug(),
     toggleState: toggleStateOnRepo(),
 });
@@ -163,70 +167,17 @@ function create() {
 function searchByOwnerAndRepoSlug() {
     return protectedProcedure
         .input(repoBySlugsSchema)
-        .query(async ({ ctx, input }) => {
-            const decodedOwnerSlug = decodeURIComponent(input.ownerSlug.trim());
-            const organization = await ctx.prisma.organization.findFirst({
-                where: { name: decodedOwnerSlug },
-                select: { id: true, name: true, image: true },
-            });
-
-            // if no organization found, try to find user by username
-            const user = !organization
-                ? await ctx.prisma.user.findFirst({
-                      select: { id: true, name: true, image: true },
-                      where: { name: decodedOwnerSlug },
-                  })
-                : null;
-
-            if (!organization && !user) {
-                throw new TRPCError({
-                    code: "NOT_FOUND",
-                    message: "Repo not found",
-                });
-            }
-
-            const ownerId = organization?.id || user?.id;
-            const ownerName = organization?.name || user?.name;
-            const ownerImage = organization?.image || user?.image;
-
+        .query(async ({ ctx, input }): Promise<Repository> => {
+            const owner = await ownerBySlug(ctx.prisma, input.ownerSlug);
             const decodedRepositorySlug = decodeURIComponent(
                 input.repositorySlug.trim(),
             );
-            const repo = await ctx.prisma.repo.findFirst({
-                where: {
-                    name: decodedRepositorySlug,
-                    OR: [
-                        { public: true },
-                        {
-                            userOrganizationRepo: {
-                                some: {
-                                    AND: [
-                                        {
-                                            userMetadata: {
-                                                userId: ctx.session.user.id,
-                                            },
-                                        },
-                                        {
-                                            organizationId: user
-                                                ? null // if it is users repo, show if the current user has a role, or if it is public
-                                                : organization!.id, // if it is a orgs repo, current user can see repo if there is any role (there is no 'guest' role)
-                                        },
-                                    ],
-                                },
-                            },
-                        },
-                    ],
-                },
-                include: {
-                    userOrganizationRepo: {
-                        select: { favorite: true, repoRole: true },
-                        where: {
-                            userMetadata: { userId: ctx.session.user.id },
-                        },
-                    },
-                },
-            });
-
+            const repo = await repoBySlug(
+                ctx.prisma,
+                decodedRepositorySlug,
+                ctx.session.user.id,
+                owner,
+            );
             if (!repo) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
@@ -242,20 +193,59 @@ function searchByOwnerAndRepoSlug() {
                 });
             }
             const userRepoRelation = repo.userOrganizationRepo.at(0);
+            const repoPath = path.join(
+                process.env.REPOSITORIES_STORAGE_ROOT!,
+                owner.name!,
+                repo.name,
+            );
+            const contentsTree = loadRepoItems(repoPath, 0, false);
 
             return {
                 id: repo.id,
-                ownerId: ownerId!,
-                ownerName: ownerName!,
+                ownerId: owner.id!,
+                ownerName: owner.name!,
                 name: repo.name,
                 visibility: repo.public ? "public" : "private",
                 favorite: userRepoRelation?.favorite ?? false,
                 pinned: false,
                 description: repo.description ?? undefined,
-                ownerImage: ownerImage ?? undefined,
+                ownerImage: owner.image,
                 createdAt: repo.createdAt,
                 userRole: dbUserRoleToAppUserRole(userRepoRelation?.repoRole),
+                tree: contentsTree,
             } satisfies Repository;
+        });
+}
+
+function loadRepoItem() {
+    return protectedProcedure
+        .input(repoItemSchema)
+        .query(async ({ ctx, input }): Promise<RepositoryItem> => {
+            const owner = await ownerBySlug(ctx.prisma, input.ownerSlug);
+            const decodedRepositorySlug = decodeURIComponent(
+                input.repositorySlug.trim(),
+            );
+            const repo = await repoBySlug(
+                ctx.prisma,
+                decodedRepositorySlug,
+                ctx.session.user.id,
+                owner,
+            );
+            if (!repo) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Repo not found",
+                });
+            }
+
+            const itemPath = path.join(
+                process.env.REPOSITORIES_STORAGE_ROOT!,
+                owner.name!,
+                repo.name,
+                input.path,
+            );
+
+            return loadRepoDirOrFile(itemPath, 0, false);
         });
 }
 
@@ -683,4 +673,86 @@ function dbUserRoleToAppUserRole(userRole?: $Enums.RepoRole): RepoUserRole {
         case "OWNER":
             return "owner";
     }
+}
+
+async function ownerBySlug(
+    prisma: PrismaType,
+    ownerSlug: string,
+): Promise<{ type: "org" | "user"; id: string; name: string; image?: string }> {
+    const decodedOwnerSlug = decodeURIComponent(ownerSlug.trim());
+    const organization = await prisma.organization.findFirst({
+        where: { name: decodedOwnerSlug },
+        select: { id: true, name: true, image: true },
+    });
+
+    if (organization) {
+        return {
+            type: "org",
+            id: organization.id,
+            name: organization.name,
+            image: organization.image || undefined,
+        };
+    }
+
+    const user = await prisma.user.findFirst({
+        select: { id: true, name: true, image: true },
+        where: { name: decodedOwnerSlug },
+    });
+
+    if (!user) {
+        throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Repo not found",
+        });
+    }
+
+    return {
+        type: "user",
+        id: user.id,
+        name: user.name!,
+        image: user.image || undefined,
+    };
+}
+
+async function repoBySlug(
+    prisma: PrismaType,
+    slug: string,
+    sessionUserId: string,
+    owner: Awaited<ReturnType<typeof ownerBySlug>>,
+) {
+    return await prisma.repo.findFirst({
+        where: {
+            name: slug,
+            OR: [
+                { public: true },
+                {
+                    userOrganizationRepo: {
+                        some: {
+                            AND: [
+                                {
+                                    userMetadata: {
+                                        userId: sessionUserId,
+                                    },
+                                },
+                                {
+                                    organizationId:
+                                        owner.type === "user"
+                                            ? null // if it is users repo, show if the current user has a role, or if it is public
+                                            : owner.id, // if it is a orgs repo, current user can see repo if there is any role (there is no 'guest' role)
+                                },
+                            ],
+                        },
+                    },
+                },
+            ],
+        },
+        include: {
+            userOrganizationRepo: {
+                select: { favorite: true, repoRole: true },
+                where: {
+                    userMetadata: { userId: sessionUserId },
+                },
+            },
+        },
+    });
 }
