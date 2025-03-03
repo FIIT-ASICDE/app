@@ -1,4 +1,5 @@
 import { CommandElement, CommandElementGroup } from "@/lib/types/generic";
+import { OnboardedUser } from "@/lib/types/user";
 import {
     Building,
     FolderPlus,
@@ -10,10 +11,9 @@ import {
     UserRoundPen,
     UserRoundPlus,
 } from "lucide-react";
-import { Session } from "next-auth";
 
 interface CommandOptionsProps {
-    user: Session["user"];
+    user: OnboardedUser;
 }
 
 export const CommandOptions = ({

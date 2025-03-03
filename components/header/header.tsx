@@ -10,11 +10,9 @@ import LogoIcon from "@/components/icons/logo";
 export default async function Header() {
     const session = await auth();
 
-    if (session) {
-        const user = await api.user.byId(session.user.id);
-        if (user?.type === "non-onboarded") {
-            return <></>;
-        }
+    const user = session ? await api.user.byId(session.user.id) : undefined;
+    if (!user || user?.type === "non-onboarded") {
+        return <></>;
     }
 
     return (
@@ -31,8 +29,8 @@ export default async function Header() {
                                 <p className="text-xl font-bold">ASICDE</p>
                             </Link>
                         </div>
-                        <CommandBar user={session.user} />
-                        <NavigationLoggedIn user={session.user} />
+                        <CommandBar user={user} />
+                        <NavigationLoggedIn user={user} />
                     </div>
                 </header>
             )}

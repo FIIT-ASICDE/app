@@ -4,22 +4,11 @@ import type { Provider } from "next-auth/providers";
 import GitHub from "next-auth/providers/github";
 
 import prisma from "./prisma";
-import { $Enums } from ".prisma/client";
 
 declare module "next-auth" {
-    import UserRole = $Enums.UserRole;
-
-    interface User {
-        username?: string;
-        surname?: string;
-    }
     interface Session {
         user: {
             id: string; // overwrites the id?: string in DefaultSession['user']
-            username: string;
-            surname: string;
-            image?: string;
-            role: UserRole;
         } & DefaultSession["user"];
     }
 }
@@ -49,18 +38,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         async jwt({ token, user }) {
             if (user) {
                 token.id = user.id;
-                token.username = user.name;
-                token.surname = "REMOVE";
-                token.image = user.image;
             }
             return token;
         },
         async session({ session, token }) {
             session.user.id = token.id as string;
-            session.user.username = token.name as string;
-            session.user.surname = "REMOVE";
-            session.user.image = token.image as string;
-            session.user.role = "USER";
             return session;
         },
     },

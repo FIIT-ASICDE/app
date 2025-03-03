@@ -1,9 +1,9 @@
-import { Session } from "next-auth";
+import { OnboardedUser } from "@/lib/types/user";
 
 import { HeaderDropdown } from "@/components/header/header-dropdown";
 
 interface NavigationLoggedInProps {
-    user: Session["user"];
+    user: OnboardedUser;
 }
 
 export const NavigationLoggedIn = ({ user }: NavigationLoggedInProps) => {

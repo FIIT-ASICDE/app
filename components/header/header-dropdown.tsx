@@ -1,6 +1,7 @@
 "use client";
 
 import { imgSrc } from "@/lib/client-file-utils";
+import { OnboardedUser } from "@/lib/types/user";
 import {
     Building,
     Folders,
@@ -9,7 +10,6 @@ import {
     Settings,
     UserRound,
 } from "lucide-react";
-import { Session } from "next-auth";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import * as React from "react";
@@ -28,12 +28,12 @@ import {
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface HeaderDropdownProps {
-    user: Session["user"];
+    user: OnboardedUser;
 }
 
-export const HeaderDropdown = ({
-    user: { username, name, surname, image },
-}: HeaderDropdownProps) => {
+export const HeaderDropdown = ({ user }: HeaderDropdownProps) => {
+    const { username, name, surname, image } = user;
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger className="rounded-full">
