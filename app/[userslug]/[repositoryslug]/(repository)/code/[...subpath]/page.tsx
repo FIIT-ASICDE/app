@@ -1,6 +1,5 @@
+import CodePage from "@/app/[userslug]/[repositoryslug]/(repository)/code/code-page";
 import { api } from "@/lib/trpc/server";
-
-import CodePage from "../code-page";
 
 export default async function RepoSubDirectoryPage({
     params,
