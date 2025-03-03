@@ -3,7 +3,22 @@ import {
     onboardSchema,
     userSearchSchema,
 } from "@/lib/schemas/user-schemas";
+import {
+    favoriteRepos,
+    pinnedRepos,
+    recentRepos,
+} from "@/lib/server/api/routers/repos";
+import {
+    createTRPCRouter,
+    protectedProcedure,
+    publicProcedure,
+} from "@/lib/server/api/trpc";
 import { PaginationResult } from "@/lib/types/generic";
+import {
+    Invitation,
+    InvitationStatus,
+    InvitationType,
+} from "@/lib/types/invitation";
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import {
     OnboardedUser,
@@ -13,13 +28,9 @@ import {
     UsersOverview,
 } from "@/lib/types/user";
 import prisma, { PrismaType } from "@/prisma";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import { favoriteRepos, pinnedRepos, recentRepos } from "./repos";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { Invitation, InvitationStatus, InvitationType } from "@/lib/types/invitation";
 
 export const userRouter = createTRPCRouter({
     completeOnboarding: completeOnboarding(),
@@ -33,7 +44,7 @@ export const userRouter = createTRPCRouter({
     fulltextSearchUsers: fulltextSearchUsers(),
     inviteUserToOrganization: inviteUserToOrganization(),
     acceptInvitation: acceptInvitation(),
-    declineInvitation: declineInvitation()
+    declineInvitation: declineInvitation(),
 });
 
 function completeOnboarding() {
@@ -177,7 +188,7 @@ function editUser() {
                     surname: true,
                     bio: true,
                     role: true,
-                    id: true
+                    id: true,
                 },
             });
 
@@ -296,7 +307,8 @@ function usersDashboard() {
             const userMetadata = await prisma.userMetadata.findFirst({
                 where: { user: { name: decodedUsername } },
                 select: {
-                    id: true, userId: true
+                    id: true,
+                    userId: true,
                 },
             });
 
@@ -307,10 +319,20 @@ function usersDashboard() {
                 });
             }
 
-            const invitations: Invitation[] = await getUserInvitations(userMetadata.id)
+            const invitations: Invitation[] = await getUserInvitations(
+                userMetadata.id,
+            );
 
-            const favorite = await favoriteRepos(prisma, userMetadata.userId, ctx.session?.user.id === userMetadata.userId);
-            const recent = await recentRepos(prisma, userMetadata.userId, ctx.session?.user.id === userMetadata.userId);
+            const favorite = await favoriteRepos(
+                prisma,
+                userMetadata.userId,
+                ctx.session?.user.id === userMetadata.userId,
+            );
+            const recent = await recentRepos(
+                prisma,
+                userMetadata.userId,
+                ctx.session?.user.id === userMetadata.userId,
+            );
 
             return {
                 favoriteRepositories: favorite,
@@ -342,11 +364,11 @@ function fulltextSearchUsers() {
             z.object({
                 query: z.string().min(1).max(50),
                 limit: z.number().min(1).max(10).default(10),
-            })
+            }),
         )
         .query(async ({ ctx, input }) => {
             const { query, limit } = input;
-            const decodedQuery = decodeURIComponent(query.trim())
+            const decodedQuery = decodeURIComponent(query.trim());
 
             const users = await ctx.prisma.user.findMany({
                 where: {
@@ -379,28 +401,34 @@ function acceptInvitation() {
         .input(
             z.object({
                 organizationId: z.string().uuid(),
-            })
+            }),
         )
         .mutation(async ({ ctx, input }) => {
             const { organizationId } = input;
             const prisma = ctx.prisma;
-            const userId = ctx.session.user.id
+            const userId = ctx.session.user.id;
 
             const userMetadata = await prisma.userMetadata.findUnique({
                 where: { userId },
                 select: { id: true },
             });
 
-            if(!userMetadata) {
+            if (!userMetadata) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
                     message: "User not found",
                 });
             }
 
-            const invitation = await prisma.organizationUserInvitation.findUnique({
-                where: { userMetadataId_organizationId: { userMetadataId: userMetadata.id, organizationId } },
-            });
+            const invitation =
+                await prisma.organizationUserInvitation.findUnique({
+                    where: {
+                        userMetadataId_organizationId: {
+                            userMetadataId: userMetadata.id,
+                            organizationId,
+                        },
+                    },
+                });
 
             if (!invitation) {
                 throw new TRPCError({
@@ -420,12 +448,17 @@ function acceptInvitation() {
                     }),
 
                     prisma.organizationUserInvitation.update({
-                        where: { userMetadataId_organizationId: { userMetadataId: userMetadata.id, organizationId } },
+                        where: {
+                            userMetadataId_organizationId: {
+                                userMetadataId: userMetadata.id,
+                                organizationId,
+                            },
+                        },
                         data: { isPending: false },
                     }),
                 ]);
 
-                return getUserInvitations(userMetadata.id)
+                return getUserInvitations(userMetadata.id);
             } catch (error) {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
@@ -440,7 +473,7 @@ function declineInvitation() {
         .input(
             z.object({
                 organizationId: z.string().uuid(),
-            })
+            }),
         )
         .mutation(async ({ ctx, input }) => {
             const { organizationId } = input;
@@ -459,9 +492,15 @@ function declineInvitation() {
                 });
             }
 
-            const invitation = await prisma.organizationUserInvitation.findUnique({
-                where: { userMetadataId_organizationId: { userMetadataId: userMetadata.id, organizationId } },
-            });
+            const invitation =
+                await prisma.organizationUserInvitation.findUnique({
+                    where: {
+                        userMetadataId_organizationId: {
+                            userMetadataId: userMetadata.id,
+                            organizationId,
+                        },
+                    },
+                });
 
             if (!invitation) {
                 throw new TRPCError({
@@ -472,11 +511,16 @@ function declineInvitation() {
 
             try {
                 await prisma.organizationUserInvitation.update({
-                    where: { userMetadataId_organizationId: { userMetadataId: userMetadata.id, organizationId } },
+                    where: {
+                        userMetadataId_organizationId: {
+                            userMetadataId: userMetadata.id,
+                            organizationId,
+                        },
+                    },
                     data: { isPending: false },
                 });
 
-                return getUserInvitations(userMetadata.id)
+                return getUserInvitations(userMetadata.id);
             } catch (error) {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
@@ -492,13 +536,14 @@ function inviteUserToOrganization() {
             z.object({
                 userId: z.string().uuid(),
                 organisationName: z.string(),
-            })
+            }),
         )
         .mutation(async ({ ctx, input }) => {
             const { userId, organisationName } = input;
-            const decodedOrganisationName = decodeURIComponent(organisationName)
+            const decodedOrganisationName =
+                decodeURIComponent(organisationName);
             const prisma = ctx.prisma;
-            const senderId = ctx.session.user.id
+            const senderId = ctx.session.user.id;
 
             const userMetadata = await prisma.userMetadata.findUnique({
                 where: { userId },
@@ -530,7 +575,7 @@ function inviteUserToOrganization() {
                     data: {
                         userMetadataId: userMetadata.id,
                         organizationId: organization.id,
-                        senderMetadataId: senderMetadata.id
+                        senderMetadataId: senderMetadata.id,
                     },
                 });
             } catch (error) {
@@ -538,7 +583,8 @@ function inviteUserToOrganization() {
                     if (error.code === "P2002") {
                         throw new TRPCError({
                             code: "CONFLICT",
-                            message: "User is already invited to this organization",
+                            message:
+                                "User is already invited to this organization",
                         });
                     }
                 }
@@ -621,7 +667,9 @@ async function getUsersOrgs(
     });
 }
 
-async function getUserInvitations(userMetadataId: string): Promise<Invitation[]> {
+async function getUserInvitations(
+    userMetadataId: string,
+): Promise<Invitation[]> {
     const invitations = await prisma.organizationUserInvitation.findMany({
         where: { userMetadataId, isPending: true },
         include: {

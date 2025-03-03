@@ -1,8 +1,7 @@
+import { OnboardingForm } from "@/app/onboarding/onboarding-form";
 import { auth } from "@/auth";
 import { redirectIfNotOnboarded } from "@/lib/onboarding-guard";
 import { BookUser } from "lucide-react";
-
-import { OnboardingForm } from "./onboarding-form";
 
 import {
     Card,

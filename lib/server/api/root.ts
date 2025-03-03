@@ -1,7 +1,7 @@
-import { orgRouter } from "./routers/orgs";
-import { repoRouter } from "./routers/repos";
-import { userRouter } from "./routers/user";
-import { createCallerFactory, createTRPCRouter } from "./trpc";
+import { orgRouter } from "@/lib/server/api/routers/orgs";
+import { repoRouter } from "@/lib/server/api/routers/repos";
+import { userRouter } from "@/lib/server/api/routers/user";
+import { createCallerFactory, createTRPCRouter } from "@/lib/server/api/trpc";
 
 /**
  * This is the primary router for your server.
