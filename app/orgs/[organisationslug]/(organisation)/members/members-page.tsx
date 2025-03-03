@@ -22,7 +22,7 @@ interface MembersPageProps {
         role: RoleOrganisationFilter;
         pagination: PaginationResult;
     };
-    orgSlut: string
+    orgSlut: string;
 }
 
 const data = {
@@ -94,7 +94,7 @@ const data = {
 export default function MembersPage({
     members,
     searchParams,
-    orgSlut
+    orgSlut,
 }: MembersPageProps) {
     if (!data.showMembers) {
         return (
@@ -119,7 +119,9 @@ export default function MembersPage({
                             role: searchParams.role,
                         }}
                     />
-                    {data.userIsAdmin && <InviteMemberDialog organisationName={orgSlut} />}
+                    {data.userIsAdmin && (
+                        <InviteMemberDialog organisationName={orgSlut} />
+                    )}
                 </div>
             </div>
 
