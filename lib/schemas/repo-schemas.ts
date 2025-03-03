@@ -18,6 +18,10 @@ export const repoBySlugsSchema = z.object({
         .transform((value) => value.trim()),
 });
 
+export const repoItemSchema = repoBySlugsSchema.extend({
+    path: z.string().transform((value) => value.trim()),
+});
+
 export const createRepositoryFormSchema = z.object({
     ownerId: z.string().uuid("Invalid UUID format"),
     name: z

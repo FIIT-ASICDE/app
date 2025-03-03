@@ -8,7 +8,7 @@ export type Repository = {
     pinned: boolean;
     description?: string;
     ownerImage?: string;
-    tree?: Array<RepositoryFile>;
+    tree?: Array<RepositoryItem>;
     createdAt?: Date;
     userRole: RepoUserRole;
 };
@@ -30,20 +30,34 @@ export type RepositoryDisplay = {
 
 export type RepositoryVisibility = "public" | "private";
 
-export type RepositoryFile = {
+interface FileDisplayItem {
+    type: "file-display";
     name: string;
-    isDirectory: boolean;
     lastActivity: Date;
-    language?: string;
-    children?: RepositoryFile[];
+    language: string;
+}
+
+export type FileItem = Omit<FileDisplayItem, "type"> & {
+    type: "file";
+    content: string;
 };
 
-export type RepositoryFilePreview = {
+interface DirectoryDisplayItem {
+    type: "directory-display";
     name: string;
-    content: string;
     lastActivity: Date;
-    language?: string;
+}
+
+type DirectoryItem = Omit<DirectoryDisplayItem, "type"> & {
+    type: "directory";
+    children: RepositoryItem[];
 };
+
+export type RepositoryItem =
+    | DirectoryDisplayItem
+    | DirectoryItem
+    | FileDisplayItem
+    | FileItem;
 
 export type PinnedRepositoriesFilter = "all" | "pinned" | "notPinned";
 

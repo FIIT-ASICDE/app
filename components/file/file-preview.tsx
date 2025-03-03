@@ -1,8 +1,6 @@
-import { RepositoryFilePreview } from "@/lib/types/repository";
 import { Code, FileIcon, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
-import { Dispatch, SetStateAction } from "react";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { darcula, docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
@@ -16,7 +14,7 @@ interface FilePreviewProps {
     language: string | undefined;
     content: string;
     lastActivity: Date;
-    setFilePreview: Dispatch<SetStateAction<RepositoryFilePreview | undefined>>;
+    onXPressed: () => void;
     openInIDEPath?: string;
 }
 
@@ -25,7 +23,7 @@ export const FilePreview = ({
     language,
     content,
     lastActivity,
-    setFilePreview,
+    onXPressed,
     openInIDEPath,
 }: FilePreviewProps) => {
     const { theme, resolvedTheme } = useTheme();
@@ -65,7 +63,7 @@ export const FilePreview = ({
                     )}
                     <button
                         className="m-0 rounded bg-transparent p-1 hover:bg-accent"
-                        onClick={() => setFilePreview(undefined)}
+                        onClick={onXPressed}
                     >
                         <X />
                     </button>
