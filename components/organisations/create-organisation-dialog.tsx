@@ -6,7 +6,6 @@ import {
     createOrganisationFormSchema,
 } from "@/lib/schemas/org-schemas";
 import { api } from "@/lib/trpc/react";
-import { UserDisplay } from "@/lib/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
     FileText,
@@ -21,6 +20,7 @@ import { UseFormReturn, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
+import { useUser } from "@/components/context/user-context";
 import { MultiSelect } from "@/components/multi-select/multi-select";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,44 +44,11 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 
-const data = {
-    possibleInitialMembers: [
-        {
-            id: "bc3b164e-4bd7-4e52-8762-cdd8a1d1b317",
-            username: "john-doe",
-            image: "/avatars/avatar1.png",
-        } satisfies UserDisplay,
-        {
-            id: "bc3b164e-4bd7-4e52-8762-cdd8a1d1b316",
-            username: "john-doe-2",
-            image: "/avatars/avatar2.png",
-        } satisfies UserDisplay,
-        {
-            id: "bc3b164e-4bd7-4e52-8762-cdd8a1d1b315",
-            username: "john-doe-3",
-            image: "/avatars/avatar3.png",
-        } satisfies UserDisplay,
-        {
-            id: "bc3b164e-4bd7-4e52-8762-cdd8a1d1b314",
-            username: "john-doe-4",
-            image: "/avatars/avatar4.png",
-        } satisfies UserDisplay,
-        {
-            id: "bc3b164e-4bd7-4e52-8762-cdd8a1d1b313",
-            username: "john-doe-5",
-            image: "/avatars/avatar5.png",
-        } satisfies UserDisplay,
-        {
-            id: "bc3b164e-4bd7-4e52-8762-cdd8a1d1b312",
-            username: "john-doe-6",
-            image: "/avatars/avatar6.png",
-        } satisfies UserDisplay,
-    ] satisfies Array<UserDisplay>,
-};
-
 export const CreateOrganisationDialog = () => {
     const router = useRouter();
+    const { user } = useUser();
     const [open, setOpen] = useState<boolean>(false);
+    const [initialMembersSearch, setInitialMembersSearch] = useState("");
 
     const form = useForm<z.infer<typeof createOrganisationFormSchema>>({
         resolver: zodResolver(createOrganisationFormSchema),
@@ -91,6 +58,15 @@ export const CreateOrganisationDialog = () => {
             initialMembers: [],
         },
     });
+
+    const initialMembers = api.user.search.useQuery(
+        {
+            searchTerm: initialMembersSearch,
+            page: 0,
+            pageSize: 10,
+        },
+        { enabled: initialMembersSearch !== "" },
+    );
 
     const createOrgMutation = api.org.create.useMutation();
 
@@ -300,14 +276,25 @@ export const CreateOrganisationDialog = () => {
                                                 <FormControl>
                                                     <MultiSelect
                                                         placeholder="Select initial members"
+                                                        filterValues={(value) =>
+                                                            value.id !== user.id
+                                                        }
                                                         elements={
-                                                            data.possibleInitialMembers
+                                                            initialMembers.data
+                                                                ?.users ?? []
                                                         }
                                                         value={
                                                             field.value ?? []
                                                         }
                                                         onChangeAction={
                                                             field.onChange
+                                                        }
+                                                        onInputChange={
+                                                            setInitialMembersSearch
+                                                        }
+                                                        isLoading={
+                                                            // true
+                                                            initialMembers.isLoading
                                                         }
                                                     />
                                                 </FormControl>

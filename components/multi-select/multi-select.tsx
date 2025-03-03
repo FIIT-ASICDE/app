@@ -3,7 +3,7 @@
 import { imgSrc } from "@/lib/client-file-utils";
 import { UserDisplay } from "@/lib/types/user";
 import { Command as CommandPrimitive } from "cmdk";
-import { UsersRound } from "lucide-react";
+import { Loader2, UsersRound } from "lucide-react";
 import * as React from "react";
 import { useState } from "react";
 
@@ -24,18 +24,29 @@ interface MultiSelectProps {
     placeholder: string;
     elements: Array<UserDisplay>;
     value: Array<UserDisplay>;
+    onInputChange?: (value: string) => void;
+    filterValues?: (value: UserDisplay) => boolean;
     onChangeAction: (value: Array<UserDisplay>) => void;
+    isLoading?: boolean;
 }
 
 export const MultiSelect = ({
     placeholder,
     elements,
     value,
+    onInputChange,
     onChangeAction,
+    filterValues,
+    isLoading,
 }: MultiSelectProps) => {
     const inputRef = React.useRef<HTMLInputElement>(null);
     const [open, setOpen] = useState<boolean>(false);
     const [inputValue, setInputValue] = React.useState("");
+
+    const onInput = (value: string) => {
+        setInputValue(value);
+        onInputChange?.(value);
+    };
 
     const handleUnselect = React.useCallback(
         (element: UserDisplay) => {
@@ -61,12 +72,13 @@ export const MultiSelect = ({
         [onChangeAction, value],
     );
 
-    const selectables = elements.filter(
-        (element) => !value.some((v) => v.id === element.id),
-    );
+    const selectables = elements
+        .filter((element) => !value.some((v) => v.id === element.id))
+        .filter((element) => filterValues?.(element) ?? true);
 
     return (
         <Command
+            shouldFilter={false}
             onKeyDown={handleKeyDown}
             className="overflow-visible bg-transparent"
         >
@@ -107,20 +119,26 @@ export const MultiSelect = ({
                         <CommandPrimitive.Input
                             ref={inputRef}
                             value={inputValue}
-                            onValueChange={setInputValue}
+                            onValueChange={onInput}
                             onBlur={() => setOpen(false)}
                             onFocus={() => setOpen(true)}
                             placeholder={placeholder}
-                            className="ml-2 flex-1 pl-5 outline-none placeholder:text-muted-foreground"
+                            className="ml-2 w-full flex-1 pl-5 outline-none placeholder:text-muted-foreground"
                         />
                     </div>
                 </div>
             </div>
+
             <div className="relative mt-2">
                 <CommandList>
-                    {open && selectables.length > 0 ? (
+                    {isLoading && (
+                        <div className="animate-in absolute top-0 z-10 flex h-12 w-full items-center justify-center rounded-md border bg-popover text-center text-popover-foreground outline-none">
+                            <Loader2 className="animate-spin" />
+                        </div>
+                    )}
+                    {open && selectables.length > 0 && (
                         <div className="animate-in absolute top-0 z-10 w-full rounded-md border bg-popover text-popover-foreground outline-none">
-                            <CommandGroup className="h-full overflow-auto">
+                            <CommandGroup className="h-12 overflow-auto">
                                 {selectables.map((element) => {
                                     return (
                                         <CommandItem
@@ -130,7 +148,7 @@ export const MultiSelect = ({
                                                 e.stopPropagation();
                                             }}
                                             onSelect={() => {
-                                                setInputValue("");
+                                                onInput("");
                                                 onChangeAction([
                                                     ...value,
                                                     element,
@@ -149,7 +167,7 @@ export const MultiSelect = ({
                                 })}
                             </CommandGroup>
                         </div>
-                    ) : null}
+                    )}
                 </CommandList>
             </div>
         </Command>
