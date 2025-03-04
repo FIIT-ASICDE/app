@@ -1,8 +1,7 @@
+import "@/app/globals.css";
 import { TRPCReactProvider } from "@/lib/trpc/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import React, { Suspense } from "react";
-
-import "./globals.css";
 
 import DevControls from "@/components/dev-controls/dev-controls";
 import Header from "@/components/header/header";

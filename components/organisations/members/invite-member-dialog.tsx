@@ -1,8 +1,11 @@
 "use client";
 
+import { useDebounce } from "@/lib/hooks/useDebounce";
+import { api } from "@/lib/trpc/react";
 import { UserDisplay } from "@/lib/types/user";
 import { Search, UserRoundPlus } from "lucide-react";
 import { useState } from "react";
+
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,10 +24,12 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { api } from "@/lib/trpc/react";
-import { useDebounce } from "@/lib/hooks/useDebounce";
 
-export const InviteMemberDialog = ({ organisationName }: { organisationName: string }) => {
+export const InviteMemberDialog = ({
+    organisationName,
+}: {
+    organisationName: string;
+}) => {
     const [query, setQuery] = useState("");
     const [selectedUser, setSelectedUser] = useState<UserDisplay>();
     const [commandOpen, setCommandOpen] = useState<boolean>(false);
@@ -33,13 +38,14 @@ export const InviteMemberDialog = ({ organisationName }: { organisationName: str
 
     const debouncedQuery = useDebounce(query, 500);
 
-    const { data: users = [], isFetching } = api.user.fulltextSearchUsers.useQuery(
-        { query: debouncedQuery },
-        {
-            enabled: !!debouncedQuery,
-            staleTime: 0,
-        }
-    );
+    const { data: users = [], isFetching } =
+        api.user.fulltextSearchUsers.useQuery(
+            { query: debouncedQuery },
+            {
+                enabled: !!debouncedQuery,
+                staleTime: 0,
+            },
+        );
 
     const inviteMutation = api.user.inviteUserToOrganization.useMutation({
         onSuccess: () => {
@@ -52,7 +58,7 @@ export const InviteMemberDialog = ({ organisationName }: { organisationName: str
         if (!selectedUser) return;
         inviteMutation.mutate({
             userId: selectedUser.id,
-            organisationName: organisationName
+            organisationName: organisationName,
         });
     };
 
@@ -64,9 +70,13 @@ export const InviteMemberDialog = ({ organisationName }: { organisationName: str
                 if (!isOpen) {
                     setSelectedUser(undefined);
                 }
-            }}>
+            }}
+        >
             <DialogTrigger asChild>
-                <Button variant="default" className="hover:bg-primary-button-hover">
+                <Button
+                    variant="default"
+                    className="hover:bg-primary-button-hover"
+                >
                     <UserRoundPlus />
                     Invite member
                 </Button>
@@ -77,7 +87,8 @@ export const InviteMemberDialog = ({ organisationName }: { organisationName: str
                         Invite a member
                     </DialogTitle>
                     <DialogDescription>
-                        Please select a member that will get an invite to your organisation.
+                        Please select a member that will get an invite to your
+                        organisation.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -150,7 +161,8 @@ export const InviteMemberDialog = ({ organisationName }: { organisationName: str
                         your organization
                         <span className="font-bold">
                             {" " + decodedOrganisationName + " "}
-                        </span>.
+                        </span>
+                        .
                     </p>
                 )}
 
@@ -161,7 +173,9 @@ export const InviteMemberDialog = ({ organisationName }: { organisationName: str
                         variant="default"
                         disabled={!selectedUser || inviteMutation.isPending}
                     >
-                        {inviteMutation.isPending ? "Sending..." : "Send an invitation"}
+                        {inviteMutation.isPending
+                            ? "Sending..."
+                            : "Send an invitation"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

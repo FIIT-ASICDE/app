@@ -1,6 +1,7 @@
 "use client";
-import { api } from "@/lib/trpc/react";
+
 import { imgSrc } from "@/lib/client-file-utils";
+import { api } from "@/lib/trpc/react";
 import { Invitation } from "@/lib/types/invitation";
 import { cn } from "@/lib/utils";
 import { Calendar, CircleCheck, CircleX } from "lucide-react";
@@ -25,7 +26,7 @@ interface InvitationCardDisplayProps {
 export const InvitationCardDisplay = ({
     invitation,
     className,
-    setInvitations
+    setInvitations,
 }: InvitationCardDisplayProps) => {
     const invitationDisplayData = getInvitationDisplayData(invitation);
     const acceptMutation = api.user.acceptInvitation.useMutation({
@@ -93,10 +94,14 @@ export const InvitationCardDisplay = ({
                         }}
                         disabled={declineMutation.isPending}
                     >
-                        {declineMutation.isPending ? "Declining..." : <>
-                        <CircleX />
-                        Decline
-                        </>}
+                        {declineMutation.isPending ? (
+                            "Declining..."
+                        ) : (
+                            <>
+                                <CircleX />
+                                Decline
+                            </>
+                        )}
                     </Button>
                     <Button
                         variant="default"
@@ -109,10 +114,14 @@ export const InvitationCardDisplay = ({
                         }}
                         disabled={acceptMutation.isPending}
                     >
-                        {acceptMutation.isPending ? "Accepting..." : <>
-                            <CircleCheck />
-                            Accept
-                        </>}
+                        {acceptMutation.isPending ? (
+                            "Accepting..."
+                        ) : (
+                            <>
+                                <CircleCheck />
+                                Accept
+                            </>
+                        )}
                     </Button>
                 </div>
             </CardFooter>

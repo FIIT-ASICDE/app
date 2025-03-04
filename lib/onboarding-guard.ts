@@ -1,7 +1,6 @@
+import { api } from "@/lib/trpc/server";
 import { Session } from "next-auth";
 import { RedirectType, redirect } from "next/navigation";
-
-import { api } from "./trpc/server";
 
 export async function redirectIfNotOnboarded(
     session: Session | null,

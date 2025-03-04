@@ -1,6 +1,6 @@
-"use client"
-import { PaginationResult } from "@/lib/types/generic";
+"use client";
 
+import { PaginationResult } from "@/lib/types/generic";
 import type { Invitation } from "@/lib/types/invitation";
 import type { RepositoryDisplay } from "@/lib/types/repository";
 import { UsersDashboard } from "@/lib/types/user";
@@ -34,7 +34,6 @@ interface DashboardPageProps {
     };
 }
 
-
 export default function DashboardPage({
     dashboard,
     searchParams,
@@ -43,7 +42,9 @@ export default function DashboardPage({
         dashboard.recentRepositories;
     const favoriteRepositories: Array<RepositoryDisplay> =
         dashboard.favoriteRepositories;
-    const [invitations, setInvitations] = useState<Invitation[]>(dashboard.invitations);
+    const [invitations, setInvitations] = useState<Invitation[]>(
+        dashboard.invitations,
+    );
 
     return (
         <div className="m-6 flex flex-col gap-6 bg-background text-foreground lg:flex-row">

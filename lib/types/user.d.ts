@@ -1,8 +1,7 @@
 import { Invitation, InvitationStatus } from "@/lib/types/invitation";
 import { OrganisationDisplay } from "@/lib/types/organisation";
-
-import { RepositoryDisplay } from "./repository";
-import { $Enums } from ".prisma/client";
+import { RepositoryDisplay } from "@/lib/types/repository";
+import { $Enums } from "prisma/client";
 
 import UserRole = $Enums.UserRole;
 
@@ -10,7 +9,7 @@ export type User =
     | {
           type: "onboarded";
           id: string;
-        userMetadataId: string;
+          userMetadataId: string;
           name: string;
           surname: string;
           username: string;
@@ -47,7 +46,7 @@ export interface UsersOverview {
 export interface UsersDashboard {
     favoriteRepositories: Array<RepositoryDisplay>;
     recentRepositories: Array<RepositoryDisplay>;
-    invitations: Array<Invitation>
+    invitations: Array<Invitation>;
 }
 
 export type UserSettingsTab = "account" | "preferences" | "danger";

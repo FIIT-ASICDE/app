@@ -2,6 +2,12 @@ import {
     createOrgProcedureSchema,
     orgSearchSchema,
 } from "@/lib/schemas/org-schemas";
+import { pinnedRepos } from "@/lib/server/api/routers/repos";
+import {
+    createTRPCRouter,
+    protectedProcedure,
+    publicProcedure,
+} from "@/lib/server/api/trpc";
 import {
     Organisation,
     OrganisationDisplay,
@@ -15,40 +21,39 @@ import { TRPCError } from "@trpc/server";
 import { Session } from "next-auth";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import { pinnedRepos } from "./repos";
-
 export const orgRouter = createTRPCRouter({
     create: createOrg(),
     overview: orgOverview(),
     search: search(),
     byName: byName(),
     userOrgs: usersOrgs(),
-    getMembers: getMembers()
+    getMembers: getMembers(),
 });
 
 function getMembers() {
     return protectedProcedure
         .input(
             z.object({
-                organisationName: z.string()
-            })
+                organisationName: z.string(),
+            }),
         )
         .query(async ({ ctx, input }): Promise<OrganisationMember[]> => {
             const { organisationName } = input;
-            const decodedOrganisationName = decodeURIComponent(organisationName.trim());
+            const decodedOrganisationName = decodeURIComponent(
+                organisationName.trim(),
+            );
             const prisma: PrismaType = ctx.prisma;
 
             const organisation = await prisma.organization.findUnique({
-                where: {name: decodedOrganisationName},
-                select: {id: true}
-            })
+                where: { name: decodedOrganisationName },
+                select: { id: true },
+            });
 
-            if(!organisation) {
+            if (!organisation) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
                     message: "Organisation not found",
-                })
+                });
             }
 
             const members = await prisma.organizationUser.findMany({
