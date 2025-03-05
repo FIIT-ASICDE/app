@@ -1,4 +1,4 @@
-import { Invitation, InvitationStatus } from "@/lib/types/invitation";
+import { Invitation } from "@/lib/types/invitation";
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import { RepositoryDisplay } from "@/lib/types/repository";
 import { $Enums } from "prisma/client";
@@ -51,4 +51,4 @@ export interface UsersDashboard {
 
 export type UserSettingsTab = "account" | "preferences" | "danger";
 
-export type UserInvitationsTab = InvitationStatus | "all";
+export type UserInvitationsTab = "pending" | "accepted" | "declined";

@@ -1,11 +1,24 @@
 import SettingsPage from "@/app/orgs/[organisationslug]/(organisation)/settings/settings-page";
+import { OrganisationSettingsTab } from "@/lib/types/organisation";
+
+interface OrganisationSettingsPageProps {
+    params: Promise<{
+        organisationslug: string;
+    }>;
+    searchParams?: Promise<{
+        tab?: string;
+    }>;
+}
 
 export default async function OrganisationSettingsPage({
     params,
-}: {
-    params: Promise<{ organisationslug: string }>;
-}) {
+    searchParams,
+}: OrganisationSettingsPageProps) {
     const orgSlug = (await params).organisationslug;
 
-    return <SettingsPage orgSlug={orgSlug} />;
+    const settingsSearchParams = await searchParams;
+    const tab: OrganisationSettingsTab = (settingsSearchParams?.tab ||
+        "general") as OrganisationSettingsTab;
+
+    return <SettingsPage orgSlug={orgSlug} tab={tab} />;
 }

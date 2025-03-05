@@ -3,7 +3,7 @@ import { OrganisationMember } from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
+import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
 import { getCardStripe } from "@/components/generic/generic";
 import { ManageMemberDialog } from "@/components/organisations/members/manage-member-dialog";
 import { RoleBadge } from "@/components/organisations/members/role-badge";
@@ -45,7 +45,7 @@ export const MemberCard = ({
                                 " " +
                                 organisationMember.surname}
                         </span>
-                        <DynamicTitleLink
+                        <DynamicTitle
                             title={organisationMember.username}
                             link={memberLink}
                             className="text-sm tracking-normal"

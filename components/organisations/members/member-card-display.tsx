@@ -2,7 +2,7 @@ import { imgSrc } from "@/lib/client-file-utils";
 import { OrganisationMember } from "@/lib/types/organisation";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
+import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
 import { RoleIcon } from "@/components/organisations/role-icon";
 import {
     Tooltip,
@@ -25,7 +25,7 @@ export const MemberCardDisplay = ({ member }: MemberCardDisplayProps) => {
                     image={imgSrc(member.image)}
                     name={member.username}
                 />
-                <DynamicTitleLink title={member.username} link={memberLink} />
+                <DynamicTitle title={member.username} link={memberLink} />
             </div>
             <Tooltip>
                 <TooltipTrigger asChild>

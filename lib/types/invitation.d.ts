@@ -8,8 +8,10 @@ export type Invitation = {
     sender: UserDisplay;
     organisation?: OrganisationDisplay;
     repository?: RepositoryDisplay;
+    receiver?: UserDisplay;
     status: InvitationStatus;
     createdAt: Date;
+    resolvedAt?: Date;
 };
 
 export type InvitationType = "repository" | "organisation";

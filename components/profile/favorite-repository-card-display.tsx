@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Star } from "lucide-react";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
+import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
 import { getCardStripe } from "@/components/generic/generic";
 import { VisibilityBadge } from "@/components/repositories/visibility-badge";
 import { Card, CardHeader } from "@/components/ui/card";
@@ -38,7 +38,7 @@ export const FavoriteRepositoryCardDisplay = ({
                             image={imgSrc(repository.ownerImage)}
                             name={repository.ownerName}
                         />
-                        <DynamicTitleLink
+                        <DynamicTitle
                             title={repositoryDisplayName}
                             link={repositoryLink}
                             tooltipVisible

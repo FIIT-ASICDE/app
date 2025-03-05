@@ -2,12 +2,13 @@
 
 import { imgSrc } from "@/lib/client-file-utils";
 import { api } from "@/lib/trpc/react";
+import { CardType } from "@/lib/types/generic";
 import { Invitation } from "@/lib/types/invitation";
 import { cn } from "@/lib/utils";
 import { Calendar, CircleCheck, CircleX } from "lucide-react";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
+import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
 import {
     getCardStripe,
     getInvitationDisplayData,
@@ -40,7 +41,7 @@ export const InvitationCardDisplay = ({
         <Card
             className={cn(
                 "max-w-full pl-1.5 shadow-lg",
-                getCardStripe("invitation"),
+                getCardStripe((invitation.status + "Invitation") as CardType),
                 className,
             )}
         >
@@ -55,7 +56,7 @@ export const InvitationCardDisplay = ({
                             ""
                         }
                     />
-                    <DynamicTitleLink
+                    <DynamicTitle
                         title={invitationDisplayData.displayName}
                         link={invitationDisplayData.link}
                         tooltipVisible

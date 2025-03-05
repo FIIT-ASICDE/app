@@ -5,7 +5,7 @@ import { Calendar, Code } from "lucide-react";
 import Link from "next/link";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
+import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
 import {
     getCardStripe,
     getTimeDeltaString,
@@ -43,7 +43,7 @@ export const RecentRepositoryCardDisplay = ({
                             image={imgSrc(repository.ownerImage)}
                             name={repository.ownerName}
                         />
-                        <DynamicTitleLink
+                        <DynamicTitle
                             title={repositoryDisplayName}
                             link={repositoryLink}
                             tooltipVisible

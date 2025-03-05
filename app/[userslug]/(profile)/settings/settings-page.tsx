@@ -1,7 +1,6 @@
 "use client";
 
 import { UserSettingsTab } from "@/lib/types/user";
-import { cn } from "@/lib/utils";
 import {
     CircleUserRound,
     CircleX,
@@ -12,11 +11,11 @@ import {
 import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 import { useUser } from "@/components/context/user-context";
 import { DeleteAccountDialog } from "@/components/profile/delete-account-dialog";
 import { ThemeIcon } from "@/components/profile/theme-icon";
+import { UserSettingsTabs } from "@/components/profile/user-settings-tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -28,15 +27,13 @@ import {
 
 interface SettingsPageProps {
     userSlug: string;
+    tab: UserSettingsTab;
 }
 
-export default function SettingsPage({ userSlug }: SettingsPageProps) {
+export default function SettingsPage({ userSlug, tab }: SettingsPageProps) {
     const { user } = useUser();
     const router = useRouter();
     const { theme, setTheme } = useTheme();
-
-    const [activeSettingsTab, setActiveSettingsTab] =
-        useState<UserSettingsTab>("account");
 
     if (userSlug !== user.username) {
         router.back();
@@ -46,53 +43,11 @@ export default function SettingsPage({ userSlug }: SettingsPageProps) {
     return (
         <div className="m-6 flex flex-col gap-x-3 md:flex-row">
             <aside className="w-full md:w-1/5">
-                <div className="flex w-full flex-row gap-3 md:flex-col">
-                    <Button
-                        variant={
-                            activeSettingsTab === "account"
-                                ? "secondary"
-                                : "outline"
-                        }
-                        className="flex w-1/2 flex-row gap-x-3 md:w-full"
-                        onClick={() => setActiveSettingsTab("account")}
-                    >
-                        <CircleUserRound />
-                        Account
-                    </Button>
-                    <Button
-                        variant={
-                            activeSettingsTab === "preferences"
-                                ? "secondary"
-                                : "outline"
-                        }
-                        className="flex w-1/2 flex-row gap-x-3 md:w-full"
-                        onClick={() => setActiveSettingsTab("preferences")}
-                    >
-                        <Settings2 />
-                        Preferences
-                    </Button>
-                    <Button
-                        variant={
-                            activeSettingsTab === "danger"
-                                ? "destructive"
-                                : "outline"
-                        }
-                        className={cn(
-                            "flex w-1/2 flex-row gap-x-3 border-destructive hover:bg-destructive-hover md:w-full",
-                            activeSettingsTab === "danger"
-                                ? "bg-destructive"
-                                : "bg-background",
-                        )}
-                        onClick={() => setActiveSettingsTab("danger")}
-                    >
-                        <TriangleAlert />
-                        Danger zone
-                    </Button>
-                </div>
+                <UserSettingsTabs tab={tab} />
             </aside>
 
             <main className="mt-3 flex w-full flex-col gap-y-3 md:mt-0 md:w-4/5">
-                {activeSettingsTab === "account" && (
+                {tab === "account" && (
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex flex-row items-center gap-3">
@@ -131,7 +86,7 @@ export default function SettingsPage({ userSlug }: SettingsPageProps) {
                     </Card>
                 )}
 
-                {activeSettingsTab === "preferences" && (
+                {tab === "preferences" && (
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex flex-row items-center gap-3">
@@ -189,41 +144,11 @@ export default function SettingsPage({ userSlug }: SettingsPageProps) {
                                     </TooltipContent>
                                 </Tooltip>
                             </div>
-
-                            {/*<div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-                                <div className="flex flex-row items-center space-x-3">
-                                    <Paintbrush
-                                        className="text-muted-foreground"
-                                    />
-                                    <div className="flex flex-col space-y-1">
-                                        <span>Code theme</span>
-                                        <span className="text-sm text-muted-foreground">
-                                            You are currently using
-                                            <span className="font-bold">
-                                                {" " + user.codeTheme + " "}
-                                            </span>
-                                            theme.
-                                        </span>
-                                    </div>
-                                </div>
-                                <Select defaultValue={user.codeTheme}>
-                                    <SelectTrigger className="w-60">
-                                        <SelectValue placeholder="Select code theme" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="atomOneDark">Atom One Dark</SelectItem>
-                                        <SelectItem value="monokai">Monokai</SelectItem>
-                                        <SelectItem value="solarizedLight">Solarized Light</SelectItem>
-                                        <SelectItem value="github">Github</SelectItem>
-                                        <SelectItem value="nightOwl">Night Owl</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>*/}
                         </CardContent>
                     </Card>
                 )}
 
-                {activeSettingsTab === "danger" && (
+                {tab === "danger" && (
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex flex-row items-center gap-3">

@@ -1,5 +1,3 @@
-"use client";
-
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import { UsersOverview } from "@/lib/types/user";
 import { Building, Calendar, Ellipsis, PinOff } from "lucide-react";
@@ -63,7 +61,7 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                                         </button>
                                     </Link>
                                 </TooltipTrigger>
-                                <TooltipContent>
+                                <TooltipContent className="font-normal tracking-normal">
                                     View all repositories
                                 </TooltipContent>
                             </Tooltip>
@@ -111,7 +109,7 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                                         </button>
                                     </Link>
                                 </TooltipTrigger>
-                                <TooltipContent>
+                                <TooltipContent className="font-normal tracking-normal">
                                     View all organisations
                                 </TooltipContent>
                             </Tooltip>

@@ -64,6 +64,7 @@ export default async function OrganisationMembersPage({
 
     return (
         <MembersPage
+            orgSlug={orgSlug}
             members={members}
             searchParams={{
                 query,
@@ -71,7 +72,6 @@ export default async function OrganisationMembersPage({
                 role: roleFilter,
                 pagination,
             }}
-            orgSlut={orgSlug}
         />
     );
 }

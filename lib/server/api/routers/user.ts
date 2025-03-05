@@ -352,9 +352,7 @@ function usersOrganisations() {
         .query(async ({ ctx, input }): Promise<Array<OrganisationDisplay>> => {
             const decodedUsername = decodeURIComponent(input.username.trim());
             const user = await userByUsername(ctx.prisma, decodedUsername);
-            const orgs = await getUsersOrgs(ctx.prisma, user.id);
-
-            return orgs;
+            return await getUsersOrgs(ctx.prisma, user.id);
         });
 }
 

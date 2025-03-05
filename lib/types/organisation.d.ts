@@ -38,8 +38,10 @@ export type OrganisationDisplay = Omit<
 
 export type RoleOrganisationFilter = "all" | "admin" | "member";
 
-export type MemberCountSort = "none" | "asc" | "desc";
+export type OrganisationSettingsTab = "general" | "invitations" | "danger";
 
-export type OrganisationSettingsTab = "general" | "danger";
+export type InvitationsTab = "pending" | "accepted" | "declined";
 
 export type ManageMemberTab = "promote" | "expel";
+
+export type InviteUserTab = "toOrganisation" | "onRepository";

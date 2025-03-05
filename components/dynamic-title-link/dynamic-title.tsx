@@ -7,26 +7,37 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-interface DynamicTitleLinkProps {
+interface DynamicTitleProps {
     title: string;
-    link: string;
+    link?: string;
     tooltipVisible?: boolean;
     className?: string;
 }
 
-export const DynamicTitleLink = ({
+export const DynamicTitle = ({
     title,
     link,
     tooltipVisible,
     className,
-}: DynamicTitleLinkProps) => {
+}: DynamicTitleProps) => {
     return (
         <Tooltip>
             <TooltipTrigger asChild>
-                <Link
-                    href={link}
-                    className="flex min-w-0 items-center truncate"
-                >
+                {link ? (
+                    <Link
+                        href={link}
+                        className="flex min-w-0 items-center truncate"
+                    >
+                        <div
+                            className={cn(
+                                "m-0 h-auto max-w-full truncate p-0 text-xl font-semibold leading-normal tracking-tight text-primary hover:text-primary-button-hover",
+                                className,
+                            )}
+                        >
+                            <span className="truncate">{title}</span>
+                        </div>
+                    </Link>
+                ) : (
                     <div
                         className={cn(
                             "m-0 h-auto max-w-full truncate p-0 text-xl font-semibold leading-normal tracking-tight text-primary hover:text-primary-button-hover",
@@ -35,7 +46,7 @@ export const DynamicTitleLink = ({
                     >
                         <span className="truncate">{title}</span>
                     </div>
-                </Link>
+                )}
             </TooltipTrigger>
             {tooltipVisible && <TooltipContent>{title}</TooltipContent>}
         </Tooltip>

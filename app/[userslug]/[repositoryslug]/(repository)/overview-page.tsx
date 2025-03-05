@@ -1,16 +1,29 @@
 import { FileItem, Repository, RepositoryItem } from "@/lib/types/repository";
-import { Calendar } from "lucide-react";
+import { Calendar, FileX2 } from "lucide-react";
 
 import { MarkdownRenderer } from "@/components/file/markdown-renderer";
 import { getDateString } from "@/components/generic/generic";
-import { Card, CardContent } from "@/components/ui/card";
+import { NoData } from "@/components/no-data/no-data";
+import LanguageStatisticsChart from "@/components/repositories/language-statistics";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface OverviewPageProps {
     repository: Repository;
+    languageStatistics: {
+        percentages: Array<{
+            language: string;
+            loc: number;
+            percentage: number;
+        }>;
+        totalLoc: number;
+    };
 }
 
-export default function OverviewPage({ repository }: OverviewPageProps) {
-    function findReadMe(tree?: Array<RepositoryItem>): FileItem | undefined {
+export default function OverviewPage({
+    repository,
+    languageStatistics,
+}: OverviewPageProps) {
+    const findReadMe = (tree?: Array<RepositoryItem>): FileItem | undefined => {
         if (!tree) return undefined;
 
         for (const file of tree) {
@@ -29,7 +42,7 @@ export default function OverviewPage({ repository }: OverviewPageProps) {
             }
         }
         return undefined;
-    }
+    };
 
     const readMeFile: RepositoryItem | undefined = findReadMe(repository.tree);
 
@@ -39,7 +52,11 @@ export default function OverviewPage({ repository }: OverviewPageProps) {
                 <Card>
                     <CardContent className="pt-6">
                         <div className="flex flex-col items-start">
-                            <div className="mb-4">{repository.description}</div>
+                            {repository.description && (
+                                <div className="mb-4">
+                                    {repository.description}
+                                </div>
+                            )}
                             {repository.createdAt && (
                                 <div className="flex items-center text-muted-foreground">
                                     <Calendar className="mr-2 h-5 w-5" />
@@ -52,11 +69,28 @@ export default function OverviewPage({ repository }: OverviewPageProps) {
                         </div>
                     </CardContent>
                 </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Language statistics</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <LanguageStatisticsChart
+                            languageStatistics={languageStatistics}
+                        />
+                    </CardContent>
+                </Card>
             </aside>
 
             <main className="mt-3 flex w-full flex-col gap-y-3 md:mt-0 md:w-2/3">
-                {readMeFile && (
+                {readMeFile ? (
                     <MarkdownRenderer content={readMeFile.content} />
+                ) : (
+                    <NoData
+                        icon={FileX2}
+                        message={"No README.md file found."}
+                        className="m-6"
+                    />
                 )}
             </main>
         </div>

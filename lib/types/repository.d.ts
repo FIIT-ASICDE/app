@@ -1,3 +1,5 @@
+import { UserDisplay } from "@/lib/types/user";
+
 export type Repository = {
     id: string;
     ownerId: string;
@@ -8,6 +10,9 @@ export type Repository = {
     pinned: boolean;
     description?: string;
     ownerImage?: string;
+
+    contributors?: Array<UserDisplay>;
+
     tree?: Array<RepositoryItem>;
     createdAt?: Date;
     userRole: RepoUserRole;
@@ -64,3 +69,22 @@ export type PinnedRepositoriesFilter = "all" | "pinned" | "notPinned";
 export type FavoriteRepositoriesFilter = "all" | "favorite" | "notFavorite";
 
 export type PublicRepositoriesFilter = "all" | "public" | "private";
+
+export type RepositorySettingsTab =
+    | "general"
+    | "contributors"
+    | "invitations"
+    | "danger";
+
+export type RepositoryInvitationsTab = "pending" | "accepted" | "declined";
+
+export type LanguageStatisticsItem = {
+    language: string;
+    loc: number;
+    percentage: number;
+};
+
+export type LanguageStatistics = {
+    percentages: Array<LanguageStatisticsItem>;
+    totalLoc: number;
+};

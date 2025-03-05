@@ -1,3 +1,6 @@
+"use client";
+
+import { OrganisationDisplay } from "@/lib/types/organisation";
 import { Eye, EyeOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -12,25 +15,21 @@ import {
 } from "@/components/ui/dialog";
 
 interface ToggleMembersVisibilityDialogProps {
-    id: string;
-    name: string;
-    showMembers: boolean;
+    organisation: OrganisationDisplay;
 }
 
 export const ToggleMembersVisibilityDialog = ({
-    id,
-    name,
-    showMembers,
+    organisation,
 }: ToggleMembersVisibilityDialogProps) => {
     const getChangeMembersVisibilityMessage = () => {
         return (
             <span>
                 This will result in{" "}
                 <span className="font-bold">
-                    {showMembers ? "hiding" : "showing"}
+                    {organisation.showMembers ? "hiding" : "showing"}
                 </span>{" "}
-                the members of your organisation {showMembers ? "from" : "to"}{" "}
-                the public.
+                the members of your organisation{" "}
+                {organisation.showMembers ? "from" : "to"} the public.
             </span>
         );
     };
@@ -39,13 +38,13 @@ export const ToggleMembersVisibilityDialog = ({
         /* TODO: change visibility */
         console.log(
             "Organisation " +
-                name +
+                organisation.name +
                 " with ID: " +
-                id +
+                organisation.id +
                 " toggled members visibility from " +
-                showMembers +
+                organisation.showMembers +
                 " to " +
-                !showMembers,
+                !organisation.showMembers,
         );
     };
 
@@ -56,7 +55,7 @@ export const ToggleMembersVisibilityDialog = ({
                     variant="default"
                     className="w-60 hover:bg-primary-button-hover"
                 >
-                    {showMembers ? (
+                    {organisation.showMembers ? (
                         <>
                             <EyeOff />
                             Hide members
@@ -87,7 +86,7 @@ export const ToggleMembersVisibilityDialog = ({
                             className="w-full hover:bg-primary-button-hover"
                             variant="default"
                         >
-                            {showMembers ? (
+                            {organisation.showMembers ? (
                                 <>
                                     <EyeOff />
                                     Hide members

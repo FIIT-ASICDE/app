@@ -1,3 +1,6 @@
+"use client";
+
+import { OrganisationDisplay } from "@/lib/types/organisation";
 import { UserDisplay } from "@/lib/types/user";
 import { Search, UserRoundMinus } from "lucide-react";
 import { useState } from "react";
@@ -24,15 +27,13 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface LeaveOrganisationDialogProps {
-    id: string;
-    name: string;
+    organisation: OrganisationDisplay;
     isUserOnlyAdmin: boolean;
     possibleAdmins?: Array<UserDisplay>;
 }
 
 export const LeaveOrganisationDialog = ({
-    id,
-    name,
+    organisation,
     isUserOnlyAdmin,
     possibleAdmins,
 }: LeaveOrganisationDialogProps) => {
@@ -41,7 +42,7 @@ export const LeaveOrganisationDialog = ({
     const [leaveOrganisationInput, setLeaveOrganisationInput] =
         useState<string>("");
 
-    const leaveOrganisationPhrase: string = name;
+    const leaveOrganisationPhrase: string = organisation.name;
 
     const [commandOpen, setCommandOpen] = useState<boolean>(false);
     const [selectedUser, setSelectedUser] = useState<UserDisplay>();
@@ -52,9 +53,9 @@ export const LeaveOrganisationDialog = ({
             "User with ID: " +
                 user.id +
                 " left an organisation called: " +
-                name +
+                organisation.name +
                 " with ID: " +
-                id,
+                organisation.id,
         );
         console.log("IsUserOnlyAdmin: " + isUserOnlyAdmin);
         console.log("Newly selected admin: " + selectedUser);
@@ -78,7 +79,7 @@ export const LeaveOrganisationDialog = ({
                     </DialogTitle>
                     <DialogDescription>
                         You are about to leave your organisation called
-                        <span className="font-bold"> {name}</span>.
+                        <span className="font-bold"> {organisation.name}</span>.
                     </DialogDescription>
                 </DialogHeader>
                 {isUserOnlyAdmin && possibleAdmins !== undefined && (

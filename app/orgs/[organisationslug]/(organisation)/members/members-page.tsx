@@ -15,6 +15,7 @@ import { OrganisationFilter } from "@/components/organisations/organisation-filt
 import Search from "@/components/ui/search";
 
 interface MembersPageProps {
+    orgSlug: string;
     members: Array<OrganisationMember>;
     searchParams: {
         query: string;
@@ -22,7 +23,6 @@ interface MembersPageProps {
         role: RoleOrganisationFilter;
         pagination: PaginationResult;
     };
-    orgSlut: string;
 }
 
 const data = {
@@ -94,7 +94,7 @@ const data = {
 export default function MembersPage({
     members,
     searchParams,
-    orgSlut,
+    orgSlug,
 }: MembersPageProps) {
     if (!data.showMembers) {
         return (
@@ -120,7 +120,7 @@ export default function MembersPage({
                         }}
                     />
                     {data.userIsAdmin && (
-                        <InviteMemberDialog organisationName={orgSlut} />
+                        <InviteMemberDialog organisationName={orgSlug} />
                     )}
                 </div>
             </div>
