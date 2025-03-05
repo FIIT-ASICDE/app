@@ -22,7 +22,7 @@ export const OrganisationNavigation = ({
         else return "nonInteractive";
     };
 
-    const settingAccess = () => {
+    const settingsAccess = () => {
         if (!organisation.userRole) return "none";
         else if (organisation.userRole === "admin") return "interactive";
         return "nonInteractive";
@@ -58,7 +58,7 @@ export const OrganisationNavigation = ({
                 icon={Settings}
                 variant={currentPage === "/settings" ? "secondary" : "outline"}
                 link={"/orgs/" + organisation.name + "/settings"}
-                access={settingAccess()}
+                access={settingsAccess()}
             />
         </div>
     );

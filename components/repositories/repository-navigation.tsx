@@ -17,7 +17,7 @@ export const RepositoryNavigation = ({
     const pathname: string = usePathname();
     const currentPage: string = getCurrentPage(pathname, 2);
 
-    const showSettings = () => {
+    const settingsAccess = () => {
         if (repository.userRole === "guest") {
             return "none";
         } else if (
@@ -59,14 +59,15 @@ export const RepositoryNavigation = ({
                     repository.name +
                     "/settings"
                 }
-                access={showSettings()}
+                access={settingsAccess()}
             />
             <NavigationButton
                 title={"open in IDE"}
                 icon={CodeXml}
-                variant="default"
+                variant={"default"}
                 link={"/editor"}
                 access={"interactive"}
+                className={"hover:bg-primary-button-hover"}
             />
         </div>
     );

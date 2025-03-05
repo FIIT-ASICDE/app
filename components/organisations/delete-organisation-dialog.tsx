@@ -1,3 +1,6 @@
+"use client";
+
+import { OrganisationDisplay } from "@/lib/types/organisation";
 import { CircleX } from "lucide-react";
 import { useState } from "react";
 
@@ -14,22 +17,20 @@ import {
 import { Input } from "@/components/ui/input";
 
 interface DeleteOrganisationDialogProps {
-    id: string;
-    name: string;
+    organisation: OrganisationDisplay;
 }
 
 export const DeleteOrganisationDialog = ({
-    id,
-    name,
+    organisation,
 }: DeleteOrganisationDialogProps) => {
     const [deleteOrganisationInput, setDeleteOrganisationInput] =
         useState<string>("");
 
-    const deleteConfirmationPhrase: string = name;
+    const deleteConfirmationPhrase: string = organisation.name;
 
     const handleDeleteOrganisation = () => {
         /* TODO: handle organisation deletion */
-        console.log("Delete organisation with ID: " + id);
+        console.log("Delete organisation with ID: " + organisation.id);
     };
 
     return (
@@ -50,7 +51,7 @@ export const DeleteOrganisationDialog = ({
                     </DialogTitle>
                     <DialogDescription>
                         You are about to delete your organisation called
-                        <span className="font-bold"> {name}</span>.
+                        <span className="font-bold"> {organisation.name}</span>.
                     </DialogDescription>
                 </DialogHeader>
                 <span>

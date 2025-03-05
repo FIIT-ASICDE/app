@@ -1,6 +1,6 @@
 "use client";
 
-import { FileItem, RepositoryItem } from "@/lib/types/repository";
+import { type FileItem, type RepositoryItem } from "@/lib/types/repository";
 import { Folders } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 interface CodePageProps {
-    tree: RepositoryItem[];
+    tree: Array<RepositoryItem>;
     repositoryName: string;
     repositoryOwnerName: string;
     subPath: string;

@@ -1,11 +1,24 @@
 import SettingsPage from "@/app/[userslug]/(profile)/settings/settings-page";
+import { UserSettingsTab } from "@/lib/types/user";
+
+interface UserSettingsPageProps {
+    params: Promise<{
+        userslug: string;
+    }>;
+    searchParams?: Promise<{
+        tab?: string;
+    }>;
+}
 
 export default async function UserSettingsPage({
     params,
-}: {
-    params: Promise<{ userslug: string }>;
-}) {
+    searchParams,
+}: UserSettingsPageProps) {
     const userSlug = (await params).userslug;
 
-    return <SettingsPage userSlug={userSlug} />;
+    const settingsSearchParams = await searchParams;
+    const tab: UserSettingsTab = (settingsSearchParams?.tab ||
+        "account") as UserSettingsTab;
+
+    return <SettingsPage userSlug={userSlug} tab={tab} />;
 }

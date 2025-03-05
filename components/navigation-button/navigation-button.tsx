@@ -1,4 +1,5 @@
 import type { ButtonVariant } from "@/lib/types/generic";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { ElementType } from "react";
 
@@ -15,6 +16,7 @@ interface NavigationButtonProps {
     variant: ButtonVariant;
     link: string;
     access: "interactive" | "nonInteractive" | "none";
+    className?: string;
 }
 
 export const NavigationButton = ({
@@ -23,6 +25,7 @@ export const NavigationButton = ({
     variant,
     link,
     access,
+    className,
 }: NavigationButtonProps) => {
     const displayTitle: string = title.charAt(0).toUpperCase() + title.slice(1);
 
@@ -56,7 +59,10 @@ export const NavigationButton = ({
         <Tooltip>
             <Link href={link}>
                 <TooltipTrigger asChild>
-                    <Button variant={variant} className={`w-full lg:w-auto`}>
+                    <Button
+                        variant={variant}
+                        className={cn("w-full lg:w-auto", className)}
+                    >
                         <Icon className="h-4 w-4 lg:mr-2" />
                         <span className="hidden lg:inline">{displayTitle}</span>
                     </Button>

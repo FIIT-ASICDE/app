@@ -1,17 +1,20 @@
 import CodePage from "@/app/[userslug]/[repositoryslug]/(repository)/code/code-page";
 import { api } from "@/lib/trpc/server";
+import { RepositoryItem } from "@/lib/types/repository";
 
-export default async function RepoSubDirectoryPage({
-    params,
-}: {
+interface RepoSubDirectoryPageProps {
     params: Promise<{
         userslug: string;
         repositoryslug: string;
-        subpath: string[];
+        subpath: Array<string>;
     }>;
-}) {
+}
+
+export default async function RepoSubDirectoryPage({
+    params,
+}: RepoSubDirectoryPageProps) {
     const { userslug, repositoryslug, subpath } = await params;
-    const repoSubDir = await api.repo.loadRepoItem({
+    const repoSubDir: RepositoryItem = await api.repo.loadRepoItem({
         path: subpath.join("/"),
         ownerSlug: userslug,
         repositorySlug: repositoryslug,

@@ -47,8 +47,8 @@ export const ChangeVisibilityDialog = ({
         <Dialog>
             <DialogTrigger asChild>
                 <Button
-                    variant="destructive"
-                    className="w-60 hover:bg-destructive-hover"
+                    variant="default"
+                    className="w-60 hover:bg-primary-button-hover"
                 >
                     {repository.visibility !== "public" ? <Globe /> : <Lock />}
                     Change visibility to{" "}

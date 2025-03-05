@@ -9,15 +9,6 @@ export type AvatarProportions = {
 
 export type LayoutType = "grid" | "rows";
 
-export type ResponsivenessCheckpoint =
-    | "2xs"
-    | "xs"
-    | "sm"
-    | "md"
-    | "lg"
-    | "xl"
-    | "2xl";
-
 export type BadgeType =
     | "public"
     | "private"
@@ -63,6 +54,8 @@ export type CardType =
     | "recentRepository"
     | "organisation"
     | "member"
-    | "invitation";
+    | "pendingInvitation"
+    | "acceptedInvitation"
+    | "declinedInvitation";
 
 export type FilterType = "pinned" | "favorite" | "public" | "role";

@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { UsersRound } from "lucide-react";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
+import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
 import { getCardStripe } from "@/components/generic/generic";
 import { RoleBadge } from "@/components/organisations/members/role-badge";
 import { Card, CardHeader } from "@/components/ui/card";
@@ -41,7 +41,7 @@ export const OrganisationCardDisplay = ({
                             image={imgSrc(organisation.image)}
                             name={organisation.name}
                         />
-                        <DynamicTitleLink
+                        <DynamicTitle
                             title={organisation.name}
                             link={organisationLink}
                             tooltipVisible

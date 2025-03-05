@@ -9,13 +9,14 @@ import {
     LogOut,
     Settings,
     UserRound,
+    UsersRound,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import * as React from "react";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitleLink } from "@/components/dynamic-title-link/dynamic-title-link";
+import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -57,7 +58,7 @@ export const HeaderDropdown = ({ user }: HeaderDropdownProps) => {
                                 {name} {surname}
                             </span>
                             <TooltipProvider delayDuration={0}>
-                                <DynamicTitleLink
+                                <DynamicTitle
                                     title={username}
                                     link={"/" + username}
                                     className="text-sm"
@@ -114,6 +115,13 @@ export const HeaderDropdown = ({ user }: HeaderDropdownProps) => {
                         <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
                             <span>All organisations</span>
                             <Building className="text-muted-foreground" />
+                        </DropdownMenuItem>
+                    </Link>
+
+                    <Link href={"/users"} className="text-sm">
+                        <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
+                            <span>All users</span>
+                            <UsersRound className="text-muted-foreground" />
                         </DropdownMenuItem>
                     </Link>
 

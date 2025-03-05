@@ -16,11 +16,13 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 
-export default async function LoginPage({
-    searchParams,
-}: {
-    searchParams: Promise<{ callbackUrl: string | undefined }>;
-}) {
+interface LoginPageProps {
+    searchParams: Promise<{
+        callbackUrl: string | undefined;
+    }>;
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
     const session = await auth();
     await redirectIfNotOnboarded(session, "login");
 
