@@ -49,7 +49,7 @@ function create() {
                 throw new TRPCError({
                     code: "CONFLICT",
                     message:
-                        "A repository with this name already exists under this owner.",
+                        "A repository with this name already exists under this owner",
                 });
             }
 
@@ -75,7 +75,7 @@ function create() {
                     throw new TRPCError({
                         code: "FORBIDDEN",
                         message:
-                            "You must be a member of the organization to create repositories.",
+                            "You must be a member of the organisation to create repositories",
                     });
                 }
                 ownerName = organization.name;
@@ -85,7 +85,7 @@ function create() {
                 if (ownerId !== session.user.id) {
                     throw new TRPCError({
                         code: "FORBIDDEN",
-                        message: "Invalid owner ID.",
+                        message: "Invalid owner ID",
                     });
                 }
 
@@ -100,7 +100,7 @@ function create() {
                 if (!user || !user.name) {
                     throw new TRPCError({
                         code: "NOT_FOUND",
-                        message: "Owner not found.",
+                        message: "Owner not found",
                     });
                 }
 
@@ -180,7 +180,7 @@ function searchByOwnerAndRepoSlug() {
             if (!repo) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Repo not found",
+                    message: "Repository not found",
                 });
             }
 
@@ -233,7 +233,7 @@ function loadRepoItem() {
             if (!repo) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Repo not found",
+                    message: "Repository not found",
                 });
             }
 
@@ -271,7 +271,7 @@ function reposByOwnerSlug() {
             if (!organization && !user) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Repos not found",
+                    message: "Repositories not found",
                 });
             }
 

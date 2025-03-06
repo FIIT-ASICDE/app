@@ -24,6 +24,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
 
 export const InviteMemberDialog = ({
     organisationName,
@@ -49,9 +50,16 @@ export const InviteMemberDialog = ({
 
     const inviteMutation = api.user.inviteUserToOrganization.useMutation({
         onSuccess: () => {
+            toast.success("Invitation sent successfully", {
+                description: selectedUser?.username + " has been invited to join your organisation."
+            });
+
             setDialogOpen(false);
             setSelectedUser(undefined);
         },
+        onError: (error) => {
+            toast.error(error.message);
+        }
     });
 
     const handleInviteMember = () => {

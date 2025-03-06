@@ -65,7 +65,7 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                                         </button>
                                     </Link>
                                 </TooltipTrigger>
-                                <TooltipContent>
+                                <TooltipContent className="font-normal tracking-normal">
                                     View all repositories
                                 </TooltipContent>
                             </Tooltip>
@@ -114,7 +114,7 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                                             </button>
                                         </Link>
                                     </TooltipTrigger>
-                                    <TooltipContent>
+                                    <TooltipContent className="font-normal tracking-normal">
                                         View all members
                                     </TooltipContent>
                                 </Tooltip>

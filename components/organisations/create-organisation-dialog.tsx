@@ -43,6 +43,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 export const CreateOrganisationDialog = () => {
     const router = useRouter();
@@ -68,7 +69,14 @@ export const CreateOrganisationDialog = () => {
         { enabled: initialMembersSearch !== "" },
     );
 
-    const createOrgMutation = api.org.create.useMutation();
+    const createOrgMutation = api.org.create.useMutation({
+        onSuccess: () => {
+            toast.success("Organisation successfully created");
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
 
     const onCreateOrganisation = async (
         data: z.infer<typeof createOrganisationFormSchema>,
@@ -93,6 +101,7 @@ export const CreateOrganisationDialog = () => {
         };
         const validatedData = createOrgProcedureSchema.parse(transformedData);
         const newOrg = await createOrgMutation.mutateAsync(validatedData);
+
         router.push(`/orgs/${newOrg.name}`);
     };
 

@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 export function OnboardingForm() {
     const router = useRouter();
@@ -32,8 +33,16 @@ export function OnboardingForm() {
         },
     });
 
-    const completeOnboardingMutation =
-        api.user.completeOnboarding.useMutation();
+    const completeOnboardingMutation = api.user.completeOnboarding.useMutation({
+        onSuccess: () => {
+            toast.success("Onboarding successful", {
+                description: "Welcome!"
+            });
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
     async function onSubmit(data: z.infer<typeof onboardSchema>) {
         const onboarded = await completeOnboardingMutation.mutateAsync(data);
         router.replace("/" + onboarded.username);

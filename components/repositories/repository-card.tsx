@@ -16,6 +16,8 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface RepositoryCardProps {
     repository: Repository;
@@ -28,11 +30,24 @@ export default function RepositoryCard({
     isUserOwner,
     className,
 }: RepositoryCardProps) {
+    const router = useRouter();
+
+    const pinOrStar: boolean = false;
+
     const repositoryDisplayName: string =
         repository.ownerName + "/" + repository.name;
     const repositoryLink: string = "/" + repositoryDisplayName;
 
-    const toggleRepoState = api.repo.toggleState.useMutation();
+    const toggleRepoState = api.repo.toggleState.useMutation({
+        onSuccess: () => {
+            toast.success(pinOrStar ?
+                repository.favorite ? "Repository added to your favorites" : "Repository removed from your favorites" :
+                repository.pinned ? "Repository unpinned from overview page" : "Repository pinned to overview page")
+        },
+        onError: (error) => {
+            toast.error(error.message)
+        }
+    });
 
     const handleStarClick = async () => {
         await toggleRepoState.mutateAsync({
@@ -40,6 +55,7 @@ export default function RepositoryCard({
             repoId: repository.id,
             favorite: !repository.favorite,
         });
+        router.refresh();
     };
 
     const handlePinClicked = async () => {
@@ -48,6 +64,7 @@ export default function RepositoryCard({
             repoId: repository.id,
             pinned: !repository.pinned,
         });
+        router.refresh();
     };
 
     return (

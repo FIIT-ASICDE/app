@@ -41,6 +41,8 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+// import { toast } from "sonner";
+// import { api } from "@/lib/trpc/server";
 
 interface EditOrganisationDialogProps {
     organisation: OrganisationDisplay;
@@ -75,7 +77,14 @@ export const EditOrganisationDialog = ({
     }, [organisation, form]);
 
     /* TODO: lukas */
-    // const editMutation = api.organisation.edit.useMutation();
+    /*const editMutation = api.organisation.edit.useMutation({
+        onSuccess: () => {
+            toast.success("Organisation updated successfully");
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });*/
 
     const onSaveOrganisationChanges = async (
         data: z.infer<typeof editOrganisationFormSchema>,

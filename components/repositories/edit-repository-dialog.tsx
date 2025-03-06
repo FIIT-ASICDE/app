@@ -60,7 +60,14 @@ export const EditRepositoryDialog = ({
     }, [repository, form]);
 
     /* TODO: lukas */
-    // const editMutation = api.repository.edit.useMutation();
+    /*const editMutation = api.repository.edit.useMutation({
+        onSuccess: () => {
+            toast.success("Repository successfully updated");
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });*/
 
     const onSaveRepositoryChanges = async (
         data: z.infer<typeof editRepositoryFormSchema>,

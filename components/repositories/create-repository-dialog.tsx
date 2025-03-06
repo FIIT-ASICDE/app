@@ -50,6 +50,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 interface CreateRepositoryDialogProps {
     usersOrganisations: Array<Omit<OrganisationDisplay, "memberCount">>;
@@ -71,7 +72,14 @@ export const CreateRepositoryDialog = ({
         },
     });
 
-    const createRepoMutation = api.repo.create.useMutation();
+    const createRepoMutation = api.repo.create.useMutation({
+        onSuccess: () => {
+            toast.success("Repository successfully created");
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
     const onCreateRepository = async (
         data: z.infer<typeof createRepositoryFormSchema>,
     ) => {

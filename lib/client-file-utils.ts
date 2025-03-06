@@ -43,7 +43,7 @@ export async function fetchFile(filename: string): Promise<File | null> {
 }
 
 export function imgSrc(img?: string) {
-    if (img?.startsWith("https")) {
+    if (img?.startsWith("https") || img?.startsWith("/avatars")) {
         return img;
     }
     return img ? `/api/files/${img}` : undefined;

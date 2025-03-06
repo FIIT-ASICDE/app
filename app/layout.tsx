@@ -6,6 +6,7 @@ import React, { Suspense } from "react";
 import DevControls from "@/components/dev-controls/dev-controls";
 import Header from "@/components/header/header";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
 
 const ThemeProvider = ({
     children,
@@ -26,7 +27,10 @@ export default async function RootLayout({
                 <ThemeProvider attribute="class" disableTransitionOnChange>
                     <Suspense fallback={<div>TODO: LOADING</div>}>
                         <TooltipProvider delayDuration={0}>
-                            <TRPCReactProvider>{children}</TRPCReactProvider>
+                            <TRPCReactProvider>
+                                {children}
+                                <Toaster closeButton />
+                            </TRPCReactProvider>
                             {process.env.NODE_ENV === "development" && (
                                 <DevControls />
                             )}

@@ -49,6 +49,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { toast } from "sonner";
 
 interface EditProfileDialogProps {
     profile: OnboardedUser;
@@ -88,7 +89,14 @@ export const EditProfileDialog = ({ profile }: EditProfileDialogProps) => {
         }
     }, [profile, form]);
 
-    const editMutation = api.user.edit.useMutation();
+    const editMutation = api.user.edit.useMutation({
+        onSuccess: () => {
+            toast.success("Profile updated successfully");
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
 
     const onSaveProfileChanges = async (
         data: z.infer<typeof editUserFormSchema>,

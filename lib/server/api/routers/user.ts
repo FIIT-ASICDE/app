@@ -65,7 +65,7 @@ function completeOnboarding() {
             if (user.metadata) {
                 throw new TRPCError({
                     code: "FORBIDDEN",
-                    message: "User already onboarded",
+                    message: "User is already onboarded",
                 });
             }
 
@@ -582,7 +582,7 @@ function inviteUserToOrganization() {
                         throw new TRPCError({
                             code: "CONFLICT",
                             message:
-                                "User is already invited to this organization",
+                                "User already has a pending invitation to this organisation",
                         });
                     }
                 }

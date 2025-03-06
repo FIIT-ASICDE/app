@@ -17,24 +17,46 @@ import {
 import { InvitationBadge } from "@/components/profile/invitation-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface InvitationCardDisplayProps {
     invitation: Invitation;
     className?: string;
-    setInvitations: (invitations: Invitation[]) => void;
 }
 
 export const InvitationCardDisplay = ({
     invitation,
     className,
-    setInvitations,
 }: InvitationCardDisplayProps) => {
+    const router = useRouter();
+
     const invitationDisplayData = getInvitationDisplayData(invitation);
+
     const acceptMutation = api.user.acceptInvitation.useMutation({
-        onSuccess: (newInvitations) => setInvitations(newInvitations),
+        onSuccess: () => {
+            toast.success("Invitation successfully accepted", {
+                description: invitation.type === "repository" ?
+                    "You are now a collaborator on the " + invitationDisplayData.displayName + " repository" :
+                    "You are now a member of the " + invitationDisplayData.displayName + " organisation"
+            });
+            router.refresh();
+        },
+        onError: (error) => {
+            toast.error(error.message);
+            router.refresh();
+        }
     });
+
     const declineMutation = api.user.declineInvitation.useMutation({
-        onSuccess: (newInvitations) => setInvitations(newInvitations),
+        onSuccess: () => {
+            toast.success("Invitation declined");
+            router.refresh();
+        },
+        onError: (error) => {
+            toast.error(error.message);
+            router.refresh();
+        }
     });
 
     return (
