@@ -1,5 +1,3 @@
-"use client";
-
 import { PaginationResult } from "@/lib/types/generic";
 import type { Invitation } from "@/lib/types/invitation";
 import type { RepositoryDisplay } from "@/lib/types/repository";
@@ -12,7 +10,7 @@ import {
     Star,
     StarOff,
 } from "lucide-react";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 
 import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
 import { NoData } from "@/components/no-data/no-data";
@@ -38,13 +36,9 @@ export default function DashboardPage({
     dashboard,
     searchParams,
 }: DashboardPageProps) {
-    const recentRepositories: Array<RepositoryDisplay> =
-        dashboard.recentRepositories;
-    const favoriteRepositories: Array<RepositoryDisplay> =
-        dashboard.favoriteRepositories;
-    const [invitations, setInvitations] = useState<Invitation[]>(
-        dashboard.invitations,
-    );
+    const recentRepositories: Array<RepositoryDisplay> = dashboard.recentRepositories;
+    const favoriteRepositories: Array<RepositoryDisplay> = dashboard.favoriteRepositories;
+    const invitations: Array<Invitation> = dashboard.invitations;
 
     return (
         <div className="m-6 flex flex-col gap-6 bg-background text-foreground lg:flex-row">
@@ -164,7 +158,6 @@ export default function DashboardPage({
                                                 key={invitation.id}
                                                 invitation={invitation}
                                                 className="w-full"
-                                                setInvitations={setInvitations}
                                             />
                                         ),
                                     )}
