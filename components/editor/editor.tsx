@@ -4,23 +4,15 @@ import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { useEffect, useRef } from "react";
 import { MonacoBinding } from "y-monaco";
 import { WebsocketProvider } from "y-websocket";
-import * as Y from "yjs";
+import * as Y from "yjs"
 
 interface EditorProps {
-    filePath: string;
-    language?: string;
-    theme?: string;
-    autoDetectHighContrast?: boolean;
-    readOnly?: boolean;
+    filePath: string
+    language?: string
+    theme?: string
 }
 
-export default function Editor({
-    filePath,
-    language = "systemverilog",
-    theme = "vs-dark",
-    autoDetectHighContrast = false,
-    readOnly,
-}: EditorProps) {
+export default function Editor({ filePath, language = "systemverilog", theme = "vs-dark" }: EditorProps) {
     const editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
     const monacoEl = useRef<HTMLElement | null>(null);
 
@@ -32,8 +24,7 @@ export default function Editor({
         editor.current = monaco.editor.create(monacoEl.current, {
             language,
             theme,
-            autoDetectHighContrast,
-            readOnly,
+            automaticLayout: true,
         });
 
         if (process.env.NODE_ENV === "production") {
@@ -57,4 +48,4 @@ export default function Editor({
     });
 
     return <main className="h-full w-full" ref={monacoEl}></main>;
-}
+};

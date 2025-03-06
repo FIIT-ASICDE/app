@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { UseFormReturn, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
@@ -50,7 +51,6 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
 
 interface CreateRepositoryDialogProps {
     usersOrganisations: Array<Omit<OrganisationDisplay, "memberCount">>;
@@ -78,7 +78,7 @@ export const CreateRepositoryDialog = ({
         },
         onError: (error) => {
             toast.error(error.message);
-        }
+        },
     });
     const onCreateRepository = async (
         data: z.infer<typeof createRepositoryFormSchema>,

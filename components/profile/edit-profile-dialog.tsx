@@ -19,6 +19,7 @@ import {
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
@@ -49,7 +50,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { toast } from "sonner";
 
 interface EditProfileDialogProps {
     profile: OnboardedUser;
@@ -95,7 +95,7 @@ export const EditProfileDialog = ({ profile }: EditProfileDialogProps) => {
         },
         onError: (error) => {
             toast.error(error.message);
-        }
+        },
     });
 
     const onSaveProfileChanges = async (

@@ -17,6 +17,7 @@ import {
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useState } from "react";
 import { UseFormReturn, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
@@ -43,7 +44,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
 
 export const CreateOrganisationDialog = () => {
     const router = useRouter();
@@ -75,7 +75,7 @@ export const CreateOrganisationDialog = () => {
         },
         onError: (error) => {
             toast.error(error.message);
-        }
+        },
     });
 
     const onCreateOrganisation = async (

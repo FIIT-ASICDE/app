@@ -1,8 +1,7 @@
+import { SidebarContentTab } from "@/lib/types/editor";
 import { cn } from "@/lib/utils";
-import { Dispatch, ElementType, SetStateAction } from "react";
+import { ElementType } from "react";
 
-import { useSidebar } from "@/components/ui/sidebar";
-import { TabsTrigger } from "@/components/ui/tabs";
 import {
     Tooltip,
     TooltipContent,
@@ -10,11 +9,11 @@ import {
 } from "@/components/ui/tooltip";
 
 interface SidebarNavigationButtonProps {
-    value: string;
+    value: SidebarContentTab;
     icon: ElementType;
     tooltip: string;
     activeSidebarContent: string;
-    setActiveSidebarContent: Dispatch<SetStateAction<string>>;
+    onClick?: () => void;
 }
 
 export const SidebarNavigationButton = ({
@@ -22,34 +21,24 @@ export const SidebarNavigationButton = ({
     icon: Icon,
     tooltip,
     activeSidebarContent,
-    setActiveSidebarContent,
+    onClick,
 }: SidebarNavigationButtonProps) => {
-    const { open, setOpen } = useSidebar();
-
     return (
         <Tooltip>
             <TooltipTrigger asChild>
-                <TabsTrigger
-                    value={value}
+                <button
                     className={cn(
                         "flex h-10 w-10 items-center justify-center rounded-md p-0",
                         "text-header-foreground",
                         "hover:bg-header-button-hover hover:text-header-foreground",
-                        value === activeSidebarContent && open
+                        value === activeSidebarContent
                             ? "bg-header-button-hover"
                             : "bg-header-button",
                     )}
-                    onClick={() => {
-                        if (value === activeSidebarContent) {
-                            setOpen(!open);
-                        } else {
-                            setActiveSidebarContent(value);
-                            setOpen(true);
-                        }
-                    }}
+                    onClick={onClick}
                 >
                     <Icon className="h-5 w-5" />
-                </TabsTrigger>
+                </button>
             </TooltipTrigger>
             <TooltipContent side="right">
                 <p>{tooltip}</p>

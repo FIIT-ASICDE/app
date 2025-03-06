@@ -5,6 +5,7 @@ import { api } from "@/lib/trpc/react";
 import { UserDisplay } from "@/lib/types/user";
 import { Search, UserRoundPlus } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,6 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { toast } from "sonner";
 
 export const InviteMemberDialog = ({
     organisationName,
@@ -51,7 +51,9 @@ export const InviteMemberDialog = ({
     const inviteMutation = api.user.inviteUserToOrganization.useMutation({
         onSuccess: () => {
             toast.success("Invitation sent successfully", {
-                description: selectedUser?.username + " has been invited to join your organisation."
+                description:
+                    selectedUser?.username +
+                    " has been invited to join your organisation.",
             });
 
             setDialogOpen(false);
@@ -59,7 +61,7 @@ export const InviteMemberDialog = ({
         },
         onError: (error) => {
             toast.error(error.message);
-        }
+        },
     });
 
     const handleInviteMember = () => {

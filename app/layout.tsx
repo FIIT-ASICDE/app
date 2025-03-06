@@ -4,9 +4,8 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 import React, { Suspense } from "react";
 
 import DevControls from "@/components/dev-controls/dev-controls";
-import Header from "@/components/header/header";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const ThemeProvider = ({
     children,
@@ -23,7 +22,6 @@ export default async function RootLayout({
     return (
         <html lang="en" suppressHydrationWarning>
             <body>
-                <Header />
                 <ThemeProvider attribute="class" disableTransitionOnChange>
                     <Suspense fallback={<div>TODO: LOADING</div>}>
                         <TooltipProvider delayDuration={0}>

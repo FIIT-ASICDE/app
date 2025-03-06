@@ -11,7 +11,7 @@ interface NavigationButtonProps {
     icon: ElementType;
     tooltip: string;
     tooltipSide?: "right" | "top" | "bottom" | "left";
-    onClick: () => void;
+    onClick?: () => void;
 }
 
 export const NavigationButton = ({

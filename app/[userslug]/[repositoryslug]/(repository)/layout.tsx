@@ -2,6 +2,7 @@ import { api } from "@/lib/trpc/server";
 import { TRPCError } from "@trpc/server";
 import React from "react";
 
+import Header from "@/components/header/header";
 import { RepositoryHeader } from "@/components/repositories/repository-header";
 import { Separator } from "@/components/ui/separator";
 
@@ -24,6 +25,7 @@ export default async function RepositoryLayout({
 
         return (
             <>
+                <Header />
                 <RepositoryHeader
                     repository={repo}
                     canEdit={

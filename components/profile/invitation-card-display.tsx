@@ -6,6 +6,8 @@ import { CardType } from "@/lib/types/generic";
 import { Invitation } from "@/lib/types/invitation";
 import { cn } from "@/lib/utils";
 import { Calendar, CircleCheck, CircleX } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
@@ -17,8 +19,6 @@ import {
 import { InvitationBadge } from "@/components/profile/invitation-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 
 interface InvitationCardDisplayProps {
     invitation: Invitation;
@@ -36,16 +36,21 @@ export const InvitationCardDisplay = ({
     const acceptMutation = api.user.acceptInvitation.useMutation({
         onSuccess: () => {
             toast.success("Invitation successfully accepted", {
-                description: invitation.type === "repository" ?
-                    "You are now a collaborator on the " + invitationDisplayData.displayName + " repository" :
-                    "You are now a member of the " + invitationDisplayData.displayName + " organisation"
+                description:
+                    invitation.type === "repository"
+                        ? "You are now a collaborator on the " +
+                          invitationDisplayData.displayName +
+                          " repository"
+                        : "You are now a member of the " +
+                          invitationDisplayData.displayName +
+                          " organisation",
             });
             router.refresh();
         },
         onError: (error) => {
             toast.error(error.message);
             router.refresh();
-        }
+        },
     });
 
     const declineMutation = api.user.declineInvitation.useMutation({
@@ -56,7 +61,7 @@ export const InvitationCardDisplay = ({
         onError: (error) => {
             toast.error(error.message);
             router.refresh();
-        }
+        },
     });
 
     return (

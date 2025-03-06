@@ -5,6 +5,7 @@ import { api } from "@/lib/trpc/react";
 import { Repository } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { Pin, Star } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
@@ -16,8 +17,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 
 interface RepositoryCardProps {
     repository: Repository;
@@ -32,22 +31,11 @@ export default function RepositoryCard({
 }: RepositoryCardProps) {
     const router = useRouter();
 
-    const pinOrStar: boolean = false;
-
     const repositoryDisplayName: string =
         repository.ownerName + "/" + repository.name;
     const repositoryLink: string = "/" + repositoryDisplayName;
 
-    const toggleRepoState = api.repo.toggleState.useMutation({
-        onSuccess: () => {
-            toast.success(pinOrStar ?
-                repository.favorite ? "Repository added to your favorites" : "Repository removed from your favorites" :
-                repository.pinned ? "Repository unpinned from overview page" : "Repository pinned to overview page")
-        },
-        onError: (error) => {
-            toast.error(error.message)
-        }
-    });
+    const toggleRepoState = api.repo.toggleState.useMutation();
 
     const handleStarClick = async () => {
         await toggleRepoState.mutateAsync({

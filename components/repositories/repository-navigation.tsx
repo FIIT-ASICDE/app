@@ -65,7 +65,13 @@ export const RepositoryNavigation = ({
                 title={"open in IDE"}
                 icon={CodeXml}
                 variant={"default"}
-                link={"/editor"}
+                link={
+                    "/" +
+                    repository.ownerName +
+                    "/" +
+                    repository.name +
+                    "/editor"
+                }
                 access={"interactive"}
                 className={"hover:bg-primary-button-hover"}
             />

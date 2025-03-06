@@ -36,8 +36,10 @@ export default function DashboardPage({
     dashboard,
     searchParams,
 }: DashboardPageProps) {
-    const recentRepositories: Array<RepositoryDisplay> = dashboard.recentRepositories;
-    const favoriteRepositories: Array<RepositoryDisplay> = dashboard.favoriteRepositories;
+    const recentRepositories: Array<RepositoryDisplay> =
+        dashboard.recentRepositories;
+    const favoriteRepositories: Array<RepositoryDisplay> =
+        dashboard.favoriteRepositories;
     const invitations: Array<Invitation> = dashboard.invitations;
 
     return (
