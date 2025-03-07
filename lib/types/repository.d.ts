@@ -88,3 +88,10 @@ export type LanguageStatistics = {
     percentages: Array<LanguageStatisticsItem>;
     totalLoc: number;
 };
+
+interface GithubRepoDisplay {
+    name: string;
+    visibility: RepositoryVisibility;
+    githubFullName: string;
+    description?: string;
+}

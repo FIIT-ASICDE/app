@@ -16,6 +16,9 @@
         "@auth/prisma-adapter": "^2.7.4",
         "@hookform/resolvers": "^3.10.0",
         "@joint/core": "^4.1.2",
+        "@octokit/core": "^6.1.4",
+        "@octokit/plugin-paginate-rest": "^11.4.3",
+        "@octokit/plugin-throttling": "^9.4.0",
         "@prisma/adapter-pg": "^6.3.0",
         "@prisma/client": "^6.3.0",
         "@radix-ui/react-avatar": "^1.1.2",
@@ -70,6 +73,7 @@
     },
     "devDependencies": {
         "@eslint/eslintrc": "^3",
+        "@octokit/types": "^13.8.0",
         "@trivago/prettier-plugin-sort-imports": "^4.3.0",
         "@types/bcryptjs": "^2.4.6",
         "@types/node": "^20.17.16",
