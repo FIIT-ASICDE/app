@@ -9,20 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface OverviewPageProps {
     repository: RepositoryOverview;
-    languageStatistics: {
-        percentages: Array<{
-            language: string;
-            loc: number;
-            percentage: number;
-        }>;
-        totalLoc: number;
-    };
 }
 
-export default function OverviewPage({
-    repository,
-    languageStatistics,
-}: OverviewPageProps) {
+export default function OverviewPage({ repository }: OverviewPageProps) {
     return (
         <div className="m-6 flex flex-col gap-x-3 md:flex-row">
             <aside className="flex w-full flex-col gap-y-3 md:w-1/3">
@@ -53,7 +42,7 @@ export default function OverviewPage({
                     </CardHeader>
                     <CardContent>
                         <LanguageStatisticsChart
-                            languageStatistics={languageStatistics}
+                            languageStatistics={repository.stats}
                         />
                     </CardContent>
                 </Card>

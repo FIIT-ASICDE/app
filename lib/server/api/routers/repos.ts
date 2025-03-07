@@ -1,4 +1,5 @@
 import {
+    calculateLanguageStatistics,
     findReadmeFile,
     loadRepoDirOrFile,
     loadRepoItems,
@@ -251,6 +252,7 @@ function repositoryOverview() {
                 repo.name,
             );
             const readme = findReadmeFile(repoPath);
+            const stats = await calculateLanguageStatistics(repoPath);
 
             return {
                 id: repo.id,
@@ -265,6 +267,7 @@ function repositoryOverview() {
                 createdAt: repo.createdAt,
                 userRole: dbUserRoleToAppUserRole(userRepoRelation?.repoRole),
                 readme,
+                stats,
             } satisfies RepositoryOverview;
         });
 }

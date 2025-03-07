@@ -20,6 +20,7 @@ export type Repository = {
 
 export type RepositoryOverview = Omit<Repository, "contributors" | "tree"> & {
     readme?: FileItem;
+    stats: LanguageStatistics;
 };
 
 export type RepoUserRole =

@@ -18,51 +18,5 @@ export default async function RepositoryHome({ params }: RepositoryHomeProps) {
         repositorySlug: repositoryslug,
     });
 
-    const languageStatistics = {
-        percentages: [
-            {
-                language: "typescript",
-                loc: 5200,
-                percentage: 40.62,
-            },
-            {
-                language: "javascript",
-                loc: 3800,
-                percentage: 29.69,
-            },
-            {
-                language: "python",
-                loc: 1500,
-                percentage: 11.72,
-            },
-            {
-                language: "html",
-                loc: 950,
-                percentage: 7.42,
-            },
-            {
-                language: "css",
-                loc: 750,
-                percentage: 5.86,
-            },
-            {
-                language: "json",
-                loc: 400,
-                percentage: 3.13,
-            },
-            {
-                language: "markdown",
-                loc: 200,
-                percentage: 1.56,
-            },
-        ],
-        totalLoc: 12800,
-    };
-
-    return (
-        <OverviewPage
-            repository={repo}
-            languageStatistics={languageStatistics}
-        />
-    );
+    return <OverviewPage repository={repo} />;
 }
