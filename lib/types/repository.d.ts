@@ -18,6 +18,10 @@ export type Repository = {
     userRole?: RepoUserRole;
 };
 
+export type RepositoryOverview = Omit<Repository, "contributors" | "tree"> & {
+    readme?: FileItem;
+};
+
 export type RepoUserRole =
     | "owner"
     | "admin"

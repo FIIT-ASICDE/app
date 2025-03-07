@@ -1,4 +1,4 @@
-import { RepositoryItem } from "@/lib/types/repository";
+import { FileItem, RepositoryItem } from "@/lib/types/repository";
 import { TRPCError } from "@trpc/server";
 import fs from "fs";
 import path from "path";
@@ -113,7 +113,7 @@ export function loadRepoDirOrFile(
     }
 }
 
-export function loadRepoFile(filePath: string): RepositoryItem {
+export function loadRepoFile(filePath: string): FileItem {
     if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
         throw new TRPCError({
             code: "NOT_FOUND",
@@ -133,4 +133,38 @@ export function loadRepoFile(filePath: string): RepositoryItem {
         language: extension,
         content: fs.readFileSync(filePath, "utf-8"),
     };
+}
+
+/**
+ * Finds and returns the README.md file from a repository root
+ *
+ * @param repoPath - Path to the repository directory
+ * @returns FileItem object containing the README file or null if not found
+ */
+export function findReadmeFile(repoPath: string): FileItem | undefined {
+    if (!fs.existsSync(repoPath) || !fs.statSync(repoPath).isDirectory()) {
+        throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Repository directory not found",
+        });
+    }
+
+    const entries = fs.readdirSync(repoPath, { withFileTypes: true });
+    const readmeEntry = entries.find(
+        (entry) =>
+            !entry.isDirectory() &&
+            entry.name.toLowerCase().startsWith("readme"),
+    );
+
+    if (!readmeEntry) {
+        return undefined;
+    }
+
+    const readmePath = path.join(repoPath, readmeEntry.name);
+    try {
+        return loadRepoFile(readmePath);
+    } catch (error) {
+        console.error(`Failed to read README file: ${readmePath}`, error);
+        return undefined;
+    }
 }

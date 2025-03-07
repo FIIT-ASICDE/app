@@ -1,4 +1,4 @@
-import { FileItem, Repository, RepositoryItem } from "@/lib/types/repository";
+import { RepositoryOverview } from "@/lib/types/repository";
 import { Calendar, FileX2 } from "lucide-react";
 
 import { MarkdownRenderer } from "@/components/file/markdown-renderer";
@@ -8,7 +8,7 @@ import LanguageStatisticsChart from "@/components/repositories/language-statisti
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface OverviewPageProps {
-    repository: Repository;
+    repository: RepositoryOverview;
     languageStatistics: {
         percentages: Array<{
             language: string;
@@ -23,29 +23,6 @@ export default function OverviewPage({
     repository,
     languageStatistics,
 }: OverviewPageProps) {
-    const findReadMe = (tree?: Array<RepositoryItem>): FileItem | undefined => {
-        if (!tree) return undefined;
-
-        for (const file of tree) {
-            if (
-                file.name.toLowerCase() === "readme.md" &&
-                file.type === "file"
-            ) {
-                return file;
-            }
-
-            if (file.type === "directory") {
-                const found = findReadMe(file.children);
-                if (found) {
-                    return found;
-                }
-            }
-        }
-        return undefined;
-    };
-
-    const readMeFile: RepositoryItem | undefined = findReadMe(repository.tree);
-
     return (
         <div className="m-6 flex flex-col gap-x-3 md:flex-row">
             <aside className="flex w-full flex-col gap-y-3 md:w-1/3">
@@ -83,8 +60,8 @@ export default function OverviewPage({
             </aside>
 
             <main className="mt-3 flex w-full flex-col gap-y-3 md:mt-0 md:w-2/3">
-                {readMeFile ? (
-                    <MarkdownRenderer content={readMeFile.content} />
+                {repository.readme ? (
+                    <MarkdownRenderer content={repository.readme.content} />
                 ) : (
                     <NoData
                         icon={FileX2}

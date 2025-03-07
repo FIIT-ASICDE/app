@@ -1,4 +1,8 @@
-import { loadRepoDirOrFile, loadRepoItems } from "@/lib/files/repo-files";
+import {
+    findReadmeFile,
+    loadRepoDirOrFile,
+    loadRepoItems,
+} from "@/lib/files/repo-files";
 import {
     createRepositoryFormSchema,
     repoBySlugsSchema,
@@ -9,7 +13,8 @@ import {
     RepoUserRole,
     Repository,
     RepositoryDisplay,
-    RepositoryItem, RepositoryVisibility
+    RepositoryItem,
+    RepositoryOverview,
 } from "@/lib/types/repository";
 import { PrismaType } from "@/prisma";
 import { $Enums, RepoRole } from "@prisma/client";
@@ -23,6 +28,7 @@ import { PaginationResult } from "@/lib/types/generic";
 export const repoRouter = createTRPCRouter({
     create: create(),
     search: searchByOwnerAndRepoSlug(),
+    overview: repositoryOverview(),
     loadRepoItem: loadRepoItem(),
     ownersRepos: reposByOwnerSlug(),
     toggleState: toggleStateOnRepo(),
@@ -210,6 +216,58 @@ function searchByOwnerAndRepoSlug() {
         });
 }
 
+function repositoryOverview() {
+    return protectedProcedure
+        .input(repoBySlugsSchema)
+        .query(async ({ ctx, input }): Promise<RepositoryOverview> => {
+            const owner = await ownerBySlug(ctx.prisma, input.ownerSlug);
+            const decodedRepositorySlug = decodeURIComponent(
+                input.repositorySlug.trim(),
+            );
+            const repo = await repoBySlug(
+                ctx.prisma,
+                decodedRepositorySlug,
+                ctx.session.user.id,
+                owner,
+            );
+            if (!repo) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Repo not found",
+                });
+            }
+
+            if (repo.userOrganizationRepo.length > 1) {
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message:
+                        "Failed server condition, there must be max one userOrganizationRepo row for a user",
+                });
+            }
+            const userRepoRelation = repo.userOrganizationRepo.at(0);
+            const repoPath = path.join(
+                process.env.REPOSITORIES_STORAGE_ROOT!,
+                owner.name!,
+                repo.name,
+            );
+            const readme = findReadmeFile(repoPath);
+
+            return {
+                id: repo.id,
+                ownerId: owner.id!,
+                ownerName: owner.name!,
+                name: repo.name,
+                visibility: repo.public ? "public" : "private",
+                favorite: userRepoRelation?.favorite ?? false,
+                pinned: false,
+                description: repo.description ?? undefined,
+                ownerImage: owner.image,
+                createdAt: repo.createdAt,
+                userRole: dbUserRoleToAppUserRole(userRepoRelation?.repoRole),
+                readme,
+            } satisfies RepositoryOverview;
+        });
+}
 function loadRepoItem() {
     return protectedProcedure
         .input(repoItemSchema)
