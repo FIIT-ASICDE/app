@@ -1,21 +1,19 @@
 import { PaginationResult } from "@/lib/types/generic";
+import { GithubRepoDisplay } from "@/lib/types/repository";
 import { Octokit } from "@octokit/core";
+import { paginateRest } from "@octokit/plugin-paginate-rest";
+import { throttling } from "@octokit/plugin-throttling";
 import { Session } from "next-auth";
 
-import { GithubRepoDisplay } from "./types/repository";
+const AsicdeOctokit = Octokit.plugin(throttling).plugin(paginateRest);
 
 // since the access token can change, the client isn't created once, but
 // recreated for each request
 const octoKitClient = (session: Session | null) =>
-    new Octokit({
+    new AsicdeOctokit({
         auth: session?.accessToken,
         throttle: {
-            onRateLimit: (
-                retryAfter: number,
-                options: any,
-                octokit: any,
-                retryCount: number,
-            ) => {
+            onRateLimit: (retryAfter, options, octokit, retryCount) => {
                 octokit.log.warn(
                     `Request quota exhausted for request ${options.method} ${options.url}`,
                 );
@@ -25,7 +23,8 @@ const octoKitClient = (session: Session | null) =>
                     return true;
                 }
             },
-            onSecondaryRateLimit: (options: any, octokit: any) => {
+
+            onSecondaryRateLimit: (_, options, octokit) => {
                 octokit.log.warn(
                     `SecondaryRateLimit detected for request ${options.method} ${options.url}`,
                 );

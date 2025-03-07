@@ -1,6 +1,7 @@
 import { readUsersGithubRepos } from "@/lib/github";
 import { paginationSchema } from "@/lib/schemas/common-schemas";
 import { cloneRepoSchema } from "@/lib/schemas/repo-schemas";
+import { doesRepoExist } from "@/lib/server/api/routers/repos";
 import { createTRPCRouter, protectedProcedure } from "@/lib/server/api/trpc";
 import { ReturnTypeOf } from "@octokit/core/dist-types/types";
 import { $Enums } from "@prisma/client";
@@ -9,8 +10,6 @@ import { exec } from "child_process";
 import { access, mkdir, rm } from "fs/promises";
 import path from "path";
 import util from "util";
-
-import { doesRepoExist } from "./repos";
 
 const execPromise = util.promisify(exec);
 
