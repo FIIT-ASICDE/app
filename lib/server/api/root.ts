@@ -3,6 +3,8 @@ import { repoRouter } from "@/lib/server/api/routers/repos";
 import { userRouter } from "@/lib/server/api/routers/user";
 import { createCallerFactory, createTRPCRouter } from "@/lib/server/api/trpc";
 
+import { githubRouter } from "./routers/github";
+
 /**
  * This is the primary router for your server.
  *
@@ -12,6 +14,7 @@ export const appRouter = createTRPCRouter({
     user: userRouter,
     org: orgRouter,
     repo: repoRouter,
+    github: githubRouter,
 });
 
 // export type definition of API

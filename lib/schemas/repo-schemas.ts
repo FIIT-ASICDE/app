@@ -59,3 +59,16 @@ export const editRepositoryFormSchema = z.object({
         .optional()
         .transform((value) => (value ? value.trim() : undefined)),
 });
+
+export const cloneRepoSchema = z.object({
+    githubFullName: z.string(),
+    name: z.string().optional(),
+    description: z
+        .string()
+        .max(500, "Description cannot exceed 500 characters")
+        .optional()
+        .transform((value) => (value ? value.trim() : undefined)),
+    visibility: z.enum(["public", "private"], {
+        required_error: "Visibility is required.",
+    }),
+});

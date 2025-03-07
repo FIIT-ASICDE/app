@@ -34,18 +34,7 @@ function create() {
             const { prisma, session } = ctx;
             const { ownerId, name, description, visibility } = input;
 
-            // check for duplicate repo names under the owner
-            const existingRepo = await prisma.repoUserOrganization.findFirst({
-                where: {
-                    repo: { name },
-                    OR: [
-                        { userMetadata: { userId: ownerId } },
-                        { organizationId: ownerId },
-                    ],
-                },
-            });
-
-            if (existingRepo) {
+            if (await doesRepoExist(ctx.prisma, name, ownerId)) {
                 throw new TRPCError({
                     code: "CONFLICT",
                     message:
@@ -752,6 +741,22 @@ async function repoBySlug(
                     userMetadata: { userId: sessionUserId },
                 },
             },
+        },
+    });
+}
+
+export async function doesRepoExist(
+    prisma: PrismaType,
+    name: string,
+    ownerId: string,
+) {
+    return await prisma.repoUserOrganization.findFirst({
+        where: {
+            repo: { name },
+            OR: [
+                { userMetadata: { userId: ownerId } },
+                { organizationId: ownerId },
+            ],
         },
     });
 }
