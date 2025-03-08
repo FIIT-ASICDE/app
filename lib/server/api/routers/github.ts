@@ -1,6 +1,6 @@
-import { readUsersGithubRepos } from "@/lib/github";
+import { readGithubRepoBranches, readUsersGithubRepos } from "@/lib/github";
 import { paginationSchema } from "@/lib/schemas/common-schemas";
-import { cloneRepoSchema } from "@/lib/schemas/repo-schemas";
+import { cloneRepoSchema, repoBySlugsSchema } from "@/lib/schemas/repo-schemas";
 import { doesRepoExist } from "@/lib/server/api/routers/repos";
 import { createTRPCRouter, protectedProcedure } from "@/lib/server/api/trpc";
 import { ReturnTypeOf } from "@octokit/core/dist-types/types";
@@ -15,6 +15,7 @@ const execPromise = util.promisify(exec);
 
 export const githubRouter = createTRPCRouter({
     userRepos: userGithubRepos(),
+    branches: githubRepoBranches(),
     clone: clone(),
 });
 
@@ -80,8 +81,14 @@ function clone() {
             const accessToken = ctx.session.accessToken;
             const cloneUrl = `https://oauth2:${accessToken}@github.com/${input.githubFullName}.git`;
 
+            let cmd = "git clone";
+            if (input.branch) {
+                cmd += ` -b ${input.branch}`;
+            }
+            cmd += ` ${cloneUrl} ${targetPath}`;
+
             try {
-                await execPromise(`git clone ${cloneUrl} ${targetPath}`);
+                await execPromise(cmd);
 
                 await ctx.prisma.$transaction(async (tx) => {
                     const repo = await tx.repo.create({
@@ -134,5 +141,17 @@ function clone() {
                 console.error("Error cloning repo from github", errorMessage);
                 throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
             }
+        });
+}
+
+function githubRepoBranches() {
+    return protectedProcedure
+        .input(repoBySlugsSchema)
+        .query(async ({ ctx, input }): Promise<Array<string>> => {
+            return readGithubRepoBranches(
+                ctx.session,
+                input.ownerSlug,
+                input.repositorySlug,
+            );
         });
 }

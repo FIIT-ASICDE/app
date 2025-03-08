@@ -62,6 +62,7 @@ export const editRepositoryFormSchema = z.object({
 export const cloneRepoSchema = z.object({
     githubFullName: z.string(),
     name: z.string().optional(),
+    branch: z.string().optional(),
     description: z
         .string()
         .max(500, "Description cannot exceed 500 characters")

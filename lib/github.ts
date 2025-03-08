@@ -75,3 +75,20 @@ export async function readUsersGithubRepos(
 
     return { repos, pagination };
 }
+
+export async function readGithubRepoBranches(
+    session: Session,
+    owner: string,
+    repo: string,
+): Promise<Array<string>> {
+    const octokit = octoKitClient(session);
+
+    const branches = await octokit.request(
+        "GET /repos/{owner}/{repo}/branches",
+        {
+            owner,
+            repo,
+        },
+    );
+    return branches.data.map((branch) => branch.name);
+}

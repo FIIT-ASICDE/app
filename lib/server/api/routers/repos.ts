@@ -180,7 +180,6 @@ function searchByOwnerAndRepoSlug() {
                 ctx.session.user.id,
                 owner,
             );
-            console.log(repo);
             if (!repo) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
