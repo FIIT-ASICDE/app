@@ -1,6 +1,5 @@
 import DashboardPage from "@/app/[userslug]/dashboard/dashboard-page";
 import { api } from "@/lib/trpc/server";
-import { PaginationResult } from "@/lib/types/generic";
 
 interface UserDashboardPageProps {
     params: Promise<{
@@ -23,30 +22,11 @@ export default async function UserDashboardPage({
 
     const pageSize: number = 3;
 
-    /*
-     * TODO: this method on BE
-     * Explanation: The recent repositories are alright,
-     * but I need favorites that will return
-     * a pagination object (PaginationResult)
-     */
-    /*const { favoriteRepositories, pagination } = await api.user.favoriteRepositories({
+    const { favoriteRepositories, pagination } = await api.repo.fetchUserFavoriteRepos({
+        username: userSlug,
         page: currentPage,
         pageSize: pageSize,
-    });*/
-
-    /* I also need invitations, but they don't need to be paginated,
-     * so just a regular call.
-     * Everything can be inside the dashboard variable,
-     * it doesn't need to be 3 different API calls.
-     */
-
-    // dummy data so it does not break
-    const pagination: PaginationResult = {
-        total: 0,
-        pageCount: 0,
-        page: currentPage,
-        pageSize: pageSize,
-    };
+    });
 
     return (
         <DashboardPage
@@ -54,6 +34,7 @@ export default async function UserDashboardPage({
             searchParams={{
                 pagination,
             }}
+            favoriteRepos={favoriteRepositories}
         />
     );
 }
