@@ -9,15 +9,16 @@ import {
     RepoUserRole,
     Repository,
     RepositoryDisplay,
-    RepositoryItem,
+    RepositoryItem, RepositoryVisibility
 } from "@/lib/types/repository";
 import { PrismaType } from "@/prisma";
-import { $Enums } from "@prisma/client";
+import { $Enums, RepoRole } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { mkdir } from "fs/promises";
 import { Session } from "next-auth";
 import path from "path";
 import { z } from "zod";
+import { PaginationResult } from "@/lib/types/generic";
 
 export const repoRouter = createTRPCRouter({
     create: create(),
@@ -25,6 +26,9 @@ export const repoRouter = createTRPCRouter({
     loadRepoItem: loadRepoItem(),
     ownersRepos: reposByOwnerSlug(),
     toggleState: toggleStateOnRepo(),
+    fetchUserRepos: fetchUserRepos(),
+    fetchOrgRepos: fetchOrgRepos(),
+    fetchUserFavoriteRepos: fetchUserFavoriteRepos()
 });
 
 function create() {
@@ -156,7 +160,7 @@ function searchByOwnerAndRepoSlug() {
     return protectedProcedure
         .input(repoBySlugsSchema)
         .query(async ({ ctx, input }): Promise<Repository> => {
-            const owner = await ownerBySlug(ctx.prisma, input.ownerSlug);
+            const owner = await ownerBySlug(ctx.prisma, decodeURIComponent(input.ownerSlug.trim()));
             const decodedRepositorySlug = decodeURIComponent(
                 input.repositorySlug.trim(),
             );
@@ -166,6 +170,7 @@ function searchByOwnerAndRepoSlug() {
                 ctx.session.user.id,
                 owner,
             );
+            console.log(repo)
             if (!repo) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
@@ -209,7 +214,7 @@ function loadRepoItem() {
     return protectedProcedure
         .input(repoItemSchema)
         .query(async ({ ctx, input }): Promise<RepositoryItem> => {
-            const owner = await ownerBySlug(ctx.prisma, input.ownerSlug);
+            const owner = await ownerBySlug(ctx.prisma, decodeURIComponent(input.ownerSlug));
             const decodedRepositorySlug = decodeURIComponent(
                 input.repositorySlug.trim(),
             );
@@ -349,6 +354,333 @@ function toggleStateOnRepo() {
                 );
             },
         );
+}
+
+function fetchUserRepos() {
+    return protectedProcedure
+        .input(
+            z.object({
+                ownerSlug: z.string(),
+                nameSearchTerm: z.string().optional(),
+                pinnedFilter: z.boolean().optional(),
+                favoriteFilter: z.boolean().optional(),
+                publicFilter: z.boolean().optional(),
+                page: z.number().min(1),
+                pageSize: z.number().min(1).max(100),
+            })
+        )
+        .query(async ({ ctx, input }) => {
+            const {
+                ownerSlug,
+                nameSearchTerm,
+                pinnedFilter,
+                favoriteFilter,
+                publicFilter,
+                page,
+                pageSize,
+            } = input;
+
+            const decodedUsername = decodeURIComponent(ownerSlug);
+            const decodedQuery = decodeURIComponent(nameSearchTerm ?? "")
+
+            const prisma = ctx.prisma;
+
+            const owner = await prisma.user.findFirst({
+                where: { name: decodedUsername },
+                include: { metadata: true },
+            });
+
+            if (!owner || !owner.metadata) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Owner not found.",
+                });
+            }
+
+            const userMetadataId = owner.metadata.id;
+            const sessionUserId = ctx.session?.user.id;
+            const isCurrentUser = sessionUserId === owner.id;
+            const shouldFilterPublic = isCurrentUser ? publicFilter ?? undefined : true;
+
+
+            // Počítame celkový počet repozitárov (pre pagináciu)
+            const total = await prisma.repoUserOrganization.count({
+                where: {
+                    userMetadataId,
+                    repo: {
+                        name: {
+                            contains: decodedQuery ?? "",
+                            mode: "insensitive",
+                        },
+                        public: shouldFilterPublic,
+                    },
+                    pinned: pinnedFilter ?? undefined,
+                    favorite: favoriteFilter ?? undefined,
+                },
+            });
+
+            // Fetch repozitárov s filtrom a pagináciou
+            const repos = await prisma.repoUserOrganization.findMany({
+                where: {
+                    userMetadataId,
+                    repo: {
+                        name: {
+                            contains: decodedQuery ?? "",
+                            mode: "insensitive",
+                        },
+                        public: shouldFilterPublic,
+                    },
+                    pinned: pinnedFilter ?? undefined,
+                    favorite: favoriteFilter ?? undefined,
+                },
+                include: {
+                    repo: true,
+                    userMetadata: {
+                        include: { user: true },
+                    },
+                },
+                orderBy: {
+                    repo: {
+                        name: "asc",
+                    },
+                },
+                skip: (page - 1) * pageSize,
+                take: pageSize,
+            });
+
+            const userRepos = repos.map((repoUser) => ({
+                id: repoUser.repo.id,
+                ownerId: repoUser.userMetadata.user.id,
+                ownerName: repoUser.userMetadata.user.name ?? "",
+                ownerImage: repoUser.userMetadata.user.image ?? undefined,
+                name: repoUser.repo.name,
+                description: repoUser.repo.description ?? undefined,
+                visibility: repoUser.repo.public ? "public" : "private" as RepositoryVisibility,
+                favorite: repoUser.favorite,
+                pinned: repoUser.pinned ?? false,
+                createdAt: repoUser.repo.createdAt,
+                userRole: mapRepoRoleToUserRole(repoUser.repoRole),
+            }));
+
+            const pagination: PaginationResult = {
+                total,
+                pageCount: Math.ceil(total / pageSize),
+                page,
+                pageSize,
+            };
+
+            return { userRepos, pagination };
+        });
+}
+
+function fetchOrgRepos() {
+    return protectedProcedure
+        .input(
+            z.object({
+                organizationName: z.string(),
+                nameSearchTerm: z.string().optional(),
+                publicFilter: z.boolean().optional(),
+                page: z.number().min(1),
+                pageSize: z.number().min(1).max(100),
+            })
+        )
+        .query(async ({ ctx, input }) => {
+            const {
+                organizationName,
+                nameSearchTerm,
+                publicFilter,
+                page,
+                pageSize,
+            } = input;
+
+            const decodedOrgName = decodeURIComponent(organizationName);
+            const decodedQuery = decodeURIComponent(nameSearchTerm ?? "");
+
+            const prisma = ctx.prisma;
+            const userId = ctx.session.user.id;
+
+            const organization = await prisma.organization.findFirst({
+                where: { name: decodedOrgName },
+                include: { users: true },
+            });
+
+            if (!organization) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Organization not found.",
+                });
+            }
+
+            const user = await prisma.user.findFirst({
+                where: { id: userId },
+                include: { metadata: true },
+            });
+
+            if(!user) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "User not found.",
+                });
+            }
+
+            const isMember = organization.users.some(
+                (orgUser) => user?.metadata?.id === orgUser.userMetadataId
+            );
+
+            const shouldFilterByPublic = isMember ? publicFilter ?? undefined : true;
+
+            const total = await prisma.repo.count({
+                where: {
+                    userOrganizationRepo: {
+                        some: {
+                            organizationId: organization.id,
+                        },
+                    },
+                    name: {
+                        contains: decodedQuery ?? "",
+                        mode: "insensitive",
+                    },
+                    public: shouldFilterByPublic,
+                },
+            });
+
+            const repos = await prisma.repo.findMany({
+                where: {
+                    userOrganizationRepo: {
+                        some: {
+                            organizationId: organization.id,
+                        },
+                    },
+                    name: {
+                        contains: decodedQuery ?? "",
+                        mode: "insensitive",
+                    },
+                    public: shouldFilterByPublic,
+                },
+                include: {
+                    userOrganizationRepo: {
+                        include: {
+                            userMetadata: {
+                                include: { user: true },
+                            },
+                        },
+                    },
+                },
+                orderBy: {
+                    name: "asc",
+                },
+                skip: (page - 1) * pageSize,
+                take: pageSize,
+            });
+
+            const repositories = repos.map((repo) => {
+
+                return {
+                    id: repo.id,
+                    ownerId: organization.id,
+                    ownerName: organization.name,
+                    ownerImage: organization.image ?? undefined,
+                    name: repo.name,
+                    description: repo.description ?? undefined,
+                    visibility: repo.public ? "public" : "private" as RepositoryVisibility,
+                    favorite: undefined,
+                    pinned: undefined,
+                    createdAt: repo.createdAt,
+                    userRole: undefined,
+                };
+            });
+
+            const pagination: PaginationResult = {
+                total,
+                pageCount: Math.ceil(total / pageSize),
+                page,
+                pageSize,
+            };
+
+            return { repositories, pagination };
+        });
+}
+
+function fetchUserFavoriteRepos() {
+    return protectedProcedure
+        .input(
+            z.object({
+                username: z.string(),
+                page: z.number().min(1),
+                pageSize: z.number().min(1).max(100),
+            })
+        )
+        .query(async ({ ctx, input }) => {
+            const { username, page, pageSize } = input;
+            const decodedUsername = decodeURIComponent(username);
+
+            const prisma = ctx.prisma;
+            const sessionUserId = ctx.session?.user.id;
+
+            // Fetch user metadata
+            const userMetadata = await prisma.userMetadata.findFirst({
+                where: { user: { name: decodedUsername } },
+                include: { user: true },
+            });
+
+            if (!userMetadata) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "User not found.",
+                });
+            }
+
+            const isCurrentUser = sessionUserId === userMetadata.userId;
+
+            // Fetch favorite repos using helper function
+            const total = await prisma.repoUserOrganization.count({
+                where: {
+                    favorite: true,
+                    userMetadataId: userMetadata.id,
+                    ...(isCurrentUser ? {} : { repo: { public: true } }),
+                },
+            });
+
+            const favoriteRepoConnections = await prisma.repoUserOrganization.findMany({
+                where: {
+                    favorite: true,
+                    userMetadataId: userMetadata.id,
+                    ...(isCurrentUser ? {} : { repo: { public: true } }),
+                },
+                select: {
+                    repo: {
+                        select: {
+                            id: true,
+                            name: true,
+                            public: true,
+                        },
+                    },
+                    userMetadata: { include: { user: true } },
+                },
+                orderBy: {
+                    repo: { name: "asc" },
+                },
+                skip: (page - 1) * pageSize,
+                take: pageSize,
+            });
+
+            const favoriteRepositories: RepositoryDisplay[] = favoriteRepoConnections.map(({ repo, userMetadata }) => ({
+                id: repo.id,
+                ownerName: userMetadata.user.name!,
+                ownerImage: userMetadata.user.image || undefined,
+                name: repo.name,
+                visibility: repo.public ? "public" : "private" as RepositoryVisibility,
+            }));
+
+            const pagination: PaginationResult = {
+                total,
+                pageCount: Math.ceil(total / pageSize),
+                page,
+                pageSize,
+            };
+
+            return { favoriteRepositories, pagination };
+        });
 }
 
 export async function pinnedRepos(
@@ -743,6 +1075,19 @@ async function repoBySlug(
             },
         },
     });
+
+}
+
+// ONLY TEMPORARILY - TODO MISO treba zrusit na FE celu RepoUserRole a zacat pouzivat RepoRole aj na FE
+function mapRepoRoleToUserRole(repoRole: RepoRole): RepoUserRole {
+    const roleMapping: Record<RepoRole, RepoUserRole> = {
+        OWNER: "owner",
+        ADMIN: "admin",
+        CONTRIBUTOR: "contributor",
+        VIEWER: "viewer",
+    };
+
+    return roleMapping[repoRole] ?? "guest"; // Ak by náhodou nebolo v enum, dáme "guest"
 }
 
 export async function doesRepoExist(

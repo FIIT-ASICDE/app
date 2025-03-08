@@ -45,6 +45,7 @@ export const userRouter = createTRPCRouter({
     inviteUserToOrganization: inviteUserToOrganization(),
     acceptInvitation: acceptInvitation(),
     declineInvitation: declineInvitation(),
+    fetchAllUsers: fetchAllUsers()
 });
 
 function completeOnboarding() {
@@ -463,6 +464,67 @@ function acceptInvitation() {
                     message: "Could not accept invitation: " + error,
                 });
             }
+        });
+}
+
+function fetchAllUsers() {
+    return protectedProcedure
+        .input(
+            z.object({
+                nameSearchTerm: z.string().optional(),
+                page: z.number().min(1),
+                pageSize: z.number().min(1).max(100),
+            })
+        )
+        .query(async ({ ctx, input }) => {
+            const { nameSearchTerm, page, pageSize } = input;
+
+            const decodedQuery = decodeURIComponent(nameSearchTerm ?? "");
+
+            const prisma = ctx.prisma;
+
+            const total = await prisma.user.count({
+                where: {
+                    name: {
+                        contains: decodedQuery,
+                        mode: "insensitive",
+                    },
+                },
+            });
+
+            const users = await prisma.user.findMany({
+                where: {
+                    name: {
+                        contains: decodedQuery,
+                        mode: "insensitive",
+                    },
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    image: true,
+                },
+                orderBy: {
+                    name: "asc",
+                },
+                skip: (page - 1) * pageSize,
+                take: pageSize,
+            });
+
+            const userList: UserDisplay[] = users.map((user) => ({
+                id: user.id,
+                username: user.name ?? "",
+                image: user.image ?? undefined,
+            }));
+
+            const pagination: PaginationResult = {
+                total,
+                pageCount: Math.ceil(total / pageSize),
+                page,
+                pageSize,
+            };
+
+            return { users: userList, pagination };
         });
 }
 

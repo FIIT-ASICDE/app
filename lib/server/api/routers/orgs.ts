@@ -1,6 +1,5 @@
 import {
     createOrgProcedureSchema,
-    orgSearchSchema,
 } from "@/lib/schemas/org-schemas";
 import { pinnedRepos } from "@/lib/server/api/routers/repos";
 import {
@@ -16,7 +15,7 @@ import {
     OrganisationRole,
 } from "@/lib/types/organisation";
 import { PrismaType } from "@/prisma";
-import { $Enums, Prisma } from "@prisma/client";
+import { $Enums, OrganizationRole } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { Session } from "next-auth";
 import { z } from "zod";
@@ -28,6 +27,7 @@ export const orgRouter = createTRPCRouter({
     byName: byName(),
     userOrgs: usersOrgs(),
     getMembers: getMembers(),
+    fetchUserOrgs: fetchUserOrgs()
 });
 
 function getMembers() {
@@ -35,29 +35,59 @@ function getMembers() {
         .input(
             z.object({
                 organisationName: z.string(),
-            }),
+                nameSearchTerm: z.string().optional(),
+                roleFilter: z.enum(["ADMIN", "MEMBER"]).optional(),
+                page: z.number().min(1),
+                pageSize: z.number().min(1).max(100),
+            })
         )
-        .query(async ({ ctx, input }): Promise<OrganisationMember[]> => {
-            const { organisationName } = input;
-            const decodedOrganisationName = decodeURIComponent(
-                organisationName.trim(),
-            );
-            const prisma: PrismaType = ctx.prisma;
+        .query(async ({ ctx, input }) => {
+            const { organisationName, nameSearchTerm, roleFilter, page, pageSize } = input;
+            const decodedOrganisationName = decodeURIComponent(organisationName)
+            const decodedQuery = decodeURIComponent(nameSearchTerm ?? "")
+            const prisma = ctx.prisma;
 
-            const organisation = await prisma.organization.findUnique({
+            const organization = await prisma.organization.findUnique({
                 where: { name: decodedOrganisationName },
-                select: { id: true },
             });
 
-            if (!organisation) {
+            if (!organization) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Organisation not found",
+                    message: "Organization not found",
                 });
             }
 
+            const organizationId = organization.id;
+
+            const totalCount = await prisma.organizationUser.count({
+                where: {
+                    organizationId,
+                    userMetadata: {
+                        user: {
+                            name: {
+                                contains: decodedQuery || "",
+                                mode: "insensitive",
+                            },
+                        },
+                    },
+                    role: roleFilter,
+                },
+            });
+
             const members = await prisma.organizationUser.findMany({
-                where: { organizationId: organisation.id },
+                where: {
+                    organizationId,
+                    userMetadata: {
+                        user: {
+                            name: {
+                                contains: decodedQuery || "",
+                                mode: "insensitive",
+                            },
+                        },
+                    },
+                    role: roleFilter,
+                },
                 include: {
                     userMetadata: {
                         include: {
@@ -65,23 +95,31 @@ function getMembers() {
                         },
                     },
                 },
-                orderBy: {
-                    userMetadata: {
-                        firstName: "asc",
-                    },
-                },
+                orderBy: { userMetadata: { user: { name: "asc" } } },
+                skip: (page - 1) * pageSize,
+                take: pageSize,
             });
 
-            return members.map((member) => ({
-                id: member.userMetadata.user.id,
-                username: member.userMetadata.user.name ?? "",
-                image: member.userMetadata.user.image ?? "/avatars/default.png",
-                name: member.userMetadata.firstName,
-                surname: member.userMetadata.surname,
-                role: member.role === "ADMIN" ? "admin" : "member",
-            }));
+
+            return {
+                members: members.map((member) => ({
+                    id: member.userMetadata.user.id,
+                    username: member.userMetadata.user.name ?? "",
+                    name: member.userMetadata.firstName,
+                    surname: member.userMetadata.surname,
+                    image: member.userMetadata.user.image || "/avatars/default.png",
+                    role: mapOrganizationRoleToOrganisationRole(member.role)
+                })),
+                pagination: {
+                    total: totalCount,
+                    pageCount: Math.ceil(totalCount / pageSize),
+                    page,
+                    pageSize,
+                },
+            };
         });
 }
+
 
 function createOrg() {
     return protectedProcedure
@@ -178,90 +216,61 @@ function createOrg() {
 
 function search() {
     return protectedProcedure
-        .input(orgSearchSchema)
+        .input(
+            z.object({
+                nameSearchTerm: z.string().optional(),
+                page: z.number().min(1),
+                pageSize: z.number().min(1).max(100),
+            })
+        )
         .query(async ({ ctx, input }) => {
             const { nameSearchTerm, page, pageSize } = input;
-            const offset = page * pageSize;
-            const userId = ctx.session.user.id;
+            const prisma = ctx.prisma;
 
-            const countResult: Array<{ total: number }> = await ctx.prisma
-                .$queryRaw`
-        select count(*)::int as total
-        from "Organization" org
-        ${
-            nameSearchTerm
-                ? Prisma.sql`where org.name ilike ${nameSearchTerm + "%"}`
-                : Prisma.empty
-        }
-      `;
-            const total = countResult[0]?.total ?? 0;
-            const pageCount = Math.ceil(total / pageSize);
+            const totalCount = await prisma.organization.count({
+                where: {
+                    name: {
+                        contains: nameSearchTerm || "",
+                        mode: "insensitive",
+                    },
+                },
+            });
 
-            const orgsRaw: Array<{
-                id: string;
-                name: string;
-                image: string | null;
-                bio: string | null;
-                membercount: number;
-                role: "admin" | "user" | null;
-            }> = await ctx.prisma.$queryRaw`
-        select org.id, org.name, org.image, org.bio,
-          (
-            select count(*) 
-            from "OrganizationUser" ou_all 
-            where ou_all."organizationId" = org.id
-          ) as membercount,
-          ou."role"
-        from "Organization" org
-        left join "OrganizationUser" ou 
-          on ou."organizationId" = org.id and ou."userMetadataId" = ${userId}
-        ${
-            nameSearchTerm
-                ? Prisma.sql`where org.name ilike ${nameSearchTerm + "%"}`
-                : Prisma.empty
-        }
-        order by
-          case 
-            when ou."role" = 'ADMIN' then 1
-            when ou."role" = 'MEMBER' then 2
-            else 3
-          end,
-          org.name
-        offset ${offset} limit ${pageSize}
-      `;
-
-            const organizations: OrganisationDisplay[] = orgsRaw.map((org) => {
-                const userOrg: OrganisationDisplay = {
-                    id: org.id,
-                    name: org.name,
-                    image: org.image ?? undefined,
-                    bio: org.bio ?? undefined,
-                    memberCount: org.membercount,
-                };
-                if (!org.role) {
-                    return userOrg;
-                }
-
-                if (org.role === "user") {
-                    userOrg.userRole = "member";
-                } else if (org.role === "admin") {
-                    userOrg.userRole = "admin";
-                }
-
-                return userOrg;
+            const organizations = await prisma.organization.findMany({
+                where: {
+                    name: {
+                        contains: nameSearchTerm || "",
+                        mode: "insensitive",
+                    },
+                },
+                include: {
+                    _count: {
+                        select: { users: true },
+                    },
+                },
+                orderBy: { name: "asc" },
+                skip: (page - 1) * pageSize,
+                take: pageSize,
             });
 
             return {
-                organizations,
+                organisations: organizations.map((org) => ({
+                    id: org.id,
+                    name: org.name,
+                    image: org.image || "/avatars/default.png",
+                    bio: org.bio || undefined,
+                    memberCount: org._count.users,
+                })),
                 pagination: {
-                    total,
-                    pageCount,
+                    total: totalCount,
+                    pageCount: Math.ceil(totalCount / pageSize),
                     page,
                     pageSize,
                 },
             };
         });
 }
+
 
 function byName() {
     return publicProcedure
@@ -319,6 +328,95 @@ function orgOverview() {
             };
         });
 }
+
+function fetchUserOrgs() {
+    return protectedProcedure
+        .input(
+            z.object({
+                username: z.string(),
+                nameSearchTerm: z.string().optional(),
+                roleFilter: z.enum(["ADMIN", "MEMBER"]).optional(),
+                page: z.number().min(1),
+                pageSize: z.number().min(1).max(100),
+            })
+        )
+        .query(async ({ ctx, input }) => {
+            const { username, nameSearchTerm, roleFilter, page, pageSize } = input;
+            const decodedUsername = decodeURIComponent(username)
+            const decodedQuery = decodeURIComponent(nameSearchTerm ?? "")
+            const prisma = ctx.prisma;
+
+            const user = await prisma.user.findFirst({
+                where: { name: decodedUsername },
+                include: { metadata: true },
+            });
+
+            if (!user || !user.metadata) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "User not found",
+                });
+            }
+
+            const userMetadataId = user.metadata.id;
+
+            const totalCount = await prisma.organizationUser.count({
+                where: {
+                    userMetadataId,
+                    organization: {
+                        name: {
+                            contains: decodedQuery || "",
+                            mode: "insensitive",
+                        },
+                    },
+                    role: roleFilter,
+                },
+            });
+
+            const organizations = await prisma.organizationUser.findMany({
+                where: {
+                    userMetadataId,
+                    organization: {
+                        name: {
+                            contains: decodedQuery || "",
+                            mode: "insensitive",
+                        },
+                    },
+                    role: roleFilter,
+                },
+                include: {
+                    organization: {
+                        include: {
+                            _count: {
+                                select: { users: true },
+                            },
+                        },
+                    },
+                },
+                orderBy: { organization: { name: "asc" } },
+                skip: (page - 1) * pageSize,
+                take: pageSize,
+            });
+
+            return {
+                usersOrganisations: organizations.map((orgUser) => ({
+                    id: orgUser.organization.id,
+                    name: orgUser.organization.name,
+                    image: orgUser.organization.image || "/avatars/default.png",
+                    bio: orgUser.organization.bio || undefined,
+                    memberCount: orgUser.organization._count.users,
+                    userRole: orgUser.role.toLowerCase() as OrganisationRole,
+                })),
+                pagination: {
+                    total: totalCount,
+                    pageCount: Math.ceil(totalCount / pageSize),
+                    page,
+                    pageSize,
+                },
+            };
+        });
+}
+
 
 async function orgByName(
     prisma: PrismaType,
@@ -417,3 +515,14 @@ function usersOrgs() {
             },
         );
 }
+
+// ONLY TEMPORARILY - TODO MISO treba zrusit na FE celu OrganisationRole a zacat pouzivat OrganizationRole aj na FE
+function mapOrganizationRoleToOrganisationRole(organizationRole: OrganizationRole): OrganisationRole {
+    const roleMapping: Record<OrganizationRole, OrganisationRole> = {
+        MEMBER: "member",
+        ADMIN: "admin"
+    };
+
+    return roleMapping[organizationRole];
+}
+

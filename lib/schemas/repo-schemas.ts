@@ -5,7 +5,6 @@ export const repoBySlugsSchema = z.object({
         .string()
         .min(2, "Owner slug must be at least 2 characters long")
         .max(100, "Owner slug cannot exceed 100 characters")
-        .regex(/^[^%$?]*$/, "Owner slug cannot contain %, $, or ?")
         .transform((value) => value.trim()),
     repositorySlug: z
         .string()

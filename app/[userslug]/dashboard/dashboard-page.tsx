@@ -32,16 +32,18 @@ interface DashboardPageProps {
     searchParams: {
         pagination: PaginationResult;
     };
+    favoriteRepos: RepositoryDisplay[]
 }
 
 export default function DashboardPage({
     dashboard,
     searchParams,
+    favoriteRepos
 }: DashboardPageProps) {
     const recentRepositories: Array<RepositoryDisplay> =
         dashboard.recentRepositories;
     const favoriteRepositories: Array<RepositoryDisplay> =
-        dashboard.favoriteRepositories;
+        favoriteRepos
     const [invitations, setInvitations] = useState<Invitation[]>(
         dashboard.invitations,
     );
@@ -100,7 +102,7 @@ export default function DashboardPage({
                     </CardHeader>
                     <CardContent className="pb-0">
                         <Suspense fallback={<div>Loading my favorites...</div>}>
-                            {favoriteRepositories.length !== 0 ? (
+                            {favoriteRepositories.length == 0 ? (
                                 <NoData
                                     icon={StarOff}
                                     message={"No favorite repositories found."}

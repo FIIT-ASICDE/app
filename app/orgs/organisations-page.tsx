@@ -1,7 +1,6 @@
 import { PaginationResult } from "@/lib/types/generic";
 import {
     OrganisationDisplay,
-    RoleOrganisationFilter,
 } from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 import { Building } from "lucide-react";
@@ -10,7 +9,6 @@ import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagin
 import { LayoutOptions } from "@/components/layout/layout-options";
 import { NoData } from "@/components/no-data/no-data";
 import { CreateOrganisationDialog } from "@/components/organisations/create-organisation-dialog";
-import { OrganisationFilter } from "@/components/organisations/organisation-filter";
 import { OrganisationCardDisplay } from "@/components/profile/organisation-card-display";
 import Search from "@/components/ui/search";
 
@@ -19,7 +17,6 @@ interface OrganisationsPageProps {
     searchParams: {
         query: string;
         rows: boolean;
-        role: RoleOrganisationFilter;
         pagination: PaginationResult;
     };
 }
@@ -39,12 +36,6 @@ export const OrganisationsPage = ({
                     />
                 </div>
                 <div className="m-6 mb-0 flex space-x-3">
-                    <OrganisationFilter
-                        type="organisations"
-                        filters={{
-                            role: searchParams.role,
-                        }}
-                    />
                     <CreateOrganisationDialog />
                 </div>
             </div>
