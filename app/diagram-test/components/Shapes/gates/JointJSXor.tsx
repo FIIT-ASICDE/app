@@ -68,7 +68,7 @@ export const JointJSXor = (xor: Xor) => {
                 strokeWidth: 2,
             },
             label: {
-                text: '',
+                text: `${xor.name}`,
                 fontSize: 14,
                 fontFamily: 'Arial',
                 fontWeight: 'bold',

@@ -17,14 +17,32 @@ const highlightSettings = {
 };
 
 const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
-    const { graph, setSelectedElement, setPaper, isPanning } = useDiagramContext();
+    const { graph, setSelectedElement, setPaper, isPanning, removeElement, hasFormErrors } = useDiagramContext();
+    console.log(hasFormErrors);
     const paperRef = useRef<dia.Paper | null>(null);
     const selectedCellViewRef = useRef<dia.CellView | null>(null);
     const isDragging = useRef(false);
     const lastClientX = useRef(0);
     const lastClientY = useRef(0);
     const translation = useRef({ x: 0, y: 0 });
+    const removeAllTools = (paper: dia.Paper) => {
+        const elements = graph.getElements();
+        elements.forEach(element => {
+            const elementView = paper.findViewByModel(element);
+            if (elementView) elementView.removeTools();
+        });
 
+        const links = graph.getLinks();
+        links.forEach(link => {
+            const linkView = paper.findViewByModel(link);
+            if (linkView) linkView.removeTools();
+        });
+    };
+    const hasFormErrorsRef = useRef(hasFormErrors);
+
+    useEffect(() => {
+        hasFormErrorsRef.current = hasFormErrors;
+    }, [hasFormErrors]);
 
     useEffect(() => {
         if (paperElement.current && !paperRef.current) {
@@ -180,9 +198,16 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
             setPaper(paper);
 
             paper.on('cell:pointerclick', (cellView) => {
+
+                if (hasFormErrorsRef.current) {
+                    console.log("Cannot switch, form has errors.");
+                    return;
+                }
+                console.log(hasFormErrors);
+                removeAllTools(paper);
+
                 if (selectedCellViewRef.current) {
                     selectedCellViewRef.current.unhighlight('image', { highlighter: highlightSettings });
-
                 }
 
                 cellView.highlight('image', { highlighter: highlightSettings });
@@ -190,6 +215,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                 selectedCellViewRef.current = cellView;
                 setSelectedElement(cellView.model);
             });
+
 
             const linkTool = new dia.ToolsView({
                 tools: [
@@ -202,62 +228,64 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                 linkView.addTools(linkTool);
             });
 
-            paper.on('blank:pointerclick', () => {
-                const elements = graph.getElements();
-                elements.forEach(element => {
-                    const elementView = paper.findViewByModel(element);
-                    if (elementView) elementView.removeTools();
-                });
 
-                const links = graph.getLinks();
-                links.forEach(link => {
-                    const linkView = paper.findViewByModel(link);
-                    if (linkView) linkView.removeTools();
-                });
-            });
-
-            const elementTool = new dia.ToolsView({
-                tools: [
-                    new elementTools.Remove({
-                        x: '100%',
-                        y: 0,
-                        offset: { x: 10, y: -10 },
-                        markup: [
-                            {
-                                tagName: 'circle',
-                                selector: 'button',
-                                attributes: {
-                                    'r': 7,
-                                    'fill': '#FF1D00',
-                                    'cursor': 'pointer'
-                                }
-                            },
-                            {
-                                tagName: 'path',
-                                selector: 'icon',
-                                attributes: {
-                                    'd': 'M -3 -3 3 3 M -3 3 3 -3',
-                                    'fill': 'none',
-                                    'stroke': '#FFFFFF',
-                                    'stroke-width': 2,
-                                    'pointer-events': 'none'
-                                }
-                            }
-                        ]
-                    })
-                ]
-            });
 
             paper.on('element:pointerclick', (elementView) => {
+
+                if (hasFormErrorsRef.current) {
+                    console.log("Cannot switch, form has errors.");
+                    return;
+                }
+                
+                const elementModel = elementView.model;
+
+                const elementTool = new dia.ToolsView({
+                    tools: [
+                        new elementTools.Remove({
+                            x: '100%',
+                            y: 0,
+                            offset: { x: 10, y: -10 },
+                            markup: [
+                                {
+                                    tagName: 'circle',
+                                    selector: 'button',
+                                    attributes: {
+                                        'r': 7,
+                                        'fill': '#FF1D00',
+                                        'cursor': 'pointer'
+                                    }
+                                },
+                                {
+                                    tagName: 'path',
+                                    selector: 'icon',
+                                    attributes: {
+                                        'd': 'M -3 -3 3 3 M -3 3 3 -3',
+                                        'fill': 'none',
+                                        'stroke': '#FFFFFF',
+                                        'stroke-width': 2,
+                                        'pointer-events': 'none'
+                                    }
+                                }
+                            ],
+                            action: function(evt) {
+                                graph.removeCells([elementModel]);
+                                setSelectedElement(null);
+                            }
+                        })
+                    ]
+                });
+
                 elementView.addTools(elementTool);
             });
 
-
             paper.on('blank:pointerclick', () => {
+                removeAllTools(paper);
+
                 if (selectedCellViewRef.current) {
                     selectedCellViewRef.current.unhighlight('image', { highlighter: highlightSettings });
                     selectedCellViewRef.current = null;
                 }
+
                 setSelectedElement(null);
             });
 

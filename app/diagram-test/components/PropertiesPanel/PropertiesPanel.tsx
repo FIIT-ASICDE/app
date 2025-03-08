@@ -23,8 +23,11 @@ import {JointJSNewModule} from "../Shapes/modules/JointJSNewModule";
 import {Module} from "../Shapes/classes/module";
 import {JointJSRegister} from "../Shapes/memory/JointJSRegister";
 import {Register} from "../Shapes/classes/register";
+import {JointJSSRam} from "../Shapes/memory/JointJSSRam";
+import {Ram} from "../Shapes/classes/ram";
 import { MdErrorOutline } from "react-icons/md";
 import { FaEdit, FaTrash } from 'react-icons/fa';
+import { dia } from "@joint/core";
 interface Properties {
     label?: string;
     stroke?: string;
@@ -37,10 +40,14 @@ interface Properties {
     inPortsModule?: { name: string; bandwidth: number }[];
     outPortsModule?: { name: string; bandwidth: number }[];
     resetPort?: boolean;
+    enablePort?: boolean;
+    clkEdge?: 'rising' | 'falling';
+    rstEdge?: 'rising' | 'falling';
 }
 
+
 const PropertiesPanel = () => {
-    const { selectedElement,graph,setSelectedElement, updateElement, removeElement } = useDiagramContext();
+    const { selectedElement,graph,setSelectedElement, updateElement, hasFormErrors, setHasFormErrors } = useDiagramContext();
     const [properties, setProperties] = useState<Properties>({
         label: '',
         instance: '',
@@ -53,8 +60,10 @@ const PropertiesPanel = () => {
         inPortsModule: [],
         outPortsModule: [],
         resetPort: false,
+        enablePort: false,
+        clkEdge: 'rising',
+        rstEdge: 'rising',
     });
-    const [isHover, setIsHover] = useState(false);
     const [portWidthMode, setPortWidthMode] = useState<'bit' | 'vector' | 'struct'>('bit');
     const [logicWidthMode, setLogicWidthMode] = useState<'bit' | 'vector'>('bit');
     const [errorMessage, setErrorMessage] = useState('');
@@ -66,7 +75,8 @@ const PropertiesPanel = () => {
     const [editPortType, setEditPortType] = useState<'input' | 'output'>('input');
     const [showSaveNotification, setShowSaveNotification] = useState(false);
     const [panelWidth, setPanelWidth] = useState(300);
-
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [clipboardCell, setClipboardCell] = useState<dia.Cell | null>(null);
 
     const handleWidthChange = (newWidth: number) => {
         setPanelWidth(newWidth);
@@ -83,6 +93,9 @@ const PropertiesPanel = () => {
                 instance: selectedElement.attributes.instance || '',
                 addressBandwidth: selectedElement.attributes.addressBandwidth || 8,
                 resetPort: selectedElement.attributes.resetPort ?? false,
+                enablePort: selectedElement.attributes.enablePort ?? false,
+                clkEdge: selectedElement.attributes.clkEdge || 'rising',
+                rstEdge: selectedElement.attributes.rstEdge || 'rising',
 
             };
             if (selectedElement.isLink()) {
@@ -113,6 +126,7 @@ const PropertiesPanel = () => {
                 inPortsModule: [],
                 outPortsModule: [],
                 resetPort: false,
+                enablePort: false,
             });
         }
     }, [selectedElement]);
@@ -146,16 +160,58 @@ const PropertiesPanel = () => {
         }
     }, [selectedElement]);
 
+    function validateField(fieldName: string, fieldValue: any): string {
+        // Проверяем строковые поля (label, instance, port name)
+        if (typeof fieldValue === 'string') {
+            if (!fieldValue.trim()) {
+                return "The field can't be empty";
+            }
+        }
+
+        // Проверяем числовые поля (bandwidth и др.)
+        if (typeof fieldValue === 'number') {
+            if (fieldValue <= 0) {
+                return "The value must be > 0";
+            }
+        }
+
+
+        // Если нет ошибок
+        return "";
+    }
 
     const handleChange = (e: { target: { name: string; type: string; checked?: boolean; value?: any; }; }) => {
         const { name, type, checked, value} = e.target;
+
+        let newValue: any = value;
+        if (type === 'checkbox') {
+            newValue = checked;
+        } else if (type === 'number') {
+            newValue = Number(value);
+        }
+
+
+        const errorMsg = validateField(name, newValue);
+
+        setErrors(prev => ({
+            ...prev,
+            [name]: errorMsg
+        }));
+
+        const newErrors = { ...errors, [name]: errorMsg };
+        const hasAnyError = Object.values(newErrors).some((msg) => msg);
+
+
+        setHasFormErrors(hasAnyError);
+
+        console.log(hasAnyError);
+
         setProperties(prev => ({
             ...prev,
             [name]: type === 'checkbox' ? checked :
                 (name === 'strokeWidth' || name === 'bandwidth' || name === 'inputPorts' || name === 'addressBandwidth'
                     ? Number(value) : value)
         }));
-
     };
     useEffect(() => {
         if (showSaveNotification) {
@@ -196,16 +252,14 @@ const PropertiesPanel = () => {
     const handleNewPortSubmit = () => {
         if (!selectedElement) return;
 
-        // Сброс сообщения
         setErrorMessage('');
 
-        // Валидация
         if (!newPortData.name.trim()) {
             setErrorMessage('Port Name is mandatory');
             return;
         }
         if (newPortData.bandwidth < 1) {
-            setErrorMessage('Bandwidth must be >= 1');
+            setErrorMessage('Bandwidth must be > 0');
             return;
         }
 
@@ -292,12 +346,10 @@ const PropertiesPanel = () => {
     const handleModulePortChange = () => {
         if (!selectedElement) return;
 
-        // Создаём новый объект модуля
         const newMod = new Module();
         newMod.name = properties.label || '';
         newMod.instance = properties.instance || '';
 
-        // Конвертируем локальные inPortsModule / outPortsModule в Port[]
         newMod.inPorts = properties.inPortsModule.map((p, i) => ({
             name: p.name,
             bandwidth: p.bandwidth,
@@ -307,18 +359,14 @@ const PropertiesPanel = () => {
             bandwidth: p.bandwidth,
         }));
 
-        // Позицию и т.д.
         const { x, y } = selectedElement.position();
         newMod.position = { x, y };
 
-        // Удаляем старый элемент из графа
         graph.removeCells([selectedElement]);
 
-        // Создаем новый элемент через JointJSNewModule и добавляем в граф
         const newModuleCell = JointJSNewModule(newMod);
         graph.addCell(newModuleCell);
 
-        // Выбираем его
         setSelectedElement(newModuleCell);
     };
     const handleEditPort = (portType: 'input' | 'output', index: number) => {
@@ -357,115 +405,75 @@ const PropertiesPanel = () => {
             const { x, y } = selectedElement.position();
             const registerData = new Register();
             registerData.name = properties.label || '';
-            registerData.resetPort = properties.resetPort;
+            registerData.resetPort = properties.resetPort || false;
+            registerData.enablePort = properties.enablePort || false;
             registerData.dataBandwidth = properties.bandwidth || 1;
             registerData.position = { x, y };
+            registerData.clkEdge = properties.clkEdge;
+            registerData.rstEdge = properties.rstEdge;
 
             graph.removeCells([selectedElement]);
             const newRegister = JointJSRegister(registerData);
             graph.addCell(newRegister);
             setSelectedElement(newRegister);
         }
+        if (selectedElement?.attributes.elType === 'ram') {
+            const { x, y } = selectedElement.position();
+            const ramData = new Ram();
+            ramData.name = properties.label || '';
+            ramData.dataBandwidth = properties.bandwidth || 1;
+            ramData.addressBandwidth = properties.addressBandwidth || 8;
+            ramData.position = { x, y };
+            ramData.clkEdge = properties.clkEdge;
+
+            graph.removeCells([selectedElement]);
+            const newRam = JointJSSRam(ramData);
+            graph.addCell(newRam);
+            setSelectedElement(newRam);
+        }
     }
-
     const handleLogicPortChange = () => {
+        if (!selectedElement) return;
 
-        if (selectedElement?.attributes.elType === 'and') {
+        const logicGates = {
+            'and': { class: And, create: JointJSAnd },
+            'or': { class: Or, create: JointJSOr },
+            'xor': { class: Xor, create: JointJSXor },
+            'xnor': { class: Xnor, create: JointJSXnor },
+            'nand': { class: Nand, create: JointJSNand },
+            'nor': { class: Nor, create: JointJSNor }
+        };
+
+        const elType = selectedElement.attributes.elType;
+        const gate = logicGates[elType];
+
+        if (gate) {
             const { x, y } = selectedElement.position();
-            const andData = new And();
-            andData.name = properties.label || '';
-            andData.inPorts = properties.inputPorts || 2;
-            console.log(andData.inPorts);
-            andData.bandwidth = properties.bandwidth || 1;
-            andData.position = { x, y };
+            const gateData = new gate.class();
+            gateData.name = properties.label || '';
+            gateData.inPorts = properties.inputPorts || 2;
+            gateData.bandwidth = properties.bandwidth || 1;
+            gateData.position = { x, y };
 
             graph.removeCells([selectedElement]);
-            const newAnd = JointJSAnd(andData);
-            newAnd.attr({ label: { text: properties.label } });
-            graph.addCell(newAnd);
-            setSelectedElement(newAnd);
+            const newGate = gate.create(gateData);
+            newGate.attr({ label: { text: properties.label } });
+            graph.addCell(newGate);
+            setSelectedElement(newGate);
         }
-
-        if (selectedElement?.attributes.elType === 'or') {
-            const { x, y } = selectedElement.position();
-            const orData = new Or();
-            orData.name = properties.label || '';
-            orData.inPorts = properties.inputPorts || 2;
-            console.log(orData.inPorts);
-            orData.bandwidth = properties.bandwidth || 1;
-            orData.position = { x, y };
-
-            graph.removeCells([selectedElement]);
-            const newOr = JointJSOr(orData);
-            newOr.attr({ label: { text: properties.label } });
-            graph.addCell(newOr);
-            setSelectedElement(newOr);
-        }
-        if (selectedElement?.attributes.elType === 'xor') {
-            const { x, y } = selectedElement.position();
-            const xorData = new Xor();
-            xorData.name = properties.label || '';
-            xorData.inPorts = properties.inputPorts || 2;
-            console.log(xorData.inPorts);
-            xorData.bandwidth = properties.bandwidth || 1;
-            xorData.position = { x, y };
-
-            graph.removeCells([selectedElement]);
-            const newXor = JointJSXor(xorData);
-            newXor.attr({ label: { text: properties.label } });
-            graph.addCell(newXor);
-            setSelectedElement(newXor);
-        }
-        if (selectedElement?.attributes.elType === 'xnor') {
-            const { x, y } = selectedElement.position();
-            const xnorData = new Xnor();
-            xnorData.name = properties.label || '';
-            xnorData.inPorts = properties.inputPorts || 2;
-            console.log(xnorData.inPorts);
-            xnorData.bandwidth = properties.bandwidth || 1;
-            xnorData.position = { x, y };
-
-            graph.removeCells([selectedElement]);
-            const newXnor = JointJSXnor(xnorData);
-            newXnor.attr({ label: { text: properties.label } });
-            graph.addCell(newXnor);
-            setSelectedElement(newXnor);
-        }
-        if (selectedElement?.attributes.elType === 'nand') {
-            const { x, y } = selectedElement.position();
-            const nandData = new Nand();
-            nandData.name = properties.label || '';
-            nandData.inPorts = properties.inputPorts || 2;
-            console.log(nandData.inPorts);
-            nandData.bandwidth = properties.bandwidth || 1;
-            nandData.position = { x, y };
-
-            graph.removeCells([selectedElement]);
-            const newNand = JointJSNand(nandData);
-            newNand.attr({ label: { text: properties.label } });
-            graph.addCell(newNand);
-            setSelectedElement(newNand);
-        }
-        if (selectedElement?.attributes.elType === 'nor') {
-            const { x, y } = selectedElement.position();
-            const norData = new Nor();
-            norData.name = properties.label || '';
-            norData.inPorts = properties.inputPorts || 2;
-            console.log(norData.inPorts);
-            norData.bandwidth = properties.bandwidth || 1;
-            norData.position = { x, y };
-
-            graph.removeCells([selectedElement]);
-            const newNor = JointJSNor(norData);
-            newNor.attr({ label: { text: properties.label } });
-            graph.addCell(newNor);
-            setSelectedElement(newNor);
-        }
-
     };
+
 
     const handleSave = () => {
         if (!selectedElement) return;
+
+        const hasAnyErrors = Object.values(errors).some((msg) => msg);
+        if (hasAnyErrors) {
+            // Можно вывести всплывающее уведомление:
+            alert("Cannot save! Check if the fields are filled in correctly");
+            return;
+        }
+
         const attrsToUpdate: any = {};
 
         if (selectedElement.isLink()) {
@@ -482,7 +490,8 @@ const PropertiesPanel = () => {
         }
         else if (selectedElement.attributes.elType === 'ram') {
             selectedElement.attributes.addressBandwidth = properties.addressBandwidth;
-            attrsToUpdate.label = { text: 'RAM\n' + properties.label };
+            handleMemoryPortChange();
+            return;
         }
         else if (selectedElement.attributes.elType === 'register') {
             handleMemoryPortChange();
@@ -538,16 +547,38 @@ const PropertiesPanel = () => {
         updateElement(selectedElement);
         setShowSaveNotification(true);
     };
+    function handleCopy() {
+        if (!selectedElement) return;
+        // Клонируем элемент
+        const clone = selectedElement.clone();
+        // Сохраняем в state, чтобы потом вставить
+        setClipboardCell(clone);
+        console.log("Copied element:", clone);
+    }
 
-    const handleDelete = () => {
-        if (selectedElement) {
-            removeElement();
+    function handlePaste() {
+        if (!clipboardCell) return;
+
+        const newCell = clipboardCell.clone();
+
+        if (newCell.attributes.name && newCell.attributes.attrs?.label?.text) {
+            newCell.attr('label/text', newCell.attributes.attrs.label.text + '_copy');
+            newCell.attributes.name = newCell.attributes.name + '_copy';
         }
-    };
+
+        const pos = newCell.position();
+        newCell.position(pos.x + 20, pos.y + 20);
+        console.log(newCell);
+        graph.addCell(newCell);
+
+        setSelectedElement(newCell);
+        console.log("Pasted element:", newCell);
+    }
+
     useHotkeys({
         onSave: handleSave,
-        onDelete: handleDelete,
-        enabled: isHover  // например, только при наведении мыши на панель
+        onCopy: handleCopy,
+        onPaste: handlePaste,
     });
 
     // Вызывается при переключении радио-кнопок
@@ -615,6 +646,12 @@ const PropertiesPanel = () => {
                             value={properties.label || ''}
                             onChange={handleChange}
                         />
+                        {errors.label && (
+                            <div className={styles.errorMessage}>
+                                <MdErrorOutline className={styles.errorIcon} />
+                                {errors.label}
+                            </div>
+                        )}
                     </label>
 
                     <div className={styles.radioContainer}>
@@ -662,6 +699,12 @@ const PropertiesPanel = () => {
                                 value={properties.bandwidth || 0}
                                 onChange={handleChange}
                             />
+                            {errors.bandwidth && (
+                                <div className={styles.errorMessage}>
+                                    <MdErrorOutline className={styles.errorIcon} />
+                                    {errors.bandwidth}
+                                </div>
+                            )}
                         </label>
                     )}
                     {portWidthMode === 'struct' && (
@@ -694,6 +737,12 @@ const PropertiesPanel = () => {
                             value={properties.label || ''}
                             onChange={handleChange}
                         />
+                        {errors.label && (
+                            <div className={styles.errorMessage}>
+                                <MdErrorOutline className={styles.errorIcon} />
+                                {errors.label}
+                            </div>
+                        )}
                     </label>
 
                     <div className={styles.radioContainer}>
@@ -725,11 +774,17 @@ const PropertiesPanel = () => {
                         <label>
                             Number of input ports:
                             <input
-                                type="text"
+                                type="number"
                                 name="inputPorts"
-                                value={properties.inputPorts || ''}
+                                value={properties.inputPorts || 0}
                                 onChange={handleChange}
                             />
+                            {errors.inputPorts && (
+                                <div className={styles.errorMessage}>
+                                    <MdErrorOutline className={styles.errorIcon} />
+                                    {errors.inputPorts}
+                                </div>
+                            )}
                         </label>
                     )
                     }
@@ -742,6 +797,12 @@ const PropertiesPanel = () => {
                                 value={properties.bandwidth || 0}
                                 onChange={handleChange}
                             />
+                            {errors.bandwidth && (
+                                <div className={styles.errorMessage}>
+                                    <MdErrorOutline className={styles.errorIcon} />
+                                    {errors.bandwidth}
+                                </div>
+                            )}
                         </label>
                     )}
                 </>
@@ -759,6 +820,12 @@ const PropertiesPanel = () => {
                             value={properties.label || ''}
                             onChange={handleChange}
                         />
+                        {errors.label && (
+                            <div className={styles.errorMessage}>
+                                <MdErrorOutline className={styles.errorIcon} />
+                                {errors.label}
+                            </div>
+                        )}
                     </label>
 
                     <div className={styles.radioContainer}>
@@ -806,6 +873,12 @@ const PropertiesPanel = () => {
                                 value={properties.bandwidth || 0}
                                 onChange={handleChange}
                             />
+                            {errors.bandwidth && (
+                                <div className={styles.errorMessage}>
+                                    <MdErrorOutline className={styles.errorIcon} />
+                                    {errors.bandwidth}
+                                </div>
+                            )}
                         </label>
                     )}
                     {portWidthMode === 'struct' && (
@@ -847,6 +920,12 @@ const PropertiesPanel = () => {
                             value={properties.label || ''}
                             onChange={handleChange}
                         />
+                        {errors.label && (
+                            <div className={styles.errorMessage}>
+                                <MdErrorOutline className={styles.errorIcon} />
+                                {errors.label}
+                            </div>
+                        )}
                     </label>
                     <label>
                     DATA width:
@@ -856,6 +935,12 @@ const PropertiesPanel = () => {
                             value={properties.bandwidth || 0}
                             onChange={handleChange}
                         />
+                        {errors.bandwidth && (
+                            <div className={styles.errorMessage}>
+                                <MdErrorOutline className={styles.errorIcon} />
+                                {errors.bandwidth}
+                            </div>
+                        )}
                     </label>
 
                 </>
@@ -873,6 +958,12 @@ const PropertiesPanel = () => {
                             value={properties.label || ''}
                             onChange={handleChange}
                         />
+                        {errors.label && (
+                            <div className={styles.errorMessage}>
+                                <MdErrorOutline className={styles.errorIcon} />
+                                {errors.label}
+                            </div>
+                        )}
                     </label>
                     <label>
                         DATA width:
@@ -882,6 +973,12 @@ const PropertiesPanel = () => {
                             value={properties.bandwidth || 0}
                             onChange={handleChange}
                         />
+                        {errors.bandwidth && (
+                            <div className={styles.errorMessage}>
+                                <MdErrorOutline className={styles.errorIcon} />
+                                {errors.bandwidth}
+                            </div>
+                        )}
                     </label>
                     {selectedElement.attributes.elType === 'comparator' && (
                         <label>
@@ -914,6 +1011,12 @@ const PropertiesPanel = () => {
                             value={properties.label || ''}
                             onChange={handleChange}
                         />
+                        {errors.label && (
+                            <div className={styles.errorMessage}>
+                                <MdErrorOutline className={styles.errorIcon} />
+                                {errors.label}
+                            </div>
+                        )}
                     </label>
                     <label>
                         Instance name:
@@ -924,6 +1027,12 @@ const PropertiesPanel = () => {
                             value={properties.instance || ''}
                             onChange={handleChange}
                         />
+                        {errors.instance && (
+                            <div className={styles.errorMessage}>
+                                <MdErrorOutline className={styles.errorIcon} />
+                                {errors.instance}
+                            </div>
+                        )}
                     </label>
 
                     <div className={styles.portSection}>
@@ -932,13 +1041,11 @@ const PropertiesPanel = () => {
                             <div key={idx} className={styles.portItem}>
                                 <span>{p.name} (bw={p.bandwidth})</span>
 
-                                {/* Иконка редактирования */}
                                 <FaEdit
                                     className={styles.portIcon}
                                     onClick={() => handleEditPort('input', idx)}
                                 />
 
-                                {/* Иконка удаления */}
                                 <FaTrash
                                     className={styles.portIcon}
                                     onClick={() => handleDeletePort('input', idx)}
@@ -983,6 +1090,12 @@ const PropertiesPanel = () => {
                             value={properties.label || ''}
                             onChange={handleChange}
                         />
+                        {errors.label && (
+                            <div className={styles.errorMessage}>
+                                <MdErrorOutline className={styles.errorIcon} />
+                                {errors.label}
+                            </div>
+                        )}
                     </label>
                     {(['ram'].includes(selectedElement.attributes.elType)) && (
                         <label>
@@ -994,19 +1107,60 @@ const PropertiesPanel = () => {
                                 value={properties.addressBandwidth || ''}
                                 onChange={handleChange}
                             />
+                            {errors.addressBandwidth && (
+                                <div className={styles.errorMessage}>
+                                    <MdErrorOutline className={styles.errorIcon} />
+                                    {errors.addressBandwidth}
+                                </div>
+                            )}
                         </label>
                     )}
                     {(['register'].includes(selectedElement.attributes.elType)) && (
-                        <label>
-                            Reset Port:
-                            <input
-                                type="checkbox"
-                                name="resetPort"
-                                checked={!!properties.resetPort} // Преобразуем в boolean
-                                onChange={handleChange}
-                            />
-                        </label>
+                        <>
+                            <label>
+                                Reset Port:
+                                <input
+                                    type="checkbox"
+                                    name="resetPort"
+                                    checked={!!properties.resetPort}
+                                    onChange={handleChange}
+                                />
+                            </label>
+                            <label>
+                                Enable Port:
+                                <input
+                                    type="checkbox"
+                                    name="enablePort"
+                                    checked={!!properties.enablePort}
+                                    onChange={handleChange}
+                                />
+                            </label>
+                            {(properties.resetPort) && (
+                                <label>
+                                    Reset Edge:
+                                    <select
+                                        name="rstEdge"
+                                        value={properties.rstEdge}
+                                        onChange={handleChange}>
+                                        <option value="rising">Rising</option>
+                                        <option value="falling">Falling</option>
+                                    </select>
+                                </label>
+                            )}
+                        </>
                     )}
+
+
+                    <label>
+                        Clock Edge:
+                        <select
+                            name="clkEdge"
+                            value={properties.clkEdge}
+                            onChange={handleChange}>
+                            <option value="rising">Rising</option>
+                            <option value="falling">Falling</option>
+                        </select>
+                    </label>
                     <div className={styles.radioContainer}>
                         <span>Select DATA width:</span>
                         <div className={styles.radioOption}>
@@ -1052,6 +1206,12 @@ const PropertiesPanel = () => {
                                 value={properties.bandwidth || 0}
                                 onChange={handleChange}
                             />
+                            {errors.bandwidth && (
+                                <div className={styles.errorMessage}>
+                                    <MdErrorOutline className={styles.errorIcon} />
+                                    {errors.bandwidth}
+                                </div>
+                            )}
                         </label>
                     )}
                     {portWidthMode === 'struct' && (
@@ -1104,9 +1264,6 @@ const PropertiesPanel = () => {
                 <button onClick={handleSave} className={styles.saveButton}>
                     Save
                 </button>
-                <button onClick={handleDelete} className={styles.deleteButton}>
-                    Delete
-                </button>
             </div>
             {showSaveNotification && (
                 <div className={styles.saveNotification}>Element saved successfully!</div>
@@ -1130,6 +1287,12 @@ const PropertiesPanel = () => {
                                 value={newPortData.name}
                                 onChange={handleNewPortDataChange}
                             />
+                            {errors.label && (
+                                <div className={styles.errorMessage}>
+                                    <MdErrorOutline className={styles.errorIcon} />
+                                    {errors.label}
+                                </div>
+                            )}
                         </label>
                         <label>
                             Bandwidth:

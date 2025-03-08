@@ -66,7 +66,7 @@ export const JointJSOr = (or: Or) => {
                 strokeWidth: 2,
             },
             label: {
-                text: '',
+                text: `${or.name}`,
                 fontSize: 14,
                 fontFamily: 'Arial',
                 fontWeight: 'bold',

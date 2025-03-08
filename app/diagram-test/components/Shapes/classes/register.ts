@@ -7,6 +7,7 @@ export class Register {
     };
     public dataBandwidth: number;
     public enablePort: boolean;
-    public resetPort: boolean | undefined;
-
+    public resetPort: boolean;
+    public clkEdge?: 'rising' | 'falling';
+    public rstEdge?: 'rising' | 'falling';
 }

@@ -67,7 +67,7 @@ export const JointJSNor = (nor: Nor) => {
                 strokeWidth: 2,
             },
             label: {
-                text: '',
+                text: `${nor.name}`,
                 fontSize: 14,
                 fontFamily: 'Arial',
                 fontWeight: 'bold',

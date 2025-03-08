@@ -1,7 +1,7 @@
 // pages/diagram-test/components/DiagramArea/DiagramArea.tsx
 
 import React, {useRef, useState} from 'react';
-import { shapes } from "@joint/core";
+import { dia, shapes } from "@joint/core";
 import useJointJS from '../../hooks/useJointJS';
 import { useDiagramContext } from '../../context/useDiagramContext';
 import styles from './DiagramArea.module.css';
@@ -54,9 +54,44 @@ const DiagramArea = () => {
         paperElement: paperElement.current
     });
 
+    function getElType(toolType: string): string {
+        switch (toolType) {
+        case 'and':        return 'and';
+        case 'or':         return 'or';
+        case 'xor':        return 'xor';
+        case 'xnor':       return 'xnor';
+        case 'nand':       return 'nand';
+        case 'nor':        return 'nor';
+        case 'not':        return 'not';
+        case 'input':      return 'input';
+        case 'output':     return 'output';
+        case 'multiplexer':return 'multiplexer';
+        case 'decoder':    return 'decoder';
+        case 'encoder':    return 'encoder';
+        case 'adder':      return 'adder';
+        case 'sub':        return 'subtractor';
+        case 'comp':       return 'comparator';
+        case 'newModule':  return 'newModule';
+        case 'ram':        return 'ram';
+        case 'register':   return 'register';
+        default:           return toolType;
+        }
+    }
+
+    function getNextName(graph: dia.Graph, elType: string): string {
+        const all = graph.getElements();
+        const sameTypeCount = all.filter(el => el.attributes.elType === elType).length;
+        return elType + '_' + (sameTypeCount + 1);
+    }
+
+
     const handleDrop = (event: React.DragEvent) => {
         event.preventDefault();
         const toolType = event.dataTransfer.getData('toolType');
+
+        const elType = getElType(toolType);
+        const elementName = getNextName(graph, elType);
+
         const rect = paperElement.current!.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
@@ -66,118 +101,122 @@ const DiagramArea = () => {
         switch(toolType) {
         case 'and':
             const and = new And();
-            and.name = "New And";
+            and.name = elementName;
             and.position = {x, y};
             and.inPorts = 2;
             element = JointJSAnd(and);
             break;
         case 'or':
             const or = new Or();
-            or.name = "New Or";
+            or.name = elementName;
             or.position = {x, y};
             or.inPorts = 2;
             element = JointJSOr(or);
             break;
         case 'xor':
             const xor = new Xor();
-            xor.name = "New Xor";
+            xor.name = elementName;
             xor.position = {x, y};
             xor.inPorts = 2;
             element = JointJSXor(xor);
             break;
         case 'xnor':
             const xnor = new Xnor();
-            xnor.name = "New Xnor";
+            xnor.name = elementName;
             xnor.position = {x, y};
             xnor.inPorts = 2;
             element = JointJSXnor(xnor);
             break;
         case 'input':
             const input = new Port();
-            input.name = "New Port";
+            input.name = elementName;
             input.position = {x, y};
             input.direction = "in";
             element = JointJSInputPort(input);
             break;
         case 'nand':
             const nand = new Nand();
-            nand.name = "New Nand";
+            nand.name = elementName;
             nand.position = {x, y};
             nand.inPorts = 2;
             element = JointJSNand(nand);
             break;
         case 'nor':
             const nor = new Nor();
-            nor.name = "New Nor";
+            nor.name = elementName;
             nor.position = {x, y};
             nor.inPorts = 2;
             element = JointJSNor(nor);
             break;
         case 'not':
             const not = new Not();
-            not.name = "New Not";
+            not.name = elementName;
             not.position = {x, y};
             element = JointJSNot(not);
             break;
         case 'output':
             const output = new Port();
-            output.name = "New Output";
+            output.name = elementName;
             output.position = {x, y};
             output.direction = "out";
             element = JointJSOutputPort(output);
             break;
         case 'multiplexer':
             const multiplexer = new Multiplexer();
-            multiplexer.name = "New Multiplexer";
+            multiplexer.name = elementName;
             multiplexer.dataPorts = 2;
             multiplexer.position = {x, y};
             element = JointJSMultiplexer(multiplexer);
             break;
         case 'decoder':
             const decoder = new Decoder();
-            decoder.name = "New Decoder";
+            decoder.name = elementName;
             decoder.position = {x, y};
             element = JointJSDecoder(decoder);
             break;
         case 'encoder':
             const encoder = new Encoder();
-            encoder.name = "New Encoder";
+            encoder.name = elementName;
             encoder.position = {x, y};
             element = JointJSEncoder(encoder);
             break;
         case 'adder':
             const adder = new Adder();
-            adder.name = "New Adder";
+            adder.name = elementName;
             adder.position = {x, y};
             element = JointJSAdder(adder);
             break;
         case 'sub':
             const subtractor = new Subtractor();
-            subtractor.name = "New Subtractor";
+            subtractor.name = elementName;
             subtractor.position = {x, y};
             element = JointJSSubtractor(subtractor);
             break;
         case 'comp':
             const comparator = new Comparator();
-            comparator.name = "New Comparator";
+            comparator.name = elementName;
             comparator.type = ">";
             element = JointJSComparator(comparator);
             break;
         case 'newModule':
             const newModule = new Module();
-            newModule.name = "New Module";
-            newModule.instance = "";
+            newModule.name = elementName;
+            newModule.instance = `instance_${elementName}`;
             element = JointJSNewModule(newModule);
             break;
         case 'ram':
             const ram = new Ram();
-            ram.name = "New SRAM";
+            ram.name = elementName;
+            ram.clkEdge = "rising";
             element = JointJSSRam(ram);
             break;
         case 'register':
             const register = new Register();
-            register.name = "New Register";
+            register.name = elementName;
             register.resetPort = true;
+            register.enablePort = true;
+            register.clkEdge = "rising";
+            register.rstEdge = "rising";
             element = JointJSRegister(register);
             break;
         default:

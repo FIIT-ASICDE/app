@@ -5,8 +5,24 @@ export const JointJSRegister = (register: Register) => {
 
     const dimension = 200;
     const portItems = [];
-    const inLeftCount = register.resetPort ? 3 : 2;
-    const registerRefD = register.resetPort ? 'M 0 0 L 50 0 L 50 100 L 0 100 L 0 70 L 10 75 L 0 80 Z' : 'M 0 0 L 50 0 L 50 100 L 0 100 Z';
+    const inLeftCount = 3;
+
+    const registerRefD = register.resetPort
+        ? (register.clkEdge === 'rising'
+            ? (register.rstEdge === 'rising'
+                ? 'M 0 0 L 50 0 L 50 100 L 0 100 L 0 70 L 10 75 L 0 80 Z'  // Case 1
+                : 'M 0 0 L 50 0 L 50 100 L 0 100 L 0 70 L 10 75 L 0 80 Z M 23 2 a 2,2 0 1,0 0,-0.1 Z')  // Case 2
+            : (register.rstEdge === 'rising'
+                ? 'M 0 0 L 50 0 L 50 100 L 0 100 L 0 70 L 10 75 L 0 80 Z M 0 75 a 2,2 0 1,0 0,-0.1 Z'  // Case 6
+                : 'M 0 0 L 50 0 L 50 100 L 0 100 L 0 70 L 10 75 L 0 80 Z M 23 2 a 2,2 0 1,0 0,-0.1 Z M 0 75 a 2,2 0 1,0 0,-0.1 Z'))  // Case 3
+        : (register.clkEdge === 'rising'
+            ? 'M 0 0 L 50 0 L 50 100 L 0 100 L 0 70 L 10 75 L 0 80 Z'  // Case 4
+            : 'M 0 0 L 50 0 L 50 100 L 0 100 L 0 70 L 10 75 L 0 80 Z M 0 75 a 2,2 0 1,0 0,-0.1 Z');  // Case 5
+
+    // const port_padding_x = register.resetPort && register.clkEdge !== 'rising' ? 25 : 0;
+    // const port_padding_y = register.resetPort && register.rstEdge === 'falling' ? 105 : -5;
+
+
     const portLeftY = (idx: number) => (dimension / (inLeftCount + 1)) * (idx + 1);
 
     portItems.push({
@@ -20,57 +36,60 @@ export const JointJSRegister = (register: Register) => {
             portLabel: { text: 'D' }
         }
     });
-
-    portItems.push({
-        id: 'input2',
-        group: 'input',
-        args: {
-            x: 0,
-            y: portLeftY(1)
-        },
-        attrs: {
-            portLabel: { text: 'EN' }
-        }
-    });
-    if (register.resetPort) {
+    if (register.enablePort) {
         portItems.push({
-            id: 'input3',
+            id: 'input2',
             group: 'input',
             args: {
                 x: 0,
-                y: portLeftY(2)
+                y: portLeftY(1)
             },
             attrs: {
-                portLabel: {
-                    text: 'RST',
-                    x: 25
-                }
+                portLabel: { text: 'EN' }
             }
         });
     }
 
+
     portItems.push({
-        id: 'input4',
+        id: 'input3',
         group: 'input',
         args: {
-            x: dimension / 4,
-            y: -15
+            x: 0,
+            y: portLeftY(2)
         },
         attrs: {
-            portLine: {
-                x1: 0,  y1: 15,
-                x2: 0,  y2: -5,
-            },
-            portCircle: {
-                cx: 0,  cy: -5
-            },
             portLabel: {
                 text: 'CLK',
-                x: -10,
-                y: 30
+                x: 25
             }
         }
     });
+
+    if (register.resetPort) {
+        portItems.push({
+            id: 'input4',
+            group: 'input',
+            args: {
+                x: dimension / 4,
+                y: -15
+            },
+            attrs: {
+                portLine: {
+                    x1: 0, y1: 15,
+                    x2: 0, y2: -5,
+                },
+                portCircle: {
+                    cx: 0, cy: -5
+                },
+                portLabel: {
+                    text: 'RST',
+                    x: -10,
+                    y: 35
+                }
+            }
+        });
+    }
 
     portItems.push({
         id: 'output1',
@@ -89,6 +108,9 @@ export const JointJSRegister = (register: Register) => {
         name: register.name,
         bandwidth: register.dataBandwidth,
         resetPort: register.resetPort,
+        enablePort: register.enablePort,
+        clkEdge: register.clkEdge,
+        rstEdge: register.rstEdge,
         position: { x: register.position?.x || 100, y: register.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {

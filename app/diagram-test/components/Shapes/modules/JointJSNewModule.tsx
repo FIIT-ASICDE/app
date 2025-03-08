@@ -10,7 +10,7 @@ export const JointJSNewModule = (module: Module) => {
     const outCount = moduleOutPorts.length;
 
     const maxPorts = Math.max(inCount, outCount, 2);
-    const baseWidth = 150;
+    const baseWidth = 160;
     const baseHeight = 100;
     const stepWidth = 10;
     const stepHeight = 40;

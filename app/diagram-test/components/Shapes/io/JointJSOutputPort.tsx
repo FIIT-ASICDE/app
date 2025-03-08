@@ -28,7 +28,7 @@ export const JointJSOutputPort = (output: Port) => {
                 strokeWidth: 2,
             },
             label: {
-                text: '',
+                text: `${output.name}`,
                 fontSize: 14,
                 fontFamily: 'Arial',
                 fontWeight: 'bold',

@@ -66,7 +66,7 @@ export const JointJSXnor = (xnor: Xnor) => {
                 strokeWidth: 2,
             },
             label: {
-                text: '',
+                text: `${xnor.name}`,
                 fontSize: 14,
                 fontFamily: 'Arial',
                 fontWeight: 'bold',

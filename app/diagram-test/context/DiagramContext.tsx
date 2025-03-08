@@ -18,6 +18,8 @@ interface DiagramContextProps {
     isPanning: boolean;
     togglePanning: () => void;
     removeElement: () => void;
+    hasFormErrors: boolean;
+    setHasFormErrors: (val: boolean) => void;
 }
 
 export const DiagramContext = createContext<DiagramContextProps | undefined>(undefined);
@@ -36,6 +38,7 @@ export const DiagramProvider = ({ children }: DiagramProviderProps) => {
     const [paper, setPaper] = useState<dia.Paper | null>(null);
     const [selectedElement, setSelectedElement] = useState<dia.Cell | null>(null);
     const [isPanning, setIsPanning] = useState(false);
+    const [hasFormErrors, setHasFormErrors] = useState<boolean>(false);
 
     const updateElement = (cell: dia.Cell) => {
         graph.addCell(cell);
@@ -92,6 +95,8 @@ export const DiagramProvider = ({ children }: DiagramProviderProps) => {
                 isPanning,
                 removeElement,
                 togglePanning,
+                hasFormErrors,
+                setHasFormErrors,
 
             }}
         >

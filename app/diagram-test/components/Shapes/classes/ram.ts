@@ -7,5 +7,6 @@ export class Ram {
     };
     public dataBandwidth: number;
     public addressBandwidth: number;
+    clkEdge?: 'rising' | 'falling';
 
 }

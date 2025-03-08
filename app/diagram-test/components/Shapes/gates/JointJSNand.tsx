@@ -40,7 +40,7 @@ export const JointJSNand = (nand: Nand) => {
                 strokeWidth: 2,
             },
             label: {
-                text: '',
+                text: `${nand.name}`,
                 fontSize: 14,
                 fontFamily: 'Arial',
                 fontWeight: 'bold',

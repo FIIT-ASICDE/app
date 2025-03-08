@@ -40,7 +40,7 @@ export const JointJSNot = (not: Not) => {
                 strokeWidth: 2,
             },
             label: {
-                text: '',
+                text: `${not.name}`,
                 fontSize: 14,
                 fontFamily: 'Arial',
                 fontWeight: 'bold',

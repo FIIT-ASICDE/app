@@ -43,7 +43,7 @@ export const JointJSAnd = (and: And) => {
                 strokeWidth: 2,
             },
             label: {
-                text: '',
+                text: `${and.name}`,
                 fontSize: 14,
                 fontFamily: 'Arial',
                 fontWeight: 'bold',

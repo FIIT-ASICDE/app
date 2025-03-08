@@ -6,6 +6,11 @@ export const JointJSSRam = (ram: Ram) => {
     const dimension = 200;
     const portItems = [];
 
+    const ramRefD = ram.clkEdge === 'rising'
+        ? 'M 0 0 L 30 0 L 25 10 L 20 0 L 50 0 L 50 100 L 0 100 Z'
+        : 'M 0 0 L 30 0 L 25 10 L 20 0 L 50 0 L 50 100 L 0 100 Z M 23 2 a 2,2 0 1,0 0,-0.1 Z';
+
+
     portItems.push({
         id: 'input1',
         group: 'input',
@@ -77,13 +82,14 @@ export const JointJSSRam = (ram: Ram) => {
     return new shapes.standard.Path({
         elType: 'ram',
         name: ram.name,
+        clkEdge: ram.clkEdge,
         bandwidth: ram.dataBandwidth,
         addressBandwidth: ram.addressBandwidth,
         position: { x: ram.position?.x || 100, y: ram.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {
             body: {
-                refD: 'M 0 0 L 30 0 L 25 10 L 20 0 L 50 0 L 50 100 L 0 100 Z',
+                refD: ramRefD,
                 fill: 'white',
                 stroke: '#000',
                 strokeWidth: 2,
