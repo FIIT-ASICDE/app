@@ -1,13 +1,12 @@
 import { Port } from '@/app/diagram-test/models/Port';
 
-export class Module {
+export class BitSelect {
     public name: string;
     public id: string;
-    public instance: string;
+    public dataBandwidth: number;
     public position: {
         x: number,
         y: number
     };
-    public inPorts: Port[];
     public outPorts: Port[];
 }

@@ -40,6 +40,10 @@ import { JointJSSRam } from '../Shapes/memory/JointJSSRam';
 import { Ram } from '../Shapes/classes/ram';
 import { JointJSRegister } from '../Shapes/memory/JointJSRegister';
 import { Register } from '../Shapes/classes/register';
+import { JointJSBitSelect } from '../Shapes/bitOperations/JointJSBitSelect';
+import { BitSelect } from '../Shapes/classes/bitSelect';
+import { JointJSBitCombine } from '../Shapes/bitOperations/JointJSBitCombine';
+import { BitCombine } from '../Shapes/classes/bitCombine';
 import {useDiagramEvents} from "@/app/diagram-test/hooks/useDiagramEvents";
 
 
@@ -74,6 +78,8 @@ const DiagramArea = () => {
         case 'newModule':  return 'newModule';
         case 'ram':        return 'ram';
         case 'register':   return 'register';
+        case 'bitSelect':   return 'bitSelect';
+        case 'bitCombine':   return 'bitCombine';
         default:           return toolType;
         }
     }
@@ -218,6 +224,18 @@ const DiagramArea = () => {
             register.clkEdge = "rising";
             register.rstEdge = "rising";
             element = JointJSRegister(register);
+            break;
+        case 'bitSelect':
+            const bitSelect = new BitSelect();
+            bitSelect.name = elementName;
+            bitSelect.position = {x, y};
+            element = JointJSBitSelect(bitSelect);
+            break;
+        case 'bitCombine':
+            const bitCombine = new BitCombine();
+            bitCombine.name = elementName;
+            bitCombine.position = {x, y};
+            element = JointJSBitCombine(bitCombine);
             break;
         default:
             return;

@@ -25,9 +25,14 @@ import {JointJSRegister} from "../Shapes/memory/JointJSRegister";
 import {Register} from "../Shapes/classes/register";
 import {JointJSSRam} from "../Shapes/memory/JointJSSRam";
 import {Ram} from "../Shapes/classes/ram";
+import {JointJSBitCombine} from "../Shapes/bitOperations/JointJSBitCombine";
+import {BitCombine} from "../Shapes/classes/bitCombine";
+import {JointJSBitSelect} from "../Shapes/bitOperations/JointJSBitSelect";
+import {BitSelect} from "../Shapes/classes/bitSelect";
 import { MdErrorOutline } from "react-icons/md";
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { dia } from "@joint/core";
+import { prop } from "types-ramda/es";
 interface Properties {
     label?: string;
     stroke?: string;
@@ -37,8 +42,8 @@ interface Properties {
     addressBandwidth?: number;
     inputPorts?: number;
     instance?: string;
-    inPortsModule?: { name: string; bandwidth: number }[];
-    outPortsModule?: { name: string; bandwidth: number }[];
+    createdInPorts?: { name: string; bandwidth: number }[];
+    createdOutPorts?: { name: string; bandwidth: number }[];
     resetPort?: boolean;
     enablePort?: boolean;
     clkEdge?: 'rising' | 'falling';
@@ -57,8 +62,8 @@ const PropertiesPanel = () => {
         stroke: '#000',
         strokeWidth: 2,
         comparatorType: '',
-        inPortsModule: [],
-        outPortsModule: [],
+        createdInPorts: [],
+        createdOutPorts: [],
         resetPort: false,
         enablePort: false,
         clkEdge: 'rising',
@@ -88,8 +93,8 @@ const PropertiesPanel = () => {
                 label: selectedElement.attributes.attrs?.label?.text || '',
                 bandwidth: selectedElement.attributes.bandwidth || 1,
                 inputPorts: selectedElement.attributes.inPorts || 0,
-                inPortsModule: selectedElement.attributes.moduleInPorts || [],
-                outPortsModule: selectedElement.attributes.moduleOutPorts || [],
+                createdInPorts: selectedElement.attributes.moduleInPorts || selectedElement.attributes.combineInPorts || [],
+                createdOutPorts: selectedElement.attributes.moduleOutPorts || selectedElement.attributes.selectOutPorts || [],
                 instance: selectedElement.attributes.instance || '',
                 addressBandwidth: selectedElement.attributes.addressBandwidth || 8,
                 resetPort: selectedElement.attributes.resetPort ?? false,
@@ -123,8 +128,8 @@ const PropertiesPanel = () => {
                 stroke: '#000',
                 strokeWidth: 2,
                 comparatorType: '',
-                inPortsModule: [],
-                outPortsModule: [],
+                createdInPorts: [],
+                createdOutPorts: [],
                 resetPort: false,
                 enablePort: false,
             });
@@ -266,24 +271,24 @@ const PropertiesPanel = () => {
         // Если мы РЕДАКТИРУЕМ порт
         if (isEditingPort && editPortIndex !== null) {
             if (editPortType === 'input') {
-                const updated = [...properties.inPortsModule];
+                const updated = [...properties.createdInPorts];
                 updated[editPortIndex] = {
                     name: newPortData.name,
                     bandwidth: newPortData.bandwidth,
                 };
                 setProperties(prev => ({
                     ...prev,
-                    inPortsModule: updated,
+                    createdInPorts: updated,
                 }));
             } else {
-                const updated = [...properties.outPortsModule];
+                const updated = [...properties.createdOutPorts];
                 updated[editPortIndex] = {
                     name: newPortData.name,
                     bandwidth: newPortData.bandwidth,
                 };
                 setProperties(prev => ({
                     ...prev,
-                    outPortsModule: updated,
+                    createdOutPorts: updated,
                 }));
             }
         }
@@ -292,8 +297,8 @@ const PropertiesPanel = () => {
             if (newPortType === 'input') {
                 setProperties(prev => ({
                     ...prev,
-                    inPortsModule: [
-                        ...prev.inPortsModule,
+                    createdInPorts: [
+                        ...prev.createdInPorts,
                         {
                             name: newPortData.name,
                             bandwidth: newPortData.bandwidth,
@@ -303,8 +308,8 @@ const PropertiesPanel = () => {
             } else {
                 setProperties(prev => ({
                     ...prev,
-                    outPortsModule: [
-                        ...prev.outPortsModule,
+                    createdOutPorts: [
+                        ...prev.createdOutPorts,
                         {
                             name: newPortData.name,
                             bandwidth: newPortData.bandwidth,
@@ -327,13 +332,13 @@ const PropertiesPanel = () => {
     };
 
 
-    const handleMultiplexerPortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const portCount = parseInt(event.target.value);
+    const handleMultiplexerPortChange = () => {
         if (selectedElement?.attributes.elType === 'multiplexer') {
             const { x, y } = selectedElement.position();
             const multiplexerData = new Multiplexer();
-            multiplexerData.name = selectedElement.attributes.attrs?.label?.text || 'Default Name';
-            multiplexerData.dataPorts = portCount;
+            multiplexerData.name = properties.label || '';
+            multiplexerData.dataBandwidth = properties.bandwidth || 1;
+            multiplexerData.dataPorts = properties.inputPorts || 2;
             multiplexerData.position = { x, y };
 
             graph.removeCells([selectedElement]);
@@ -350,11 +355,11 @@ const PropertiesPanel = () => {
         newMod.name = properties.label || '';
         newMod.instance = properties.instance || '';
 
-        newMod.inPorts = properties.inPortsModule.map((p, i) => ({
+        newMod.inPorts = properties.createdInPorts.map((p, i) => ({
             name: p.name,
             bandwidth: p.bandwidth,
         }));
-        newMod.outPorts = properties.outPortsModule.map((p, i) => ({
+        newMod.outPorts = properties.createdOutPorts.map((p, i) => ({
             name: p.name,
             bandwidth: p.bandwidth,
         }));
@@ -369,6 +374,48 @@ const PropertiesPanel = () => {
 
         setSelectedElement(newModuleCell);
     };
+    const handleBitSelectPortChange = () => {
+        if (!selectedElement) return;
+
+        const newBitSelect = new BitSelect();
+        newBitSelect.name = properties.label || '';
+
+        newBitSelect.outPorts = properties.createdOutPorts.map((p, i) => ({
+            name: p.name,
+            bandwidth: p.bandwidth,
+        }));
+
+        const { x, y } = selectedElement.position();
+        newBitSelect.position = { x, y };
+
+        graph.removeCells([selectedElement]);
+
+        const newBitSelectCell = JointJSBitSelect(newBitSelect);
+        graph.addCell(newBitSelectCell);
+
+        setSelectedElement(newBitSelectCell);
+    };
+    const handleBitCombinePortChange = () => {
+        if (!selectedElement) return;
+
+        const bitCombine = new BitCombine();
+        bitCombine.name = properties.label || '';
+
+        bitCombine.inPorts = properties.createdInPorts.map((p, i) => ({
+            name: p.name,
+            bandwidth: p.bandwidth,
+        }));
+
+        const { x, y } = selectedElement.position();
+        bitCombine.position = { x, y };
+
+        graph.removeCells([selectedElement]);
+
+        const newBitCombineCell = JointJSBitCombine(bitCombine);
+        graph.addCell(newBitCombineCell);
+
+        setSelectedElement(newBitCombineCell);
+    };
     const handleEditPort = (portType: 'input' | 'output', index: number) => {
         setIsEditingPort(true);
         setEditPortIndex(index);
@@ -377,8 +424,8 @@ const PropertiesPanel = () => {
 
         // Находим текущий порт
         const currentPort = portType === 'input'
-            ? properties.inPortsModule[index]
-            : properties.outPortsModule[index];
+            ? properties.createdInPorts[index]
+            : properties.createdOutPorts[index];
 
         // Заполняем форму (modal) данными порта
         setNewPortData({
@@ -390,13 +437,13 @@ const PropertiesPanel = () => {
     };
     const handleDeletePort = (portType: 'input' | 'output', index: number) => {
         if (portType === 'input') {
-            const updatedInPorts = [...properties.inPortsModule];
+            const updatedInPorts = [...properties.createdInPorts];
             updatedInPorts.splice(index, 1); // удаляем порт
-            setProperties(prev => ({ ...prev, inPortsModule: updatedInPorts }));
+            setProperties(prev => ({ ...prev, createdInPorts: updatedInPorts }));
         } else {
-            const updatedOutPorts = [...properties.outPortsModule];
+            const updatedOutPorts = [...properties.createdOutPorts];
             updatedOutPorts.splice(index, 1);
-            setProperties(prev => ({ ...prev, outPortsModule: updatedOutPorts }));
+            setProperties(prev => ({ ...prev, createdOutPorts: updatedOutPorts }));
         }
     };
 
@@ -482,6 +529,10 @@ const PropertiesPanel = () => {
                 strokeWidth: properties.strokeWidth || 2,
             };
         }
+        else if (selectedElement.attributes.elType === 'multiplexer') {
+            handleMultiplexerPortChange();
+            return;
+        }
         else if (selectedElement.attributes.elType === 'comparator') {
             attrsToUpdate.label = { text: properties.comparatorType + '\n\n\n\n' + properties.label };
         }
@@ -505,6 +556,14 @@ const PropertiesPanel = () => {
             // attrsToUpdate.label = { text: properties.label + '\n' + properties.instance };
             return;
 
+        }
+        else if (selectedElement.attributes.elType === 'bitCombine') {
+            handleBitCombinePortChange()
+            return;
+        }
+        else if (selectedElement.attributes.elType === 'bitSelect') {
+            handleBitSelectPortChange()
+            return;
         }
         else if (selectedElement.attributes.elType === 'adder') {
             attrsToUpdate.label = { text: '+\n\n\n\n' + properties.label };
@@ -900,7 +959,7 @@ const PropertiesPanel = () => {
 
                     <label>
                         Multiplexer type:
-                        <select onChange={handleMultiplexerPortChange} defaultValue="2" name="inputPorts">
+                        <select onChange={handleChange} defaultValue="2" name="inputPorts">
                             <option value="2">2-to-1</option>
                             <option value="4">4-to-1</option>
                             <option value="8">8-to-1</option>
@@ -1037,7 +1096,7 @@ const PropertiesPanel = () => {
 
                     <div className={styles.portSection}>
                         <h4>Input Ports</h4>
-                        {properties.inPortsModule.map((p, idx) => (
+                        {properties.createdInPorts.map((p, idx) => (
                             <div key={idx} className={styles.portItem}>
                                 <span>{p.name} (bw={p.bandwidth})</span>
 
@@ -1058,7 +1117,7 @@ const PropertiesPanel = () => {
                     </div>
                     <div className={styles.portSection}>
                         <h4>Output Ports</h4>
-                        {properties.outPortsModule.map((p, idx) => (
+                        {properties.createdOutPorts.map((p, idx) => (
                             <div key={idx} className={styles.portItem}>
                                 <span>{p.name} (bw={p.bandwidth})</span>
 
@@ -1231,6 +1290,76 @@ const PropertiesPanel = () => {
                         </label>
                     )}
                 </>
+            )}
+            {(['bitCombine', 'bitSelect'].includes(selectedElement.attributes.elType)) && (
+                <>
+                    <label>
+                        {toTitleCase(selectedElement.attributes.elType)} signal name:
+                        <input
+                            type="text"
+                            name="label"
+                            placeholder="Insert name..."
+                            value={properties.label || ''}
+                            onChange={handleChange}
+                        />
+                        {errors.label && (
+                            <div className={styles.errorMessage}>
+                                <MdErrorOutline className={styles.errorIcon} />
+                                {errors.label}
+                            </div>
+                        )}
+                    </label>
+                    {(['bitCombine'].includes(selectedElement.attributes.elType)) && (
+                        <div className={styles.portSection}>
+                            <h4>Input Ports</h4>
+                            {properties.createdInPorts.map((p, idx) => (
+                                <div key={idx} className={styles.portItem}>
+                                    <span>{p.name} (bw={p.bandwidth})</span>
+
+                                    <FaEdit
+                                        className={styles.portIcon}
+                                        onClick={() => handleEditPort('input', idx)}
+                                    />
+
+                                    <FaTrash
+                                        className={styles.portIcon}
+                                        onClick={() => handleDeletePort('input', idx)}
+                                    />
+                                </div>
+                            ))}
+                            <button onClick={handleAddInputPort} className={styles.addPortButton}>
+                                Add Input Port
+                            </button>
+                        </div>
+                    )}
+                    {(['bitSelect'].includes(selectedElement.attributes.elType)) && (
+                        <div className={styles.portSection}>
+                            <h4>Output Ports</h4>
+                            {properties.createdOutPorts.map((p, idx) => (
+                                <div key={idx} className={styles.portItem}>
+                                    <span>{p.name} (bw={p.bandwidth})</span>
+
+                                    <FaEdit
+                                        className={styles.portIcon}
+                                        onClick={() => handleEditPort('output', idx)}
+                                    />
+
+                                    <FaTrash
+                                        className={styles.portIcon}
+                                        onClick={() => handleDeletePort('output', idx)}
+                                    />
+                                </div>
+                            ))}
+                            <button onClick={handleAddOutputPort} className={styles.addPortButton}>
+                                Add Output Port
+                            </button>
+                        </div>
+                    )}
+
+
+
+                </>
+
             )}
 
 

@@ -31,6 +31,7 @@ const Sidebar = () => {
     const [isActionsCollapsed, setIsActionsCollapsed] = useState(true);
     const [isComplexLogicCollapsed, setIsComplexLogicCollapsed] = useState(true);
     const [isMemoryCollapsed, setIsMemoryCollapsed] = useState(true);
+    const [isBitOperationsCollapsed, setIsBitOperationsCollapsed] = useState(true);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [gridColumns, setGridColumns] = useState(3);
 
@@ -448,6 +449,90 @@ const Sidebar = () => {
                                 <Image
                                     src="/images/svg/Register.svg"
                                     alt="REGISTER"
+                                    className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
+                                />
+                            </div>
+                        </Tippy>
+
+                    </div>
+                )}
+            </div>
+            <div>
+                <div className={styles.groupHeader} onClick={() => setIsMemoryCollapsed(!isMemoryCollapsed)}>
+                    <FaPlug className={styles.collapseIcon} />
+                    <h3>Memory</h3>
+                    <FaBars className={styles.toggleIcon} />
+                </div>
+                {!isMemoryCollapsed && (
+                    <div style={iconListStyle}>
+                        <Tippy content="SRAM" placement="right" delay={[500, 0]}>
+                            <div
+                                className={styles.iconItem}
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, 'ram')}
+                            >
+                                <Image
+                                    src="/images/svg/Ram.svg"
+                                    alt="SRAM"
+                                    className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
+                                />
+                            </div>
+                        </Tippy>
+                        <Tippy content="REGISTER" placement="right" delay={[500, 0]}>
+                            <div
+                                className={styles.iconItem}
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, 'register')}
+                            >
+                                <Image
+                                    src="/images/svg/Register.svg"
+                                    alt="REGISTER"
+                                    className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
+                                />
+                            </div>
+                        </Tippy>
+
+                    </div>
+                )}
+            </div>
+            <div>
+                <div className={styles.groupHeader} onClick={() => setIsBitOperationsCollapsed(!isBitOperationsCollapsed)}>
+                    <FaPlug className={styles.collapseIcon} />
+                    <h3>Bit Operations</h3>
+                    <FaBars className={styles.toggleIcon} />
+                </div>
+                {!isBitOperationsCollapsed && (
+                    <div style={iconListStyle}>
+                        <Tippy content="Bit Select" placement="right" delay={[500, 0]}>
+                            <div
+                                className={styles.iconItem}
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, 'bitSelect')}
+                            >
+                                <Image
+                                    src="/images/svg/BitSelect.svg"
+                                    alt="Bit Select"
+                                    className={styles.svgIcon}
+                                    width={40}
+                                    height={40}
+                                />
+                            </div>
+                        </Tippy>
+                        <Tippy content="Bit Combine" placement="right" delay={[500, 0]}>
+                            <div
+                                className={styles.iconItem}
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, 'bitCombine')}
+                            >
+                                <Image
+                                    src="/images/svg/BitCombine.svg"
+                                    alt="Bit Combine"
                                     className={styles.svgIcon}
                                     width={40}
                                     height={40}

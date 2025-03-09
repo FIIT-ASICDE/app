@@ -19,12 +19,9 @@ export function useHotkeys({
 }: UseHotkeysOptions) {
 
     useEffect(() => {
-        console.debug('enabled');
-
         const handleKeyDown = (e: KeyboardEvent) => {
             const isCtrlOrCmd = e.ctrlKey || e.metaKey;
             const key = e.key.toLowerCase();
-            console.log(key);
             if (isCtrlOrCmd && e.key.toLowerCase() === 's') {
                 e.preventDefault();
                 onSave?.();
