@@ -4,6 +4,9 @@ create extension if not exists pg_trgm;
 CREATE TYPE "OrganizationRole" AS ENUM ('MEMBER', 'ADMIN');
 
 -- CreateEnum
+CREATE TYPE "InvitationStatus" AS ENUM ('PENDING', 'ACCEPTED', 'DECLINED');
+
+-- CreateEnum
 CREATE TYPE "RepoRole" AS ENUM ('ADMIN', 'CONTRIBUTOR', 'VIEWER', 'OWNER');
 
 -- CreateEnum
@@ -15,6 +18,7 @@ CREATE TABLE "Organization" (
     "name" TEXT NOT NULL,
     "image" TEXT,
     "bio" TEXT,
+    "hideMembers" BOOLEAN,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -33,9 +37,12 @@ CREATE TABLE "OrganizationUser" (
 -- CreateTable
 CREATE TABLE "OrganizationUserInvitation" (
     "userMetadataId" UUID NOT NULL,
+    "senderMetadataId" UUID NOT NULL,
     "organizationId" UUID NOT NULL,
-    "isPending" BOOLEAN NOT NULL DEFAULT true,
+    "status" "InvitationStatus" NOT NULL DEFAULT 'PENDING',
     "role" "OrganizationRole" NOT NULL DEFAULT 'MEMBER',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "resolvedAt" TIMESTAMP(3),
 
     CONSTRAINT "OrganizationUserInvitation_pkey" PRIMARY KEY ("userMetadataId","organizationId")
 );
@@ -60,7 +67,20 @@ CREATE TABLE "RepoUserOrganization" (
     "organizationId" UUID,
     "repoId" UUID NOT NULL,
     "repoRole" "RepoRole" NOT NULL DEFAULT 'OWNER',
-    "lastVisitedAt" TIMESTAMP NOT NULL
+    "lastVisitedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CreateTable
+CREATE TABLE "RepoUserInvitation" (
+    "userMetadataId" UUID NOT NULL,
+    "senderMetadataId" UUID NOT NULL,
+    "repoId" UUID NOT NULL,
+    "status" "InvitationStatus" NOT NULL DEFAULT 'PENDING',
+    "role" "RepoRole" NOT NULL DEFAULT 'CONTRIBUTOR',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "resolvedAt" TIMESTAMP(3),
+
+    CONSTRAINT "RepoUserInvitation_pkey" PRIMARY KEY ("userMetadataId","repoId")
 );
 
 -- CreateTable
@@ -127,6 +147,9 @@ CREATE TABLE "VerificationToken" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Organization_name_key" ON "Organization"("name");
+
+-- CreateIndex
 CREATE INDEX "organization_name_trgm_idx" ON "Organization" USING GIN ("name" gin_trgm_ops);
 
 -- CreateIndex
@@ -134,6 +157,12 @@ CREATE INDEX "OrganizationUser_userMetadataId_idx" ON "OrganizationUser"("userMe
 
 -- CreateIndex
 CREATE INDEX "OrganizationUser_organizationId_idx" ON "OrganizationUser"("organizationId");
+
+-- CreateIndex
+CREATE INDEX "OrganizationUserInvitation_senderMetadataId_idx" ON "OrganizationUserInvitation"("senderMetadataId");
+
+-- CreateIndex
+CREATE INDEX "OrganizationUserInvitation_organizationId_idx" ON "OrganizationUserInvitation"("organizationId");
 
 -- CreateIndex
 CREATE INDEX "Repo_name_idx" ON "Repo"("name");
@@ -149,6 +178,12 @@ CREATE INDEX "RepoUserOrganization_repoId_idx" ON "RepoUserOrganization"("repoId
 
 -- CreateIndex
 CREATE UNIQUE INDEX "RepoUserOrganization_userMetadataId_repoId_key" ON "RepoUserOrganization"("userMetadataId", "repoId");
+
+-- CreateIndex
+CREATE INDEX "RepoUserInvitation_senderMetadataId_idx" ON "RepoUserInvitation"("senderMetadataId");
+
+-- CreateIndex
+CREATE INDEX "RepoUserInvitation_repoId_idx" ON "RepoUserInvitation"("repoId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
@@ -175,10 +210,13 @@ ALTER TABLE "OrganizationUser" ADD CONSTRAINT "OrganizationUser_userMetadataId_f
 ALTER TABLE "OrganizationUser" ADD CONSTRAINT "OrganizationUser_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "OrganizationUserInvitation" ADD CONSTRAINT "OrganizationUserInvitation_userMetadataId_fkey" FOREIGN KEY ("userMetadataId") REFERENCES "UserMetadata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "OrganizationUserInvitation" ADD CONSTRAINT "fk_invitation_user_org" FOREIGN KEY ("userMetadataId") REFERENCES "UserMetadata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "OrganizationUserInvitation" ADD CONSTRAINT "OrganizationUserInvitation_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "OrganizationUserInvitation" ADD CONSTRAINT "fk_invitation_sender_org" FOREIGN KEY ("senderMetadataId") REFERENCES "UserMetadata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "OrganizationUserInvitation" ADD CONSTRAINT "fk_invitation_organization" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "RepoUserOrganization" ADD CONSTRAINT "RepoUserOrganization_userMetadataId_fkey" FOREIGN KEY ("userMetadataId") REFERENCES "UserMetadata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -188,6 +226,15 @@ ALTER TABLE "RepoUserOrganization" ADD CONSTRAINT "RepoUserOrganization_organiza
 
 -- AddForeignKey
 ALTER TABLE "RepoUserOrganization" ADD CONSTRAINT "RepoUserOrganization_repoId_fkey" FOREIGN KEY ("repoId") REFERENCES "Repo"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "RepoUserInvitation" ADD CONSTRAINT "fk_invitation_user_repo" FOREIGN KEY ("userMetadataId") REFERENCES "UserMetadata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "RepoUserInvitation" ADD CONSTRAINT "fk_invitation_sender_repo" FOREIGN KEY ("senderMetadataId") REFERENCES "UserMetadata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "RepoUserInvitation" ADD CONSTRAINT "fk_invitation_repo" FOREIGN KEY ("repoId") REFERENCES "Repo"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UserMetadata" ADD CONSTRAINT "UserMetadata_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

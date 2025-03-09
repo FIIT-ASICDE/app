@@ -6,6 +6,7 @@ model Organization {
   users                      OrganizationUser[]
   userOrganizationRepo       RepoUserOrganization[]
   OrganizationUserInvitation OrganizationUserInvitation[]
+  hideMembers                Boolean?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -39,7 +40,7 @@ model OrganizationUserInvitation {
   status       InvitationStatus @default(PENDING)
   role         OrganizationRole @default(MEMBER)
   createdAt    DateTime         @default(now())
-  UserMetadata UserMetadata     @relation(fields: [userMetadataId], references: [id])
+  resolvedAt   DateTime?
 
   @@id([userMetadataId, organizationId])
   @@index([senderMetadataId])

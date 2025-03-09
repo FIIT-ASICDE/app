@@ -152,3 +152,8 @@ export const editOrganisationFormSchema = z.object({
         )
         .optional(),
 });
+
+export const leaveOrgSchema = z.object({
+    organizationId: z.string().uuid(),
+    newAdminUserId: z.string().uuid().optional(),
+});

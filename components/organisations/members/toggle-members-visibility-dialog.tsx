@@ -1,7 +1,8 @@
 "use client";
 
+import { api } from "@/lib/trpc/react";
 import { OrganisationDisplay } from "@/lib/types/organisation";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,36 +17,36 @@ import {
 
 interface ToggleMembersVisibilityDialogProps {
     organisation: OrganisationDisplay;
+    afterToggleAction?: () => void;
 }
 
 export const ToggleMembersVisibilityDialog = ({
     organisation,
+    afterToggleAction,
 }: ToggleMembersVisibilityDialogProps) => {
+    const showMembers = organisation.showMembers;
+
     const getChangeMembersVisibilityMessage = () => {
         return (
             <span>
                 This will result in{" "}
                 <span className="font-bold">
-                    {organisation.showMembers ? "hiding" : "showing"}
+                    {showMembers ? "hiding" : "showing"}
                 </span>{" "}
-                the members of your organisation{" "}
-                {organisation.showMembers ? "from" : "to"} the public.
+                the members of your organisation {showMembers ? "from" : "to"}{" "}
+                the public.
             </span>
         );
     };
 
+    const memberVisibilityMutation = api.org.setShowMembers.useMutation();
     const handleMembersVisibilityChange = () => {
-        /* TODO: change visibility */
-        console.log(
-            "Organisation " +
-                organisation.name +
-                " with ID: " +
-                organisation.id +
-                " toggled members visibility from " +
-                organisation.showMembers +
-                " to " +
-                !organisation.showMembers,
-        );
+        memberVisibilityMutation
+            .mutateAsync({
+                orgId: organisation.id,
+                showMembers: !showMembers,
+            })
+            .then(afterToggleAction);
     };
 
     return (
@@ -55,15 +56,21 @@ export const ToggleMembersVisibilityDialog = ({
                     variant="default"
                     className="w-60 hover:bg-primary-button-hover"
                 >
-                    {organisation.showMembers ? (
-                        <>
-                            <EyeOff />
-                            Hide members
-                        </>
+                    {memberVisibilityMutation.isPending ? (
+                        <Loader2 className="animate-spin" />
                     ) : (
                         <>
-                            <Eye />
-                            Show members
+                            {showMembers ? (
+                                <>
+                                    <EyeOff />
+                                    Hide members
+                                </>
+                            ) : (
+                                <>
+                                    <Eye />
+                                    Show members
+                                </>
+                            )}
                         </>
                     )}
                 </Button>
@@ -86,7 +93,7 @@ export const ToggleMembersVisibilityDialog = ({
                             className="w-full hover:bg-primary-button-hover"
                             variant="default"
                         >
-                            {organisation.showMembers ? (
+                            {showMembers ? (
                                 <>
                                     <EyeOff />
                                     Hide members

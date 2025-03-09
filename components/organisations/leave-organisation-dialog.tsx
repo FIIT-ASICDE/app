@@ -1,8 +1,10 @@
 "use client";
 
+import { api } from "@/lib/trpc/react";
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import { UserDisplay } from "@/lib/types/user";
-import { Search, UserRoundMinus } from "lucide-react";
+import { Loader2, Search, UserRoundMinus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
@@ -28,7 +30,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface LeaveOrganisationDialogProps {
     organisation: OrganisationDisplay;
-    isUserOnlyAdmin: boolean;
+    isUserOnlyAdmin?: boolean;
     possibleAdmins?: Array<UserDisplay>;
 }
 
@@ -37,6 +39,7 @@ export const LeaveOrganisationDialog = ({
     isUserOnlyAdmin,
     possibleAdmins,
 }: LeaveOrganisationDialogProps) => {
+    const router = useRouter();
     const { user } = useUser();
 
     const [leaveOrganisationInput, setLeaveOrganisationInput] =
@@ -47,18 +50,15 @@ export const LeaveOrganisationDialog = ({
     const [commandOpen, setCommandOpen] = useState<boolean>(false);
     const [selectedUser, setSelectedUser] = useState<UserDisplay>();
 
+    const leaveOrgMutation = api.org.leave.useMutation();
+
     const handleLeaveOrganisation = () => {
-        /* TODO: handle leave organisation, also set new selected admin if user was the only admin */
-        console.log(
-            "User with ID: " +
-                user.id +
-                " left an organisation called: " +
-                organisation.name +
-                " with ID: " +
-                organisation.id,
-        );
-        console.log("IsUserOnlyAdmin: " + isUserOnlyAdmin);
-        console.log("Newly selected admin: " + selectedUser);
+        leaveOrgMutation
+            .mutateAsync({
+                organizationId: organisation.id,
+                newAdminUserId: selectedUser?.id,
+            })
+            .then(() => router.replace("/" + user.username));
     };
 
     return (
@@ -67,9 +67,16 @@ export const LeaveOrganisationDialog = ({
                 <Button
                     variant="destructive"
                     className="w-60 hover:bg-destructive-hover"
+                    disabled={leaveOrgMutation.isPending}
                 >
-                    <UserRoundMinus />
-                    Leave organisation
+                    {leaveOrgMutation.isPending ? (
+                        <Loader2 className="animate-spin" />
+                    ) : (
+                        <>
+                            <UserRoundMinus />
+                            Leave organisation
+                        </>
+                    )}
                 </Button>
             </DialogTrigger>
             <DialogContent>

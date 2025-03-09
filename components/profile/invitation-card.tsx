@@ -60,7 +60,11 @@ export const InvitationCard = ({
                             <span className="mx-1 text-destructive">
                                 declined
                             </span>
-                            on {datePretty(invitation.resolvedAt)}
+                            {invitation.resolvedAt && (
+                                <span>
+                                    on {datePretty(invitation.resolvedAt)}
+                                </span>
+                            )}
                         </p>
                     </div>
                 );
