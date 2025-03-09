@@ -17,6 +17,7 @@ import {
     TriangleAlert,
     UserRoundMinus,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { NoData } from "@/components/no-data/no-data";
@@ -40,6 +41,7 @@ interface SettingsPageProps {
 }
 
 export default function SettingsPage({ tab, settings }: SettingsPageProps) {
+    const router = useRouter();
     const organisation: OrganisationDisplay = settings.org;
     const isUserAdmin = settings.isUserAdmin;
     const isUserOnlyAdmin = settings.isUserOnlyAdmin;
@@ -115,6 +117,7 @@ export default function SettingsPage({ tab, settings }: SettingsPageProps) {
                                 </div>
                                 <ToggleMembersVisibilityDialog
                                     organisation={organisation}
+                                    afterToggleAction={router.refresh}
                                 />
                             </div>
                         </CardContent>
@@ -158,12 +161,15 @@ export default function SettingsPage({ tab, settings }: SettingsPageProps) {
                                                     (
                                                         invitation: Invitation,
                                                     ) => (
-                                                        <InvitationCard
+                                                        <div
                                                             key={invitation.id}
-                                                            invitation={
-                                                                invitation
-                                                            }
-                                                        />
+                                                        >
+                                                            <InvitationCard
+                                                                invitation={
+                                                                    invitation
+                                                                }
+                                                            />
+                                                        </div>
                                                     ),
                                                 )}
                                             </div>

@@ -19,7 +19,7 @@ import {
 } from "@/lib/types/organisation";
 import { UserDisplay } from "@/lib/types/user";
 import { PrismaType } from "@/prisma";
-import { $Enums, OrganizationRole } from "@prisma/client";
+import { $Enums, Organization, OrganizationRole } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { Session } from "next-auth";
 import { z } from "zod";
@@ -34,6 +34,7 @@ export const orgRouter = createTRPCRouter({
     fetchUserOrgs: fetchUserOrgs(),
     leave: leave(),
     settings: settings(),
+    setShowMembers: setShowMembers(),
 });
 
 function getMembers() {
@@ -69,6 +70,22 @@ function getMembers() {
                     code: "NOT_FOUND",
                     message: "Organization not found",
                 });
+            }
+
+            const isMember = await isUserMember(prisma, {
+                by: "id",
+                id: ctx.session.user.id,
+            });
+            if (!isMember || organization.hideMembers) {
+                return {
+                    members: [],
+                    pagination: {
+                        total: 0,
+                        pageCount: 0,
+                        page,
+                        pageSize,
+                    },
+                };
             }
 
             const organizationId = organization.id;
@@ -454,20 +471,30 @@ async function orgByName(
         });
     }
 
-    const members: Array<OrganisationMember> = organization.users
-        .map(({ userMetadata, role }) => ({
-            id: userMetadata.user.id,
-            username: userMetadata.user.name!,
-            name: userMetadata.firstName,
-            surname: userMetadata.surname,
-            image: userMetadata.user.image || undefined,
-            role: (role === "ADMIN" ? "admin" : "member") as OrganisationRole,
-        }))
-        .sort((a, b) => {
-            if (a.role === "admin" && b.role === "member") return -1;
-            if (a.role === "member" && b.role === "admin") return 1;
-            return a.name.localeCompare(b.name);
-        });
+    const isMember = await isUserMember(prisma, {
+        by: "id",
+        id: currentUser!.id,
+    });
+
+    const members: Array<OrganisationMember> =
+        !isMember || organization.hideMembers
+            ? []
+            : organization.users
+                  .map(({ userMetadata, role }) => ({
+                      id: userMetadata.user.id,
+                      username: userMetadata.user.name!,
+                      name: userMetadata.firstName,
+                      surname: userMetadata.surname,
+                      image: userMetadata.user.image || undefined,
+                      role: (role === "ADMIN"
+                          ? "admin"
+                          : "member") as OrganisationRole,
+                  }))
+                  .sort((a, b) => {
+                      if (a.role === "admin" && b.role === "member") return -1;
+                      if (a.role === "member" && b.role === "admin") return 1;
+                      return a.name.localeCompare(b.name);
+                  });
     const isUserAdmin = members.some(
         (m) => m.id === currentUser?.id && m.role === "admin",
     );
@@ -710,59 +737,22 @@ function leave() {
 
 function settings() {
     return protectedProcedure
-        .input(z.string())
+        .input(z.object({ orgName: z.string() }))
         .query(async ({ ctx, input }): Promise<OrganizationSettings> => {
-            const organizationName = decodeURIComponent(input);
-            const userId = ctx.session.user.id;
+            const { org, userRole } = await getOrgAsMember(
+                ctx.prisma,
+                ctx.session.user.id,
+                { by: "name", name: decodeURIComponent(input.orgName) },
+            );
 
-            const currentUser = await ctx.prisma.user.findUnique({
-                where: { id: userId },
-                include: { metadata: true },
-            });
-
-            if (!currentUser?.metadata) {
-                throw new TRPCError({
-                    code: "NOT_FOUND",
-                    message: "User metadata not found",
-                });
-            }
-            const userMetadataId = currentUser.metadata.id;
-
-            const organization = await ctx.prisma.organization.findUnique({
-                where: { name: organizationName },
-            });
-
-            if (!organization) {
-                throw new TRPCError({
-                    code: "NOT_FOUND",
-                    message: "Organization not found",
-                });
-            }
-
-            const userOrg = await ctx.prisma.organizationUser.findUnique({
-                where: {
-                    userMetadataId_organizationId: {
-                        userMetadataId,
-                        organizationId: organization.id,
-                    },
-                },
-            });
-
-            if (!userOrg) {
-                throw new TRPCError({
-                    code: "FORBIDDEN",
-                    message: "You are not a member of this organization",
-                });
-            }
-
-            const isUserAdmin = userOrg.role === OrganizationRole.ADMIN;
+            const isUserAdmin = userRole === OrganizationRole.ADMIN;
             const memberCount = await ctx.prisma.organizationUser.count({
-                where: { organizationId: organization.id },
+                where: { organizationId: org.id },
             });
 
             const adminCount = await ctx.prisma.organizationUser.count({
                 where: {
-                    organizationId: organization.id,
+                    organizationId: org.id,
                     role: OrganizationRole.ADMIN,
                 },
             });
@@ -770,7 +760,7 @@ function settings() {
             const isUserOnlyAdmin = isUserAdmin && adminCount === 1;
             const possibleAdmins = await ctx.prisma.organizationUser.findMany({
                 where: {
-                    organizationId: organization.id,
+                    organizationId: org.id,
                     role: OrganizationRole.MEMBER,
                 },
                 include: {
@@ -782,15 +772,13 @@ function settings() {
                 },
             });
 
-            const invitations = await orgsInvitations(
-                ctx.prisma,
-                organization.id,
-            );
+            const invitations = await orgsInvitations(ctx.prisma, org.id);
             const orgDisplay: OrganisationDisplay = {
-                id: organization.id,
-                name: organization.name,
-                image: organization.image || undefined,
-                bio: organization.bio || undefined,
+                id: org.id,
+                name: org.name,
+                image: org.image || undefined,
+                bio: org.bio || undefined,
+                showMembers: !org.hideMembers,
                 memberCount,
             };
 
@@ -802,9 +790,9 @@ function settings() {
                 }),
             );
 
-            const formatInvitation = (
+            const formatInvitation = async (
                 inv: Awaited<ReturnType<typeof orgsInvitations>>[0],
-            ): Invitation => {
+            ): Promise<Invitation> => {
                 const sender: UserDisplay = {
                     id: inv.senderMetadata.user.id,
                     username: inv.senderMetadata.user.name!,
@@ -829,11 +817,10 @@ function settings() {
                 if (inv.isPending) {
                     status = "pending";
                 } else {
-                    // Since we don't have a direct way to know if it was accepted or declined,
-                    // we'll check if the user is a member of the organization
-                    const isMember =
-                        userOrg &&
-                        userOrg.userMetadataId === inv.userMetadataId;
+                    const isMember = await isUserMember(ctx.prisma, {
+                        by: "userMetadataId",
+                        userMetadataId: inv.userMetadataId,
+                    });
                     status = isMember ? "accepted" : "declined";
                 }
 
@@ -849,25 +836,31 @@ function settings() {
                 };
             };
 
-            const pendingInvitations = invitations
-                .filter((inv) => inv.isPending)
-                .map(formatInvitation);
+            const pendingInvitations = await Promise.all(
+                invitations
+                    .filter((inv) => inv.isPending)
+                    .map(async (inv) => await formatInvitation(inv)),
+            );
 
-            const acceptedInvitations = invitations
-                .filter(
-                    (inv) =>
-                        !inv.isPending &&
-                        !isUserMember(ctx.prisma, inv.userMetadataId),
-                )
-                .map(formatInvitation);
+            const acceptedInvitations = await Promise.all(
+                invitations
+                    .filter(
+                        (inv) =>
+                            !inv.isPending &&
+                            !isUserMember(ctx.prisma, inv.userMetadataId),
+                    )
+                    .map(async (inv) => await formatInvitation(inv)),
+            );
 
-            const declinedInvitations = invitations
-                .filter(
-                    (inv) =>
-                        !inv.isPending &&
-                        isUserMember(ctx.prisma, inv.userMetadataId),
-                )
-                .map(formatInvitation);
+            const declinedInvitations = await Promise.all(
+                invitations
+                    .filter(
+                        (inv) =>
+                            !inv.isPending &&
+                            isUserMember(ctx.prisma, inv.userMetadataId),
+                    )
+                    .map(async (inv) => await formatInvitation(inv)),
+            );
 
             return {
                 org: orgDisplay,
@@ -878,6 +871,37 @@ function settings() {
                 acceptedInvitations,
                 declinedInvitations,
             };
+        });
+}
+
+function setShowMembers() {
+    return protectedProcedure
+        .input(
+            z.object({
+                orgId: z.string().uuid(),
+                showMembers: z.boolean(),
+            }),
+        )
+        .mutation(async ({ ctx, input }) => {
+            const { org, userRole } = await getOrgAsMember(
+                ctx.prisma,
+                ctx.session.user.id,
+                { by: "id", id: input.orgId },
+            );
+
+            if (userRole !== $Enums.RepoRole.ADMIN) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "You are not an admin of this organization",
+                });
+            }
+
+            const result = await ctx.prisma.organization.update({
+                where: { id: org.id },
+                data: { hideMembers: !input.showMembers },
+                select: { hideMembers: true },
+            });
+            return { showMembers: result.hideMembers };
         });
 }
 
@@ -895,10 +919,16 @@ function mapOrganizationRoleToOrganisationRole(
 
 async function isUserMember(
     prisma: PrismaType,
-    userMetadataId: string,
+    getBy:
+        | { by: "id"; id: string }
+        | { by: "userMetadataId"; userMetadataId: string },
 ): Promise<boolean> {
     const userRole = await prisma.organizationUser.findFirst({
-        where: { userMetadataId },
+        where: {
+            ...(getBy.by === "id"
+                ? { userMetadata: { userId: getBy.id } }
+                : { userMetadataId: getBy.userMetadataId }),
+        },
     });
     return !!userRole;
 }
@@ -922,4 +952,53 @@ async function orgsInvitations(prisma: PrismaType, organizationId: string) {
             },
         },
     });
+}
+
+async function getOrgAsMember(
+    prisma: PrismaType,
+    currentUserId: string,
+    getBy: { by: "id"; id: string } | { by: "name"; name: string },
+): Promise<{ org: Organization; userRole: $Enums.OrganizationRole }> {
+    const currentUser = await prisma.user.findUnique({
+        where: { id: currentUserId },
+        include: { metadata: true },
+    });
+
+    if (!currentUser?.metadata) {
+        throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "User metadata not found",
+        });
+    }
+
+    const organization = await prisma.organization.findUnique({
+        where: {
+            ...(getBy.by === "id" ? { id: getBy.id } : { name: getBy.name }),
+        },
+    });
+
+    if (!organization) {
+        throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Organization not found",
+        });
+    }
+
+    const userOrg = await prisma.organizationUser.findUnique({
+        where: {
+            userMetadataId_organizationId: {
+                userMetadataId: currentUser.metadata.id,
+                organizationId: organization.id,
+            },
+        },
+    });
+
+    if (!userOrg) {
+        throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You are not a member of this organization",
+        });
+    }
+
+    return { org: organization, userRole: userOrg.role };
 }

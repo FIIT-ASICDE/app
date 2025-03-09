@@ -34,6 +34,7 @@ export type OrganisationDisplay = Omit<
 > & {
     memberCount: number;
     userRole?: OrganisationRole;
+    showMembers?: boolean;
 };
 
 export type RoleOrganisationFilter = "all" | "admin" | "member";

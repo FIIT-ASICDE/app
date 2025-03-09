@@ -21,6 +21,6 @@ export default async function OrganisationSettingsPage({
     const tab: OrganisationSettingsTab = (settingsSearchParams?.tab ||
         "general") as OrganisationSettingsTab;
 
-    const orgsSettings = await api.org.settings(orgSlug);
+    const orgsSettings = await api.org.settings({ orgName: orgSlug });
     return <SettingsPage settings={orgsSettings} tab={tab} />;
 }
