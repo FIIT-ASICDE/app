@@ -1,7 +1,4 @@
 import { UsersPage } from "@/app/users/users-page";
-import { OrganisationDisplay } from "@/lib/types/organisation";
-import { RepositoryDisplay } from "@/lib/types/repository";
-
 import { parseBoolean } from "@/components/generic/generic";
 import { api } from "@/lib/trpc/server";
 
@@ -30,26 +27,9 @@ export default async function AllUsersPage({
         pageSize: pageSize,
     });
 
-    // TODO ADAM FETCH ON BACKEND
-    const usersOrganisations: Array<OrganisationDisplay> = [
-        {
-            id: "1",
-            name: "Org 1",
-            image: "/avatars/organisation-avatar1.png",
-            memberCount: 20,
-        } satisfies OrganisationDisplay,
-    ] satisfies Array<OrganisationDisplay>;
+    const usersOrganisations = await api.user.usersAdminOrganisations()
 
-    const usersRepositories: Array<RepositoryDisplay> = [
-        {
-            id: "1",
-            ownerName: "johndoe",
-            ownerImage: "/avatars/avatar3.png",
-            name: "Repo 1",
-            visibility: "public",
-        } satisfies RepositoryDisplay,
-    ] satisfies Array<RepositoryDisplay>;
-
+    const usersRepositories = await api.user.usersAdminRepos()
     return (
         <UsersPage
             users={users}

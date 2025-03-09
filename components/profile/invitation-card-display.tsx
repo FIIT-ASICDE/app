@@ -30,10 +30,16 @@ export const InvitationCardDisplay = ({
     setInvitations,
 }: InvitationCardDisplayProps) => {
     const invitationDisplayData = getInvitationDisplayData(invitation);
-    const acceptMutation = api.user.acceptInvitation.useMutation({
+    const acceptOrgMutation = api.user.acceptOrgInvitation.useMutation({
         onSuccess: (newInvitations) => setInvitations(newInvitations),
     });
-    const declineMutation = api.user.declineInvitation.useMutation({
+    const declineOrgMutation = api.user.declineOrgInvitation.useMutation({
+        onSuccess: (newInvitations) => setInvitations(newInvitations),
+    });
+    const acceptRepoMutation = api.user.acceptRepoInvitation.useMutation({
+        onSuccess: (newInvitations) => setInvitations(newInvitations),
+    });
+    const declineRepoMutation = api.user.declineRepoInvitation.useMutation({
         onSuccess: (newInvitations) => setInvitations(newInvitations),
     });
 
@@ -88,14 +94,21 @@ export const InvitationCardDisplay = ({
                     <Button
                         variant="outline"
                         onClick={() => {
-                            if (!invitation.organisation?.id) return;
-                            declineMutation.mutate({
-                                organizationId: invitation.organisation.id,
-                            });
+                            if(invitation.type == "organisation") {
+                                if (!invitation.organisation?.id) return;
+                                declineOrgMutation.mutate({
+                                    organizationId: invitation.organisation.id,
+                                });
+                            } else {
+                                if(!invitation.repository?.id) return;
+                                declineRepoMutation.mutate({
+                                    repositoryId: invitation.repository.id,
+                                })
+                            }
                         }}
-                        disabled={declineMutation.isPending}
+                        disabled={declineOrgMutation.isPending || declineRepoMutation.isPending}
                     >
-                        {declineMutation.isPending ? (
+                        {declineOrgMutation.isPending || declineRepoMutation.isPending ? (
                             "Declining..."
                         ) : (
                             <>
@@ -108,14 +121,21 @@ export const InvitationCardDisplay = ({
                         variant="default"
                         className="hover:bg-primary-button-hover"
                         onClick={() => {
-                            if (!invitation.organisation?.id) return;
-                            acceptMutation.mutate({
-                                organizationId: invitation.organisation.id,
-                            });
+                            if(invitation.type == "organisation") {
+                                if (!invitation.organisation?.id) return;
+                                acceptOrgMutation.mutate({
+                                    organizationId: invitation.organisation.id,
+                                });
+                            } else {
+                                if(!invitation.repository?.id) return;
+                                acceptRepoMutation.mutate({
+                                    repositoryId: invitation.repository.id,
+                                })
+                            }
                         }}
-                        disabled={acceptMutation.isPending}
+                        disabled={acceptOrgMutation.isPending || acceptRepoMutation.isPending}
                     >
-                        {acceptMutation.isPending ? (
+                        {acceptOrgMutation.isPending || acceptRepoMutation.isPending ? (
                             "Accepting..."
                         ) : (
                             <>
