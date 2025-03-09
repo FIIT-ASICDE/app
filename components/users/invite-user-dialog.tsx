@@ -8,7 +8,6 @@ import { Building, Folder, Mail } from "lucide-react";
 import { useState } from "react";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { useUser } from "@/components/context/user-context";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -32,6 +31,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { api } from "@/lib/trpc/react";
 
 interface InviteUserDialogProps {
     selectedUser: UserDisplay;
@@ -44,7 +44,6 @@ export const InviteUserDialog = ({
     usersOrganisations,
     usersRepositories,
 }: InviteUserDialogProps) => {
-    const { user } = useUser();
 
     const [open, setOpen] = useState<boolean>(false);
 
@@ -67,30 +66,32 @@ export const InviteUserDialog = ({
         RepositoryDisplay | undefined
     >(undefined);
 
+    const inviteOrgMutation = api.user.inviteUserToOrganization.useMutation({
+        onSuccess: () => {
+            setOpen(false);
+        },
+    });
+
+    const inviteRepoMutation = api.user.inviteUserToRepo.useMutation({
+        onSuccess: () => {
+            setOpen(false);
+        },
+    });
+
     const handleInviteToOrganisation = () => {
-        /* TODO: handle invite to organisation */
-        console.log(
-            "User " +
-                user.username +
-                " has invited user " +
-                selectedUser.username +
-                " to join an organisation called " +
-                selectedOrganisation?.name,
-        );
+        if (!selectedUser || !selectedOrganisation) return;
+        inviteOrgMutation.mutate({
+            userId: selectedUser.id,
+            organisationName: selectedOrganisation.name,
+        });
     };
 
     const handleInviteToRepository = () => {
-        /* TODO: handle invite on repository */
-        console.log(
-            "User " +
-                user.username +
-                " has invited user " +
-                selectedUser.username +
-                " to collaborate on a repository called " +
-                selectedRepository?.ownerName +
-                "/" +
-                selectedRepository?.name,
-        );
+        if (!selectedUser || !selectedRepository) return;
+        inviteRepoMutation.mutate({
+            userId: selectedUser.id,
+            repositoryName: selectedRepository.name,
+        });
     };
 
     if (!userIsAdminInAnyOrg && !userHasRepos) {
