@@ -46,7 +46,7 @@ model RepoUserInvitation {
   status       InvitationStatus @default(PENDING)
   role         RepoRole         @default(CONTRIBUTOR)
   createdAt    DateTime         @default(now())
-  UserMetadata UserMetadata     @relation(fields: [userMetadataId], references: [id])
+  resolvedAt   DateTime?
 
   @@id([userMetadataId, repoId])
   @@index([senderMetadataId])

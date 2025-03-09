@@ -41,8 +41,6 @@ model UserMetadata {
 
   user                       User                         @relation(fields: [userId], references: [id])
   userId                     String                       @unique @db.Uuid
-  OrganizationUserInvitation OrganizationUserInvitation[]
-  RepoUserInvitation         RepoUserInvitation[]
 }
 
 enum UserRole {
