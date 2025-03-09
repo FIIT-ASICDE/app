@@ -1,15 +1,22 @@
-import { loadRepoDirOrFile, loadRepoItems } from "@/lib/files/repo-files";
+import {
+    calculateLanguageStatistics,
+    findReadmeFile,
+    loadRepoDirOrFile,
+    loadRepoItems,
+} from "@/lib/files/repo-files";
 import {
     createRepositoryFormSchema,
     repoBySlugsSchema,
     repoItemSchema,
 } from "@/lib/schemas/repo-schemas";
 import { createTRPCRouter, protectedProcedure } from "@/lib/server/api/trpc";
+import { PaginationResult } from "@/lib/types/generic";
 import {
     RepoUserRole,
     Repository,
     RepositoryDisplay,
-    RepositoryItem, RepositoryVisibility
+    RepositoryItem,
+    RepositoryOverview,
 } from "@/lib/types/repository";
 import { PrismaType } from "@/prisma";
 import { $Enums, RepoRole } from "@prisma/client";
@@ -18,17 +25,17 @@ import { mkdir } from "fs/promises";
 import { Session } from "next-auth";
 import path from "path";
 import { z } from "zod";
-import { PaginationResult } from "@/lib/types/generic";
 
 export const repoRouter = createTRPCRouter({
     create: create(),
     search: searchByOwnerAndRepoSlug(),
+    overview: repositoryOverview(),
     loadRepoItem: loadRepoItem(),
     ownersRepos: reposByOwnerSlug(),
     toggleState: toggleStateOnRepo(),
     fetchUserRepos: fetchUserRepos(),
     fetchOrgRepos: fetchOrgRepos(),
-    fetchUserFavoriteRepos: fetchUserFavoriteRepos()
+    fetchUserFavoriteRepos: fetchUserFavoriteRepos(),
 });
 
 function create() {
@@ -160,7 +167,10 @@ function searchByOwnerAndRepoSlug() {
     return protectedProcedure
         .input(repoBySlugsSchema)
         .query(async ({ ctx, input }): Promise<Repository> => {
-            const owner = await ownerBySlug(ctx.prisma, decodeURIComponent(input.ownerSlug.trim()));
+            const owner = await ownerBySlug(
+                ctx.prisma,
+                decodeURIComponent(input.ownerSlug.trim()),
+            );
             const decodedRepositorySlug = decodeURIComponent(
                 input.repositorySlug.trim(),
             );
@@ -170,7 +180,7 @@ function searchByOwnerAndRepoSlug() {
                 ctx.session.user.id,
                 owner,
             );
-            console.log(repo)
+            console.log(repo);
             if (!repo) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
@@ -210,11 +220,68 @@ function searchByOwnerAndRepoSlug() {
         });
 }
 
+function repositoryOverview() {
+    return protectedProcedure
+        .input(repoBySlugsSchema)
+        .query(async ({ ctx, input }): Promise<RepositoryOverview> => {
+            const owner = await ownerBySlug(ctx.prisma, input.ownerSlug);
+            const decodedRepositorySlug = decodeURIComponent(
+                input.repositorySlug.trim(),
+            );
+            const repo = await repoBySlug(
+                ctx.prisma,
+                decodedRepositorySlug,
+                ctx.session.user.id,
+                owner,
+            );
+            if (!repo) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Repo not found",
+                });
+            }
+
+            if (repo.userOrganizationRepo.length > 1) {
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message:
+                        "Failed server condition, there must be max one userOrganizationRepo row for a user",
+                });
+            }
+            const userRepoRelation = repo.userOrganizationRepo.at(0);
+            const repoPath = path.join(
+                process.env.REPOSITORIES_STORAGE_ROOT!,
+                owner.name!,
+                repo.name,
+            );
+            const readme = findReadmeFile(repoPath);
+            const stats = await calculateLanguageStatistics(repoPath);
+
+            return {
+                id: repo.id,
+                ownerId: owner.id!,
+                ownerName: owner.name!,
+                name: repo.name,
+                visibility: repo.public ? "public" : "private",
+                favorite: userRepoRelation?.favorite ?? false,
+                pinned: false,
+                description: repo.description ?? undefined,
+                ownerImage: owner.image,
+                createdAt: repo.createdAt,
+                userRole: dbUserRoleToAppUserRole(userRepoRelation?.repoRole),
+                readme,
+                stats,
+            } satisfies RepositoryOverview;
+        });
+}
 function loadRepoItem() {
     return protectedProcedure
         .input(repoItemSchema)
         .query(async ({ ctx, input }): Promise<RepositoryItem> => {
-            const owner = await ownerBySlug(ctx.prisma, decodeURIComponent(input.ownerSlug));
+            const owner = await ownerBySlug(
+                ctx.prisma,
+                decodeURIComponent(input.ownerSlug),
+            );
             const decodedRepositorySlug = decodeURIComponent(
                 input.repositorySlug.trim(),
             );
@@ -367,7 +434,7 @@ function fetchUserRepos() {
                 publicFilter: z.boolean().optional(),
                 page: z.number().min(1),
                 pageSize: z.number().min(1).max(100),
-            })
+            }),
         )
         .query(async ({ ctx, input }) => {
             const {
@@ -381,7 +448,7 @@ function fetchUserRepos() {
             } = input;
 
             const decodedUsername = decodeURIComponent(ownerSlug);
-            const decodedQuery = decodeURIComponent(nameSearchTerm ?? "")
+            const decodedQuery = decodeURIComponent(nameSearchTerm ?? "");
 
             const prisma = ctx.prisma;
 
@@ -400,8 +467,9 @@ function fetchUserRepos() {
             const userMetadataId = owner.metadata.id;
             const sessionUserId = ctx.session?.user.id;
             const isCurrentUser = sessionUserId === owner.id;
-            const shouldFilterPublic = isCurrentUser ? publicFilter ?? undefined : true;
-
+            const shouldFilterPublic = isCurrentUser
+                ? (publicFilter ?? undefined)
+                : true;
 
             // Počítame celkový počet repozitárov (pre pagináciu)
             const total = await prisma.repoUserOrganization.count({
@@ -448,19 +516,21 @@ function fetchUserRepos() {
                 take: pageSize,
             });
 
-            const userRepos = repos.map((repoUser) => ({
-                id: repoUser.repo.id,
-                ownerId: repoUser.userMetadata.user.id,
-                ownerName: repoUser.userMetadata.user.name ?? "",
-                ownerImage: repoUser.userMetadata.user.image ?? undefined,
-                name: repoUser.repo.name,
-                description: repoUser.repo.description ?? undefined,
-                visibility: repoUser.repo.public ? "public" : "private" as RepositoryVisibility,
-                favorite: repoUser.favorite,
-                pinned: repoUser.pinned ?? false,
-                createdAt: repoUser.repo.createdAt,
-                userRole: mapRepoRoleToUserRole(repoUser.repoRole),
-            }));
+            const userRepos = repos.map(
+                (repoUser): Repository => ({
+                    id: repoUser.repo.id,
+                    ownerId: repoUser.userMetadata.user.id,
+                    ownerName: repoUser.userMetadata.user.name ?? "",
+                    ownerImage: repoUser.userMetadata.user.image ?? undefined,
+                    name: repoUser.repo.name,
+                    description: repoUser.repo.description ?? undefined,
+                    visibility: repoUser.repo.public ? "public" : "private",
+                    favorite: repoUser.favorite,
+                    pinned: repoUser.pinned ?? false,
+                    createdAt: repoUser.repo.createdAt,
+                    userRole: mapRepoRoleToUserRole(repoUser.repoRole),
+                }),
+            );
 
             const pagination: PaginationResult = {
                 total,
@@ -482,7 +552,7 @@ function fetchOrgRepos() {
                 publicFilter: z.boolean().optional(),
                 page: z.number().min(1),
                 pageSize: z.number().min(1).max(100),
-            })
+            }),
         )
         .query(async ({ ctx, input }) => {
             const {
@@ -516,7 +586,7 @@ function fetchOrgRepos() {
                 include: { metadata: true },
             });
 
-            if(!user) {
+            if (!user) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
                     message: "User not found.",
@@ -524,10 +594,12 @@ function fetchOrgRepos() {
             }
 
             const isMember = organization.users.some(
-                (orgUser) => user?.metadata?.id === orgUser.userMetadataId
+                (orgUser) => user?.metadata?.id === orgUser.userMetadataId,
             );
 
-            const shouldFilterByPublic = isMember ? publicFilter ?? undefined : true;
+            const shouldFilterByPublic = isMember
+                ? (publicFilter ?? undefined)
+                : true;
 
             const total = await prisma.repo.count({
                 where: {
@@ -573,8 +645,7 @@ function fetchOrgRepos() {
                 take: pageSize,
             });
 
-            const repositories = repos.map((repo) => {
-
+            const repositories = repos.map((repo): Repository => {
                 return {
                     id: repo.id,
                     ownerId: organization.id,
@@ -582,7 +653,7 @@ function fetchOrgRepos() {
                     ownerImage: organization.image ?? undefined,
                     name: repo.name,
                     description: repo.description ?? undefined,
-                    visibility: repo.public ? "public" : "private" as RepositoryVisibility,
+                    visibility: repo.public ? "public" : "private",
                     favorite: undefined,
                     pinned: undefined,
                     createdAt: repo.createdAt,
@@ -608,7 +679,7 @@ function fetchUserFavoriteRepos() {
                 username: z.string(),
                 page: z.number().min(1),
                 pageSize: z.number().min(1).max(100),
-            })
+            }),
         )
         .query(async ({ ctx, input }) => {
             const { username, page, pageSize } = input;
@@ -641,36 +712,38 @@ function fetchUserFavoriteRepos() {
                 },
             });
 
-            const favoriteRepoConnections = await prisma.repoUserOrganization.findMany({
-                where: {
-                    favorite: true,
-                    userMetadataId: userMetadata.id,
-                    ...(isCurrentUser ? {} : { repo: { public: true } }),
-                },
-                select: {
-                    repo: {
-                        select: {
-                            id: true,
-                            name: true,
-                            public: true,
-                        },
+            const favoriteRepoConnections =
+                await prisma.repoUserOrganization.findMany({
+                    where: {
+                        favorite: true,
+                        userMetadataId: userMetadata.id,
+                        ...(isCurrentUser ? {} : { repo: { public: true } }),
                     },
-                    userMetadata: { include: { user: true } },
-                },
-                orderBy: {
-                    repo: { name: "asc" },
-                },
-                skip: (page - 1) * pageSize,
-                take: pageSize,
-            });
+                    select: {
+                        repo: {
+                            select: {
+                                id: true,
+                                name: true,
+                                public: true,
+                            },
+                        },
+                        userMetadata: { include: { user: true } },
+                    },
+                    orderBy: {
+                        repo: { name: "asc" },
+                    },
+                    skip: (page - 1) * pageSize,
+                    take: pageSize,
+                });
 
-            const favoriteRepositories: RepositoryDisplay[] = favoriteRepoConnections.map(({ repo, userMetadata }) => ({
-                id: repo.id,
-                ownerName: userMetadata.user.name!,
-                ownerImage: userMetadata.user.image || undefined,
-                name: repo.name,
-                visibility: repo.public ? "public" : "private" as RepositoryVisibility,
-            }));
+            const favoriteRepositories: RepositoryDisplay[] =
+                favoriteRepoConnections.map(({ repo, userMetadata }) => ({
+                    id: repo.id,
+                    ownerName: userMetadata.user.name!,
+                    ownerImage: userMetadata.user.image || undefined,
+                    name: repo.name,
+                    visibility: repo.public ? "public" : "private",
+                }));
 
             const pagination: PaginationResult = {
                 total,
@@ -1075,7 +1148,6 @@ async function repoBySlug(
             },
         },
     });
-
 }
 
 // ONLY TEMPORARILY - TODO MISO treba zrusit na FE celu RepoUserRole a zacat pouzivat RepoRole aj na FE
