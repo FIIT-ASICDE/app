@@ -404,7 +404,7 @@ function usersAdminRepos() {
             const repos = await ctx.prisma.repoUserOrganization.findMany({
                 where: {
                     userMetadataId: userMetadata.id,
-                    repoRole: "ADMIN",
+                    repoRole:  { in: ["ADMIN", "OWNER"] },
                 },
                 include: {
                     repo: true,
@@ -696,6 +696,22 @@ function inviteUserToOrganization() {
                 });
             }
 
+            const existingMembership = await prisma.organizationUser.findUnique({
+                where: {
+                    userMetadataId_organizationId: {
+                        userMetadataId: userMetadata.id,
+                        organizationId: organization.id,
+                    },
+                },
+            });
+
+            if (existingMembership) {
+                throw new TRPCError({
+                    code: "CONFLICT",
+                    message: "User is already a member of this organization",
+                });
+            }
+
             try {
                 await prisma.organizationUserInvitation.create({
                     data: {
@@ -760,6 +776,22 @@ function inviteUserToRepo() {
                 throw new TRPCError({
                     code: "NOT_FOUND",
                     message: "User or repository not found",
+                });
+            }
+
+            const existingMembership = await prisma.repoUserOrganization.findUnique({
+                where: {
+                    userMetadataId_repoId: {
+                        userMetadataId: userMetadata.id,
+                        repoId: repo.id,
+                    },
+                },
+            });
+
+            if (existingMembership) {
+                throw new TRPCError({
+                    code: "CONFLICT",
+                    message: "User is already a member of this repository",
                 });
             }
 
