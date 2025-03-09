@@ -109,6 +109,7 @@ const DiagramArea = () => {
             const and = new And();
             and.name = elementName;
             and.position = {x, y};
+            and.bandwidth = 1;
             and.inPorts = 2;
             element = JointJSAnd(and);
             break;
@@ -116,6 +117,7 @@ const DiagramArea = () => {
             const or = new Or();
             or.name = elementName;
             or.position = {x, y};
+            or.bandwidth = 1;
             or.inPorts = 2;
             element = JointJSOr(or);
             break;
@@ -123,6 +125,7 @@ const DiagramArea = () => {
             const xor = new Xor();
             xor.name = elementName;
             xor.position = {x, y};
+            xor.bandwidth = 1;
             xor.inPorts = 2;
             element = JointJSXor(xor);
             break;
@@ -130,6 +133,7 @@ const DiagramArea = () => {
             const xnor = new Xnor();
             xnor.name = elementName;
             xnor.position = {x, y};
+            xnor.bandwidth = 1;
             xnor.inPorts = 2;
             element = JointJSXnor(xnor);
             break;
@@ -137,6 +141,7 @@ const DiagramArea = () => {
             const input = new Port();
             input.name = elementName;
             input.position = {x, y};
+            input.bandwidth = 1;
             input.direction = "in";
             element = JointJSInputPort(input);
             break;
@@ -144,6 +149,7 @@ const DiagramArea = () => {
             const nand = new Nand();
             nand.name = elementName;
             nand.position = {x, y};
+            nand.bandwidth = 1;
             nand.inPorts = 2;
             element = JointJSNand(nand);
             break;
@@ -151,6 +157,7 @@ const DiagramArea = () => {
             const nor = new Nor();
             nor.name = elementName;
             nor.position = {x, y};
+            nor.bandwidth = 1;
             nor.inPorts = 2;
             element = JointJSNor(nor);
             break;
@@ -158,12 +165,14 @@ const DiagramArea = () => {
             const not = new Not();
             not.name = elementName;
             not.position = {x, y};
+            not.bandwidth = 1;
             element = JointJSNot(not);
             break;
         case 'output':
             const output = new Port();
             output.name = elementName;
             output.position = {x, y};
+            output.bandwidth = 1;
             output.direction = "out";
             element = JointJSOutputPort(output);
             break;
@@ -171,36 +180,42 @@ const DiagramArea = () => {
             const multiplexer = new Multiplexer();
             multiplexer.name = elementName;
             multiplexer.dataPorts = 2;
+            multiplexer.dataBandwidth = 1;
             multiplexer.position = {x, y};
             element = JointJSMultiplexer(multiplexer);
             break;
         case 'decoder':
             const decoder = new Decoder();
             decoder.name = elementName;
+            decoder.dataBandwidth = 1;
             decoder.position = {x, y};
             element = JointJSDecoder(decoder);
             break;
         case 'encoder':
             const encoder = new Encoder();
             encoder.name = elementName;
+            encoder.dataBandwidth = 1;
             encoder.position = {x, y};
             element = JointJSEncoder(encoder);
             break;
         case 'adder':
             const adder = new Adder();
             adder.name = elementName;
+            adder.dataBandwidth = 1;
             adder.position = {x, y};
             element = JointJSAdder(adder);
             break;
         case 'sub':
             const subtractor = new Subtractor();
             subtractor.name = elementName;
+            subtractor.dataBandwidth = 1;
             subtractor.position = {x, y};
             element = JointJSSubtractor(subtractor);
             break;
         case 'comp':
             const comparator = new Comparator();
             comparator.name = elementName;
+            comparator.dataBandwidth = 1;
             comparator.type = ">";
             element = JointJSComparator(comparator);
             break;
@@ -213,12 +228,14 @@ const DiagramArea = () => {
         case 'ram':
             const ram = new Ram();
             ram.name = elementName;
+            ram.dataBandwidth = 1;
             ram.clkEdge = "rising";
             element = JointJSSRam(ram);
             break;
         case 'register':
             const register = new Register();
             register.name = elementName;
+            register.dataBandwidth = 1;
             register.resetPort = true;
             register.enablePort = true;
             register.clkEdge = "rising";

@@ -9,6 +9,7 @@ export const JointJSSubtractor = (subtractor: Subtractor) => {
     portItems.push({
         id: 'input1',
         group: 'input',
+        bandwidth: subtractor.dataBandwidth,
         args: {
             x: 0,
             y: 25
@@ -18,6 +19,7 @@ export const JointJSSubtractor = (subtractor: Subtractor) => {
     portItems.push({
         id: 'input2',
         group: 'input',
+        bandwidth: subtractor.dataBandwidth,
         args: {
             x: 0,
             y: dimension - 25
@@ -27,6 +29,7 @@ export const JointJSSubtractor = (subtractor: Subtractor) => {
     portItems.push({
         id: 'output1',
         group: 'output',
+        bandwidth: subtractor.dataBandwidth+1,
         args: {
             x: dimension / 2,
             y: dimension / 2

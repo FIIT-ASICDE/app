@@ -11,6 +11,7 @@ export const JointJSMultiplexer = (multiplexer: Multiplexer) => {
         const portY = (dimension / (inCount + 1)) * i;
         portItems.push({
             id: `input${i}`,
+            bandwidth: multiplexer.dataBandwidth,
             group: 'input',
             args: { x: 0, y: portY }
         });
@@ -19,6 +20,7 @@ export const JointJSMultiplexer = (multiplexer: Multiplexer) => {
     portItems.push({
         id: 'output1',
         group: 'output',
+        bandwidth: multiplexer.dataBandwidth,
         args: {
             x: dimension/2,
             y: dimension / 2
@@ -28,6 +30,7 @@ export const JointJSMultiplexer = (multiplexer: Multiplexer) => {
     portItems.push({
         id: 'select',
         group: 'input',
+        bandwidth: Math.ceil(Math.log2(inCount)),
         args: {
             x: 25,
             y: 0

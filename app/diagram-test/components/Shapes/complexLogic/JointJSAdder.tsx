@@ -9,6 +9,7 @@ export const JointJSAdder = (adder: Adder) => {
     portItems.push({
         id: 'input1',
         group: 'input',
+        bandwidth: adder.dataBandwidth,
         args: {
             x: 0,
             y: 25
@@ -18,6 +19,7 @@ export const JointJSAdder = (adder: Adder) => {
     portItems.push({
         id: 'input2',
         group: 'input',
+        bandwidth: adder.dataBandwidth,
         args: {
             x: 0,
             y: dimension - 25
@@ -27,6 +29,7 @@ export const JointJSAdder = (adder: Adder) => {
     portItems.push({
         id: 'output1',
         group: 'output',
+        bandwidth: adder.dataBandwidth + 1,
         args: {
             x: dimension / 2,
             y: dimension / 2

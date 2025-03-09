@@ -40,6 +40,7 @@ export const JointJSXor = (xor: Xor) => {
         portItems.push({
             id: `input${i}`,
             group: 'input',
+            bandwidth: xor.bandwidth,
             args: { x: finalX, y: finalY }
         });
     }
@@ -47,6 +48,7 @@ export const JointJSXor = (xor: Xor) => {
     portItems.push({
         id: 'output1',
         group: 'output',
+        bandwidth: xor.bandwidth,
         args: {
             x: dimension,
             y: dimension / 2

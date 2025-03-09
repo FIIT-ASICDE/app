@@ -27,6 +27,7 @@ export const JointJSRegister = (register: Register) => {
 
     portItems.push({
         id: 'input1',
+        bandwidth: register.dataBandwidth,
         group: 'input',
         args: {
             x: 0,
@@ -39,6 +40,7 @@ export const JointJSRegister = (register: Register) => {
     if (register.enablePort) {
         portItems.push({
             id: 'input2',
+            bandwidth: 1,
             group: 'input',
             args: {
                 x: 0,
@@ -53,6 +55,7 @@ export const JointJSRegister = (register: Register) => {
 
     portItems.push({
         id: 'input3',
+        bandwidth: 1,
         group: 'input',
         args: {
             x: 0,
@@ -69,6 +72,7 @@ export const JointJSRegister = (register: Register) => {
     if (register.resetPort) {
         portItems.push({
             id: 'input4',
+            bandwidth: 1,
             group: 'input',
             args: {
                 x: dimension / 4,
@@ -93,6 +97,7 @@ export const JointJSRegister = (register: Register) => {
 
     portItems.push({
         id: 'output1',
+        bandwidth: register.dataBandwidth,
         group: 'output',
         args: {
             x: dimension / 2,

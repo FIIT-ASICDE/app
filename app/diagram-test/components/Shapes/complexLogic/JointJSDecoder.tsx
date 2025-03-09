@@ -9,6 +9,7 @@ export const JointJSDecoder = (decoder: Decoder) => {
     portItems.push({
         id: 'input1',
         group: 'input',
+        bandwidth: decoder.dataBandwidth,
         args: {
             x: 0,
             y: dimension / 4
@@ -18,6 +19,7 @@ export const JointJSDecoder = (decoder: Decoder) => {
     portItems.push({
         id: 'output1',
         group: 'output',
+        bandwidth: 2 ** decoder.dataBandwidth,
         args: {
             x: dimension / 2,
             y: dimension / 2

@@ -38,6 +38,7 @@ export const JointJSNor = (nor: Nor) => {
         portItems.push({
             id: `input${i}`,
             group: 'input',
+            bandwidth: nor.bandwidth,
             args: { x: finalX, y: finalY }
         });
     }
@@ -45,6 +46,7 @@ export const JointJSNor = (nor: Nor) => {
     portItems.push({
         id: 'output1',
         group: 'output',
+        bandwidth: nor.bandwidth,
         args: {
             x: dimension,
             y: dimension / 2

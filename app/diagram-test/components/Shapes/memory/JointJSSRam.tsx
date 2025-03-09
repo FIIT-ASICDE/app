@@ -13,6 +13,7 @@ export const JointJSSRam = (ram: Ram) => {
 
     portItems.push({
         id: 'input1',
+        bandwidth: ram.dataBandwidth,
         group: 'input',
         args: {
             x: 0,
@@ -25,6 +26,7 @@ export const JointJSSRam = (ram: Ram) => {
 
     portItems.push({
         id: 'input2',
+        bandwidth: ram.addressBandwidth,
         group: 'input',
         args: {
             x: 0,
@@ -37,6 +39,7 @@ export const JointJSSRam = (ram: Ram) => {
 
     portItems.push({
         id: 'input3',
+        bandwidth: 1,
         group: 'input',
         args: {
             x: 0,
@@ -49,6 +52,7 @@ export const JointJSSRam = (ram: Ram) => {
 
     portItems.push({
         id: 'input4',
+        bandwidth: 1,
         group: 'input',
         args: {
             x: dimension / 4,
@@ -68,6 +72,7 @@ export const JointJSSRam = (ram: Ram) => {
 
     portItems.push({
         id: 'output1',
+        bandwidth: ram.dataBandwidth,
         group: 'output',
         args: {
             x: dimension / 2,

@@ -10,6 +10,7 @@ export const JointJSNot = (not: Not) => {
     portItems.push({
         id: 'input1',
         group: 'input',
+        bandwidth: not.bandwidth,
         args: {
             x: 0,
             y: dimension / 2
@@ -19,6 +20,7 @@ export const JointJSNot = (not: Not) => {
     portItems.push({
         id: 'output1',
         group: 'output',
+        bandwidth: not.bandwidth,
         args: {
             x: dimension,
             y: dimension / 2

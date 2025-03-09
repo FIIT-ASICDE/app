@@ -38,6 +38,7 @@ export const JointJSXnor = (xnor: Xnor) => {
         portItems.push({
             id: `input${i}`,
             group: 'input',
+            bandwidth: xnor.bandwidth,
             args: { x: finalX, y: finalY }
         });
     }
@@ -45,6 +46,7 @@ export const JointJSXnor = (xnor: Xnor) => {
     portItems.push({
         id: 'output1',
         group: 'output',
+        bandwidth: xnor.bandwidth,
         args: {
             x: dimension,
             y: dimension / 2

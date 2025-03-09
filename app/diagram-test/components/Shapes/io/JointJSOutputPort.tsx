@@ -8,6 +8,7 @@ export const JointJSOutputPort = (output: Port) => {
     portItems.push({
         id: 'input1',
         group: 'input',
+        bandwidth: output.bandwidth,
         args: {
             x: 0,
             y: dimension / 4

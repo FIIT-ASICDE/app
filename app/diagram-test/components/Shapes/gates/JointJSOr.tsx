@@ -38,6 +38,7 @@ export const JointJSOr = (or: Or) => {
         portItems.push({
             id: `input${i}`,
             group: 'input',
+            bandwidth: or.bandwidth,
             args: { x: finalX, y: finalY }
         });
     }
@@ -45,6 +46,7 @@ export const JointJSOr = (or: Or) => {
     portItems.push({
         id: 'output1',
         group: 'output',
+        bandwidth: or.bandwidth,
         args: {
             x: dimension,
             y: dimension / 2

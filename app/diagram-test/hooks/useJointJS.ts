@@ -15,6 +15,65 @@ const highlightSettings = {
         }
     }
 };
+function highlightAllInputPorts(
+    graph: dia.Graph,
+    neededBw: number,
+    sourceElemId: string
+) {
+    const elements = graph.getElements();
+    elements.forEach((elem) => {
+        // Если это тот же элемент, что и выходной порт, пропускаем
+        if (elem.id === sourceElemId) return;
+
+        const ports = elem.get('ports')?.items || [];
+        ports.forEach((p) => {
+            // Интересуют только input-порты
+            if (p.group === 'input') {
+                const portBw = p.bandwidth ?? -1;
+                if (portBw === neededBw) {
+                    // Подсвечиваем зелёным
+                    elem.portProp(p.id, 'attrs/portCircle/fill', 'green');
+                } else {
+                    // Иначе — красным
+                    elem.portProp(p.id, 'attrs/portCircle/fill', 'red');
+                }
+            }
+        });
+    });
+}
+function getPortBandwidth(cell: dia.Cell, portId: string): number {
+    const ports = cell.get('ports')?.items ?? [];
+    console.log(ports);
+    const found = ports.find((p: any) => p.id === portId);
+    return found?.bandwidth ?? -1;
+}
+
+function resetAllPortsColor(graph: dia.Graph) {
+    // Сбрасываем порты к "стандартным" цветам
+    // (предполагаю, что input был #fff, output — #e3d12d, но подстраивайте под свой код)
+    const elements = graph.getElements();
+    elements.forEach((elem) => {
+        const ports = elem.get('ports')?.items || [];
+        ports.forEach((p) => {
+            if (p.group === 'input') {
+                elem.portProp(p.id, 'attrs/portCircle/fill', '#fff');
+            } else {
+                // output — можно вернуть желтый (если у вас так было)
+                elem.portProp(p.id, 'attrs/portCircle/fill', '#e3d12d');
+            }
+        });
+    });
+}
+
+function getPort(magnet: Element | null): string | null {
+    if (!magnet) return null;
+    let port = magnet.getAttribute('port');
+    if (!port && magnet.parentElement) {
+        port = magnet.parentElement.getAttribute('port');
+    }
+    return port;
+}
+
 
 const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
     const { graph, setSelectedElement, setPaper, isPanning, removeElement, hasFormErrors } = useDiagramContext();
@@ -25,6 +84,10 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
     const lastClientX = useRef(0);
     const lastClientY = useRef(0);
     const translation = useRef({ x: 0, y: 0 });
+    const isLinkingRef = useRef<boolean>(false);
+
+
+
     const removeAllTools = (paper: dia.Paper) => {
         const elements = graph.getElements();
         elements.forEach(element => {
@@ -142,15 +205,8 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                         return false;
                     }
 
-                    // Вспомогательные функции для безопасного получения атрибута.
-                    function getPort(magnet: Element | null): string | null {
-                        if (!magnet) return null;
-                        let port = magnet.getAttribute('port');
-                        if (!port && magnet.parentElement) {
-                            port = magnet.parentElement.getAttribute('port');
-                        }
-                        return port;
-                    }
+
+
 
                     function getPortGroup(magnet: Element | null): string | null {
                         if (!magnet) return null;
@@ -168,6 +224,20 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
 
                     // Если хотя бы один из портов не определён, запрещаем соединение
                     if (!sourcePortId || !targetPortId) {
+                        return false;
+                    }
+
+                    const sourceBw = getPortBandwidth(sourceView.model, sourcePortId);
+                    const targetBw = getPortBandwidth(targetView.model, targetPortId);
+                    console.log(sourceBw);
+                    console.log(targetBw);
+
+                    if (sourceBw < 0 || targetBw < 0) {
+                        return false;
+                    }
+
+                    // Если bandwidth не совпадает, запрещаем соединение
+                    if (sourceBw !== targetBw) {
                         return false;
                     }
 
@@ -226,6 +296,20 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
 
             paper.on('link:pointerclick', (linkView) => {
                 linkView.addTools(linkTool);
+            });
+
+            paper.on('link:pointerup', (linkView, evt, x, y) => {
+
+                const link = linkView.model;
+                const target = link.get('target');
+
+                if (!target || !target.port) {
+
+                    graph.removeCells([link]);
+
+                    resetAllPortsColor(graph);
+                    isLinkingRef.current = false;
+                }
             });
 
 
@@ -287,6 +371,11 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                 }
 
                 setSelectedElement(null);
+
+                if (isLinkingRef.current) {
+                    resetAllPortsColor(graph);
+                    isLinkingRef.current = false;
+                }
             });
 
 
@@ -296,7 +385,15 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                 const sourcePortGroup = magnet.getAttribute('port-group');
                 console.log(sourcePortGroup)
                 if (sourcePortGroup === 'output') {
-                    console.log('Начато соединение с output порта');
+                    const portId = getPort(magnet);
+                    if (!portId) return;
+                    const sourceBw = getPortBandwidth(elementView.model, portId);
+
+                    // Сохраняем состояние: "мы тянем связь"
+                    isLinkingRef.current = true;
+                    const sourceElemId = elementView.model.id;
+                    // Подсветить подходящие входные порты (исключая этот же элемент)
+                    highlightAllInputPorts(graph, sourceBw, sourceElemId);
                 }
 
             });
@@ -304,7 +401,8 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
             // Обработка окончания соединения (успешного или отменённого)
             paper.on('link:connect link:disconnect', () => {
                 // Можно добавить действия при подключении или отключении связей
-                console.log('Состояние связей изменено');
+                resetAllPortsColor(graph);
+                isLinkingRef.current = false;
             });
             paper.on('link:connect', (linkView) => {
                 const link = linkView.model;

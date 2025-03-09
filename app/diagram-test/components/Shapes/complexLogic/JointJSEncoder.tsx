@@ -9,6 +9,7 @@ export const JointJSEncoder = (encoder: Encoder) => {
     portItems.push({
         id: 'input1',
         group: 'input',
+        bandwidth: encoder.dataBandwidth,
         args: {
             x: 0,
             y: dimension / 2
@@ -18,6 +19,7 @@ export const JointJSEncoder = (encoder: Encoder) => {
     portItems.push({
         id: 'output1',
         group: 'output',
+        bandwidth: Math.ceil(Math.log2(encoder.dataBandwidth)),
         args: {
             x: dimension / 2,
             y: dimension / 2
