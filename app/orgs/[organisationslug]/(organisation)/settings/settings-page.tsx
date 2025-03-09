@@ -1,16 +1,12 @@
 "use client";
 
-import type {
-    Invitation,
-    InvitationStatus,
-    InvitationType,
-} from "@/lib/types/invitation";
+import type { Invitation } from "@/lib/types/invitation";
 import type {
     InvitationsTab,
     OrganisationDisplay,
     OrganisationSettingsTab,
+    OrganizationSettings,
 } from "@/lib/types/organisation";
-import type { UserDisplay } from "@/lib/types/user";
 import {
     BookUser,
     CircleX,
@@ -38,96 +34,20 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 
-const data = {
-    organisation: {
-        id: "2daf6c64-2104-4039-a619-b7477d3882bf",
-        name: "Google",
-        image: "/avatars/organisation-avatar1.png",
-        bio: "google bio bio bio",
-        showMembers: true,
-        memberCount: 20,
-    } satisfies OrganisationDisplay,
-    isUserAdmin: true,
-    isUserOnlyAdmin: true,
-    possibleAdmins: [
-        {
-            id: "1",
-            username: "jozko",
-        } satisfies UserDisplay,
-    ] satisfies Array<UserDisplay>,
-    pendingInvitations: [
-        {
-            id: "1",
-            type: "organisation" satisfies InvitationType,
-            sender: {
-                id: "2",
-                username: "me",
-                image: "/avatars/avatar1.png",
-            } satisfies UserDisplay,
-            receiver: {
-                id: "3",
-                username: "johndoe",
-                image: "/avatars/avatar2.png",
-            } satisfies UserDisplay,
-            status: "pending" satisfies InvitationStatus,
-            createdAt: new Date(),
-            resolvedAt: undefined,
-        } satisfies Invitation,
-    ],
-    acceptedInvitations: [
-        {
-            id: "4",
-            type: "organisation" satisfies InvitationType,
-            sender: {
-                id: "5",
-                username: "me",
-                image: "/avatars/avatar1.png",
-            } satisfies UserDisplay,
-            receiver: {
-                id: "6",
-                username: "johndoe",
-                image: "/avatars/avatar2.png",
-            } satisfies UserDisplay,
-            status: "accepted" satisfies InvitationStatus,
-            createdAt: new Date(),
-            resolvedAt: new Date(),
-        } satisfies Invitation,
-    ],
-    declinedInvitations: [
-        {
-            id: "7",
-            type: "organisation" satisfies InvitationType,
-            sender: {
-                id: "8",
-                username: "me",
-                image: "/avatars/avatar1.png",
-            } satisfies UserDisplay,
-            receiver: {
-                id: "9",
-                username: "johndoe",
-                image: "/avatars/avatar2.png",
-            } satisfies UserDisplay,
-            status: "declined" satisfies InvitationStatus,
-            createdAt: new Date(),
-            resolvedAt: new Date(),
-        } satisfies Invitation,
-    ],
-};
-
 interface SettingsPageProps {
-    orgSlug: string;
+    settings: OrganizationSettings;
     tab: OrganisationSettingsTab;
 }
 
-export default function SettingsPage({ tab }: SettingsPageProps) {
-    const organisation: OrganisationDisplay = data.organisation;
-    const isUserAdmin: boolean = data.isUserAdmin;
-    const isUserOnlyAdmin: boolean = data.isUserOnlyAdmin;
-    const possibleAdmins: Array<UserDisplay> = data.possibleAdmins;
+export default function SettingsPage({ tab, settings }: SettingsPageProps) {
+    const organisation: OrganisationDisplay = settings.org;
+    const isUserAdmin = settings.isUserAdmin;
+    const isUserOnlyAdmin = settings.isUserOnlyAdmin;
+    const possibleAdmins = settings.possibleAdmins;
 
-    const pendingInvitations: Array<Invitation> = data.pendingInvitations;
-    const acceptedInvitations: Array<Invitation> = data.acceptedInvitations;
-    const declinedInvitations: Array<Invitation> = data.declinedInvitations;
+    const pendingInvitations: Array<Invitation> = settings.pendingInvitations;
+    const acceptedInvitations: Array<Invitation> = settings.acceptedInvitations;
+    const declinedInvitations: Array<Invitation> = settings.declinedInvitations;
 
     const [invitationsTab, setInvitationsTab] =
         useState<InvitationsTab>("pending");
@@ -254,7 +174,7 @@ export default function SettingsPage({ tab }: SettingsPageProps) {
 
                             {invitationsTab === "accepted" && (
                                 <div>
-                                    {pendingInvitations.length === 0 ? (
+                                    {acceptedInvitations.length === 0 ? (
                                         <NoData
                                             icon={MailX}
                                             message={
@@ -285,7 +205,7 @@ export default function SettingsPage({ tab }: SettingsPageProps) {
 
                             {invitationsTab === "declined" && (
                                 <div>
-                                    {pendingInvitations.length === 0 ? (
+                                    {declinedInvitations.length === 0 ? (
                                         <NoData
                                             icon={MailX}
                                             message={

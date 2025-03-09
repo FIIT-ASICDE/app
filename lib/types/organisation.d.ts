@@ -45,3 +45,13 @@ export type InvitationsTab = "pending" | "accepted" | "declined";
 export type ManageMemberTab = "promote" | "expel";
 
 export type InviteUserTab = "toOrganisation" | "onRepository";
+
+export interface OrganizationSettings {
+    org: OrganisationDisplay;
+    isUserAdmin?: boolean;
+    isUserOnlyAdmin?: boolean;
+    possibleAdmins: Array<UserDisplay>;
+    pendingInvitations: Invitation[];
+    acceptedInvitations: Invitation[];
+    declinedInvitations: Invitation[];
+}

@@ -1,4 +1,5 @@
 import SettingsPage from "@/app/orgs/[organisationslug]/(organisation)/settings/settings-page";
+import { api } from "@/lib/trpc/server";
 import { OrganisationSettingsTab } from "@/lib/types/organisation";
 
 interface OrganisationSettingsPageProps {
@@ -20,5 +21,6 @@ export default async function OrganisationSettingsPage({
     const tab: OrganisationSettingsTab = (settingsSearchParams?.tab ||
         "general") as OrganisationSettingsTab;
 
-    return <SettingsPage orgSlug={orgSlug} tab={tab} />;
+    const orgsSettings = await api.org.settings(orgSlug);
+    return <SettingsPage settings={orgsSettings} tab={tab} />;
 }

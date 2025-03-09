@@ -1,5 +1,6 @@
 "use client";
 
+import { api } from "@/lib/trpc/react";
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import { UserDisplay } from "@/lib/types/user";
 import { Search, UserRoundMinus } from "lucide-react";
@@ -28,7 +29,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface LeaveOrganisationDialogProps {
     organisation: OrganisationDisplay;
-    isUserOnlyAdmin: boolean;
+    isUserOnlyAdmin?: boolean;
     possibleAdmins?: Array<UserDisplay>;
 }
 
@@ -47,7 +48,11 @@ export const LeaveOrganisationDialog = ({
     const [commandOpen, setCommandOpen] = useState<boolean>(false);
     const [selectedUser, setSelectedUser] = useState<UserDisplay>();
 
+    const leaveOrgMutation = api.org.leave.useMutation();
+
     const handleLeaveOrganisation = () => {
+        leaveOrgMutation.mutate({ organizationId: organisation.id });
+
         /* TODO: handle leave organisation, also set new selected admin if user was the only admin */
         console.log(
             "User with ID: " +

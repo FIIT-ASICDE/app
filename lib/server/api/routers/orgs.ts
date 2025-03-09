@@ -1,5 +1,6 @@
 import {
     createOrgProcedureSchema,
+    leaveOrgSchema,
 } from "@/lib/schemas/org-schemas";
 import { pinnedRepos } from "@/lib/server/api/routers/repos";
 import {
@@ -7,13 +8,16 @@ import {
     protectedProcedure,
     publicProcedure,
 } from "@/lib/server/api/trpc";
+import { Invitation, InvitationStatus } from "@/lib/types/invitation";
 import {
     Organisation,
     OrganisationDisplay,
     OrganisationMember,
     OrganisationOverview,
     OrganisationRole,
+    OrganizationSettings,
 } from "@/lib/types/organisation";
+import { UserDisplay } from "@/lib/types/user";
 import { PrismaType } from "@/prisma";
 import { $Enums, OrganizationRole } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
@@ -27,7 +31,9 @@ export const orgRouter = createTRPCRouter({
     byName: byName(),
     userOrgs: usersOrgs(),
     getMembers: getMembers(),
-    fetchUserOrgs: fetchUserOrgs()
+    fetchUserOrgs: fetchUserOrgs(),
+    leave: leave(),
+    settings: settings(),
 });
 
 function getMembers() {
@@ -39,12 +45,19 @@ function getMembers() {
                 roleFilter: z.enum(["ADMIN", "MEMBER"]).optional(),
                 page: z.number().min(1),
                 pageSize: z.number().min(1).max(100),
-            })
+            }),
         )
         .query(async ({ ctx, input }) => {
-            const { organisationName, nameSearchTerm, roleFilter, page, pageSize } = input;
-            const decodedOrganisationName = decodeURIComponent(organisationName)
-            const decodedQuery = decodeURIComponent(nameSearchTerm ?? "")
+            const {
+                organisationName,
+                nameSearchTerm,
+                roleFilter,
+                page,
+                pageSize,
+            } = input;
+            const decodedOrganisationName =
+                decodeURIComponent(organisationName);
+            const decodedQuery = decodeURIComponent(nameSearchTerm ?? "");
             const prisma = ctx.prisma;
 
             const organization = await prisma.organization.findUnique({
@@ -100,15 +113,16 @@ function getMembers() {
                 take: pageSize,
             });
 
-
             return {
                 members: members.map((member) => ({
                     id: member.userMetadata.user.id,
                     username: member.userMetadata.user.name ?? "",
                     name: member.userMetadata.firstName,
                     surname: member.userMetadata.surname,
-                    image: member.userMetadata.user.image || "/avatars/default.png",
-                    role: mapOrganizationRoleToOrganisationRole(member.role)
+                    image:
+                        member.userMetadata.user.image ||
+                        "/avatars/default.png",
+                    role: mapOrganizationRoleToOrganisationRole(member.role),
                 })),
                 pagination: {
                     total: totalCount,
@@ -119,7 +133,6 @@ function getMembers() {
             };
         });
 }
-
 
 function createOrg() {
     return protectedProcedure
@@ -221,7 +234,7 @@ function search() {
                 nameSearchTerm: z.string().optional(),
                 page: z.number().min(1),
                 pageSize: z.number().min(1).max(100),
-            })
+            }),
         )
         .query(async ({ ctx, input }) => {
             const { nameSearchTerm, page, pageSize } = input;
@@ -270,7 +283,6 @@ function search() {
             };
         });
 }
-
 
 function byName() {
     return publicProcedure
@@ -338,12 +350,13 @@ function fetchUserOrgs() {
                 roleFilter: z.enum(["ADMIN", "MEMBER"]).optional(),
                 page: z.number().min(1),
                 pageSize: z.number().min(1).max(100),
-            })
+            }),
         )
         .query(async ({ ctx, input }) => {
-            const { username, nameSearchTerm, roleFilter, page, pageSize } = input;
-            const decodedUsername = decodeURIComponent(username)
-            const decodedQuery = decodeURIComponent(nameSearchTerm ?? "")
+            const { username, nameSearchTerm, roleFilter, page, pageSize } =
+                input;
+            const decodedUsername = decodeURIComponent(username);
+            const decodedQuery = decodeURIComponent(nameSearchTerm ?? "");
             const prisma = ctx.prisma;
 
             const user = await prisma.user.findFirst({
@@ -416,7 +429,6 @@ function fetchUserOrgs() {
             };
         });
 }
-
 
 async function orgByName(
     prisma: PrismaType,
@@ -516,13 +528,398 @@ function usersOrgs() {
         );
 }
 
+function leave() {
+    return protectedProcedure
+        .input(leaveOrgSchema)
+        .mutation(async ({ ctx, input }) => {
+            const { organizationId, newAdminUserId } = input;
+            const userId = ctx.session.user.id;
+
+            const currentUser = await ctx.prisma.user.findUnique({
+                where: { id: userId },
+                include: { metadata: true },
+            });
+
+            if (!currentUser?.metadata) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "User metadata not found",
+                });
+            }
+
+            const userMetadataId = currentUser.metadata.id;
+
+            return ctx.prisma.$transaction(async (tx) => {
+                // 1. check if the user is a member of the organization
+                const userOrg = await tx.organizationUser.findUnique({
+                    where: {
+                        userMetadataId_organizationId: {
+                            userMetadataId,
+                            organizationId,
+                        },
+                    },
+                });
+
+                if (!userOrg) {
+                    throw new TRPCError({
+                        code: "NOT_FOUND",
+                        message: "You are not a member of this organization",
+                    });
+                }
+
+                // 2. count total members in the organization
+                const memberCount = await tx.organizationUser.count({
+                    where: { organizationId },
+                });
+
+                // 3. check if user is the only member
+                if (memberCount === 1) {
+                    // check if organization has any repositories
+                    const repoCount = await tx.repoUserOrganization.count({
+                        where: { organizationId },
+                    });
+
+                    if (repoCount > 0) {
+                        throw new TRPCError({
+                            code: "FORBIDDEN",
+                            message:
+                                "Cannot leave organization with repositories. Transfer or delete them first.",
+                        });
+                    }
+
+                    // delete the organization since it will be empty
+                    await tx.organizationUserInvitation.deleteMany({
+                        where: { organizationId },
+                    });
+
+                    await tx.organizationUser.delete({
+                        where: {
+                            userMetadataId_organizationId: {
+                                userMetadataId,
+                                organizationId,
+                            },
+                        },
+                    });
+
+                    await tx.organization.delete({
+                        where: { id: organizationId },
+                    });
+
+                    return {
+                        success: true,
+                        message:
+                            "Organization deleted as you were the last member",
+                    };
+                }
+
+                // 4. check if user is an admin
+                const isAdmin = userOrg.role === OrganizationRole.ADMIN;
+
+                if (isAdmin) {
+                    // count other admins
+                    const otherAdminsCount = await tx.organizationUser.count({
+                        where: {
+                            organizationId,
+                            role: OrganizationRole.ADMIN,
+                            userMetadataId: { not: userMetadataId },
+                        },
+                    });
+
+                    // if no other admins and no replacement provided
+                    if (otherAdminsCount === 0 && !newAdminUserId) {
+                        throw new TRPCError({
+                            code: "BAD_REQUEST",
+                            message:
+                                "You are the only admin. Specify another user to promote to admin before leaving.",
+                        });
+                    }
+
+                    // if replacement admin is provided, promote them
+                    if (newAdminUserId && otherAdminsCount === 0) {
+                        // get the new admin's metadata
+                        const newAdmin = await tx.user.findUnique({
+                            where: { id: newAdminUserId },
+                            include: { metadata: true },
+                        });
+
+                        if (!newAdmin?.metadata) {
+                            throw new TRPCError({
+                                code: "NOT_FOUND",
+                                message: "New admin user not found",
+                            });
+                        }
+
+                        // check if the new admin is a member of the organization
+                        const newAdminOrg =
+                            await tx.organizationUser.findUnique({
+                                where: {
+                                    userMetadataId_organizationId: {
+                                        userMetadataId: newAdmin.metadata.id,
+                                        organizationId,
+                                    },
+                                },
+                            });
+
+                        if (!newAdminOrg) {
+                            throw new TRPCError({
+                                code: "BAD_REQUEST",
+                                message:
+                                    "The specified user is not a member of this organization",
+                            });
+                        }
+
+                        // promote the new admin
+                        await tx.organizationUser.update({
+                            where: {
+                                userMetadataId_organizationId: {
+                                    userMetadataId: newAdmin.metadata.id,
+                                    organizationId,
+                                },
+                            },
+                            data: { role: OrganizationRole.ADMIN },
+                        });
+                    }
+                }
+
+                // 5. remove the user from the organization
+                await tx.organizationUser.delete({
+                    where: {
+                        userMetadataId_organizationId: {
+                            userMetadataId,
+                            organizationId,
+                        },
+                    },
+                });
+
+                // 6. also delete any pending invitations for this user to this organization
+                await tx.organizationUserInvitation.deleteMany({
+                    where: {
+                        isPending: true,
+                        userMetadataId,
+                        organizationId,
+                    },
+                });
+
+                return {
+                    success: true,
+                    message: "Successfully left the organization",
+                };
+            });
+        });
+}
+
+function settings() {
+    return protectedProcedure
+        .input(z.string())
+        .query(async ({ ctx, input }): Promise<OrganizationSettings> => {
+            const organizationName = decodeURIComponent(input);
+            const userId = ctx.session.user.id;
+
+            const currentUser = await ctx.prisma.user.findUnique({
+                where: { id: userId },
+                include: { metadata: true },
+            });
+
+            if (!currentUser?.metadata) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "User metadata not found",
+                });
+            }
+            const userMetadataId = currentUser.metadata.id;
+
+            const organization = await ctx.prisma.organization.findUnique({
+                where: { name: organizationName },
+            });
+
+            if (!organization) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Organization not found",
+                });
+            }
+
+            const userOrg = await ctx.prisma.organizationUser.findUnique({
+                where: {
+                    userMetadataId_organizationId: {
+                        userMetadataId,
+                        organizationId: organization.id,
+                    },
+                },
+            });
+
+            if (!userOrg) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "You are not a member of this organization",
+                });
+            }
+
+            const isUserAdmin = userOrg.role === OrganizationRole.ADMIN;
+            const memberCount = await ctx.prisma.organizationUser.count({
+                where: { organizationId: organization.id },
+            });
+
+            const adminCount = await ctx.prisma.organizationUser.count({
+                where: {
+                    organizationId: organization.id,
+                    role: OrganizationRole.ADMIN,
+                },
+            });
+
+            const isUserOnlyAdmin = isUserAdmin && adminCount === 1;
+            const possibleAdmins = await ctx.prisma.organizationUser.findMany({
+                where: {
+                    organizationId: organization.id,
+                    role: OrganizationRole.MEMBER,
+                },
+                include: {
+                    userMetadata: {
+                        include: {
+                            user: true,
+                        },
+                    },
+                },
+            });
+
+            const invitations = await orgsInvitations(
+                ctx.prisma,
+                organization.id,
+            );
+            const orgDisplay: OrganisationDisplay = {
+                id: organization.id,
+                name: organization.name,
+                image: organization.image || undefined,
+                bio: organization.bio || undefined,
+                memberCount,
+            };
+
+            const formattedPossibleAdmins = possibleAdmins.map(
+                (member): UserDisplay => ({
+                    id: member.userMetadata.user.id,
+                    username: member.userMetadata.user.name!,
+                    image: member.userMetadata.user.image || undefined,
+                }),
+            );
+
+            const formatInvitation = (
+                inv: Awaited<ReturnType<typeof orgsInvitations>>[0],
+            ): Invitation => {
+                const sender: UserDisplay = {
+                    id: inv.senderMetadata.user.id,
+                    username: inv.senderMetadata.user.name!,
+                    image: inv.senderMetadata.user.image || undefined,
+                };
+
+                const receiver: UserDisplay = {
+                    id: inv.userMetadata.user.id,
+                    username: inv.userMetadata.user.name!,
+                    image: inv.userMetadata.user.image || undefined,
+                };
+
+                const organisation: OrganisationDisplay = {
+                    id: inv.organization.id,
+                    name: inv.organization.name,
+                    image: inv.organization.image || undefined,
+                    bio: inv.organization.bio || undefined,
+                    memberCount: 0,
+                };
+
+                let status: InvitationStatus;
+                if (inv.isPending) {
+                    status = "pending";
+                } else {
+                    // Since we don't have a direct way to know if it was accepted or declined,
+                    // we'll check if the user is a member of the organization
+                    const isMember =
+                        userOrg &&
+                        userOrg.userMetadataId === inv.userMetadataId;
+                    status = isMember ? "accepted" : "declined";
+                }
+
+                return {
+                    id: `${inv.userMetadataId}_${inv.organizationId}`,
+                    type: "organisation",
+                    sender,
+                    organisation,
+                    receiver,
+                    status,
+                    createdAt: inv.createdAt,
+                    resolvedAt: inv.resolvedAt || undefined,
+                };
+            };
+
+            const pendingInvitations = invitations
+                .filter((inv) => inv.isPending)
+                .map(formatInvitation);
+
+            const acceptedInvitations = invitations
+                .filter(
+                    (inv) =>
+                        !inv.isPending &&
+                        !isUserMember(ctx.prisma, inv.userMetadataId),
+                )
+                .map(formatInvitation);
+
+            const declinedInvitations = invitations
+                .filter(
+                    (inv) =>
+                        !inv.isPending &&
+                        isUserMember(ctx.prisma, inv.userMetadataId),
+                )
+                .map(formatInvitation);
+
+            return {
+                org: orgDisplay,
+                isUserAdmin,
+                isUserOnlyAdmin,
+                possibleAdmins: formattedPossibleAdmins,
+                pendingInvitations,
+                acceptedInvitations,
+                declinedInvitations,
+            };
+        });
+}
+
 // ONLY TEMPORARILY - TODO MISO treba zrusit na FE celu OrganisationRole a zacat pouzivat OrganizationRole aj na FE
-function mapOrganizationRoleToOrganisationRole(organizationRole: OrganizationRole): OrganisationRole {
+function mapOrganizationRoleToOrganisationRole(
+    organizationRole: OrganizationRole,
+): OrganisationRole {
     const roleMapping: Record<OrganizationRole, OrganisationRole> = {
         MEMBER: "member",
-        ADMIN: "admin"
+        ADMIN: "admin",
     };
 
     return roleMapping[organizationRole];
 }
 
+async function isUserMember(
+    prisma: PrismaType,
+    userMetadataId: string,
+): Promise<boolean> {
+    const userRole = await prisma.organizationUser.findFirst({
+        where: { userMetadataId },
+    });
+    return !!userRole;
+}
+
+async function orgsInvitations(prisma: PrismaType, organizationId: string) {
+    return prisma.organizationUserInvitation.findMany({
+        where: {
+            organizationId: organizationId,
+        },
+        include: {
+            organization: true,
+            userMetadata: {
+                include: {
+                    user: true,
+                },
+            },
+            senderMetadata: {
+                include: {
+                    user: true,
+                },
+            },
+        },
+    });
+}
