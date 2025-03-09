@@ -2,8 +2,10 @@ import MembersPage from "@/app/orgs/[organisationslug]/(organisation)/members/me
 import { api } from "@/lib/trpc/server";
 import { RoleOrganisationFilter } from "@/lib/types/organisation";
 
-import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
 import { $Enums } from ".prisma/client";
+
+import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
+
 import OrganizationRole = $Enums.OrganizationRole;
 
 interface OrganisationMembersPageProps {
@@ -37,17 +39,21 @@ export default async function OrganisationMembersPage({
 
     const pageSize: number = 8;
 
+    const org = await api.org.byName(orgSlug);
     const { members, pagination } = await api.org.getMembers({
         organisationName: orgSlug,
         nameSearchTerm: query,
-        roleFilter: roleFilter === "all" ? undefined : roleFilter.toUpperCase() as OrganizationRole,
+        roleFilter:
+            roleFilter === "all"
+                ? undefined
+                : (roleFilter.toUpperCase() as OrganizationRole),
         page: currentPage,
         pageSize: pageSize,
     });
 
     return (
         <MembersPage
-            orgSlug={orgSlug}
+            org={org}
             members={members}
             searchParams={{
                 query,
