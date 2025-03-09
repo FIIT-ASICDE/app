@@ -3,7 +3,8 @@
 import { api } from "@/lib/trpc/react";
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import { UserDisplay } from "@/lib/types/user";
-import { Search, UserRoundMinus } from "lucide-react";
+import { Loader2, Search, UserRoundMinus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
@@ -38,6 +39,7 @@ export const LeaveOrganisationDialog = ({
     isUserOnlyAdmin,
     possibleAdmins,
 }: LeaveOrganisationDialogProps) => {
+    const router = useRouter();
     const { user } = useUser();
 
     const [leaveOrganisationInput, setLeaveOrganisationInput] =
@@ -51,19 +53,12 @@ export const LeaveOrganisationDialog = ({
     const leaveOrgMutation = api.org.leave.useMutation();
 
     const handleLeaveOrganisation = () => {
-        leaveOrgMutation.mutate({ organizationId: organisation.id });
-
-        /* TODO: handle leave organisation, also set new selected admin if user was the only admin */
-        console.log(
-            "User with ID: " +
-                user.id +
-                " left an organisation called: " +
-                organisation.name +
-                " with ID: " +
-                organisation.id,
-        );
-        console.log("IsUserOnlyAdmin: " + isUserOnlyAdmin);
-        console.log("Newly selected admin: " + selectedUser);
+        leaveOrgMutation
+            .mutateAsync({
+                organizationId: organisation.id,
+                newAdminUserId: selectedUser?.id,
+            })
+            .then(() => router.replace("/" + user.username));
     };
 
     return (
@@ -72,9 +67,16 @@ export const LeaveOrganisationDialog = ({
                 <Button
                     variant="destructive"
                     className="w-60 hover:bg-destructive-hover"
+                    disabled={leaveOrgMutation.isPending}
                 >
-                    <UserRoundMinus />
-                    Leave organisation
+                    {leaveOrgMutation.isPending ? (
+                        <Loader2 className="animate-spin" />
+                    ) : (
+                        <>
+                            <UserRoundMinus />
+                            Leave organisation
+                        </>
+                    )}
                 </Button>
             </DialogTrigger>
             <DialogContent>

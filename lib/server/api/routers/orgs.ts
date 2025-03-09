@@ -33,6 +33,7 @@ export const orgRouter = createTRPCRouter({
     getMembers: getMembers(),
     fetchUserOrgs: fetchUserOrgs(),
     leave: leave(),
+    delete: deleteOrg(),
     settings: settings(),
     setShowMembers: setShowMembers(),
 });
@@ -735,6 +736,82 @@ function leave() {
         });
 }
 
+function deleteOrg() {
+    return protectedProcedure
+        .input(
+            z.object({
+                organizationId: z.string().uuid(),
+            }),
+        )
+        .mutation(async ({ ctx, input }) => {
+            const { organizationId } = input;
+            const userId = ctx.session.user.id;
+
+            const currentUser = await ctx.prisma.user.findUnique({
+                where: { id: userId },
+                include: { metadata: true },
+            });
+
+            if (!currentUser?.metadata) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "User metadata not found",
+                });
+            }
+
+            const userMetadataId = currentUser.metadata.id;
+
+            return ctx.prisma.$transaction(async (tx) => {
+                const userOrg = await tx.organizationUser.findUnique({
+                    where: {
+                        userMetadataId_organizationId: {
+                            userMetadataId,
+                            organizationId,
+                        },
+                    },
+                });
+
+                if (!userOrg) {
+                    throw new TRPCError({
+                        code: "NOT_FOUND",
+                        message: "You are not a member of this organization",
+                    });
+                }
+                if (userOrg.role !== $Enums.OrganizationRole.ADMIN) {
+                    throw new TRPCError({
+                        code: "FORBIDDEN",
+                        message: "You are not an admin of this organization",
+                    });
+                }
+
+                const repoCount = await tx.repoUserOrganization.count({
+                    where: { organizationId },
+                });
+
+                if (repoCount > 0) {
+                    throw new TRPCError({
+                        code: "FORBIDDEN",
+                        message:
+                            "Cannot delete organization with repositories. Transfer or delete them first.",
+                    });
+                }
+
+                // delete the organization since it will be empty
+                await tx.organizationUserInvitation.deleteMany({
+                    where: { organizationId },
+                });
+
+                await tx.organizationUser.deleteMany({
+                    where: { organizationId },
+                });
+
+                await tx.organization.delete({
+                    where: { id: organizationId },
+                });
+            });
+        });
+}
+
 function settings() {
     return protectedProcedure
         .input(z.object({ orgName: z.string() }))
@@ -847,7 +924,10 @@ function settings() {
                     .filter(
                         (inv) =>
                             !inv.isPending &&
-                            !isUserMember(ctx.prisma, inv.userMetadataId),
+                            !isUserMember(ctx.prisma, {
+                                by: "userMetadataId",
+                                userMetadataId: inv.userMetadataId,
+                            }),
                     )
                     .map(async (inv) => await formatInvitation(inv)),
             );
@@ -857,7 +937,10 @@ function settings() {
                     .filter(
                         (inv) =>
                             !inv.isPending &&
-                            isUserMember(ctx.prisma, inv.userMetadataId),
+                            isUserMember(ctx.prisma, {
+                                by: "userMetadataId",
+                                userMetadataId: inv.userMetadataId,
+                            }),
                     )
                     .map(async (inv) => await formatInvitation(inv)),
             );
