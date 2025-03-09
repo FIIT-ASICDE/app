@@ -347,7 +347,7 @@ async function createOrganizationInvitations(
                                 userMetadataId: invitee.metadata.id,
                                 senderMetadataId: sender.userMetadataId,
                                 organizationId: organization.id,
-                                isPending,
+                                status: isPending ? "PENDING" : "ACCEPTED",
                                 role: faker.datatype.boolean(0.2)
                                     ? OrganizationRole.ADMIN
                                     : OrganizationRole.MEMBER,

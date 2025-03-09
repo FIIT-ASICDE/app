@@ -719,15 +719,6 @@ function leave() {
                     },
                 });
 
-                // 6. also delete any pending invitations for this user to this organization
-                await tx.organizationUserInvitation.deleteMany({
-                    where: {
-                        isPending: true,
-                        userMetadataId,
-                        organizationId,
-                    },
-                });
-
                 return {
                     success: true,
                     message: "Successfully left the organization",
@@ -891,14 +882,16 @@ function settings() {
                 };
 
                 let status: InvitationStatus;
-                if (inv.isPending) {
-                    status = "pending";
-                } else {
-                    const isMember = await isUserMember(ctx.prisma, {
-                        by: "userMetadataId",
-                        userMetadataId: inv.userMetadataId,
-                    });
-                    status = isMember ? "accepted" : "declined";
+                switch (inv.status) {
+                    case "PENDING":
+                        status = "pending";
+                        break;
+                    case "ACCEPTED":
+                        status = "accepted";
+                        break;
+                    case "DECLINED":
+                        status = "declined";
+                        break;
                 }
 
                 return {
@@ -915,7 +908,9 @@ function settings() {
 
             const pendingInvitations = await Promise.all(
                 invitations
-                    .filter((inv) => inv.isPending)
+                    .filter(
+                        (inv) => inv.status === $Enums.InvitationStatus.PENDING,
+                    )
                     .map(async (inv) => await formatInvitation(inv)),
             );
 
@@ -923,11 +918,7 @@ function settings() {
                 invitations
                     .filter(
                         (inv) =>
-                            !inv.isPending &&
-                            !isUserMember(ctx.prisma, {
-                                by: "userMetadataId",
-                                userMetadataId: inv.userMetadataId,
-                            }),
+                            inv.status === $Enums.InvitationStatus.ACCEPTED,
                     )
                     .map(async (inv) => await formatInvitation(inv)),
             );
@@ -936,11 +927,7 @@ function settings() {
                 invitations
                     .filter(
                         (inv) =>
-                            !inv.isPending &&
-                            isUserMember(ctx.prisma, {
-                                by: "userMetadataId",
-                                userMetadataId: inv.userMetadataId,
-                            }),
+                            inv.status === $Enums.InvitationStatus.DECLINED,
                     )
                     .map(async (inv) => await formatInvitation(inv)),
             );
