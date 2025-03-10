@@ -85,6 +85,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
     const lastClientY = useRef(0);
     const translation = useRef({ x: 0, y: 0 });
     const isLinkingRef = useRef<boolean>(false);
+    const currentLinkBandwidthRef = useRef<number>(1);
 
 
 
@@ -147,7 +148,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                     attrs: {
                         line: {
                             stroke: '#000',
-                            strokeWidth: 2,
+                            strokeWidth: currentLinkBandwidthRef.current,
                             targetMarker: {
                                 type: 'classic',
                                 stroke: '#000',
@@ -383,16 +384,13 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
             paper.on('element:magnet:pointerdown', (elementView, evt, magnet, x, y) => {
                 if (!magnet) return;
                 const sourcePortGroup = magnet.getAttribute('port-group');
-                console.log(sourcePortGroup)
                 if (sourcePortGroup === 'output') {
                     const portId = getPort(magnet);
                     if (!portId) return;
                     const sourceBw = getPortBandwidth(elementView.model, portId);
-
-                    // Сохраняем состояние: "мы тянем связь"
+                    currentLinkBandwidthRef.current = sourceBw;
                     isLinkingRef.current = true;
                     const sourceElemId = elementView.model.id;
-                    // Подсветить подходящие входные порты (исключая этот же элемент)
                     highlightAllInputPorts(graph, sourceBw, sourceElemId);
                 }
 
