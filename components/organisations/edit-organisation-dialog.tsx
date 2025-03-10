@@ -1,16 +1,23 @@
 "use client";
 
-import { editOrganisationFormSchema } from "@/lib/schemas/org-schemas";
+import { handleUpload, imgSrc } from "@/lib/client-file-utils";
+import {
+    editOrganisationFormSchema,
+    editOrganisationProcedureSchema,
+} from "@/lib/schemas/org-schemas";
+import { api } from "@/lib/trpc/react";
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
     FileText,
     Image as ImageIcon,
+    Loader2,
     Pen,
     Save,
     UserRound,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -49,14 +56,16 @@ interface EditOrganisationDialogProps {
 export const EditOrganisationDialog = ({
     organisation,
 }: EditOrganisationDialogProps) => {
+    const router = useRouter();
+    const [open, setOpen] = useState<boolean>(false);
+
     const form = useForm<z.infer<typeof editOrganisationFormSchema>>({
         resolver: zodResolver(editOrganisationFormSchema),
         defaultValues: {
             name: organisation.name,
             bio: organisation.bio,
-            /* TODO: image content not working yet */
             image: organisation.image
-                ? new File([], organisation.image)
+                ? { type: "remote", src: organisation.image }
                 : undefined,
         },
     });
@@ -66,21 +75,64 @@ export const EditOrganisationDialog = ({
             form.reset({
                 name: organisation.name,
                 bio: organisation.bio,
-                /* TODO: image content not working yet */
                 image: organisation.image
-                    ? new File([], organisation.image)
+                    ? { type: "remote", src: organisation.image }
                     : undefined,
             });
         }
     }, [organisation, form]);
 
-    /* TODO: lukas */
-    // const editMutation = api.organisation.edit.useMutation();
+    const editMutation = api.org.edit.useMutation({
+        onSuccess: () => {
+            // TODO kili toast.success("Organisation updated successfully");
+        },
+        onError: () => {
+            // TODO kili toast.error(error.message);
+        },
+    });
 
     const onSaveOrganisationChanges = async (
         data: z.infer<typeof editOrganisationFormSchema>,
     ) => {
-        console.log(data);
+        let image: string | undefined = undefined;
+        if (data.image?.type === "local") {
+            image = await handleUpload(data.image.file);
+        } else if (data.image?.type === "remote") {
+            image = data.image.src;
+        }
+
+        const transformedData: z.infer<typeof editOrganisationProcedureSchema> =
+            {
+                orgId: organisation.id,
+                name: data.name,
+                bio: data.bio,
+                image,
+            };
+
+        const changed = await editMutation.mutateAsync(transformedData);
+        router.replace(`/orgs/${changed.name}`);
+        setOpen(false);
+    };
+
+    const showImage = (
+        img: z.infer<typeof editOrganisationFormSchema>["image"],
+    ) => {
+        if (!img) {
+            return undefined;
+        } else if (img.type === "remote") {
+            return imgSrc(img.src);
+        } else if (img.type === "local") {
+            return URL.createObjectURL(img.file);
+        }
+    };
+
+    const onChangeImage = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            form.setValue("image", { type: "local", file });
+            const previewUrl = URL.createObjectURL(file);
+            return () => URL.revokeObjectURL(previewUrl);
+        }
     };
 
     if (organisation.userRole !== "admin") {
@@ -88,7 +140,7 @@ export const EditOrganisationDialog = ({
     }
 
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <Tooltip>
                 <TooltipTrigger asChild>
                     <DialogTrigger className="mt-1 rounded bg-transparent p-2 text-muted-foreground hover:bg-accent">
@@ -114,7 +166,7 @@ export const EditOrganisationDialog = ({
                         <Form {...form}>
                             <form>
                                 <fieldset
-                                    // disabled={editMutation.isPending}
+                                    disabled={editMutation.isPending}
                                     className="space-y-3 pt-3"
                                 >
                                     <FormField
@@ -135,6 +187,7 @@ export const EditOrganisationDialog = ({
                                                         />
                                                     </div>
                                                 </FormControl>
+                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
@@ -156,6 +209,7 @@ export const EditOrganisationDialog = ({
                                                         />
                                                     </div>
                                                 </FormControl>
+                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
@@ -163,11 +217,7 @@ export const EditOrganisationDialog = ({
                                         control={form.control}
                                         name="image"
                                         render={({
-                                            field: {
-                                                value,
-                                                onChange,
-                                                ...fieldProps
-                                            },
+                                            field: { value, ...fieldProps },
                                         }) => (
                                             <FormItem className="flex flex-col">
                                                 <div className="flex flex-row items-center gap-5">
@@ -180,20 +230,11 @@ export const EditOrganisationDialog = ({
                                                                 <ImageIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                                                 <Input
                                                                     {...fieldProps}
-                                                                    placeholder="Organisation image"
+                                                                    placeholder="User image"
                                                                     type="file"
                                                                     accept="image/*"
-                                                                    onChange={(
-                                                                        event,
-                                                                    ) =>
-                                                                        onChange(
-                                                                            event
-                                                                                .target
-                                                                                .files &&
-                                                                                event
-                                                                                    .target
-                                                                                    .files[0],
-                                                                        )
+                                                                    onChange={
+                                                                        onChangeImage
                                                                     }
                                                                     className="w-full resize-none pl-8 pt-2"
                                                                 />
@@ -202,13 +243,7 @@ export const EditOrganisationDialog = ({
                                                     </div>
                                                     <AvatarDisplay
                                                         displayType="profile"
-                                                        image={
-                                                            value
-                                                                ? URL.createObjectURL(
-                                                                      value,
-                                                                  )
-                                                                : undefined
-                                                        }
+                                                        image={showImage(value)}
                                                         name={form.watch(
                                                             "name",
                                                         )}
@@ -232,8 +267,14 @@ export const EditOrganisationDialog = ({
                                     )}
                                     disabled={!form.formState.isDirty}
                                 >
-                                    <Save />
-                                    Save changes
+                                    {editMutation.isPending ? (
+                                        <Loader2 className="animate-spin" />
+                                    ) : (
+                                        <>
+                                            <Save />
+                                            Save changes
+                                        </>
+                                    )}
                                 </Button>
                             </DialogTrigger>
                         </DialogFooter>

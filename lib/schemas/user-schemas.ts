@@ -132,10 +132,7 @@ export const editUserFormSchema = z.object({
             }),
             z.object({
                 type: z.literal("remote"),
-                src: z
-                    .string()
-                    .url("Invalid URL format")
-                    .transform((value) => value.trim()),
+                src: z.string().transform((value) => value.trim()),
             }),
         ])
         .optional(),
