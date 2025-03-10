@@ -1,15 +1,40 @@
-import { editUserProcedureSchema, onboardSchema, userSearchSchema } from "@/lib/schemas/user-schemas";
-import { favoriteRepos, pinnedRepos, recentRepos } from "@/lib/server/api/routers/repos";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/lib/server/api/trpc";
+import {
+    editUserProcedureSchema,
+    onboardSchema,
+    userSearchSchema,
+} from "@/lib/schemas/user-schemas";
+import {
+    favoriteRepos,
+    pinnedRepos,
+    recentRepos,
+} from "@/lib/server/api/routers/repos";
+import {
+    createTRPCRouter,
+    protectedProcedure,
+    publicProcedure,
+} from "@/lib/server/api/trpc";
 import { PaginationResult } from "@/lib/types/generic";
-import { Invitation, InvitationStatus, InvitationType } from "@/lib/types/invitation";
+import {
+    Invitation,
+    InvitationStatus,
+    InvitationType,
+} from "@/lib/types/invitation";
 import { OrganisationDisplay } from "@/lib/types/organisation";
-import { OnboardedUser, User, UserDisplay, UsersDashboard, UsersOverview } from "@/lib/types/user";
+import {
+    RepositoryDisplay,
+    RepositoryVisibility,
+} from "@/lib/types/repository";
+import {
+    OnboardedUser,
+    User,
+    UserDisplay,
+    UsersDashboard,
+    UsersOverview,
+} from "@/lib/types/user";
 import prisma, { PrismaType } from "@/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { RepositoryDisplay, RepositoryVisibility } from "@/lib/types/repository";
 
 export const userRouter = createTRPCRouter({
     completeOnboarding: completeOnboarding(),
@@ -29,7 +54,8 @@ export const userRouter = createTRPCRouter({
     declineRepoInvitation: declineRepoInvitation(),
     fetchAllUsers: fetchAllUsers(),
     usersAdminOrganisations: usersAdminOrganisations(),
-    usersAdminRepos: usersAdminRepos()
+    usersAdminRepos: usersAdminRepos(),
+    deleteAccount: deleteAccount(),
 });
 
 function completeOnboarding() {
@@ -342,8 +368,8 @@ function usersOrganisations() {
 }
 
 function usersAdminOrganisations() {
-    return protectedProcedure
-        .query(async ({ ctx }): Promise<Array<OrganisationDisplay>> => {
+    return protectedProcedure.query(
+        async ({ ctx }): Promise<Array<OrganisationDisplay>> => {
             const userId = ctx.session.user.id;
 
             const userMetadata = await prisma.userMetadata.findUnique({
@@ -381,12 +407,13 @@ function usersAdminOrganisations() {
                 memberCount: org._count.users,
                 userRole: "admin",
             }));
-        });
+        },
+    );
 }
 
 function usersAdminRepos() {
-    return protectedProcedure
-        .query(async ({ ctx }): Promise<Array<RepositoryDisplay>> => {
+    return protectedProcedure.query(
+        async ({ ctx }): Promise<Array<RepositoryDisplay>> => {
             const userId = ctx.session.user.id;
 
             const userMetadata = await prisma.userMetadata.findUnique({
@@ -404,7 +431,7 @@ function usersAdminRepos() {
             const repos = await ctx.prisma.repoUserOrganization.findMany({
                 where: {
                     userMetadataId: userMetadata.id,
-                    repoRole:  { in: ["ADMIN", "OWNER"] },
+                    repoRole: { in: ["ADMIN", "OWNER"] },
                 },
                 include: {
                     repo: true,
@@ -416,11 +443,14 @@ function usersAdminRepos() {
             return repos.map(({ repo, organization }) => ({
                 id: repo.id,
                 ownerName: organization ? organization.name : "Personal",
-                ownerImage: organization ? organization.image || undefined : undefined,
+                ownerImage: organization
+                    ? organization.image || undefined
+                    : undefined,
                 name: repo.name,
                 visibility: repo.public ? "public" : "private",
             }));
-        });
+        },
+    );
 }
 
 function fulltextSearchUsers() {
@@ -696,14 +726,16 @@ function inviteUserToOrganization() {
                 });
             }
 
-            const existingMembership = await prisma.organizationUser.findUnique({
-                where: {
-                    userMetadataId_organizationId: {
-                        userMetadataId: userMetadata.id,
-                        organizationId: organization.id,
+            const existingMembership = await prisma.organizationUser.findUnique(
+                {
+                    where: {
+                        userMetadataId_organizationId: {
+                            userMetadataId: userMetadata.id,
+                            organizationId: organization.id,
+                        },
                     },
                 },
-            });
+            );
 
             if (existingMembership) {
                 throw new TRPCError({
@@ -749,8 +781,7 @@ function inviteUserToRepo() {
         )
         .mutation(async ({ ctx, input }) => {
             const { userId, repositoryName } = input;
-            const decodedRepositoryName =
-                decodeURIComponent(repositoryName);
+            const decodedRepositoryName = decodeURIComponent(repositoryName);
             const prisma = ctx.prisma;
             const senderId = ctx.session.user.id;
 
@@ -779,14 +810,15 @@ function inviteUserToRepo() {
                 });
             }
 
-            const existingMembership = await prisma.repoUserOrganization.findUnique({
-                where: {
-                    userMetadataId_repoId: {
-                        userMetadataId: userMetadata.id,
-                        repoId: repo.id,
+            const existingMembership =
+                await prisma.repoUserOrganization.findUnique({
+                    where: {
+                        userMetadataId_repoId: {
+                            userMetadataId: userMetadata.id,
+                            repoId: repo.id,
+                        },
                     },
-                },
-            });
+                });
 
             if (existingMembership) {
                 throw new TRPCError({
@@ -808,8 +840,7 @@ function inviteUserToRepo() {
                     if (error.code === "P2002") {
                         throw new TRPCError({
                             code: "CONFLICT",
-                            message:
-                                "User is already invited to this repo",
+                            message: "User is already invited to this repo",
                         });
                     }
                 }
@@ -846,15 +877,14 @@ function acceptRepoInvitation() {
                 });
             }
 
-            const invitation =
-                await prisma.repoUserInvitation.findUnique({
-                    where: {
-                        userMetadataId_repoId: {
-                            userMetadataId: userMetadata.id,
-                            repoId: repositoryId,
-                        },
+            const invitation = await prisma.repoUserInvitation.findUnique({
+                where: {
+                    userMetadataId_repoId: {
+                        userMetadataId: userMetadata.id,
+                        repoId: repositoryId,
                     },
-                });
+                },
+            });
 
             if (!invitation) {
                 throw new TRPCError({
@@ -921,15 +951,14 @@ function declineRepoInvitation() {
                 });
             }
 
-            const invitation =
-                await prisma.repoUserInvitation.findUnique({
-                    where: {
-                        userMetadataId_repoId: {
-                            userMetadataId: userMetadata.id,
-                            repoId: repositoryId,
-                        },
+            const invitation = await prisma.repoUserInvitation.findUnique({
+                where: {
+                    userMetadataId_repoId: {
+                        userMetadataId: userMetadata.id,
+                        repoId: repositoryId,
                     },
-                });
+                },
+            });
 
             if (!invitation) {
                 throw new TRPCError({
@@ -957,6 +986,64 @@ function declineRepoInvitation() {
                 });
             }
         });
+}
+
+function deleteAccount() {
+    return protectedProcedure.mutation(async ({ ctx }) => {
+        const userId = ctx.session.user.id;
+        const user = await prisma.user.findUniqueOrThrow({
+            where: { id: userId },
+            include: { metadata: true },
+        });
+
+        return await prisma.$transaction(async (tx) => {
+            if (user.metadata) {
+                const userMetadataId = user.metadata.id;
+
+                // 1. delete organization invitations
+                await tx.organizationUserInvitation.deleteMany({
+                    where: {
+                        OR: [
+                            { userMetadataId },
+                            { senderMetadataId: userMetadataId },
+                        ],
+                    },
+                });
+
+                // 2. delete repository invitations
+                await tx.repoUserInvitation.deleteMany({
+                    where: {
+                        OR: [
+                            { userMetadataId },
+                            { senderMetadataId: userMetadataId },
+                        ],
+                    },
+                });
+
+                // 3. delete repository user organization relationships
+                await tx.repoUserOrganization.deleteMany({
+                    where: { userMetadataId },
+                });
+
+                // 4. delete organization user relationships
+                await tx.organizationUser.deleteMany({
+                    where: { userMetadataId },
+                });
+
+                // 5. delete user metadata
+                await tx.userMetadata.delete({
+                    where: { id: userMetadataId },
+                });
+            }
+
+            // 6. delete the user
+            await tx.user.delete({
+                where: { id: userId },
+            });
+
+            return { success: true };
+        });
+    });
 }
 
 async function userByUsername(
@@ -1092,7 +1179,9 @@ async function getUserInvitations(
             ownerName: "Unknown",
             ownerImage: undefined,
             name: inv.repo.name,
-            visibility: inv.repo.public ? "public" : "private" as RepositoryVisibility,
+            visibility: inv.repo.public
+                ? "public"
+                : ("private" as RepositoryVisibility),
         },
         status: "pending" as InvitationStatus,
         createdAt: inv.createdAt,

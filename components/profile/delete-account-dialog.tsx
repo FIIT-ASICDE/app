@@ -1,4 +1,6 @@
+import { api } from "@/lib/trpc/react";
 import { CircleX } from "lucide-react";
+import { signOut } from "next-auth/react";
 import { useState } from "react";
 
 import { useUser } from "@/components/context/user-context";
@@ -20,11 +22,10 @@ export const DeleteAccountDialog = () => {
     const [deleteAccountInput, setDeleteAccountInput] = useState<string>("");
     const deleteConfirmationPhrase: string | null = user && user.username;
 
-    const handleDeleteAccount = () => {
-        /* TODO: handle repository deletion */
-        if (user) {
-            console.log("Delete account with ID: " + user.id);
-        }
+    const deleteAccountMutation = api.user.deleteAccount.useMutation();
+    const handleDeleteAccount = async () => {
+        await deleteAccountMutation.mutateAsync();
+        await signOut();
     };
 
     return (
