@@ -1,4 +1,7 @@
 import { RepositoryDisplay } from "@/lib/types/repository";
+import { OrganizationRole } from "@prisma/client";
+import { UserDisplay } from "@/lib/types/user";
+import { Invitation } from "@/lib/types/invitation";
 
 export type Organisation = {
     id: string;
@@ -18,10 +21,8 @@ export type OrganisationMember = {
     name: string;
     surname: string;
     image?: string;
-    role: OrganisationRole;
+    role: OrganizationRole;
 };
-
-export type OrganisationRole = "admin" | "member";
 
 export interface OrganisationOverview {
     isUserAdmin: boolean;
@@ -33,7 +34,7 @@ export type OrganisationDisplay = Omit<
     "members" | "repositories" | "createdAt"
 > & {
     memberCount: number;
-    userRole?: OrganisationRole;
+    userRole?: OrganizationRole;
     showMembers?: boolean;
 };
 

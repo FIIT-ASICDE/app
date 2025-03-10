@@ -18,11 +18,11 @@ export const RepositoryNavigation = ({
     const currentPage: string = getCurrentPage(pathname, 2);
 
     const settingsAccess = () => {
-        if (repository.userRole === "guest") {
+        if (repository.userRole === "GUEST") {
             return "none";
         } else if (
-            repository.userRole === "owner" ||
-            repository.userRole === "admin"
+            repository.userRole === "OWNER" ||
+            repository.userRole === "ADMIN"
         ) {
             return "interactive";
         }

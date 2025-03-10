@@ -11,11 +11,7 @@ import { toast } from "sonner";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
-import {
-    getCardStripe,
-    getInvitationDisplayData,
-    getTimeDeltaString,
-} from "@/components/generic/generic";
+import { getCardStripe, getInvitationDisplayData, getTimeDeltaString } from "@/components/generic/generic";
 import { InvitationBadge } from "@/components/profile/invitation-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
@@ -33,35 +29,55 @@ export const InvitationCardDisplay = ({
 
     const invitationDisplayData = getInvitationDisplayData(invitation);
 
-    const acceptMutation = api.user.acceptInvitation.useMutation({
-        onSuccess: () => {
-            toast.success("Invitation successfully accepted", {
-                description:
-                    invitation.type === "repository"
-                        ? "You are now a collaborator on the " +
-                          invitationDisplayData.displayName +
-                          " repository"
-                        : "You are now a member of the " +
-                          invitationDisplayData.displayName +
-                          " organisation",
-            });
-            router.refresh();
-        },
+    const onAcceptedSuccessAction = () => {
+        toast.success("Invitation successfully accepted", {
+            description:
+                invitation.type === "repository"
+                    ? "You are now a collaborator on the " +
+                      invitationDisplayData.displayName +
+                      " repository"
+                    : "You are now a member of the " +
+                      invitationDisplayData.displayName +
+                      " organisation",
+        });
+        router.refresh();
+    };
+
+    const onDeclinedSuccessAction = () => {
+        toast.success("Invitation successfully declined");
+        router.refresh();
+    };
+
+    const acceptOrgMutation = api.user.acceptOrgInvitation.useMutation({
+        onSuccess: onAcceptedSuccessAction,
         onError: (error) => {
             toast.error(error.message);
             router.refresh();
-        },
+        }
     });
 
-    const declineMutation = api.user.declineInvitation.useMutation({
-        onSuccess: () => {
-            toast.success("Invitation declined");
-            router.refresh();
-        },
+    const declineOrgMutation = api.user.declineOrgInvitation.useMutation({
+        onSuccess: onDeclinedSuccessAction,
         onError: (error) => {
             toast.error(error.message);
             router.refresh();
-        },
+        }
+    });
+
+    const acceptRepoMutation = api.user.acceptRepoInvitation.useMutation({
+        onSuccess: onAcceptedSuccessAction,
+        onError: (error) => {
+            toast.error(error.message);
+            router.refresh();
+        }
+    });
+
+    const declineRepoMutation = api.user.declineRepoInvitation.useMutation({
+        onSuccess: onDeclinedSuccessAction,
+        onError: (error) => {
+            toast.error(error.message);
+            router.refresh();
+        }
     });
 
     return (
@@ -115,21 +131,25 @@ export const InvitationCardDisplay = ({
                     <Button
                         variant="outline"
                         onClick={() => {
-                            if(invitation.type == "organisation") {
+                            if (invitation.type == "organisation") {
                                 if (!invitation.organisation?.id) return;
                                 declineOrgMutation.mutate({
                                     organizationId: invitation.organisation.id,
                                 });
                             } else {
-                                if(!invitation.repository?.id) return;
+                                if (!invitation.repository?.id) return;
                                 declineRepoMutation.mutate({
                                     repositoryId: invitation.repository.id,
-                                })
+                                });
                             }
                         }}
-                        disabled={declineOrgMutation.isPending || declineRepoMutation.isPending}
+                        disabled={
+                            declineOrgMutation.isPending ||
+                            declineRepoMutation.isPending
+                        }
                     >
-                        {declineOrgMutation.isPending || declineRepoMutation.isPending ? (
+                        {declineOrgMutation.isPending ||
+                        declineRepoMutation.isPending ? (
                             "Declining..."
                         ) : (
                             <>
@@ -142,21 +162,25 @@ export const InvitationCardDisplay = ({
                         variant="default"
                         className="hover:bg-primary-button-hover"
                         onClick={() => {
-                            if(invitation.type == "organisation") {
+                            if (invitation.type == "organisation") {
                                 if (!invitation.organisation?.id) return;
                                 acceptOrgMutation.mutate({
                                     organizationId: invitation.organisation.id,
                                 });
                             } else {
-                                if(!invitation.repository?.id) return;
+                                if (!invitation.repository?.id) return;
                                 acceptRepoMutation.mutate({
                                     repositoryId: invitation.repository.id,
-                                })
+                                });
                             }
                         }}
-                        disabled={acceptOrgMutation.isPending || acceptRepoMutation.isPending}
+                        disabled={
+                            acceptOrgMutation.isPending ||
+                            acceptRepoMutation.isPending
+                        }
                     >
-                        {acceptOrgMutation.isPending || acceptRepoMutation.isPending ? (
+                        {acceptOrgMutation.isPending ||
+                        acceptRepoMutation.isPending ? (
                             "Accepting..."
                         ) : (
                             <>

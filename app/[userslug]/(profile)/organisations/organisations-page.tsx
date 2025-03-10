@@ -22,11 +22,13 @@ interface OrganisationsPageProps {
         role: RoleOrganisationFilter;
         pagination: PaginationResult;
     };
+    isItMe: boolean;
 }
 
 export default function OrganisationsPage({
     usersOrganisations,
     searchParams,
+    isItMe,
 }: OrganisationsPageProps) {
     return (
         <div className="bg-background text-foreground">
@@ -45,7 +47,9 @@ export default function OrganisationsPage({
                             role: searchParams.role,
                         }}
                     />
-                    <CreateOrganisationDialog />
+                    {isItMe && (
+                        <CreateOrganisationDialog />
+                    )}
                 </div>
             </div>
 

@@ -379,7 +379,7 @@ function usersAdminOrganisations() {
                 image: org.image || undefined,
                 bio: org.bio || undefined,
                 memberCount: org._count.users,
-                userRole: "admin",
+                userRole: "ADMIN",
             }));
         });
 }
@@ -1019,12 +1019,12 @@ async function getUsersOrgs(
         image: org.image || undefined,
         bio: org.bio || undefined,
         memberCount: org._count.users,
-        userRole: org.users[0]?.role === "ADMIN" ? "admin" : "member",
+        userRole: org.users[0]?.role ?? "MEMBER",
     }));
 
     return transformedOrgs.sort((a, b) => {
-        if (a.userRole === "admin" && b.userRole !== "admin") return -1;
-        if (a.userRole !== "admin" && b.userRole === "admin") return 1;
+        if (a.userRole === "ADMIN" && b.userRole !== "ADMIN") return -1;
+        if (a.userRole !== "ADMIN" && b.userRole === "ADMIN") return 1;
         return a.name.localeCompare(b.name);
     });
 }

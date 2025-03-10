@@ -35,7 +35,7 @@ export const MemberCardDisplay = ({ member }: MemberCardDisplayProps) => {
                     />
                 </TooltipTrigger>
                 <TooltipContent>
-                    {member.role === "admin" ? "Admin" : "Member"}
+                    {member.role === "ADMIN" ? "Admin" : "Member"}
                 </TooltipContent>
             </Tooltip>
         </div>

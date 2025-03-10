@@ -1,49 +1,28 @@
 "use client";
 
 import { handleUpload, imgSrc } from "@/lib/client-file-utils";
-import {
-    createOrgProcedureSchema,
-    createOrganisationFormSchema,
-} from "@/lib/schemas/org-schemas";
+import { createOrgProcedureSchema, createOrganisationFormSchema } from "@/lib/schemas/org-schemas";
 import { api } from "@/lib/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-    FileText,
-    Image as ImageIcon,
-    Loader2,
-    UserRound,
-    UserRoundPlus,
-} from "lucide-react";
+import { FileText, Image as ImageIcon, Loader2, UserRound, UserRoundPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useState } from "react";
 import { UseFormReturn, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+
+
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { useUser } from "@/components/context/user-context";
 import { MultiSelect } from "@/components/multi-select/multi-select";
 import { Button } from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
+
 
 export const CreateOrganisationDialog = () => {
     const router = useRouter();
@@ -83,12 +62,7 @@ export const CreateOrganisationDialog = () => {
     ) => {
         let image: string | undefined = undefined;
         if (data.image?.type === "local") {
-            const fileHash = await handleUpload(data.image.file);
-            if (!fileHash) {
-                // TODO kili handle error
-                return;
-            }
-            image = fileHash;
+            image = await handleUpload(data.image.file);
         } else if (data.image?.type === "remote") {
             image = data.image.src;
         }

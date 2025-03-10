@@ -41,6 +41,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { imgSrc } from "@/lib/client-file-utils";
 
 // import { toast } from "sonner";
 // import { api } from "@/lib/trpc/server";
@@ -57,9 +58,8 @@ export const EditOrganisationDialog = ({
         defaultValues: {
             name: organisation.name,
             bio: organisation.bio,
-            /* TODO: image content not working yet */
             image: organisation.image
-                ? new File([], organisation.image)
+                ? { type: "remote", src: organisation.image }
                 : undefined,
         },
     });
@@ -69,9 +69,8 @@ export const EditOrganisationDialog = ({
             form.reset({
                 name: organisation.name,
                 bio: organisation.bio,
-                /* TODO: image content not working yet */
                 image: organisation.image
-                    ? new File([], organisation.image)
+                    ? { type: "remote", src: organisation.image }
                     : undefined,
             });
         }
@@ -93,7 +92,19 @@ export const EditOrganisationDialog = ({
         console.log(data);
     };
 
-    if (organisation.userRole !== "admin") {
+    const showImage = (
+        img: z.infer<typeof editOrganisationFormSchema>["image"],
+    ) => {
+        if (!img) {
+            return undefined;
+        } else if (img.type === "remote") {
+            return imgSrc(img.src);
+        } else if (img.type === "local") {
+            return URL.createObjectURL(img.file);
+        }
+    };
+
+    if (organisation.userRole !== "ADMIN") {
         return undefined;
     }
 
@@ -173,7 +184,7 @@ export const EditOrganisationDialog = ({
                                         control={form.control}
                                         name="image"
                                         render={({
-                                            field: {
+                                        field: {
                                                 value,
                                                 onChange,
                                                 ...fieldProps
@@ -212,13 +223,7 @@ export const EditOrganisationDialog = ({
                                                     </div>
                                                     <AvatarDisplay
                                                         displayType="profile"
-                                                        image={
-                                                            value
-                                                                ? URL.createObjectURL(
-                                                                      value,
-                                                                  )
-                                                                : undefined
-                                                        }
+                                                        image={showImage(value)}
                                                         name={form.watch(
                                                             "name",
                                                         )}

@@ -1,11 +1,11 @@
-import type { OrganisationRole } from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 
 import { getBadgeStyle } from "@/components/generic/generic";
 import { Badge } from "@/components/ui/badge";
+import { OrganizationRole } from "@prisma/client";
 
 interface RoleBadgeProps {
-    role: OrganisationRole;
+    role: OrganizationRole;
 }
 
 export const RoleBadge = ({ role }: RoleBadgeProps) => {
@@ -14,10 +14,10 @@ export const RoleBadge = ({ role }: RoleBadgeProps) => {
             variant="default"
             className={cn(
                 "flex h-8 w-[4.5rem] items-center justify-center",
-                getBadgeStyle(role as "admin" | "member"),
+                getBadgeStyle(role === "ADMIN" ? "admin" : "member"),
             )}
         >
-            {role === "admin" ? "Admin" : "Member"}
+            {role === "ADMIN" ? "Admin" : "Member"}
         </Badge>
     );
 };

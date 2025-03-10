@@ -1,13 +1,13 @@
-import { OrganisationRole } from "@/lib/types/organisation";
 import { Shield, UserRound } from "lucide-react";
+import { OrganizationRole } from "@prisma/client";
 
 interface RoleIconProps {
-    role: OrganisationRole;
+    role: OrganizationRole;
     className?: string;
 }
 
 export const RoleIcon = ({ role, className }: RoleIconProps) => {
-    if (role === "admin") {
+    if (role === "ADMIN") {
         return <Shield className={className} />;
     } else {
         return <UserRound className={className} />;

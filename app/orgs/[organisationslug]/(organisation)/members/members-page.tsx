@@ -48,7 +48,7 @@ export default function MembersPage({
                             role: searchParams.role,
                         }}
                     />
-                    {org.userRole === "admin" && (
+                    {org.userRole === "ADMIN" && (
                         <InviteMemberDialog organisationName={org.name} />
                     )}
                 </div>
@@ -75,7 +75,7 @@ export default function MembersPage({
                                         key={organisationMember.id}
                                         organisationId={org.id}
                                         organisationMember={organisationMember}
-                                        userIsAdmin={org.userRole === "admin"}
+                                        userIsAdmin={org.userRole === "ADMIN"}
                                     />
                                 ),
                             )}

@@ -16,6 +16,7 @@ import { CreateRepositoryDialog } from "@/components/repositories/create-reposit
 import RepositoryCard from "@/components/repositories/repository-card";
 import { RepositoryFilter } from "@/components/repositories/repository-filter";
 import Search from "@/components/ui/search";
+import { ImportRepositoryDialog } from "@/components/repositories/import-repository-dialog";
 
 interface RepositoriesPageProps {
     repos: Array<Repository>;
@@ -56,9 +57,14 @@ export default async function RepositoriesPage({
                         }}
                     />
                     {canUserCreate && (
-                        <CreateRepositoryDialog
-                            usersOrganisations={userOrgs ?? []}
-                        />
+                        <div className="flex flex-row gap-x-3">
+                            <ImportRepositoryDialog
+                                githubRepositories={repos}
+                            />
+                            <CreateRepositoryDialog
+                                usersOrganisations={userOrgs ?? []}
+                            />
+                        </div>
                     )}
                 </div>
             </div>

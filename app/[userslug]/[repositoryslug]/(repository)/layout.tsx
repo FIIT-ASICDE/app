@@ -29,7 +29,7 @@ export default async function RepositoryLayout({
                 <RepositoryHeader
                     repository={repo}
                     canEdit={
-                        repo.userRole === "admin" || repo.userRole === "owner"
+                        repo.userRole === "ADMIN" || repo.userRole === "OWNER"
                     }
                 />
                 <Separator className="mx-6 w-auto border-accent" />

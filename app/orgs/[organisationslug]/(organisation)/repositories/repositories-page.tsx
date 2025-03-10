@@ -15,6 +15,7 @@ import { NoData } from "@/components/no-data/no-data";
 import { CreateRepositoryDialog } from "@/components/repositories/create-repository-dialog";
 import RepositoryCard from "@/components/repositories/repository-card";
 import Search from "@/components/ui/search";
+import { RepositoryFilter } from "@/components/repositories/repository-filter";
 
 interface RepositoriesPageProps {
     repos: Array<Repository>;
@@ -43,15 +44,12 @@ export default function RepositoriesPage({
                     />
                 </div>
                 <div className="m-6 mb-0 flex flex-row space-x-3">
-                    {/* TODO MISO- nechat tam iba filtre pre public/private */}
-                    {/*<RepositoryFilter*/}
-                    {/*    filters={{*/}
-                    {/*        pinned: searchParams.pinned,*/}
-                    {/*        favorite: searchParams.favorite,*/}
-                    {/*        public: searchParams.public,*/}
-                    {/*    }}*/}
-                    {/*/>*/}
-                    {org.userRole === "admin" && (
+                    <RepositoryFilter
+                        filters={{
+                            public: searchParams.public,
+                        }}
+                    />
+                    {org.userRole === "ADMIN" && (
                         <CreateRepositoryDialog usersOrganisations={[org]} />
                     )}
                 </div>
@@ -76,7 +74,7 @@ export default function RepositoriesPage({
                                 <RepositoryCard
                                     key={repository.id}
                                     repository={repository}
-                                    isUserOwner={org.userRole === "admin"}
+                                    isUserOwner={org.userRole === "ADMIN"}
                                 />
                             ))}
                         </div>

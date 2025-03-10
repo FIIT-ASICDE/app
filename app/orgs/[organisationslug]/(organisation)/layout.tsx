@@ -16,8 +16,6 @@ export default async function OrganisationLayout({
     const orgSlug = (await params).organisationslug.replace(/%20/g, " ");
     try {
         const org = await api.org.byName(orgSlug);
-        /* TODO: this in db */
-        org.showMembers = true;
         return (
             <>
                 <OrganisationHeader organisation={org} />

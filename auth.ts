@@ -14,7 +14,7 @@ declare module "next-auth" {
 }
 
 const providers: Provider[] = [
-    GitHub({ authorization: { params: { scope: "repo" } } }),
+    GitHub({ authorization: { params: { scope: "repo read:user user:email" } } }),
 ];
 
 export const providerMap = providers

@@ -103,12 +103,7 @@ export const EditProfileDialog = ({ profile }: EditProfileDialogProps) => {
     ) => {
         let image: string | undefined = undefined;
         if (data.image?.type === "local") {
-            const fileHash = await handleUpload(data.image.file);
-            if (!fileHash) {
-                // TODO kili handle error
-                return;
-            }
-            image = fileHash;
+            image = await handleUpload(data.image.file);
         } else if (data.image?.type === "remote") {
             image = data.image.src;
         }

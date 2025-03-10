@@ -23,16 +23,12 @@ export type RepositoryOverview = Omit<Repository, "contributors" | "tree"> & {
     stats: LanguageStatistics;
 };
 
-export type RepositoryOverview = Omit<Repository, "contributors" | "tree"> & {
-    readme?: FileItem;
-};
-
 export type RepoUserRole =
-    | "owner"
-    | "admin"
-    | "contributor"
-    | "viewer"
-    | "guest";
+    | "OWNER"
+    | "ADMIN"
+    | "CONTRIBUTOR"
+    | "VIEWER"
+    | "GUEST";
 
 export type RepositoryDisplay = {
     id: string;

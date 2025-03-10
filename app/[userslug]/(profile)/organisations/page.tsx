@@ -7,6 +7,7 @@ import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
 import { api } from "@/lib/trpc/server";
 import { $Enums } from ".prisma/client";
 import OrganizationRole = $Enums.OrganizationRole;
+import { auth } from "@/auth";
 
 interface UserOrganisationsPageProps {
     params: Promise<{
@@ -24,7 +25,11 @@ export default async function UserOrganisationsPage({
     params,
     searchParams,
 }: UserOrganisationsPageProps) {
+    const session = await auth();
+
     const userSlug = (await params).userslug;
+    const user = await api.user.byUsername({ username: userSlug });
+
     const orgsSearchParams = await searchParams;
 
     const query: string = orgsSearchParams?.query || "";
@@ -55,6 +60,7 @@ export default async function UserOrganisationsPage({
                 role: roleFilter,
                 pagination,
             }}
+            isItMe={session?.user.id === user.id}
         />
     );
 }

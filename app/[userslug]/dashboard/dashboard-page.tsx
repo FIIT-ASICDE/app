@@ -12,7 +12,7 @@ import {
     Star,
     StarOff,
 } from "lucide-react";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 
 import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
 import { NoData } from "@/components/no-data/no-data";
@@ -40,13 +40,9 @@ export default function DashboardPage({
     searchParams,
     favoriteRepos
 }: DashboardPageProps) {
-    const recentRepositories: Array<RepositoryDisplay> =
-        dashboard.recentRepositories;
-    const favoriteRepositories: Array<RepositoryDisplay> =
-        favoriteRepos
-    const [invitations, setInvitations] = useState<Invitation[]>(
-        dashboard.invitations,
-    );
+    const recentRepositories: Array<RepositoryDisplay> = dashboard.recentRepositories;
+    const favoriteRepositories: Array<RepositoryDisplay> = favoriteRepos;
+    const invitations: Array<Invitation> = dashboard.invitations;
 
     return (
         <div className="m-6 flex flex-col gap-6 bg-background text-foreground lg:flex-row">
@@ -166,7 +162,6 @@ export default function DashboardPage({
                                                 key={invitation.id}
                                                 invitation={invitation}
                                                 className="w-full"
-                                                setInvitations={setInvitations}
                                             />
                                         ),
                                     )}
