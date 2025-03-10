@@ -1,10 +1,6 @@
 "use client";
 
-import type {
-    Invitation,
-    InvitationStatus,
-    InvitationType,
-} from "@/lib/types/invitation";
+import type { Invitation } from "@/lib/types/invitation";
 import { InvitationsTab } from "@/lib/types/organisation";
 import type {
     Repository,

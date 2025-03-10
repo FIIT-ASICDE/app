@@ -23,7 +23,7 @@ import { UserDisplay } from "@/lib/types/user";
 import { PrismaType } from "@/prisma";
 import { $Enums } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { mkdir } from "fs/promises";
+import { access, mkdir, rm } from "fs/promises";
 import { Session } from "next-auth";
 import path from "path";
 import { z } from "zod";
@@ -40,6 +40,7 @@ export const repoRouter = createTRPCRouter({
     fetchUserFavoriteRepos: fetchUserFavoriteRepos(),
     settings: repoSettings(),
     changeVisibility: changeVisibility(),
+    delete: deleteRepo(),
 });
 
 function create() {
@@ -885,6 +886,75 @@ function changeVisibility() {
         });
 }
 
+function deleteRepo() {
+    return protectedProcedure
+        .input(z.object({ repoId: z.string().uuid() }))
+        .mutation(async ({ ctx, input }) => {
+            const userMetadata =
+                await ctx.prisma.userMetadata.findUniqueOrThrow({
+                    where: { userId: ctx.session.user.id },
+                });
+
+            // check if the user has permission to delete the repository
+            const userRepoRelation =
+                await ctx.prisma.repoUserOrganization.findUnique({
+                    where: {
+                        userMetadataId_repoId: {
+                            userMetadataId: userMetadata.id,
+                            repoId: input.repoId,
+                        },
+                    },
+                });
+
+            // Only OWNER or ADMIN can delete a repository
+            if (
+                !userRepoRelation ||
+                (userRepoRelation.repoRole !== RepoRole.OWNER &&
+                    userRepoRelation.repoRole !== RepoRole.ADMIN)
+            ) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message:
+                        "You don't have permission to delete this repository",
+                });
+            }
+
+            const repoPath = await resolveRepoPath(
+                ctx.prisma,
+                userRepoRelation.repoId,
+            );
+
+            return await ctx.prisma.$transaction(async (tx) => {
+                // delete all repository invitations
+                await tx.repoUserInvitation.deleteMany({
+                    where: { repoId: input.repoId },
+                });
+
+                // delete all repository user organization relationships
+                await tx.repoUserOrganization.deleteMany({
+                    where: { repoId: input.repoId },
+                });
+
+                // delete the repository itself
+                await tx.repo.delete({
+                    where: { id: input.repoId },
+                });
+
+                // delete the repository itself from file system
+                try {
+                    if (!repoPath) return;
+                    await access(repoPath);
+                    await rm(repoPath, { recursive: true, force: true });
+                } catch (fsError) {
+                    console.error(
+                        `Error deleting repository files at ${repoPath}:`,
+                        fsError,
+                    );
+                }
+            });
+        });
+}
+
 export async function pinnedRepos(
     prisma: PrismaType,
     ownerId: string,
@@ -1368,4 +1438,69 @@ async function repoContributors(
             image: role.userMetadata.user.image || undefined,
         };
     });
+}
+
+async function resolveRepoPath(
+    prisma: PrismaType,
+    repoId: string,
+): Promise<string | null> {
+    const repo = await prisma.repo.findUnique({
+        where: { id: repoId },
+        select: { name: true },
+    });
+
+    if (!repo) {
+        return null;
+    }
+
+    // 2. first check if it's a user-owned repository (has OWNER role)
+    const ownerRelation = await prisma.repoUserOrganization.findFirst({
+        where: {
+            repoId,
+            repoRole: RepoRole.OWNER,
+        },
+        include: {
+            userMetadata: {
+                select: {
+                    user: true,
+                },
+            },
+        },
+    });
+
+    if (ownerRelation) {
+        return path.join(
+            process.env.REPOSITORIES_STORAGE_ROOT!,
+            ownerRelation.userMetadata.user.name!,
+            repo.name,
+        );
+    }
+
+    // 4. If no OWNER relation, check for organization ownership (ADMIN role with org)
+    const adminOrgRelation = await prisma.repoUserOrganization.findFirst({
+        where: {
+            repoId,
+            repoRole: RepoRole.ADMIN,
+            organizationId: { not: null },
+        },
+        include: {
+            organization: {
+                select: {
+                    name: true,
+                },
+            },
+        },
+    });
+
+    // 5. if there's an ADMIN relation with org, it's org-owned
+    if (adminOrgRelation && adminOrgRelation.organization) {
+        const ownerName = adminOrgRelation.organization.name;
+        return path.join(
+            process.env.REPOSITORIES_STORAGE_ROOT!,
+            ownerName,
+            repo.name,
+        );
+    }
+
+    return null;
 }
