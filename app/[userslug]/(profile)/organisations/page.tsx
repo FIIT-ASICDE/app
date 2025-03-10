@@ -1,11 +1,12 @@
 import OrganisationsPage from "@/app/[userslug]/(profile)/organisations/organisations-page";
-import { PaginationResult } from "@/lib/types/generic";
 import {
-    OrganisationDisplay,
     RoleOrganisationFilter,
 } from "@/lib/types/organisation";
 
 import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
+import { api } from "@/lib/trpc/server";
+import { $Enums } from ".prisma/client";
+import OrganizationRole = $Enums.OrganizationRole;
 
 interface UserOrganisationsPageProps {
     params: Promise<{
@@ -20,10 +21,10 @@ interface UserOrganisationsPageProps {
 }
 
 export default async function UserOrganisationsPage({
-    // params,
+    params,
     searchParams,
 }: UserOrganisationsPageProps) {
-    // const userSlug = (await params).userslug;
+    const userSlug = (await params).userslug;
     const orgsSearchParams = await searchParams;
 
     const query: string = orgsSearchParams?.query || "";
@@ -33,34 +34,17 @@ export default async function UserOrganisationsPage({
     const roleFilter: RoleOrganisationFilter = parseFilterValue(
         "role",
         orgsSearchParams?.role,
-    ) as RoleOrganisationFilter;
+    ) as RoleOrganisationFilter
 
-    const pageSize: number = 6;
+    const pageSize: number = 8;
 
-    /*
-     * TODO: this method on BE
-     * Explanation: Here I need all users organisations (by userSlug),
-     * filtered by nameSearchTerm,
-     * filtered by role filter ("all" = no need to filter)
-     * and the pagination object (PaginationResult),
-     * the method's name or path can be customized.
-     * */
-    /*const { usersOrganisations, pagination } = await api.user.usersOrganisations.search({
+    const { usersOrganisations, pagination } = await api.org.fetchUserOrgs({
         username: userSlug,
         nameSearchTerm: query,
-        roleFilter: roleFilter,
+        roleFilter: roleFilter === "all" ? undefined : roleFilter.toUpperCase() as OrganizationRole,
         page: currentPage,
         pageSize: pageSize,
-    });*/
-
-    /* dummy values so it does not break */
-    const usersOrganisations: Array<OrganisationDisplay> = [];
-    const pagination: PaginationResult = {
-        total: 0,
-        pageCount: 0,
-        page: currentPage,
-        pageSize: pageSize,
-    };
+    });
 
     return (
         <OrganisationsPage

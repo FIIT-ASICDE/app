@@ -1,7 +1,9 @@
 "use client";
 
+import { api } from "@/lib/trpc/react";
 import { ManageMemberTab, OrganisationMember } from "@/lib/types/organisation";
-import { CircleFadingArrowUp, CircleX, Pen } from "lucide-react";
+import { CircleFadingArrowUp, CircleX, Loader2, Pen } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -28,27 +30,28 @@ export const ManageMemberDialog = ({
     organisationId,
     organisationMember,
 }: ManageMemberDialogProps) => {
+    const router = useRouter();
     const [activeManageMemberTab, setActiveManageMemberTab] =
         useState<ManageMemberTab>("promote");
 
-    /* TODO: connect handlePromote with be */
+    const promoteMutataion = api.org.promoteToAdmin.useMutation();
     const handlePromote = () => {
-        console.log(
-            "Promote member with ID: " +
-                organisationMember.id +
-                " to an admin in organisation with ID: " +
-                organisationId,
-        );
+        promoteMutataion
+            .mutateAsync({
+                userId: organisationMember.id,
+                orgId: organisationId,
+            })
+            .then(router.refresh);
     };
 
-    /* TODO: connect handleExpel with be */
+    const expelMutataion = api.org.expelMember.useMutation();
     const handleExpel = () => {
-        console.log(
-            "Expel member with ID: " +
-                organisationMember.id +
-                " from organisation with ID: " +
-                organisationId,
-        );
+        expelMutataion
+            .mutateAsync({
+                userId: organisationMember.id,
+                orgId: organisationId,
+            })
+            .then(router.refresh);
     };
 
     return (
@@ -120,9 +123,20 @@ export const ManageMemberDialog = ({
                                 onClick={() => handlePromote()}
                                 className="w-full hover:bg-primary-button-hover"
                                 variant="default"
+                                disabled={
+                                    promoteMutataion.isPending ||
+                                    expelMutataion.isPending
+                                }
                             >
-                                <CircleFadingArrowUp />
-                                Promote
+                                {promoteMutataion.isPending ||
+                                expelMutataion.isPending ? (
+                                    <Loader2 className="animate-spin" />
+                                ) : (
+                                    <>
+                                        <CircleFadingArrowUp />
+                                        Promote
+                                    </>
+                                )}
                             </Button>
                         </DialogTrigger>
                     </>

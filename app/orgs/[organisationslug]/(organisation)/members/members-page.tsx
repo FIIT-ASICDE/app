@@ -1,5 +1,6 @@
 import { PaginationResult } from "@/lib/types/generic";
 import {
+    OrganisationDisplay,
     OrganisationMember,
     RoleOrganisationFilter,
 } from "@/lib/types/organisation";
@@ -15,7 +16,7 @@ import { OrganisationFilter } from "@/components/organisations/organisation-filt
 import Search from "@/components/ui/search";
 
 interface MembersPageProps {
-    orgSlug: string;
+    org: OrganisationDisplay;
     members: Array<OrganisationMember>;
     searchParams: {
         query: string;
@@ -25,83 +26,11 @@ interface MembersPageProps {
     };
 }
 
-const data = {
-    id: "",
-    bio: "",
-    createdAt: new Date(),
-    userIsAdmin: true,
-    showMembers: true,
-    members: [
-        {
-            id: "86db4870-15bf-4333-8f03-89eb3d66d6a6",
-            username: "nesquiko12",
-            name: "Lukáš",
-            surname: "Častven",
-            image: "/avatars/avatar1.png",
-            role: "admin",
-        } satisfies OrganisationMember,
-        {
-            id: "86db4870-15bf-4333-8f03-19eb3d66d6a6",
-            username: "stanko444",
-            name: "Adam",
-            surname: "Grík",
-            image: "/avatars/avatar2.png",
-            role: "member",
-        } satisfies OrganisationMember,
-        {
-            id: "86db4870-15bf-4333-8f03-29eb3d66d6a6",
-            username: "kili",
-            name: "Michal",
-            surname: "Kilian",
-            image: "/avatars/avatar3.png",
-            role: "member",
-        } satisfies OrganisationMember,
-        {
-            id: "86db4870-15bf-4333-8f03-39eb3d66d6a6",
-            username: "dankosawa",
-            name: "Daniel",
-            surname: "Sawa",
-            image: "/avatars/avatar4.png",
-            role: "member",
-        } satisfies OrganisationMember,
-        {
-            id: "86db4870-15bf-4333-8f03-49eb3d66d6a6",
-            username: "faxo",
-            name: "Maximilián",
-            surname: "Strečanský",
-            image: "/avatars/avatar5.png",
-            role: "member",
-        } satisfies OrganisationMember,
-        {
-            id: "86db4870-15bf-4333-8f03-59eb3d66d6a6",
-            username: "maek999",
-            name: "Marek",
-            surname: "Odpadlík",
-            image: "/avatars/avatar6.png",
-            role: "member",
-        } satisfies OrganisationMember,
-        {
-            id: "86db4870-15bf-4333-8f03-09eb3d66d6a6",
-            username: "jozo",
-            name: "Jožo",
-            surname: "Jožovič",
-            image: "/avatars/avatar1.png",
-            role: "member",
-        } satisfies OrganisationMember,
-    ] satisfies Array<OrganisationMember>,
-};
-
 export default function MembersPage({
     members,
     searchParams,
-    orgSlug,
+    org,
 }: MembersPageProps) {
-    if (!data.showMembers) {
-        return (
-            <h3>TODO: This organisation is not showing their member list.</h3>
-        );
-    }
-
     return (
         <div className="bg-background text-foreground">
             <div className="flex items-center justify-between">
@@ -119,8 +48,8 @@ export default function MembersPage({
                             role: searchParams.role,
                         }}
                     />
-                    {data.userIsAdmin && (
-                        <InviteMemberDialog organisationName={orgSlug} />
+                    {org.userRole === "admin" && (
+                        <InviteMemberDialog organisationName={org.name} />
                     )}
                 </div>
             </div>
@@ -144,9 +73,9 @@ export default function MembersPage({
                                 (organisationMember: OrganisationMember) => (
                                     <MemberCard
                                         key={organisationMember.id}
-                                        organisationId={data.id}
+                                        organisationId={org.id}
                                         organisationMember={organisationMember}
-                                        userIsAdmin={data.userIsAdmin}
+                                        userIsAdmin={org.userRole === "admin"}
                                     />
                                 ),
                             )}

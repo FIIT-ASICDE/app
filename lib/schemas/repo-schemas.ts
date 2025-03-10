@@ -5,7 +5,6 @@ export const repoBySlugsSchema = z.object({
         .string()
         .min(2, "Owner slug must be at least 2 characters long")
         .max(100, "Owner slug cannot exceed 100 characters")
-        .regex(/^[^%$?]*$/, "Owner slug cannot contain %, $, or ?")
         .transform((value) => value.trim()),
     repositorySlug: z
         .string()
@@ -58,4 +57,18 @@ export const editRepositoryFormSchema = z.object({
         .max(500, "Description cannot exceed 500 characters")
         .optional()
         .transform((value) => (value ? value.trim() : undefined)),
+});
+
+export const cloneRepoSchema = z.object({
+    githubFullName: z.string(),
+    name: z.string().optional(),
+    branch: z.string().optional(),
+    description: z
+        .string()
+        .max(500, "Description cannot exceed 500 characters")
+        .optional()
+        .transform((value) => (value ? value.trim() : undefined)),
+    visibility: z.enum(["public", "private"], {
+        required_error: "Visibility is required.",
+    }),
 });

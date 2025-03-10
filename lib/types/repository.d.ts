@@ -6,8 +6,8 @@ export type Repository = {
     ownerName: string;
     name: string;
     visibility: RepositoryVisibility;
-    favorite: boolean;
-    pinned: boolean;
+    favorite?: boolean;
+    pinned?: boolean;
     description?: string;
     ownerImage?: string;
 
@@ -15,7 +15,16 @@ export type Repository = {
 
     tree?: Array<RepositoryItem>;
     createdAt?: Date;
-    userRole: RepoUserRole;
+    userRole?: RepoUserRole;
+};
+
+export type RepositoryOverview = Omit<Repository, "contributors" | "tree"> & {
+    readme?: FileItem;
+    stats: LanguageStatistics;
+};
+
+export type RepositoryOverview = Omit<Repository, "contributors" | "tree"> & {
+    readme?: FileItem;
 };
 
 export type RepoUserRole =
@@ -88,3 +97,10 @@ export type LanguageStatistics = {
     percentages: Array<LanguageStatisticsItem>;
     totalLoc: number;
 };
+
+interface GithubRepoDisplay {
+    name: string;
+    visibility: RepositoryVisibility;
+    githubFullName: string;
+    description?: string;
+}

@@ -1,3 +1,5 @@
+"use client";
+
 import { PaginationResult } from "@/lib/types/generic";
 import type { Invitation } from "@/lib/types/invitation";
 import type { RepositoryDisplay } from "@/lib/types/repository";
@@ -10,7 +12,7 @@ import {
     Star,
     StarOff,
 } from "lucide-react";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 
 import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
 import { NoData } from "@/components/no-data/no-data";
@@ -30,17 +32,21 @@ interface DashboardPageProps {
     searchParams: {
         pagination: PaginationResult;
     };
+    favoriteRepos: Array<RepositoryDisplay>
 }
 
 export default function DashboardPage({
     dashboard,
     searchParams,
+    favoriteRepos
 }: DashboardPageProps) {
     const recentRepositories: Array<RepositoryDisplay> =
         dashboard.recentRepositories;
     const favoriteRepositories: Array<RepositoryDisplay> =
-        dashboard.favoriteRepositories;
-    const invitations: Array<Invitation> = dashboard.invitations;
+        favoriteRepos
+    const [invitations, setInvitations] = useState<Invitation[]>(
+        dashboard.invitations,
+    );
 
     return (
         <div className="m-6 flex flex-col gap-6 bg-background text-foreground lg:flex-row">
@@ -96,7 +102,7 @@ export default function DashboardPage({
                     </CardHeader>
                     <CardContent className="pb-0">
                         <Suspense fallback={<div>Loading my favorites...</div>}>
-                            {favoriteRepositories.length !== 0 ? (
+                            {favoriteRepositories.length === 0 ? (
                                 <NoData
                                     icon={StarOff}
                                     message={"No favorite repositories found."}
@@ -160,6 +166,7 @@ export default function DashboardPage({
                                                 key={invitation.id}
                                                 invitation={invitation}
                                                 className="w-full"
+                                                setInvitations={setInvitations}
                                             />
                                         ),
                                     )}

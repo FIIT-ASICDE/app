@@ -1,9 +1,12 @@
 "use client";
 
+import { api } from "@/lib/trpc/react";
 import { OrganisationDisplay } from "@/lib/types/organisation";
-import { CircleX } from "lucide-react";
+import { CircleX, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useUser } from "@/components/context/user-context";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -23,14 +26,18 @@ interface DeleteOrganisationDialogProps {
 export const DeleteOrganisationDialog = ({
     organisation,
 }: DeleteOrganisationDialogProps) => {
+    const router = useRouter();
+    const { user } = useUser();
     const [deleteOrganisationInput, setDeleteOrganisationInput] =
         useState<string>("");
 
     const deleteConfirmationPhrase: string = organisation.name;
 
+    const deleteOrgMutation = api.org.delete.useMutation();
     const handleDeleteOrganisation = () => {
-        /* TODO: handle organisation deletion */
-        console.log("Delete organisation with ID: " + organisation.id);
+        deleteOrgMutation
+            .mutateAsync({ organizationId: organisation.id })
+            .then(() => router.replace("/" + user.username));
     };
 
     return (
@@ -39,9 +46,16 @@ export const DeleteOrganisationDialog = ({
                 <Button
                     variant="destructive"
                     className="w-60 hover:bg-destructive-hover"
+                    disabled={deleteOrgMutation.isPending}
                 >
-                    <CircleX />
-                    Delete organisation
+                    {deleteOrgMutation.isPending ? (
+                        <Loader2 className="animate-spin" />
+                    ) : (
+                        <>
+                            <CircleX />
+                            Delete organisation
+                        </>
+                    )}
                 </Button>
             </DialogTrigger>
             <DialogContent>
@@ -60,6 +74,7 @@ export const DeleteOrganisationDialog = ({
                         {deleteConfirmationPhrase}
                     </span>
                 </span>
+
                 <Input
                     type="text"
                     value={deleteOrganisationInput}
@@ -67,18 +82,35 @@ export const DeleteOrganisationDialog = ({
                 />
                 <DialogFooter className="justify-center">
                     <DialogTrigger asChild>
-                        <Button
-                            onClick={() => handleDeleteOrganisation()}
-                            className="w-full hover:bg-destructive-hover"
-                            variant="destructive"
-                            disabled={
-                                deleteOrganisationInput !==
-                                deleteConfirmationPhrase
-                            }
-                        >
-                            <CircleX />
-                            Delete
-                        </Button>
+                        {deleteOrgMutation.error?.message ? (
+                            <span className="text-destructive">
+                                {deleteOrgMutation.error.message}
+                            </span>
+                        ) : (
+                            <Button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleDeleteOrganisation();
+                                }}
+                                className="w-full hover:bg-destructive-hover"
+                                variant="destructive"
+                                disabled={
+                                    deleteOrganisationInput !==
+                                        deleteConfirmationPhrase ||
+                                    deleteOrgMutation.isPending ||
+                                    deleteOrgMutation.isError
+                                }
+                            >
+                                {deleteOrgMutation.isPending ? (
+                                    <Loader2 className="animate-spin" />
+                                ) : (
+                                    <>
+                                        <CircleX />
+                                        Delete
+                                    </>
+                                )}
+                            </Button>
+                        )}
                     </DialogTrigger>
                 </DialogFooter>
             </DialogContent>

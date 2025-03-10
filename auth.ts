@@ -6,13 +6,16 @@ import prisma from "@/prisma";
 
 declare module "next-auth" {
     interface Session {
+        accessToken?: string;
         user: {
             id: string; // overwrites the id?: string in DefaultSession['user']
         } & DefaultSession["user"];
     }
 }
 
-const providers: Provider[] = [GitHub];
+const providers: Provider[] = [
+    GitHub({ authorization: { params: { scope: "repo" } } }),
+];
 
 export const providerMap = providers
     .map((provider) => {
@@ -34,14 +37,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     adapter: PrismaAdapter(prisma),
     providers,
     callbacks: {
-        async jwt({ token, user }) {
+        async jwt({ token, user, account }) {
             if (user) {
                 token.id = user.id;
+            }
+            if (account?.provider === "github") {
+                token.accessToken = account.access_token;
             }
             return token;
         },
         async session({ session, token }) {
             session.user.id = token.id as string;
+            session.accessToken = token.accessToken as string;
             return session;
         },
     },

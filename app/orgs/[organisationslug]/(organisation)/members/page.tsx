@@ -1,9 +1,12 @@
 import MembersPage from "@/app/orgs/[organisationslug]/(organisation)/members/members-page";
 import { api } from "@/lib/trpc/server";
-import { PaginationResult } from "@/lib/types/generic";
 import { RoleOrganisationFilter } from "@/lib/types/organisation";
 
+import { $Enums } from ".prisma/client";
+
 import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
+
+import OrganizationRole = $Enums.OrganizationRole;
 
 interface OrganisationMembersPageProps {
     params: Promise<{
@@ -34,37 +37,23 @@ export default async function OrganisationMembersPage({
         membersSearchParams?.role,
     ) as RoleOrganisationFilter;
 
-    const pageSize: number = 6;
+    const pageSize: number = 8;
 
-    /*
-     * TODO: this method on BE
-     * Explanation: Here I need all members of an organisation (by orgSlug),
-     * filtered by nameSearchTerm,
-     * filtered by role filter ("all" = no need to filter),
-     * and the pagination object (PaginationResult),
-     * the method's name or path can be customized
-     */
-    /*const { members, pagination } = await api.org.members.search({
-        ownerSlug: orgSlug,
+    const org = await api.org.byName(orgSlug);
+    const { members, pagination } = await api.org.getMembers({
+        organisationName: orgSlug,
         nameSearchTerm: query,
-        roleFilter: roleFilter,
+        roleFilter:
+            roleFilter === "all"
+                ? undefined
+                : (roleFilter.toUpperCase() as OrganizationRole),
         page: currentPage,
         pageSize: pageSize,
-    });*/
-
-    // dummy data so it does not break
-    const members = await api.org.getMembers({ organisationName: orgSlug });
-
-    const pagination: PaginationResult = {
-        total: 0,
-        pageCount: 0,
-        page: currentPage,
-        pageSize: pageSize,
-    };
+    });
 
     return (
         <MembersPage
-            orgSlug={orgSlug}
+            org={org}
             members={members}
             searchParams={{
                 query,
