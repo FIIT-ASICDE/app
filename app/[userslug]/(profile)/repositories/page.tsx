@@ -4,7 +4,7 @@ import { api } from "@/lib/trpc/server";
 import {
     FavoriteRepositoriesFilter,
     PinnedRepositoriesFilter,
-    PublicRepositoriesFilter,
+    PublicRepositoriesFilter
 } from "@/lib/types/repository";
 
 import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
@@ -74,11 +74,14 @@ export default async function UserRepositoriesPage({
         pageSize: pageSize,
     });
 
+    const githubRepositories = await api.github.userRepos({});
+
     return (
         <RepositoriesPage
             repos={userRepos}
             canUserCreate={session?.user.id === user.id}
             userOrgs={usersOrgs}
+            githubRepositories={githubRepositories.repos}
             searchParams={{
                 query,
                 rows,

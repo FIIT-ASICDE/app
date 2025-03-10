@@ -1,37 +1,23 @@
 "use client";
 
 import { imgSrc } from "@/lib/client-file-utils";
+import { api } from "@/lib/trpc/react";
 import { InviteUserTab, OrganisationDisplay } from "@/lib/types/organisation";
 import { RepositoryDisplay } from "@/lib/types/repository";
 import { UserDisplay } from "@/lib/types/user";
-import { Building, Folder, Mail } from "lucide-react";
+import { Building, Folder, Loader2, Mail } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+
+
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { Button } from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { api } from "@/lib/trpc/react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { InviteUserDialogTabs } from "@/components/users/invite-user-dialog-tabs";
+
 
 interface InviteUserDialogProps {
     selectedUser: UserDisplay;
@@ -69,13 +55,25 @@ export const InviteUserDialog = ({
     const inviteOrgMutation = api.user.inviteUserToOrganization.useMutation({
         onSuccess: () => {
             setOpen(false);
+            toast.success("Invitation sent successfully.", {
+                description: selectedUser.username + " has been invited to join your organisation."
+            });
         },
+        onError: (error) => {
+            toast.error(error.message);
+        }
     });
 
     const inviteRepoMutation = api.user.inviteUserToRepo.useMutation({
         onSuccess: () => {
             setOpen(false);
+            toast.success("Invitation sent successfully.", {
+                description: selectedUser.username + " has been invited to collaborate on your repository."
+            });
         },
+        onError: (error) => {
+            toast.error(error.message);
+        }
     });
 
     const handleInviteToOrganisation = () => {
@@ -152,38 +150,15 @@ export const InviteUserDialog = ({
                         repository.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="flex w-full flex-row gap-x-3">
-                    <Button
-                        variant={
-                            activeInviteUserTab === "toOrganisation"
-                                ? "secondary"
-                                : "outline"
-                        }
-                        onClick={() => {
-                            setSelectedRepository(undefined);
-                            setActiveInviteUserTab("toOrganisation");
-                        }}
-                        className="flex w-1/2 flex-row items-center justify-center gap-x-2"
-                    >
-                        <Building />
-                        <span>Organisation</span>
-                    </Button>
-                    <Button
-                        variant={
-                            activeInviteUserTab === "onRepository"
-                                ? "secondary"
-                                : "outline"
-                        }
-                        onClick={() => {
-                            setSelectedOrganisation(undefined);
-                            setActiveInviteUserTab("onRepository");
-                        }}
-                        className="flex w-1/2 flex-row items-center justify-center gap-x-2"
-                    >
-                        <Folder />
-                        <span>Repository</span>
-                    </Button>
-                </div>
+
+                <InviteUserDialogTabs
+                    activeInviteUserTab={activeInviteUserTab}
+                    setActiveInviteUserTab={setActiveInviteUserTab}
+                    usersOrganisations={usersOrganisations}
+                    usersRepositories={usersRepositories}
+                    setSelectedOrganisation={setSelectedOrganisation}
+                    setSelectedRepository={setSelectedRepository}
+                />
 
                 {activeInviteUserTab === "toOrganisation" && (
                     <>
@@ -252,9 +227,16 @@ export const InviteUserDialog = ({
                                 onClick={handleInviteToOrganisation}
                                 className="w-full hover:bg-primary-button-hover"
                                 variant="default"
+                                disabled={inviteOrgMutation.isPending || selectedOrganisation === undefined}
                             >
-                                <Building />
-                                Invite
+                                {inviteOrgMutation.isPending ? (
+                                    <Loader2 />
+                                ) : (
+                                    <>
+                                        <Building />
+                                        Invite
+                                    </>
+                                )}
                             </Button>
                         </DialogTrigger>
                     </>
@@ -332,9 +314,16 @@ export const InviteUserDialog = ({
                                 onClick={handleInviteToRepository}
                                 className="w-full hover:bg-primary-button-hover"
                                 variant="default"
+                                disabled={inviteRepoMutation.isPending || selectedRepository === undefined}
                             >
-                                <Folder />
-                                Invite
+                                {inviteRepoMutation.isPending ? (
+                                    <Loader2 />
+                                ) : (
+                                    <>
+                                        <Folder />
+                                        Invite
+                                    </>
+                                )}
                             </Button>
                         </DialogTrigger>
                     </>

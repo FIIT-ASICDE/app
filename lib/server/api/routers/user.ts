@@ -775,7 +775,7 @@ function inviteUserToRepo() {
             if (!userMetadata || !repo || !senderMetadata) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "User or repository not found",
+                    message: "User or repository not found.",
                 });
             }
 
@@ -791,7 +791,7 @@ function inviteUserToRepo() {
             if (existingMembership) {
                 throw new TRPCError({
                     code: "CONFLICT",
-                    message: "User is already a member of this repository",
+                    message: "User is already a collaborator on this repository.",
                 });
             }
 
@@ -809,13 +809,13 @@ function inviteUserToRepo() {
                         throw new TRPCError({
                             code: "CONFLICT",
                             message:
-                                "User is already invited to this repo",
+                                "User already has a pending invitation to this repository.",
                         });
                     }
                 }
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
-                    message: "Could not create invitation",
+                    message: "Could not create invitation.",
                 });
             }
             return { success: true };
@@ -842,7 +842,7 @@ function acceptRepoInvitation() {
             if (!userMetadata) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "User not found",
+                    message: "User not found.",
                 });
             }
 
@@ -917,7 +917,7 @@ function declineRepoInvitation() {
             if (!userMetadata) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "User not found",
+                    message: "User not found.",
                 });
             }
 
@@ -978,7 +978,7 @@ async function userByUsername(
     if (!userMetadata) {
         throw new TRPCError({
             code: "NOT_FOUND",
-            message: "User not found",
+            message: "User not found.",
         });
     }
 

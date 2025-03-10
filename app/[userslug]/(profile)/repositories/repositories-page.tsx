@@ -1,10 +1,10 @@
 import { PaginationResult } from "@/lib/types/generic";
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import {
-    FavoriteRepositoriesFilter,
+    FavoriteRepositoriesFilter, GithubRepoDisplay,
     PinnedRepositoriesFilter,
     PublicRepositoriesFilter,
-    Repository,
+    Repository
 } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { Folders } from "lucide-react";
@@ -22,6 +22,7 @@ interface RepositoriesPageProps {
     repos: Array<Repository>;
     canUserCreate: boolean;
     userOrgs?: Array<Omit<OrganisationDisplay, "memberCount">>;
+    githubRepositories: Array<GithubRepoDisplay>;
     searchParams: {
         query: string;
         rows: boolean;
@@ -36,6 +37,7 @@ export default async function RepositoriesPage({
     repos,
     canUserCreate,
     userOrgs,
+    githubRepositories,
     searchParams,
 }: RepositoriesPageProps) {
     return (
@@ -59,7 +61,7 @@ export default async function RepositoriesPage({
                     {canUserCreate && (
                         <div className="flex flex-row gap-x-3">
                             <ImportRepositoryDialog
-                                githubRepositories={repos}
+                                githubRepositories={githubRepositories}
                             />
                             <CreateRepositoryDialog
                                 usersOrganisations={userOrgs ?? []}
