@@ -1,5 +1,6 @@
 import { PaginationResult } from "@/lib/types/generic";
 import {
+    OrganisationDisplay,
     OrganisationMember,
     RoleOrganisationFilter,
 } from "@/lib/types/organisation";
@@ -15,7 +16,7 @@ import { OrganisationFilter } from "@/components/organisations/organisation-filt
 import Search from "@/components/ui/search";
 
 interface MembersPageProps {
-    orgSlug: string;
+    org: OrganisationDisplay;
     members: Array<OrganisationMember>;
     searchParams: {
         query: string;
@@ -25,25 +26,11 @@ interface MembersPageProps {
     };
 }
 
-const data = {
-    id: "",
-    bio: "",
-    createdAt: new Date(),
-    userIsAdmin: true,
-    showMembers: true,
-};
-
 export default function MembersPage({
     members,
     searchParams,
-    orgSlug,
+    org,
 }: MembersPageProps) {
-    if (!data.showMembers) {
-        return (
-            <h3>TODO: This organisation is not showing their member list.</h3>
-        );
-    }
-
     return (
         <div className="bg-background text-foreground">
             <div className="flex items-center justify-between">
@@ -61,8 +48,8 @@ export default function MembersPage({
                             role: searchParams.role,
                         }}
                     />
-                    {data.userIsAdmin && (
-                        <InviteMemberDialog organisationName={orgSlug} />
+                    {org.userRole === "admin" && (
+                        <InviteMemberDialog organisationName={org.name} />
                     )}
                 </div>
             </div>
@@ -86,9 +73,9 @@ export default function MembersPage({
                                 (organisationMember: OrganisationMember) => (
                                     <MemberCard
                                         key={organisationMember.id}
-                                        organisationId={data.id}
+                                        organisationId={org.id}
                                         organisationMember={organisationMember}
-                                        userIsAdmin={data.userIsAdmin}
+                                        userIsAdmin={org.userRole === "admin"}
                                     />
                                 ),
                             )}

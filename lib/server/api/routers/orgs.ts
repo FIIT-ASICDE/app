@@ -36,6 +36,8 @@ export const orgRouter = createTRPCRouter({
     delete: deleteOrg(),
     settings: settings(),
     setShowMembers: setShowMembers(),
+    promoteToAdmin: promoteToAdmin(),
+    expelMember: expelMember(),
 });
 
 function getMembers() {
@@ -972,6 +974,82 @@ function setShowMembers() {
                 select: { hideMembers: true },
             });
             return { showMembers: result.hideMembers };
+        });
+}
+
+function promoteToAdmin() {
+    return protectedProcedure
+        .input(
+            z.object({
+                orgId: z.string().uuid(),
+                userId: z.string().uuid(),
+            }),
+        )
+        .mutation(async ({ ctx, input }) => {
+            const currentUser = await ctx.prisma.userMetadata.findUniqueOrThrow(
+                { where: { userId: ctx.session.user.id } },
+            );
+
+            const promoterRole = await ctx.prisma.organizationUser.findUnique({
+                where: {
+                    userMetadataId_organizationId: {
+                        userMetadataId: currentUser.id,
+                        organizationId: input.orgId,
+                    },
+                },
+            });
+
+            if (
+                !promoterRole ||
+                promoterRole.role !== $Enums.OrganizationRole.ADMIN
+            ) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "You are not an admin of this organization",
+                });
+            }
+
+            await ctx.prisma.organizationUser.updateMany({
+                where: {
+                    userMetadata: { userId: input.userId },
+                    organizationId: input.orgId,
+                },
+                data: { role: $Enums.OrganizationRole.ADMIN },
+            });
+        });
+}
+
+function expelMember() {
+    return protectedProcedure
+        .input(
+            z.object({
+                orgId: z.string().uuid(),
+                userId: z.string().uuid(),
+            }),
+        )
+        .mutation(async ({ ctx, input }) => {
+            const currentUserRole = await ctx.prisma.organizationUser.findFirst(
+                {
+                    where: {
+                        userMetadata: { userId: ctx.session.user.id },
+                        organizationId: input.orgId,
+                    },
+                },
+            );
+
+            if (!currentUserRole) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "You are not an admin of this organization",
+                });
+            }
+
+            await ctx.prisma.organizationUser.deleteMany({
+                where: {
+                    userMetadata: { userId: input.userId },
+                    organizationId: input.orgId,
+                },
+            });
         });
 }
 
