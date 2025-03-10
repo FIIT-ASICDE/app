@@ -5,8 +5,6 @@ import { GithubRepoDisplay } from "@/lib/types/repository";
 import { GitBranch, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-
-
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { useUser } from "@/components/context/user-context";
 import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
@@ -16,6 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 
 interface ImportRepositoryDialogProps {
@@ -61,10 +60,19 @@ export const ImportRepositoryDialog = ({
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="outline">
-                    <GithubIcon />
-                    Import repository
-                </Button>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant="outline"
+                        >
+                            <GithubIcon className="h-4 w-4 sm:mr-2" />
+                            <span className="hidden sm:inline">Import repository</span>
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="sm:hidden">
+                        Import repository
+                    </TooltipContent>
+                </Tooltip>
             </DialogTrigger>
             <DialogContent className="max-h-[90vh] max-w-[425px] overflow-clip p-0">
                 <ScrollArea className="h-full max-h-[90vh]">
