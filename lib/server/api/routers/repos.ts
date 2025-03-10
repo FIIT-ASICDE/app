@@ -11,12 +11,15 @@ import {
 } from "@/lib/schemas/repo-schemas";
 import { createTRPCRouter, protectedProcedure } from "@/lib/server/api/trpc";
 import { PaginationResult } from "@/lib/types/generic";
+import { Invitation, InvitationStatus } from "@/lib/types/invitation";
 import {
     Repository,
     RepositoryDisplay,
     RepositoryItem,
     RepositoryOverview,
+    RepositorySettings,
 } from "@/lib/types/repository";
+import { UserDisplay } from "@/lib/types/user";
 import { PrismaType } from "@/prisma";
 import { $Enums } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
@@ -35,6 +38,8 @@ export const repoRouter = createTRPCRouter({
     fetchUserRepos: fetchUserRepos(),
     fetchOrgRepos: fetchOrgRepos(),
     fetchUserFavoriteRepos: fetchUserFavoriteRepos(),
+    settings: repoSettings(),
+    changeVisibility: changeVisibility(),
 });
 
 function create() {
@@ -753,6 +758,133 @@ function fetchUserFavoriteRepos() {
         });
 }
 
+function repoSettings() {
+    return protectedProcedure
+        .input(repoBySlugsSchema)
+        .query(async ({ ctx, input }): Promise<RepositorySettings> => {
+            const owner = await ownerBySlug(
+                ctx.prisma,
+                decodeURIComponent(input.ownerSlug.trim()),
+            );
+            const decodedRepositorySlug = decodeURIComponent(
+                input.repositorySlug.trim(),
+            );
+            const repo = await repoBySlug(
+                ctx.prisma,
+                decodedRepositorySlug,
+                ctx.session.user.id,
+                owner,
+            );
+            if (!repo) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Repo not found",
+                });
+            }
+
+            const isUserAdmin =
+                repo.userOrganizationRepo.at(0)?.repoRole === "ADMIN";
+
+            const invitations = await reposInvitations(ctx.prisma, repo.id);
+
+            const pendingInvitations = await Promise.all(
+                invitations
+                    .filter(
+                        (inv) => inv.status === $Enums.InvitationStatus.PENDING,
+                    )
+                    .map(async (inv) => await formatInvitation(inv, owner)),
+            );
+
+            const acceptedInvitations = await Promise.all(
+                invitations
+                    .filter(
+                        (inv) =>
+                            inv.status === $Enums.InvitationStatus.ACCEPTED,
+                    )
+                    .map(async (inv) => await formatInvitation(inv, owner)),
+            );
+            const declinedInvitations = await Promise.all(
+                invitations
+                    .filter(
+                        (inv) =>
+                            inv.status === $Enums.InvitationStatus.DECLINED,
+                    )
+                    .map(async (inv) => await formatInvitation(inv, owner)),
+            );
+
+            const contributors = (
+                await repoContributors(ctx.prisma, repo.id)
+            ).filter((c) => c.id !== ctx.session.user.id);
+
+            const repository: Repository = {
+                id: repo.id,
+                ownerId: owner.id!,
+                ownerName: owner.name!,
+                name: repo.name,
+                visibility: repo.public ? "public" : "private",
+                favorite: repo.userOrganizationRepo[0].favorite ?? false,
+                pinned: false,
+                description: repo.description ?? undefined,
+                ownerImage: owner.image,
+                createdAt: repo.createdAt,
+                contributors,
+                userRole: dbUserRoleToAppUserRole(
+                    repo.userOrganizationRepo[0].repoRole,
+                ),
+            };
+
+            return {
+                repository,
+                pendingInvitations,
+                acceptedInvitations,
+                declinedInvitations,
+                isUserAdmin,
+            };
+        });
+}
+
+function changeVisibility() {
+    return protectedProcedure
+        .input(z.object({ repoId: z.string().uuid(), public: z.boolean() }))
+        .mutation(async ({ ctx, input }) => {
+            const repo = await ctx.prisma.repo.findUniqueOrThrow({
+                where: { id: input.repoId },
+                include: {
+                    userOrganizationRepo: {
+                        select: { repoRole: true },
+                        where: {
+                            userMetadata: { userId: ctx.session.user.id },
+                        },
+                    },
+                },
+            });
+
+            if (repo.userOrganizationRepo.length > 1) {
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message:
+                        "Failed server condition, there must be max one userOrganizationRepo row for a user",
+                });
+            }
+
+            if (
+                repo.userOrganizationRepo[0].repoRole !==
+                    $Enums.RepoRole.ADMIN &&
+                repo.userOrganizationRepo[0].repoRole !== $Enums.RepoRole.OWNER
+            ) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "You aren't admin of this repo",
+                });
+            }
+
+            await ctx.prisma.repo.update({
+                where: { id: input.repoId },
+                data: { public: input.public },
+            });
+        });
+}
+
 export async function pinnedRepos(
     prisma: PrismaType,
     ownerId: string,
@@ -1145,5 +1277,95 @@ export async function doesRepoExist(
                 { organizationId: ownerId },
             ],
         },
+    });
+}
+
+async function reposInvitations(prisma: PrismaType, repoId: string) {
+    return prisma.repoUserInvitation.findMany({
+        where: { repoId },
+        include: {
+            repo: true,
+            userMetadata: {
+                include: {
+                    user: true,
+                },
+            },
+            senderMetadata: {
+                include: {
+                    user: true,
+                },
+            },
+        },
+    });
+}
+
+const formatInvitation = async (
+    inv: Awaited<ReturnType<typeof reposInvitations>>[number],
+    owner: Awaited<ReturnType<typeof ownerBySlug>>,
+): Promise<Invitation> => {
+    const sender: UserDisplay = {
+        id: inv.senderMetadata.user.id,
+        username: inv.senderMetadata.user.name!,
+        image: inv.senderMetadata.user.image || undefined,
+    };
+
+    const receiver: UserDisplay = {
+        id: inv.userMetadata.user.id,
+        username: inv.userMetadata.user.name!,
+        image: inv.userMetadata.user.image || undefined,
+    };
+
+    const repo: RepositoryDisplay = {
+        id: inv.repo.id,
+        ownerName: owner.name,
+        ownerImage: owner.image,
+        name: inv.repo.name,
+        visibility: inv.repo.public ? "public" : "private",
+    };
+
+    let status: InvitationStatus;
+    switch (inv.status) {
+        case "PENDING":
+            status = "pending";
+            break;
+        case "ACCEPTED":
+            status = "accepted";
+            break;
+        case "DECLINED":
+            status = "declined";
+            break;
+    }
+
+    return {
+        id: `${inv.userMetadataId}_${inv.repoId}`,
+        type: "repository",
+        sender,
+        repository: repo,
+        receiver,
+        status,
+        createdAt: inv.createdAt,
+        resolvedAt: inv.resolvedAt || undefined,
+    };
+};
+
+async function repoContributors(
+    prisma: PrismaType,
+    repoId: string,
+): Promise<Array<UserDisplay>> {
+    const roles = await prisma.repoUserOrganization.findMany({
+        where: { repoId },
+        include: {
+            userMetadata: {
+                include: { user: true },
+            },
+        },
+    });
+
+    return roles.map((role): UserDisplay => {
+        return {
+            id: role.userMetadata.user.id,
+            username: role.userMetadata.user.name!,
+            image: role.userMetadata.user.image || undefined,
+        };
     });
 }

@@ -1,5 +1,7 @@
+import { api } from "@/lib/trpc/react";
 import { Repository } from "@/lib/types/repository";
 import { Globe, Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +21,7 @@ interface ChangeVisibilityDialogProps {
 export const ChangeVisibilityDialog = ({
     repository,
 }: ChangeVisibilityDialogProps) => {
+    const router = useRouter();
     const getRepositoryVisibilityChangeMessage = () => {
         if (repository.visibility === "public") {
             return (
@@ -39,8 +42,12 @@ export const ChangeVisibilityDialog = ({
         }
     };
 
+    const changeVisibilityMutation = api.repo.changeVisibility.useMutation();
     const handleChangeVisibility = () => {
-        /* TODO: change visibility */
+        const setTo = repository.visibility === "public" ? false : true;
+        changeVisibilityMutation
+            .mutateAsync({ repoId: repository.id, public: setTo })
+            .then(router.refresh);
     };
 
     return (

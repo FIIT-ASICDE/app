@@ -107,3 +107,11 @@ export type GithubRepositoryAffiliation =
     | "owner"
     | "collaborator"
     | "organization_member";
+
+export interface RepositorySettings {
+	repository: Repository
+    pendingInvitations: Array<Invitation>;
+    acceptedInvitations: Array<Invitation>;
+    declinedInvitations: Array<Invitation>;
+	isUserAdmin: boolean;
+}

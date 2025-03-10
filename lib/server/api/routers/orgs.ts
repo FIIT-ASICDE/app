@@ -892,54 +892,6 @@ function settings() {
                 }),
             );
 
-            const formatInvitation = async (
-                inv: Awaited<ReturnType<typeof orgsInvitations>>[0],
-            ): Promise<Invitation> => {
-                const sender: UserDisplay = {
-                    id: inv.senderMetadata.user.id,
-                    username: inv.senderMetadata.user.name!,
-                    image: inv.senderMetadata.user.image || undefined,
-                };
-
-                const receiver: UserDisplay = {
-                    id: inv.userMetadata.user.id,
-                    username: inv.userMetadata.user.name!,
-                    image: inv.userMetadata.user.image || undefined,
-                };
-
-                const organisation: OrganisationDisplay = {
-                    id: inv.organization.id,
-                    name: inv.organization.name,
-                    image: inv.organization.image || undefined,
-                    bio: inv.organization.bio || undefined,
-                    memberCount: 0,
-                };
-
-                let status: InvitationStatus;
-                switch (inv.status) {
-                    case "PENDING":
-                        status = "pending";
-                        break;
-                    case "ACCEPTED":
-                        status = "accepted";
-                        break;
-                    case "DECLINED":
-                        status = "declined";
-                        break;
-                }
-
-                return {
-                    id: `${inv.userMetadataId}_${inv.organizationId}`,
-                    type: "organisation",
-                    sender,
-                    organisation,
-                    receiver,
-                    status,
-                    createdAt: inv.createdAt,
-                    resolvedAt: inv.resolvedAt || undefined,
-                };
-            };
-
             const pendingInvitations = await Promise.all(
                 invitations
                     .filter(
@@ -1121,6 +1073,54 @@ async function orgsInvitations(prisma: PrismaType, organizationId: string) {
         },
     });
 }
+
+const formatInvitation = async (
+    inv: Awaited<ReturnType<typeof orgsInvitations>>[number],
+): Promise<Invitation> => {
+    const sender: UserDisplay = {
+        id: inv.senderMetadata.user.id,
+        username: inv.senderMetadata.user.name!,
+        image: inv.senderMetadata.user.image || undefined,
+    };
+
+    const receiver: UserDisplay = {
+        id: inv.userMetadata.user.id,
+        username: inv.userMetadata.user.name!,
+        image: inv.userMetadata.user.image || undefined,
+    };
+
+    const organisation: OrganisationDisplay = {
+        id: inv.organization.id,
+        name: inv.organization.name,
+        image: inv.organization.image || undefined,
+        bio: inv.organization.bio || undefined,
+        memberCount: 0,
+    };
+
+    let status: InvitationStatus;
+    switch (inv.status) {
+        case "PENDING":
+            status = "pending";
+            break;
+        case "ACCEPTED":
+            status = "accepted";
+            break;
+        case "DECLINED":
+            status = "declined";
+            break;
+    }
+
+    return {
+        id: `${inv.userMetadataId}_${inv.organizationId}`,
+        type: "organisation",
+        sender,
+        organisation,
+        receiver,
+        status,
+        createdAt: inv.createdAt,
+        resolvedAt: inv.resolvedAt || undefined,
+    };
+};
 
 async function getOrgAsMember(
     prisma: PrismaType,

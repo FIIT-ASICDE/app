@@ -6,7 +6,11 @@ import type {
     InvitationType,
 } from "@/lib/types/invitation";
 import { InvitationsTab } from "@/lib/types/organisation";
-import type { Repository, RepositorySettingsTab } from "@/lib/types/repository";
+import type {
+    Repository,
+    RepositorySettings,
+    RepositorySettingsTab,
+} from "@/lib/types/repository";
 import type { UserDisplay } from "@/lib/types/user";
 import {
     CircleX,
@@ -40,100 +44,17 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 interface SettingsPageProps {
-    userSlug: string;
-    repositorySlug: string;
+    settings: RepositorySettings;
     tab: RepositorySettingsTab;
 }
 
-const data = {
-    repository: {
-        id: "86db4870-15bf-4999-8f03-99eb3d66d6a6",
-        ownerId: "021bb1eb-7f88-4159-ba26-440d86f58962",
-        ownerName: "kili",
-        ownerImage: "/avatars/avatar1.png",
-        name: "repository1",
-        visibility: "public",
-        description:
-            "repository1 is an innovative and collaborative project aimed at simplifying data transformation workflows. It provides a collection of modular scripts, utilities, and APIs for processing and analyzing large datasets efficiently.",
-        favorite: false,
-        pinned: false,
-        createdAt: new Date(),
-        userRole: "ADMIN",
-
-        contributors: [
-            {
-                id: "1",
-                username: "johndoe",
-                image: "/avatars/avatar2.png",
-            } satisfies UserDisplay,
-        ] satisfies Array<UserDisplay>,
-    } satisfies Repository,
-    pendingInvitations: [
-        {
-            id: "1",
-            type: "repository" satisfies InvitationType,
-            sender: {
-                id: "2",
-                username: "me",
-                image: "/avatars/avatar1.png",
-            } satisfies UserDisplay,
-            receiver: {
-                id: "3",
-                username: "johndoe",
-                image: "/avatars/avatar2.png",
-            } satisfies UserDisplay,
-            status: "pending" satisfies InvitationStatus,
-            createdAt: new Date(),
-            resolvedAt: undefined,
-        } satisfies Invitation,
-    ],
-    acceptedInvitations: [
-        {
-            id: "4",
-            type: "repository" satisfies InvitationType,
-            sender: {
-                id: "5",
-                username: "me",
-                image: "/avatars/avatar1.png",
-            } satisfies UserDisplay,
-            receiver: {
-                id: "6",
-                username: "johndoe",
-                image: "/avatars/avatar2.png",
-            } satisfies UserDisplay,
-            status: "accepted" satisfies InvitationStatus,
-            createdAt: new Date(),
-            resolvedAt: new Date(),
-        } satisfies Invitation,
-    ],
-    declinedInvitations: [
-        {
-            id: "7",
-            type: "repository" satisfies InvitationType,
-            sender: {
-                id: "8",
-                username: "me",
-                image: "/avatars/avatar1.png",
-            } satisfies UserDisplay,
-            receiver: {
-                id: "9",
-                username: "johndoe",
-                image: "/avatars/avatar2.png",
-            } satisfies UserDisplay,
-            status: "declined" satisfies InvitationStatus,
-            createdAt: new Date(),
-            resolvedAt: new Date(),
-        } satisfies Invitation,
-    ],
-};
-
-export default function SettingsPage({ tab }: SettingsPageProps) {
+export default function SettingsPage({ settings, tab }: SettingsPageProps) {
     const { user } = useUser();
 
-    const repository: Repository = data.repository;
-    const pendingInvitations: Array<Invitation> = data.pendingInvitations;
-    const acceptedInvitations: Array<Invitation> = data.acceptedInvitations;
-    const declinedInvitations: Array<Invitation> = data.declinedInvitations;
+    const repository: Repository = settings.repository;
+    const pendingInvitations: Array<Invitation> = settings.pendingInvitations;
+    const acceptedInvitations: Array<Invitation> = settings.acceptedInvitations;
+    const declinedInvitations: Array<Invitation> = settings.declinedInvitations;
 
     const [invitationsTab, setInvitationsTab] =
         useState<InvitationsTab>("pending");

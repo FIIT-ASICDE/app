@@ -1,4 +1,5 @@
 import SettingsPage from "@/app/[userslug]/[repositoryslug]/(repository)/settings/settings-page";
+import { api } from "@/lib/trpc/server";
 import { RepositorySettingsTab } from "@/lib/types/repository";
 
 interface RepositorySettingsPageProps {
@@ -22,11 +23,10 @@ export default async function RepositorySettingsPage({
     const tab: RepositorySettingsTab = (settingsSearchParams?.tab ||
         "general") as RepositorySettingsTab;
 
-    return (
-        <SettingsPage
-            userSlug={userSlug}
-            repositorySlug={repositorySlug}
-            tab={tab}
-        />
-    );
+    const repoSettings = await api.repo.settings({
+        ownerSlug: userSlug,
+        repositorySlug,
+    });
+
+    return <SettingsPage settings={repoSettings} tab={tab} />;
 }
