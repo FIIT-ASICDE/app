@@ -1,5 +1,6 @@
 import {
     createOrgProcedureSchema,
+    editOrganisationProcedureSchema,
     leaveOrgSchema,
 } from "@/lib/schemas/org-schemas";
 import { pinnedRepos } from "@/lib/server/api/routers/repos";
@@ -26,6 +27,7 @@ import { z } from "zod";
 
 export const orgRouter = createTRPCRouter({
     create: createOrg(),
+    edit: editOrg(),
     overview: orgOverview(),
     search: search(),
     byName: byName(),
@@ -243,6 +245,38 @@ function createOrg() {
                         role: role === "ADMIN" ? "admin" : "member",
                     })),
                 } satisfies Organisation;
+            });
+        });
+}
+
+function editOrg() {
+    return protectedProcedure
+        .input(editOrganisationProcedureSchema)
+        .mutation(async ({ ctx, input }) => {
+            const { org, userRole } = await getOrgAsMember(
+                ctx.prisma,
+                ctx.session.user.id,
+                {
+                    by: "id",
+                    id: input.orgId,
+                },
+            );
+
+            if (userRole !== $Enums.OrganizationRole.ADMIN) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "You are not an admin of this organization",
+                });
+            }
+
+            return await ctx.prisma.organization.update({
+                where: { id: input.orgId },
+                data: {
+                    name: input.name ?? org.name,
+                    bio: input.bio ?? org.bio,
+                    image: input.image ?? org.image,
+                },
+                select: { name: true, bio: true, image: true },
             });
         });
 }
