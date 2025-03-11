@@ -142,7 +142,6 @@ const DiagramArea = () => {
             input.name = elementName;
             input.position = {x, y};
             input.bandwidth = 1;
-            input.direction = "in";
             element = JointJSInputPort(input);
             break;
         case 'nand':
@@ -173,7 +172,6 @@ const DiagramArea = () => {
             output.name = elementName;
             output.position = {x, y};
             output.bandwidth = 1;
-            output.direction = "out";
             element = JointJSOutputPort(output);
             break;
         case 'multiplexer':

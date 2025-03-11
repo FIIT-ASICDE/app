@@ -29,6 +29,9 @@ import {JointJSBitCombine} from "../Shapes/bitOperations/JointJSBitCombine";
 import {BitCombine} from "../Shapes/classes/bitCombine";
 import {JointJSBitSelect} from "../Shapes/bitOperations/JointJSBitSelect";
 import {BitSelect} from "../Shapes/classes/bitSelect";
+import {JointJSInputPort} from "../Shapes/io/JointJSInputPort";
+import {JointJSOutputPort} from "../Shapes/io/JointJSOutputPort";
+import {Port} from "../Shapes/classes/port";
 import { MdErrorOutline } from "react-icons/md";
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { dia } from "@joint/core";
@@ -504,9 +507,32 @@ const PropertiesPanel = () => {
 
             graph.removeCells([selectedElement]);
             const newGate = gate.create(gateData);
-            newGate.attr({ label: { text: properties.label } });
             graph.addCell(newGate);
             setSelectedElement(newGate);
+        }
+    };
+    const handlePortElementChange = () => {
+        if (!selectedElement) return;
+
+        const portTypes = {
+            'input': { class: Port, create: JointJSInputPort },
+            'output': { class: Port, create: JointJSOutputPort },
+        };
+
+        const elType = selectedElement.attributes.elType;
+        const port = portTypes[elType];
+
+        if (port) {
+            const { x, y } = selectedElement.position();
+            const portData = new port.class();
+            portData.name = properties.label || '';
+            portData.bandwidth = properties.bandwidth || 1;
+            portData.position = { x, y };
+
+            graph.removeCells([selectedElement]);
+            const newPort = port.create(portData);
+            graph.addCell(newPort);
+            setSelectedElement(newPort);
         }
     };
 
@@ -595,6 +621,15 @@ const PropertiesPanel = () => {
             handleLogicPortChange();
             return;
         }
+        else if (selectedElement.attributes.elType === 'input') {
+            handlePortElementChange();
+            return;
+        }
+        else if (selectedElement.attributes.elType === 'input') {
+            handlePortElementChange();
+            return;
+        }
+
 
         else {
             attrsToUpdate.label = { text: properties.label };
@@ -602,8 +637,8 @@ const PropertiesPanel = () => {
         selectedElement.attributes.bandwidth = properties.bandwidth;
 
         selectedElement.attr(attrsToUpdate);
-        console.log(selectedElement);
         updateElement(selectedElement);
+        console.log(selectedElement);
         setShowSaveNotification(true);
     };
     function handleCopy() {

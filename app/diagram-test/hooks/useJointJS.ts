@@ -131,7 +131,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                     }
                     return true; // Для остальных элементов
                 },
-                cellViewNamespace: shapes, // Используем кастомные формы
+                cellViewNamespace: { standard: shapes.standard }, // Используем кастомные формы
                 defaultLink: () => new shapes.standard.Link({
                     // router: {
                     //     name: 'manhattan',  // или 'metro' / 'orthogonal' / 'manhattan' / etc.
@@ -388,17 +388,15 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                     const portId = getPort(magnet);
                     if (!portId) return;
                     const sourceBw = getPortBandwidth(elementView.model, portId);
-                    currentLinkBandwidthRef.current = sourceBw;
+                    currentLinkBandwidthRef.current = Math.ceil(Math.log2(sourceBw)) || 1;
                     isLinkingRef.current = true;
                     const sourceElemId = elementView.model.id;
                     highlightAllInputPorts(graph, sourceBw, sourceElemId);
                 }
-
             });
 
             // Обработка окончания соединения (успешного или отменённого)
             paper.on('link:connect link:disconnect', () => {
-                // Можно добавить действия при подключении или отключении связей
                 resetAllPortsColor(graph);
                 isLinkingRef.current = false;
             });

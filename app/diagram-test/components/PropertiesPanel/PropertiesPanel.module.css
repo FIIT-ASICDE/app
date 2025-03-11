@@ -43,6 +43,19 @@
     outline: none;
     border-color: #90caff;
 }
+
+.propertiesPanel input[type="checkbox"] {
+    width: auto;
+    margin-left: 15px;
+    cursor: pointer;
+    transform: scale(1.2);
+}
+
+.propertiesPanel input[type="checkbox"]:focus {
+    outline: none;
+    border: 1px solid #90caff;
+}
+
 .buttonContainer {
     display: flex;
     gap: 10px;

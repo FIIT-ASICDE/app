@@ -17,7 +17,7 @@ import {
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import { useDiagramContext } from '../../context/useDiagramContext';
-import { generateSystemVerilogCode } from '../../utils/codeGenerator';
+import { generateSystemVerilogCode } from '../../utils/CodeGeneration/SystemVerilogGeneration/codeGenerator';
 import ResizablePanel from '../common/ResizablePanel';
 import styles from './Sidebar.module.css';
 
@@ -88,8 +88,9 @@ const Sidebar = () => {
                 try {
                     const json = JSON.parse(event.target?.result as string);
                     graph.fromJSON(json);
-                } catch {
+                } catch(e) {
                     alert("Error parsing file");
+                    console.log(e);
                 }
             };
             reader.readAsText(file);

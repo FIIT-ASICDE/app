@@ -1,9 +1,8 @@
 // pages/diagram-test/context/DiagramContext.tsx
 
 import React, { createContext, useState, ReactNode } from 'react';
-import {customNamespace} from '../hooks/useJointJS'
-import { dia } from "@joint/core";
 import * as joint from "@joint/core";
+import { dia, shapes } from "@joint/core";
 
 interface DiagramContextProps {
     graph: dia.Graph;
@@ -29,11 +28,8 @@ interface DiagramProviderProps {
 }
 
 export const DiagramProvider = ({ children }: DiagramProviderProps) => {
-    const [graph] = useState(
-        () =>
-            new dia.Graph({}, {
-                cellNamespace: customNamespace
-            })
+    const [graph] = useState(() =>
+        new dia.Graph({}, { cellNamespace: { standard: shapes.standard } })
     );
     const [paper, setPaper] = useState<dia.Paper | null>(null);
     const [selectedElement, setSelectedElement] = useState<dia.Cell | null>(null);
