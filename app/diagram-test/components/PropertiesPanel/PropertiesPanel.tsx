@@ -5,7 +5,6 @@ import { useDiagramContext } from '../../context/useDiagramContext';
 import styles from './PropertiesPanel.module.css';
 import ResizablePanel from '../common/ResizablePanel';
 import {Multiplexer} from "../Shapes/classes/multiplexer";
-import {JointJSComparator} from "../Shapes/complexLogic/JointJSComparator";
 import {JointJSMultiplexer} from "../Shapes/complexLogic/JointJSMultiplexer";
 import {JointJSAnd} from "../Shapes/gates/JointJSAnd";
 import {And} from "../Shapes/classes/and";
@@ -32,6 +31,12 @@ import {BitSelect} from "../Shapes/classes/bitSelect";
 import {JointJSInputPort} from "../Shapes/io/JointJSInputPort";
 import {JointJSOutputPort} from "../Shapes/io/JointJSOutputPort";
 import {Port} from "../Shapes/classes/port";
+import {JointJSAdder} from "../Shapes/complexLogic/JointJSAdder";
+import {Adder} from "../Shapes/classes/adder";
+import {JointJSSubtractor} from "../Shapes/complexLogic/JointJSSubtractor";
+import {Subtractor} from "../Shapes/classes/subtractor";
+import {JointJSComparator} from "../Shapes/complexLogic/JointJSComparator";
+import {Comparator} from "../Shapes/classes/comparator";
 import { MdErrorOutline } from "react-icons/md";
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { dia } from "@joint/core";
@@ -99,6 +104,7 @@ const PropertiesPanel = () => {
                 createdInPorts: selectedElement.attributes.moduleInPorts || selectedElement.attributes.combineInPorts || [],
                 createdOutPorts: selectedElement.attributes.moduleOutPorts || selectedElement.attributes.selectOutPorts || [],
                 instance: selectedElement.attributes.instance || '',
+                comparatorType: selectedElement.attributes.comparatorType || '',
                 addressBandwidth: selectedElement.attributes.addressBandwidth || 8,
                 resetPort: selectedElement.attributes.resetPort ?? false,
                 enablePort: selectedElement.attributes.enablePort ?? false,
@@ -377,6 +383,7 @@ const PropertiesPanel = () => {
 
         setSelectedElement(newModuleCell);
     };
+
     const handleBitSelectPortChange = () => {
         if (!selectedElement) return;
 
@@ -398,6 +405,7 @@ const PropertiesPanel = () => {
 
         setSelectedElement(newBitSelectCell);
     };
+
     const handleBitCombinePortChange = () => {
         if (!selectedElement) return;
 
@@ -419,6 +427,7 @@ const PropertiesPanel = () => {
 
         setSelectedElement(newBitCombineCell);
     };
+
     const handleEditPort = (portType: 'input' | 'output', index: number) => {
         setIsEditingPort(true);
         setEditPortIndex(index);
@@ -536,6 +545,39 @@ const PropertiesPanel = () => {
         }
     };
 
+    const handleComplexLogicChange = () => {
+        if (!selectedElement) return;
+
+        const complexLogicTypes = {
+            'adder': { class: Adder, create: JointJSAdder },
+            'subtractor': { class: Subtractor, create: JointJSSubtractor },
+            'comparator': { class: Comparator, create: JointJSComparator },
+        };
+
+        const elType = selectedElement.attributes.elType;
+
+
+
+        const complexElement = complexLogicTypes[elType];
+
+        if (complexElement) {
+            const { x, y } = selectedElement.position();
+            const complexElementData = new complexElement.class();
+            complexElementData.name = properties.label || '';
+            complexElementData.dataBandwidth = properties.bandwidth || 1;
+            if (elType === 'comparator') {
+
+                complexElementData.type = properties.comparatorType || '>';
+            }
+            complexElementData.position = { x, y };
+
+            graph.removeCells([selectedElement]);
+            const newComplexElement = complexElement.create(complexElementData);
+            graph.addCell(newComplexElement);
+            setSelectedElement(newComplexElement);
+        }
+    };
+
 
     const handleSave = () => {
         if (!selectedElement) return;
@@ -560,7 +602,8 @@ const PropertiesPanel = () => {
             return;
         }
         else if (selectedElement.attributes.elType === 'comparator') {
-            attrsToUpdate.label = { text: properties.comparatorType + '\n\n\n\n' + properties.label };
+            handleComplexLogicChange();
+            return;
         }
         else if (selectedElement.attributes.elType === 'decoder') {
             attrsToUpdate.label = { text: 'DECODER\n' + properties.label };
@@ -592,10 +635,12 @@ const PropertiesPanel = () => {
             return;
         }
         else if (selectedElement.attributes.elType === 'adder') {
-            attrsToUpdate.label = { text: '+\n\n\n\n' + properties.label };
+            handleComplexLogicChange();
+            return;
         }
         else if (selectedElement.attributes.elType === 'subtractor') {
-            attrsToUpdate.label = { text: '-\n\n\n\n' + properties.label };
+            handleComplexLogicChange();
+            return;
         }
         else if (selectedElement.attributes.elType === 'and') {
             handleLogicPortChange();

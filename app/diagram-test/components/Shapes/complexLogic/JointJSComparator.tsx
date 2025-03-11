@@ -40,6 +40,7 @@ export const JointJSComparator = (comparator: Comparator) => {
         elType: 'comparator',
         name: comparator.name,
         bandwidth: comparator.dataBandwidth,
+        comparatorType: comparator.type,
         position: { x: comparator.position?.x || 100, y: comparator.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {

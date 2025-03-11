@@ -10,9 +10,10 @@ const operatorMap: { [key: string]: string } = {
     xnor: '^',
     not: '~'
 };
-const adderSubtractorMap: { [key: string]: string } = {
+const complexLogicMap: { [key: string]: string } = {
     adder: '+',
-    subtractor: '-'
+    subtractor: '-',
+    comparator: '<'
 };
 
 
@@ -26,9 +27,9 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         !cell.isLink() &&
         Object.keys(operatorMap).includes(cell.attributes.elType)
     );
-    const adderSubtractorCells = cells.filter(cell =>
+    const complexLogicCells = cells.filter(cell =>
         !cell.isLink() &&
-        Object.keys(adderSubtractorMap).includes(cell.attributes.elType)
+        Object.keys(complexLogicMap).includes(cell.attributes.elType)
     );
     const links = cells.filter(cell => cell.isLink());
 
@@ -66,11 +67,17 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         logicNames[cell.id] = netName;
         code += `logic${bw > 1 ? ` [${bw - 1}:0]` : ''} ${netName};\n`;
     });
-    adderSubtractorCells.forEach(cell => {
+    complexLogicCells.forEach(cell => {
         const netName = getPortName(cell);
         const bw: number = cell.attributes.bandwidth;
         logicNames[cell.id] = netName;
-        code += `logic [${bw}:0] ${netName};\n`;
+        if (cell.attributes.elType === 'comparator') {
+            code += `logic ${netName};\n`;
+        }
+        else {
+            code += `logic [${bw}:0] ${netName};\n`;
+        }
+
     });
     code += `\n`;
 
@@ -122,7 +129,7 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         });
         code += `\n`;
     });
-    adderSubtractorCells.forEach(cell => {
+    complexLogicCells.forEach(cell => {
         const type = cell.attributes.elType;
         const netName = logicNames[cell.id];
         const cellPorts = cell.attributes.ports?.items || [];
@@ -133,7 +140,10 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
             return connectionMap[key] ? connectionMap[key].join(` ${operatorMap[type]} `) : '/* unconnected */';
         });
 
-        const expr = inputSignals.join(` ${adderSubtractorMap[type]} `) || '/* unconnected */';
+        let expr = inputSignals.join(` ${complexLogicMap[type]} `) || '/* unconnected */';
+        if (type === 'comparator') {
+            expr = `(${inputSignals.join(` ${cell.attributes.comparatorType} `) || '/* unconnected */'})`;
+        }
 
         code += `assign ${netName} = ${expr};\n`;
 
