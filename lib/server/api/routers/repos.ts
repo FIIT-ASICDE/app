@@ -387,7 +387,8 @@ function reposByOwnerSlug() {
                     description: repo.description ?? undefined,
                     ownerImage: ownerImage ?? undefined,
                     createdAt: repo.createdAt,
-                    userRole: repo.userOrganizationRepo.at(0)?.repoRole ?? "GUEST"
+                    userRole:
+                        repo.userOrganizationRepo.at(0)?.repoRole ?? "GUEST",
                 };
             });
         });

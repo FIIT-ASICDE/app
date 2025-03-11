@@ -1,8 +1,8 @@
+import prisma from "@/prisma";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth, { DefaultSession } from "next-auth";
 import type { Provider } from "next-auth/providers";
 import GitHub from "next-auth/providers/github";
-import prisma from "@/prisma";
 
 declare module "next-auth" {
     interface Session {
@@ -14,7 +14,9 @@ declare module "next-auth" {
 }
 
 const providers: Provider[] = [
-    GitHub({ authorization: { params: { scope: "repo read:user user:email" } } }),
+    GitHub({
+        authorization: { params: { scope: "repo read:user user:email" } },
+    }),
 ];
 
 export const providerMap = providers

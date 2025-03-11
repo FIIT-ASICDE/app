@@ -1,9 +1,9 @@
 "use client";
 
 import type { RepositoryItem } from "@/lib/types/repository";
+import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight, FileIcon, Folder } from "lucide-react";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 
 interface FileTreeItemProps {
     item: RepositoryItem;
@@ -32,31 +32,37 @@ export const FileTreeItem = ({
         <div>
             <div
                 className={cn(
-                    "flex items-center py-1 px-2 rounded-md cursor-pointer hover:bg-muted text-sm",
+                    "flex cursor-pointer items-center rounded-md px-2 py-1 text-sm hover:bg-muted",
                     isSelected && "bg-muted font-medium",
                 )}
                 style={{ paddingLeft: `${depth * 12 + 8}px` }}
                 onClick={handleToggle}
             >
-                {item.type === "directory" || item.type === "directory-display" ? (
+                {item.type === "directory" ||
+                item.type === "directory-display" ? (
                     <>
                         <span className="mr-2">
-                            {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                            {expanded ? (
+                                <ChevronDown className="h-4 w-4" />
+                            ) : (
+                                <ChevronRight className="h-4 w-4" />
+                            )}
                         </span>
-                        <Folder className="h-4 w-4 mr-2" />
+                        <Folder className="mr-2 h-4 w-4" />
                     </>
                 ) : (
                     <>
                         <span className="mr-2 w-4"></span>
-                        <FileIcon className="h-4 w-4 mr-2" />
+                        <FileIcon className="mr-2 h-4 w-4" />
                     </>
                 )}
                 <span className="truncate">{item.name}</span>
             </div>
 
-            {expanded && item.type === "directory" || item.type === "directory-display" && (
-                <div>
-                    {/*item.children
+            {(expanded && item.type === "directory") ||
+                (item.type === "directory-display" && (
+                    <div>
+                        {/*item.children
                         .sort((a: RepositoryItem, b: RepositoryItem) => {
                             if ((a.type === "directory" || a.type === "directory-display") && (b.type === "file" || b.type === "file-display")) return -1;
                             if ((a.type === "file" || a.type === "file-display") && (b.type === "directory" || b.type === "directory-display")) return 1;
@@ -71,9 +77,8 @@ export const FileTreeItem = ({
                                 selectedPath={selectedPath}
                             />
                         ))*/}
-                </div>
-            )}
+                    </div>
+                ))}
         </div>
-    )
-}
-
+    );
+};

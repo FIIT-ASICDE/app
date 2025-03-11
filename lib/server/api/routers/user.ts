@@ -1,15 +1,40 @@
-import { editUserProcedureSchema, onboardSchema, userSearchSchema } from "@/lib/schemas/user-schemas";
-import { favoriteRepos, pinnedRepos, recentRepos } from "@/lib/server/api/routers/repos";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/lib/server/api/trpc";
+import {
+    editUserProcedureSchema,
+    onboardSchema,
+    userSearchSchema,
+} from "@/lib/schemas/user-schemas";
+import {
+    favoriteRepos,
+    pinnedRepos,
+    recentRepos,
+} from "@/lib/server/api/routers/repos";
+import {
+    createTRPCRouter,
+    protectedProcedure,
+    publicProcedure,
+} from "@/lib/server/api/trpc";
 import { PaginationResult } from "@/lib/types/generic";
-import { Invitation, InvitationStatus, InvitationType } from "@/lib/types/invitation";
+import {
+    Invitation,
+    InvitationStatus,
+    InvitationType,
+} from "@/lib/types/invitation";
 import { OrganisationDisplay } from "@/lib/types/organisation";
-import { OnboardedUser, User, UserDisplay, UsersDashboard, UsersOverview } from "@/lib/types/user";
+import {
+    RepositoryDisplay,
+    RepositoryVisibility,
+} from "@/lib/types/repository";
+import {
+    OnboardedUser,
+    User,
+    UserDisplay,
+    UsersDashboard,
+    UsersOverview,
+} from "@/lib/types/user";
 import prisma, { PrismaType } from "@/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { RepositoryDisplay, RepositoryVisibility } from "@/lib/types/repository";
 
 export const userRouter = createTRPCRouter({
     completeOnboarding: completeOnboarding(),
@@ -29,7 +54,7 @@ export const userRouter = createTRPCRouter({
     declineRepoInvitation: declineRepoInvitation(),
     fetchAllUsers: fetchAllUsers(),
     usersAdminOrganisations: usersAdminOrganisations(),
-    usersAdminRepos: usersAdminRepos()
+    usersAdminRepos: usersAdminRepos(),
 });
 
 function completeOnboarding() {
@@ -342,8 +367,8 @@ function usersOrganisations() {
 }
 
 function usersAdminOrganisations() {
-    return protectedProcedure
-        .query(async ({ ctx }): Promise<Array<OrganisationDisplay>> => {
+    return protectedProcedure.query(
+        async ({ ctx }): Promise<Array<OrganisationDisplay>> => {
             const userId = ctx.session.user.id;
 
             const userMetadata = await prisma.userMetadata.findUnique({
@@ -381,12 +406,13 @@ function usersAdminOrganisations() {
                 memberCount: org._count.users,
                 userRole: "ADMIN",
             }));
-        });
+        },
+    );
 }
 
 function usersAdminRepos() {
-    return protectedProcedure
-        .query(async ({ ctx }): Promise<Array<RepositoryDisplay>> => {
+    return protectedProcedure.query(
+        async ({ ctx }): Promise<Array<RepositoryDisplay>> => {
             const userId = ctx.session.user.id;
 
             const userMetadata = await prisma.userMetadata.findUnique({
@@ -404,7 +430,7 @@ function usersAdminRepos() {
             const repos = await ctx.prisma.repoUserOrganization.findMany({
                 where: {
                     userMetadataId: userMetadata.id,
-                    repoRole:  { in: ["ADMIN", "OWNER"] },
+                    repoRole: { in: ["ADMIN", "OWNER"] },
                 },
                 include: {
                     repo: true,
@@ -416,11 +442,14 @@ function usersAdminRepos() {
             return repos.map(({ repo, organization }) => ({
                 id: repo.id,
                 ownerName: organization ? organization.name : "Personal",
-                ownerImage: organization ? organization.image || undefined : undefined,
+                ownerImage: organization
+                    ? organization.image || undefined
+                    : undefined,
                 name: repo.name,
                 visibility: repo.public ? "public" : "private",
             }));
-        });
+        },
+    );
 }
 
 function fulltextSearchUsers() {
@@ -696,14 +725,16 @@ function inviteUserToOrganization() {
                 });
             }
 
-            const existingMembership = await prisma.organizationUser.findUnique({
-                where: {
-                    userMetadataId_organizationId: {
-                        userMetadataId: userMetadata.id,
-                        organizationId: organization.id,
+            const existingMembership = await prisma.organizationUser.findUnique(
+                {
+                    where: {
+                        userMetadataId_organizationId: {
+                            userMetadataId: userMetadata.id,
+                            organizationId: organization.id,
+                        },
                     },
                 },
-            });
+            );
 
             if (existingMembership) {
                 throw new TRPCError({
@@ -749,8 +780,7 @@ function inviteUserToRepo() {
         )
         .mutation(async ({ ctx, input }) => {
             const { userId, repositoryName } = input;
-            const decodedRepositoryName =
-                decodeURIComponent(repositoryName);
+            const decodedRepositoryName = decodeURIComponent(repositoryName);
             const prisma = ctx.prisma;
             const senderId = ctx.session.user.id;
 
@@ -779,19 +809,21 @@ function inviteUserToRepo() {
                 });
             }
 
-            const existingMembership = await prisma.repoUserOrganization.findUnique({
-                where: {
-                    userMetadataId_repoId: {
-                        userMetadataId: userMetadata.id,
-                        repoId: repo.id,
+            const existingMembership =
+                await prisma.repoUserOrganization.findUnique({
+                    where: {
+                        userMetadataId_repoId: {
+                            userMetadataId: userMetadata.id,
+                            repoId: repo.id,
+                        },
                     },
-                },
-            });
+                });
 
             if (existingMembership) {
                 throw new TRPCError({
                     code: "CONFLICT",
-                    message: "User is already a collaborator on this repository.",
+                    message:
+                        "User is already a collaborator on this repository.",
                 });
             }
 
@@ -846,15 +878,14 @@ function acceptRepoInvitation() {
                 });
             }
 
-            const invitation =
-                await prisma.repoUserInvitation.findUnique({
-                    where: {
-                        userMetadataId_repoId: {
-                            userMetadataId: userMetadata.id,
-                            repoId: repositoryId,
-                        },
+            const invitation = await prisma.repoUserInvitation.findUnique({
+                where: {
+                    userMetadataId_repoId: {
+                        userMetadataId: userMetadata.id,
+                        repoId: repositoryId,
                     },
-                });
+                },
+            });
 
             if (!invitation) {
                 throw new TRPCError({
@@ -921,15 +952,14 @@ function declineRepoInvitation() {
                 });
             }
 
-            const invitation =
-                await prisma.repoUserInvitation.findUnique({
-                    where: {
-                        userMetadataId_repoId: {
-                            userMetadataId: userMetadata.id,
-                            repoId: repositoryId,
-                        },
+            const invitation = await prisma.repoUserInvitation.findUnique({
+                where: {
+                    userMetadataId_repoId: {
+                        userMetadataId: userMetadata.id,
+                        repoId: repositoryId,
                     },
-                });
+                },
+            });
 
             if (!invitation) {
                 throw new TRPCError({
@@ -1092,7 +1122,9 @@ async function getUserInvitations(
             ownerName: "Unknown",
             ownerImage: undefined,
             name: inv.repo.name,
-            visibility: inv.repo.public ? "public" : "private" as RepositoryVisibility,
+            visibility: inv.repo.public
+                ? "public"
+                : ("private" as RepositoryVisibility),
         },
         status: "pending" as InvitationStatus,
         createdAt: inv.createdAt,

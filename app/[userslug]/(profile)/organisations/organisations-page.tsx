@@ -47,9 +47,7 @@ export default function OrganisationsPage({
                             role: searchParams.role,
                         }}
                     />
-                    {isItMe && (
-                        <CreateOrganisationDialog />
-                    )}
+                    {isItMe && <CreateOrganisationDialog />}
                 </div>
             </div>
 

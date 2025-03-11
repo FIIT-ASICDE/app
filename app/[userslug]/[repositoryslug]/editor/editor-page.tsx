@@ -7,14 +7,15 @@ import type {
 import type { Repository } from "@/lib/types/repository";
 import dynamic from "next/dynamic";
 import { type ElementRef, useRef, useState } from "react";
+
+import { BottomPanelTabContent } from "@/components/editor/bottom-panel-tab-content";
+import { EditorNavigation } from "@/components/editor/editor-navigation";
+import { SidebarTabContent } from "@/components/editor/sidebar-tab-content";
 import {
     ResizableHandle,
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { EditorNavigation } from "@/components/editor/editor-navigation";
-import { SidebarTabContent } from "@/components/editor/sidebar-tab-content";
-import { BottomPanelTabContent } from "@/components/editor/bottom-panel-tab-content";
 
 interface EditorPageProps {
     repository: Repository;
@@ -84,7 +85,11 @@ export default function EditorPage({ repository }: EditorPageProps) {
                             }
                         }}
                     >
-                        <ResizablePanel defaultSize={20} collapsible collapsedSize={0}>
+                        <ResizablePanel
+                            defaultSize={20}
+                            collapsible
+                            collapsedSize={0}
+                        >
                             <SidebarTabContent
                                 activeSidebarContent={activeSidebarContent}
                                 repository={repository}
@@ -102,9 +107,11 @@ export default function EditorPage({ repository }: EditorPageProps) {
                 <ResizableHandle />
 
                 <ResizablePanel defaultSize={20} collapsible collapsedSize={0}>
-                    <BottomPanelTabContent activeBottomPanelContent={activeBottomPanelContent} />
+                    <BottomPanelTabContent
+                        activeBottomPanelContent={activeBottomPanelContent}
+                    />
                 </ResizablePanel>
             </ResizablePanelGroup>
         </div>
     );
-};
+}

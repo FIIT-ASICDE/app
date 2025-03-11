@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
+import { OrganizationRole } from "@prisma/client";
 
 import { getBadgeStyle } from "@/components/generic/generic";
 import { Badge } from "@/components/ui/badge";
-import { OrganizationRole } from "@prisma/client";
 
 interface RoleBadgeProps {
     role: OrganizationRole;

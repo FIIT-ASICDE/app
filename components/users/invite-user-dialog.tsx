@@ -9,15 +9,31 @@ import { Building, Folder, Loader2, Mail } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-
-
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { InviteUserDialogTabs } from "@/components/users/invite-user-dialog-tabs";
-
 
 interface InviteUserDialogProps {
     selectedUser: UserDisplay;
@@ -30,7 +46,6 @@ export const InviteUserDialog = ({
     usersOrganisations,
     usersRepositories,
 }: InviteUserDialogProps) => {
-
     const [open, setOpen] = useState<boolean>(false);
 
     const userIsAdminInAnyOrg: boolean = usersOrganisations.length > 0;
@@ -56,24 +71,28 @@ export const InviteUserDialog = ({
         onSuccess: () => {
             setOpen(false);
             toast.success("Invitation sent successfully.", {
-                description: selectedUser.username + " has been invited to join your organisation."
+                description:
+                    selectedUser.username +
+                    " has been invited to join your organisation.",
             });
         },
         onError: (error) => {
             toast.error(error.message);
-        }
+        },
     });
 
     const inviteRepoMutation = api.user.inviteUserToRepo.useMutation({
         onSuccess: () => {
             setOpen(false);
             toast.success("Invitation sent successfully.", {
-                description: selectedUser.username + " has been invited to collaborate on your repository."
+                description:
+                    selectedUser.username +
+                    " has been invited to collaborate on your repository.",
             });
         },
         onError: (error) => {
             toast.error(error.message);
-        }
+        },
     });
 
     const handleInviteToOrganisation = () => {
@@ -227,7 +246,10 @@ export const InviteUserDialog = ({
                                 onClick={handleInviteToOrganisation}
                                 className="w-full hover:bg-primary-button-hover"
                                 variant="default"
-                                disabled={inviteOrgMutation.isPending || selectedOrganisation === undefined}
+                                disabled={
+                                    inviteOrgMutation.isPending ||
+                                    selectedOrganisation === undefined
+                                }
                             >
                                 {inviteOrgMutation.isPending ? (
                                     <Loader2 />
@@ -314,7 +336,10 @@ export const InviteUserDialog = ({
                                 onClick={handleInviteToRepository}
                                 className="w-full hover:bg-primary-button-hover"
                                 variant="default"
-                                disabled={inviteRepoMutation.isPending || selectedRepository === undefined}
+                                disabled={
+                                    inviteRepoMutation.isPending ||
+                                    selectedRepository === undefined
+                                }
                             >
                                 {inviteRepoMutation.isPending ? (
                                     <Loader2 />

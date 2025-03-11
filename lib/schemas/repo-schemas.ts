@@ -43,9 +43,7 @@ export const createRepositoryFormSchema = z.object({
 });
 
 export const importRepositoryFormSchema = z.object({
-    repository: z.object({
-
-    })
+    repository: z.object({}),
 });
 
 export const editRepositoryFormSchema = z.object({

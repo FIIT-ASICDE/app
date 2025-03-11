@@ -4,7 +4,7 @@ import { api } from "@/lib/trpc/server";
 import {
     FavoriteRepositoriesFilter,
     PinnedRepositoriesFilter,
-    PublicRepositoriesFilter
+    PublicRepositoriesFilter,
 } from "@/lib/types/repository";
 
 import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
@@ -67,9 +67,18 @@ export default async function UserRepositoriesPage({
     const { userRepos, pagination } = await api.repo.fetchUserRepos({
         ownerSlug: userSlug,
         nameSearchTerm: query,
-        pinnedFilter: reposSearchParams?.pinned !== undefined ? reposSearchParams.pinned === "true" : undefined,
-        favoriteFilter: reposSearchParams?.favorite !== undefined ? reposSearchParams.favorite === "true" : undefined,
-        publicFilter: reposSearchParams?.public !== undefined ? reposSearchParams.public === "true" : undefined,
+        pinnedFilter:
+            reposSearchParams?.pinned !== undefined
+                ? reposSearchParams.pinned === "true"
+                : undefined,
+        favoriteFilter:
+            reposSearchParams?.favorite !== undefined
+                ? reposSearchParams.favorite === "true"
+                : undefined,
+        publicFilter:
+            reposSearchParams?.public !== undefined
+                ? reposSearchParams.public === "true"
+                : undefined,
         page: currentPage,
         pageSize: pageSize,
     });

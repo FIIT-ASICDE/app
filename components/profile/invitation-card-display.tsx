@@ -11,7 +11,11 @@ import { toast } from "sonner";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
-import { getCardStripe, getInvitationDisplayData, getTimeDeltaString } from "@/components/generic/generic";
+import {
+    getCardStripe,
+    getInvitationDisplayData,
+    getTimeDeltaString,
+} from "@/components/generic/generic";
 import { InvitationBadge } from "@/components/profile/invitation-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
@@ -53,7 +57,7 @@ export const InvitationCardDisplay = ({
         onError: (error) => {
             toast.error(error.message);
             router.refresh();
-        }
+        },
     });
 
     const declineOrgMutation = api.user.declineOrgInvitation.useMutation({
@@ -61,7 +65,7 @@ export const InvitationCardDisplay = ({
         onError: (error) => {
             toast.error(error.message);
             router.refresh();
-        }
+        },
     });
 
     const acceptRepoMutation = api.user.acceptRepoInvitation.useMutation({
@@ -69,7 +73,7 @@ export const InvitationCardDisplay = ({
         onError: (error) => {
             toast.error(error.message);
             router.refresh();
-        }
+        },
     });
 
     const declineRepoMutation = api.user.declineRepoInvitation.useMutation({
@@ -77,7 +81,7 @@ export const InvitationCardDisplay = ({
         onError: (error) => {
             toast.error(error.message);
             router.refresh();
-        }
+        },
     });
 
     return (

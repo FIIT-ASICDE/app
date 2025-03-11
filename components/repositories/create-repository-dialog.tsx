@@ -51,7 +51,11 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface CreateRepositoryDialogProps {
     usersOrganisations: Array<Omit<OrganisationDisplay, "memberCount">>;
@@ -117,7 +121,9 @@ export const CreateRepositoryDialog = ({
                             className="hover:bg-primary-button-hover"
                         >
                             <FolderPlus className="h-4 w-4 sm:mr-2" />
-                            <span className="hidden sm:inline">Create repository</span>
+                            <span className="hidden sm:inline">
+                                Create repository
+                            </span>
                         </Button>
                     </DialogTrigger>
                 </TooltipTrigger>

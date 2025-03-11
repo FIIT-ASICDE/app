@@ -1,5 +1,6 @@
 "use client";
 
+import { imgSrc } from "@/lib/client-file-utils";
 import { editOrganisationFormSchema } from "@/lib/schemas/org-schemas";
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,7 +42,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { imgSrc } from "@/lib/client-file-utils";
 
 // import { toast } from "sonner";
 // import { api } from "@/lib/trpc/server";
@@ -184,7 +184,7 @@ export const EditOrganisationDialog = ({
                                         control={form.control}
                                         name="image"
                                         render={({
-                                        field: {
+                                            field: {
                                                 value,
                                                 onChange,
                                                 ...fieldProps

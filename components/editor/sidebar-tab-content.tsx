@@ -1,12 +1,13 @@
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { imgSrc } from "@/lib/client-file-utils";
-import { FileX, SearchIcon } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import type { SidebarContentTab } from "@/lib/types/editor";
 import type { Repository } from "@/lib/types/repository";
+import { FileX, SearchIcon } from "lucide-react";
 import { useState } from "react";
+
+import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { FileTree } from "@/components/editor/file-tree";
 import { NoData } from "@/components/no-data/no-data";
+import { Input } from "@/components/ui/input";
 
 interface SidebarTabContentProps {
     activeSidebarContent: SidebarContentTab;
@@ -17,7 +18,8 @@ export const SidebarTabContent = ({
     activeSidebarContent,
     repository,
 }: SidebarTabContentProps) => {
-    const [repositorySearchTerm, setRepositorySearchTerm] = useState<string>("");
+    const [repositorySearchTerm, setRepositorySearchTerm] =
+        useState<string>("");
 
     return (
         <div className="p-2">
@@ -27,9 +29,7 @@ export const SidebarTabContent = ({
                         <AvatarDisplay
                             displayType="select"
                             name={repository.ownerName}
-                            image={imgSrc(
-                                repository.ownerImage,
-                            )}
+                            image={imgSrc(repository.ownerImage)}
                         />
                         {repository.ownerName + "/" + repository.name}
                     </header>
@@ -45,34 +45,27 @@ export const SidebarTabContent = ({
                         />
                     )}
                 </div>
-            )};
-
+            )}
+            ;
             {activeSidebarContent === "search" && (
                 <div className="text-nowrap p-2">
-                    <header className="pb-4 text-xl font-medium">
-                        Search
-                    </header>
+                    <header className="pb-4 text-xl font-medium">Search</header>
                     <div className="space-y-3">
                         <div className="relative w-full">
                             <SearchIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder={
-                                    "Search in " +
-                                    repository.name
-                                }
+                                placeholder={"Search in " + repository.name}
                                 value={repositorySearchTerm}
                                 onChange={(e) =>
-                                    setRepositorySearchTerm(
-                                        e.target.value,
-                                    )
+                                    setRepositorySearchTerm(e.target.value)
                                 }
                                 className="pl-9"
                             />
                         </div>
                     </div>
                 </div>
-            )};
-
+            )}
+            ;
             {activeSidebarContent === "sourceControl" && (
                 <div className="text-nowrap p-2">
                     <header className="pb-4 text-xl font-medium">
@@ -80,12 +73,13 @@ export const SidebarTabContent = ({
                     </header>
                     <div className="space-y-3">
                         <p>
-                            Here the source control with
-                            GitHub should be implemented
+                            Here the source control with GitHub should be
+                            implemented
                         </p>
                     </div>
                 </div>
-            )};
+            )}
+            ;
         </div>
     );
 };

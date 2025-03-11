@@ -1,22 +1,28 @@
-import Link from "next/link";
-import { NavigationButton } from "@/components/editor/navigation-button";
-import LogoIcon from "@/components/icons/logo";
+import type {
+    BottomPanelContentTab,
+    SidebarContentTab,
+} from "@/lib/types/editor";
 import { Command, File, SearchIcon, Settings, Terminal } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { SidebarNavigationButton } from "@/components/editor/sidebar-navigation-button";
-import GithubIcon from "@/components/icons/github";
-import { HeaderDropdown } from "@/components/header/header-dropdown";
-import { CommandBarDialog } from "@/components/command-bar-dialog/command-bar-dialog";
+import Link from "next/link";
 import { Dispatch, RefObject, SetStateAction, useState } from "react";
-import type { BottomPanelContentTab, SidebarContentTab } from "@/lib/types/editor";
-import { useUser } from "@/components/context/user-context";
 import { ImperativePanelGroupHandle } from "react-resizable-panels";
+
+import { CommandBarDialog } from "@/components/command-bar-dialog/command-bar-dialog";
+import { useUser } from "@/components/context/user-context";
+import { NavigationButton } from "@/components/editor/navigation-button";
+import { SidebarNavigationButton } from "@/components/editor/sidebar-navigation-button";
+import { HeaderDropdown } from "@/components/header/header-dropdown";
+import GithubIcon from "@/components/icons/github";
+import LogoIcon from "@/components/icons/logo";
+import { Separator } from "@/components/ui/separator";
 
 interface EditorNavigationProps {
     activeSidebarContent: SidebarContentTab;
     setActiveSidebarContent: Dispatch<SetStateAction<SidebarContentTab>>;
     activeBottomPanelContent: BottomPanelContentTab;
-    setActiveBottomPanelContent: Dispatch<SetStateAction<BottomPanelContentTab>>;
+    setActiveBottomPanelContent: Dispatch<
+        SetStateAction<BottomPanelContentTab>
+    >;
     verticalGroupRef: RefObject<ImperativePanelGroupHandle>;
     horizontalGroupRef: RefObject<ImperativePanelGroupHandle>;
     verticalCollapsed: boolean;

@@ -22,7 +22,15 @@ export const githubRouter = createTRPCRouter({
 
 function userGithubRepos() {
     return protectedProcedure
-        .input(paginationSchema.extend({ affiliation: z.enum(["owner", "collaborator", "organization_member"]) }))
+        .input(
+            paginationSchema.extend({
+                affiliation: z.enum([
+                    "owner",
+                    "collaborator",
+                    "organization_member",
+                ]),
+            }),
+        )
         .query(
             async ({
                 ctx,
@@ -148,16 +156,18 @@ function clone() {
 
 function githubRepoBranches() {
     return protectedProcedure
-        .input(z.object({
-            githubFullName: z.string()
-        }))
+        .input(
+            z.object({
+                githubFullName: z.string(),
+            }),
+        )
         .query(async ({ ctx, input }): Promise<Array<string>> => {
             const [ownerSlug, repositorySlug] = input.githubFullName.split("/");
 
             return readGithubRepoBranches(
                 ctx.session,
                 ownerSlug,
-                repositorySlug
+                repositorySlug,
             );
         });
 }

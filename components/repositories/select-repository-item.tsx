@@ -1,7 +1,8 @@
+import { GithubRepoDisplay } from "@/lib/types/repository";
+
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
 import { SelectItem } from "@/components/ui/select";
-import { GithubRepoDisplay } from "@/lib/types/repository";
 
 interface SelectRepositoryItemProps {
     repository: GithubRepoDisplay;
@@ -15,7 +16,7 @@ export const SelectRepositoryItem = ({
             value={repository.name}
             className="cursor-pointer hover:bg-accent"
         >
-            <div className="flex flex-row items-center space-x-3 min-w-0 w-[315px]">
+            <div className="flex w-[315px] min-w-0 flex-row items-center space-x-3">
                 <AvatarDisplay
                     displayType="select"
                     image={repository.ownerImage}
@@ -23,7 +24,7 @@ export const SelectRepositoryItem = ({
                 />
                 <DynamicTitle
                     title={repository.githubFullName}
-                    className="truncate text-foreground hover:text-foreground text-sm font-normal tracking-normal leading-normal"
+                    className="truncate text-sm font-normal leading-normal tracking-normal text-foreground hover:text-foreground"
                 />
             </div>
         </SelectItem>

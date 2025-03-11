@@ -31,8 +31,8 @@ export const ToggleMembersVisibilityDialog = ({
                 <span className="font-bold">
                     {organisation.showMembers ? "hiding" : "showing"}
                 </span>{" "}
-                the members of your organisation {organisation.showMembers ? "from" : "to"}{" "}
-                the public.
+                the members of your organisation{" "}
+                {organisation.showMembers ? "from" : "to"} the public.
             </span>
         );
     };

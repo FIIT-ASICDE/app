@@ -1,5 +1,8 @@
 import { PaginationResult } from "@/lib/types/generic";
-import { GithubRepoDisplay, GithubRepositoryAffiliation } from "@/lib/types/repository";
+import {
+    GithubRepoDisplay,
+    GithubRepositoryAffiliation,
+} from "@/lib/types/repository";
 import { Octokit } from "@octokit/core";
 import { paginateRest } from "@octokit/plugin-paginate-rest";
 import { throttling } from "@octokit/plugin-throttling";

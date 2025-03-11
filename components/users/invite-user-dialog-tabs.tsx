@@ -1,17 +1,26 @@
-import { Button } from "@/components/ui/button";
-import { Building, Folder } from "lucide-react";
 import { InviteUserTab, OrganisationDisplay } from "@/lib/types/organisation";
-import { Dispatch, SetStateAction } from "react";
 import { RepositoryDisplay } from "@/lib/types/repository";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Building, Folder } from "lucide-react";
+import { Dispatch, SetStateAction } from "react";
+
+import { Button } from "@/components/ui/button";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface InviteUserDialogTabsProps {
     activeInviteUserTab: InviteUserTab;
     setActiveInviteUserTab: Dispatch<SetStateAction<InviteUserTab>>;
     usersOrganisations: Array<OrganisationDisplay>;
     usersRepositories: Array<RepositoryDisplay>;
-    setSelectedOrganisation: Dispatch<SetStateAction<OrganisationDisplay | undefined>>;
-    setSelectedRepository: Dispatch<SetStateAction<RepositoryDisplay | undefined>>;
+    setSelectedOrganisation: Dispatch<
+        SetStateAction<OrganisationDisplay | undefined>
+    >;
+    setSelectedRepository: Dispatch<
+        SetStateAction<RepositoryDisplay | undefined>
+    >;
 }
 
 export const InviteUserDialogTabs = ({
@@ -27,7 +36,10 @@ export const InviteUserDialogTabs = ({
             {usersOrganisations.length === 0 ? (
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <div className="cursor-not-allowed flex w-1/2 flex-row items-center justify-center gap-x-2" role="button">
+                        <div
+                            className="flex w-1/2 cursor-not-allowed flex-row items-center justify-center gap-x-2"
+                            role="button"
+                        >
                             <Button
                                 variant={
                                     activeInviteUserTab === "toOrganisation"
@@ -67,7 +79,10 @@ export const InviteUserDialogTabs = ({
             {usersRepositories.length === 0 ? (
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <div className="cursor-not-allowed flex w-1/2 flex-row items-center justify-center gap-x-2" role="button">
+                        <div
+                            className="flex w-1/2 cursor-not-allowed flex-row items-center justify-center gap-x-2"
+                            role="button"
+                        >
                             <Button
                                 variant={
                                     activeInviteUserTab === "onRepository"
@@ -83,7 +98,7 @@ export const InviteUserDialogTabs = ({
                         </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                    You are not an owner of any repository.
+                        You are not an owner of any repository.
                     </TooltipContent>
                 </Tooltip>
             ) : (

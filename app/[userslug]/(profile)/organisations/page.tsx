@@ -1,13 +1,13 @@
 import OrganisationsPage from "@/app/[userslug]/(profile)/organisations/organisations-page";
-import {
-    RoleOrganisationFilter,
-} from "@/lib/types/organisation";
+import { auth } from "@/auth";
+import { api } from "@/lib/trpc/server";
+import { RoleOrganisationFilter } from "@/lib/types/organisation";
+
+import { $Enums } from ".prisma/client";
 
 import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
-import { api } from "@/lib/trpc/server";
-import { $Enums } from ".prisma/client";
+
 import OrganizationRole = $Enums.OrganizationRole;
-import { auth } from "@/auth";
 
 interface UserOrganisationsPageProps {
     params: Promise<{
@@ -39,14 +39,17 @@ export default async function UserOrganisationsPage({
     const roleFilter: RoleOrganisationFilter = parseFilterValue(
         "role",
         orgsSearchParams?.role,
-    ) as RoleOrganisationFilter
+    ) as RoleOrganisationFilter;
 
     const pageSize: number = 8;
 
     const { usersOrganisations, pagination } = await api.org.fetchUserOrgs({
         username: userSlug,
         nameSearchTerm: query,
-        roleFilter: roleFilter === "all" ? undefined : roleFilter.toUpperCase() as OrganizationRole,
+        roleFilter:
+            roleFilter === "all"
+                ? undefined
+                : (roleFilter.toUpperCase() as OrganizationRole),
         page: currentPage,
         pageSize: pageSize,
     });

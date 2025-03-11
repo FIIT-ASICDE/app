@@ -45,9 +45,15 @@ export const RepositoryFilter = ({ filters }: RepositoryFilterProps) => {
     const pathname = usePathname();
     const router = useRouter();
 
-    const [pinnedFilter, setPinnedFilter] = useState<PinnedRepositoriesFilter | undefined>(filters.pinned,);
-    const [favoriteFilter, setFavoriteFilter] = useState<FavoriteRepositoriesFilter | undefined>(filters.favorite);
-    const [publicFilter, setPublicFilter] = useState<PublicRepositoriesFilter | undefined>(filters.public);
+    const [pinnedFilter, setPinnedFilter] = useState<
+        PinnedRepositoriesFilter | undefined
+    >(filters.pinned);
+    const [favoriteFilter, setFavoriteFilter] = useState<
+        FavoriteRepositoriesFilter | undefined
+    >(filters.favorite);
+    const [publicFilter, setPublicFilter] = useState<
+        PublicRepositoriesFilter | undefined
+    >(filters.public);
 
     useEffect(() => {
         setPinnedFilter(filters.pinned);
@@ -110,7 +116,11 @@ export const RepositoryFilter = ({ filters }: RepositoryFilterProps) => {
         router.replace(pathname);
     };
 
-    if (pinnedFilter === undefined && favoriteFilter === undefined && publicFilter === undefined) {
+    if (
+        pinnedFilter === undefined &&
+        favoriteFilter === undefined &&
+        publicFilter === undefined
+    ) {
         return <></>;
     }
 
@@ -179,7 +189,10 @@ export const RepositoryFilter = ({ filters }: RepositoryFilterProps) => {
                                 </DropdownMenuLabel>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" className="w-full">
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full"
+                                        >
                                             {pinnedFilter === "all" ? (
                                                 <>
                                                     <Folders /> All
@@ -205,14 +218,18 @@ export const RepositoryFilter = ({ filters }: RepositoryFilterProps) => {
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                             onClick={() =>
-                                                handlePinnedFilterClick("pinned")
+                                                handlePinnedFilterClick(
+                                                    "pinned",
+                                                )
                                             }
                                         >
                                             <Pin /> Pinned
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                             onClick={() =>
-                                                handlePinnedFilterClick("notPinned")
+                                                handlePinnedFilterClick(
+                                                    "notPinned",
+                                                )
                                             }
                                         >
                                             <PinOff /> Not pinned
@@ -230,12 +247,16 @@ export const RepositoryFilter = ({ filters }: RepositoryFilterProps) => {
                                 </DropdownMenuLabel>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" className="w-full">
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full"
+                                        >
                                             {favoriteFilter === "all" ? (
                                                 <>
                                                     <Folders /> All
                                                 </>
-                                            ) : favoriteFilter === "favorite" ? (
+                                            ) : favoriteFilter ===
+                                              "favorite" ? (
                                                 <>
                                                     <Star fill="currentColor" />{" "}
                                                     Favorite
@@ -257,14 +278,19 @@ export const RepositoryFilter = ({ filters }: RepositoryFilterProps) => {
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                             onClick={() =>
-                                                handleFavoriteFilterClick("favorite")
+                                                handleFavoriteFilterClick(
+                                                    "favorite",
+                                                )
                                             }
                                         >
-                                            <Star fill="currentColor" /> Favorite
+                                            <Star fill="currentColor" />{" "}
+                                            Favorite
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                             onClick={() =>
-                                                handleFavoriteFilterClick("notFavorite")
+                                                handleFavoriteFilterClick(
+                                                    "notFavorite",
+                                                )
                                             }
                                         >
                                             <Star /> Not favorite
@@ -282,7 +308,10 @@ export const RepositoryFilter = ({ filters }: RepositoryFilterProps) => {
                                 </DropdownMenuLabel>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" className="w-full">
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full"
+                                        >
                                             {publicFilter === "all" ? (
                                                 <>
                                                     <Folders /> All
@@ -308,14 +337,18 @@ export const RepositoryFilter = ({ filters }: RepositoryFilterProps) => {
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                             onClick={() =>
-                                                handlePublicFilterClick("public")
+                                                handlePublicFilterClick(
+                                                    "public",
+                                                )
                                             }
                                         >
                                             <Globe /> Public
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                             onClick={() =>
-                                                handlePublicFilterClick("private")
+                                                handlePublicFilterClick(
+                                                    "private",
+                                                )
                                             }
                                         >
                                             <Lock /> Private

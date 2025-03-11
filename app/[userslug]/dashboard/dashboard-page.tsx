@@ -32,15 +32,16 @@ interface DashboardPageProps {
     searchParams: {
         pagination: PaginationResult;
     };
-    favoriteRepos: Array<RepositoryDisplay>
+    favoriteRepos: Array<RepositoryDisplay>;
 }
 
 export default function DashboardPage({
     dashboard,
     searchParams,
-    favoriteRepos
+    favoriteRepos,
 }: DashboardPageProps) {
-    const recentRepositories: Array<RepositoryDisplay> = dashboard.recentRepositories;
+    const recentRepositories: Array<RepositoryDisplay> =
+        dashboard.recentRepositories;
     const favoriteRepositories: Array<RepositoryDisplay> = favoriteRepos;
     const invitations: Array<Invitation> = dashboard.invitations;
 
