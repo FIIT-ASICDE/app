@@ -95,8 +95,15 @@ export type LanguageStatistics = {
 };
 
 interface GithubRepoDisplay {
+    ownerName: string;
+    ownerImage: string;
     name: string;
     visibility: RepositoryVisibility;
     githubFullName: string;
     description?: string;
 }
+
+export type GithubRepositoryAffiliation =
+    | "owner"
+    | "collaborator"
+    | "organization_member";

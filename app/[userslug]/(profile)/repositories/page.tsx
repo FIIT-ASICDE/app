@@ -74,14 +74,11 @@ export default async function UserRepositoriesPage({
         pageSize: pageSize,
     });
 
-    const githubRepositories = await api.github.userRepos({});
-
     return (
         <RepositoriesPage
             repos={userRepos}
             canUserCreate={session?.user.id === user.id}
             userOrgs={usersOrgs}
-            githubRepositories={githubRepositories.repos}
             searchParams={{
                 query,
                 rows,

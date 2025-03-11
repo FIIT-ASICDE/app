@@ -77,4 +77,6 @@ export const cloneRepoSchema = z.object({
     visibility: z.enum(["public", "private"], {
         required_error: "Visibility is required.",
     }),
+    ownerType: z.enum(["user", "org"]),
+    ownerId: z.string().uuid(),
 });

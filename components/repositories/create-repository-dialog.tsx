@@ -109,9 +109,9 @@ export const CreateRepositoryDialog = ({
 
     return (
         <Dialog>
-            <DialogTrigger asChild>
-                <Tooltip>
-                    <TooltipTrigger asChild>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <DialogTrigger asChild>
                         <Button
                             variant="default"
                             className="hover:bg-primary-button-hover"
@@ -119,12 +119,12 @@ export const CreateRepositoryDialog = ({
                             <FolderPlus className="h-4 w-4 sm:mr-2" />
                             <span className="hidden sm:inline">Create repository</span>
                         </Button>
-                    </TooltipTrigger>
-                    <TooltipContent className="sm:hidden">
-                        Create repository
-                    </TooltipContent>
-                </Tooltip>
-            </DialogTrigger>
+                    </DialogTrigger>
+                </TooltipTrigger>
+                <TooltipContent className="sm:hidden">
+                    Create repository
+                </TooltipContent>
+            </Tooltip>
             <DialogContent className="max-h-[90vh] max-w-[425px] overflow-clip p-0">
                 <ScrollArea className="h-full max-h-[90vh]">
                     <div className="p-6">

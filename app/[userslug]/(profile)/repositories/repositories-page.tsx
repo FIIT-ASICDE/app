@@ -1,7 +1,7 @@
 import { PaginationResult } from "@/lib/types/generic";
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import {
-    FavoriteRepositoriesFilter, GithubRepoDisplay,
+    FavoriteRepositoriesFilter,
     PinnedRepositoriesFilter,
     PublicRepositoriesFilter,
     Repository
@@ -22,7 +22,6 @@ interface RepositoriesPageProps {
     repos: Array<Repository>;
     canUserCreate: boolean;
     userOrgs?: Array<Omit<OrganisationDisplay, "memberCount">>;
-    githubRepositories: Array<GithubRepoDisplay>;
     searchParams: {
         query: string;
         rows: boolean;
@@ -37,7 +36,6 @@ export default async function RepositoriesPage({
     repos,
     canUserCreate,
     userOrgs,
-    githubRepositories,
     searchParams,
 }: RepositoriesPageProps) {
     return (
@@ -60,9 +58,7 @@ export default async function RepositoriesPage({
                     />
                     {canUserCreate && (
                         <div className="flex flex-row gap-x-3">
-                            <ImportRepositoryDialog
-                                githubRepositories={githubRepositories}
-                            />
+                            <ImportRepositoryDialog />
                             <CreateRepositoryDialog
                                 usersOrganisations={userOrgs ?? []}
                             />

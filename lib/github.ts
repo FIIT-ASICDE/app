@@ -1,5 +1,5 @@
 import { PaginationResult } from "@/lib/types/generic";
-import { GithubRepoDisplay } from "@/lib/types/repository";
+import { GithubRepoDisplay, GithubRepositoryAffiliation } from "@/lib/types/repository";
 import { Octokit } from "@octokit/core";
 import { paginateRest } from "@octokit/plugin-paginate-rest";
 import { throttling } from "@octokit/plugin-throttling";
@@ -34,13 +34,14 @@ const octoKitClient = (session: Session | null) =>
 
 export async function readUsersGithubRepos(
     session: Session,
+    affiliation: GithubRepositoryAffiliation,
     page: number,
     pageSize: number,
 ): Promise<{ repos: Array<GithubRepoDisplay>; pagination: PaginationResult }> {
     const octokit = octoKitClient(session);
 
     const response = await octokit.request("GET /user/repos", {
-        affiliation: "owner",
+        affiliation: affiliation,
         per_page: pageSize,
         page,
     });
@@ -65,7 +66,10 @@ export async function readUsersGithubRepos(
     };
 
     const repos = response.data.map((repo): GithubRepoDisplay => {
+        console.log(repo);
         return {
+            ownerName: repo.owner.login,
+            ownerImage: repo.owner.avatar_url,
             name: repo.name,
             visibility: repo.visibility === "public" ? "public" : "private",
             githubFullName: repo.full_name,
