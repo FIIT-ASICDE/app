@@ -48,6 +48,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { toast } from "sonner";
 
 interface EditOrganisationDialogProps {
     organisation: OrganisationDisplay;
@@ -84,10 +85,10 @@ export const EditOrganisationDialog = ({
 
     const editMutation = api.org.edit.useMutation({
         onSuccess: () => {
-            // TODO kili toast.success("Organisation updated successfully");
+            toast.success("Organisation updated successfully");
         },
-        onError: () => {
-            // TODO kili toast.error(error.message);
+        onError: (error) => {
+            toast.error(error.message);
         },
     });
 
