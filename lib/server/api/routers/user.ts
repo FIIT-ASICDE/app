@@ -55,6 +55,7 @@ export const userRouter = createTRPCRouter({
     fetchAllUsers: fetchAllUsers(),
     usersAdminOrganisations: usersAdminOrganisations(),
     usersAdminRepos: usersAdminRepos(),
+    deleteAccount: deleteAccount(),
 });
 
 function completeOnboarding() {
@@ -75,7 +76,7 @@ function completeOnboarding() {
             if (user.metadata) {
                 throw new TRPCError({
                     code: "FORBIDDEN",
-                    message: "User is already onboarded",
+                    message: "User already onboarded",
                 });
             }
 
@@ -404,7 +405,7 @@ function usersAdminOrganisations() {
                 image: org.image || undefined,
                 bio: org.bio || undefined,
                 memberCount: org._count.users,
-                userRole: "ADMIN",
+                userRole: "admin",
             }));
         },
     );
@@ -757,7 +758,7 @@ function inviteUserToOrganization() {
                         throw new TRPCError({
                             code: "CONFLICT",
                             message:
-                                "User already has a pending invitation to this organisation",
+                                "User is already invited to this organization",
                         });
                     }
                 }
@@ -805,7 +806,7 @@ function inviteUserToRepo() {
             if (!userMetadata || !repo || !senderMetadata) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "User or repository not found.",
+                    message: "User or repository not found",
                 });
             }
 
@@ -822,8 +823,7 @@ function inviteUserToRepo() {
             if (existingMembership) {
                 throw new TRPCError({
                     code: "CONFLICT",
-                    message:
-                        "User is already a collaborator on this repository.",
+                    message: "User is already a member of this repository",
                 });
             }
 
@@ -840,14 +840,13 @@ function inviteUserToRepo() {
                     if (error.code === "P2002") {
                         throw new TRPCError({
                             code: "CONFLICT",
-                            message:
-                                "User already has a pending invitation to this repository.",
+                            message: "User is already invited to this repo",
                         });
                     }
                 }
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
-                    message: "Could not create invitation.",
+                    message: "Could not create invitation",
                 });
             }
             return { success: true };
@@ -874,7 +873,7 @@ function acceptRepoInvitation() {
             if (!userMetadata) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "User not found.",
+                    message: "User not found",
                 });
             }
 
@@ -948,7 +947,7 @@ function declineRepoInvitation() {
             if (!userMetadata) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "User not found.",
+                    message: "User not found",
                 });
             }
 
@@ -989,6 +988,64 @@ function declineRepoInvitation() {
         });
 }
 
+function deleteAccount() {
+    return protectedProcedure.mutation(async ({ ctx }) => {
+        const userId = ctx.session.user.id;
+        const user = await prisma.user.findUniqueOrThrow({
+            where: { id: userId },
+            include: { metadata: true },
+        });
+
+        return await prisma.$transaction(async (tx) => {
+            if (user.metadata) {
+                const userMetadataId = user.metadata.id;
+
+                // 1. delete organization invitations
+                await tx.organizationUserInvitation.deleteMany({
+                    where: {
+                        OR: [
+                            { userMetadataId },
+                            { senderMetadataId: userMetadataId },
+                        ],
+                    },
+                });
+
+                // 2. delete repository invitations
+                await tx.repoUserInvitation.deleteMany({
+                    where: {
+                        OR: [
+                            { userMetadataId },
+                            { senderMetadataId: userMetadataId },
+                        ],
+                    },
+                });
+
+                // 3. delete repository user organization relationships
+                await tx.repoUserOrganization.deleteMany({
+                    where: { userMetadataId },
+                });
+
+                // 4. delete organization user relationships
+                await tx.organizationUser.deleteMany({
+                    where: { userMetadataId },
+                });
+
+                // 5. delete user metadata
+                await tx.userMetadata.delete({
+                    where: { id: userMetadataId },
+                });
+            }
+
+            // 6. delete the user
+            await tx.user.delete({
+                where: { id: userId },
+            });
+
+            return { success: true };
+        });
+    });
+}
+
 async function userByUsername(
     prisma: PrismaType,
     username: string,
@@ -1008,7 +1065,7 @@ async function userByUsername(
     if (!userMetadata) {
         throw new TRPCError({
             code: "NOT_FOUND",
-            message: "User not found.",
+            message: "User not found",
         });
     }
 
@@ -1049,12 +1106,12 @@ async function getUsersOrgs(
         image: org.image || undefined,
         bio: org.bio || undefined,
         memberCount: org._count.users,
-        userRole: org.users[0]?.role ?? "MEMBER",
+        userRole: org.users[0]?.role === "ADMIN" ? "admin" : "member",
     }));
 
     return transformedOrgs.sort((a, b) => {
-        if (a.userRole === "ADMIN" && b.userRole !== "ADMIN") return -1;
-        if (a.userRole !== "ADMIN" && b.userRole === "ADMIN") return 1;
+        if (a.userRole === "admin" && b.userRole !== "admin") return -1;
+        if (a.userRole !== "admin" && b.userRole === "admin") return 1;
         return a.name.localeCompare(b.name);
     });
 }

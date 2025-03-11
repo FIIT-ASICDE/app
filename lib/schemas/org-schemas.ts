@@ -101,22 +101,23 @@ export const orgSearchSchema = z.object({
 });
 
 export const editOrganisationProcedureSchema = z.object({
+    orgId: z.string().uuid(),
     name: z
         .string()
         .min(2, "Organisation name must be at least 2 characters long")
         .max(100, "Organisation name cannot exceed 100 characters")
         .regex(/^[^%$?]*$/, "Organisation name cannot contain %, $, or ?")
-        .transform((value) => value.trim()),
+        .optional()
+        .transform((value) => value?.trim()),
     bio: z
         .string()
         .max(500, "Bio cannot exceed 500 characters")
         .optional()
-        .transform((value) => (value ? value.trim() : undefined)),
+        .transform((value) => value?.trim()),
     image: z
         .string()
-        .url("Invalid URL format")
         .optional()
-        .transform((value) => (value ? value.trim() : undefined)),
+        .transform((value) => value?.trim()),
 });
 
 export const editOrganisationFormSchema = z.object({
@@ -138,7 +139,7 @@ export const editOrganisationFormSchema = z.object({
                 file: z
                     .instanceof(File)
                     .refine((file: File) => file.size < 2000000, {
-                        message: "Organisation image must be less than 2MB.",
+                        message: "Profile image must be less than 2MB.",
                     })
                     .refine(
                         (file: File) => {
@@ -158,10 +159,7 @@ export const editOrganisationFormSchema = z.object({
             }),
             z.object({
                 type: z.literal("remote"),
-                src: z
-                    .string()
-                    .url("Invalid URL format")
-                    .transform((value) => value.trim()),
+                src: z.string().transform((value) => value.trim()),
             }),
         ])
         .optional(),
