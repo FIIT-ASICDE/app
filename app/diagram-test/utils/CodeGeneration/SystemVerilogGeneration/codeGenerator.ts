@@ -10,6 +10,10 @@ const operatorMap: { [key: string]: string } = {
     xnor: '^',
     not: '~'
 };
+const adderSubtractorMap: { [key: string]: string } = {
+    adder: '+',
+    subtractor: '-'
+};
 
 
 export function generateSystemVerilogCode(graph: dia.Graph): string {
@@ -21,6 +25,10 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
     const logicCells = cells.filter(cell =>
         !cell.isLink() &&
         Object.keys(operatorMap).includes(cell.attributes.elType)
+    );
+    const adderSubtractorCells = cells.filter(cell =>
+        !cell.isLink() &&
+        Object.keys(adderSubtractorMap).includes(cell.attributes.elType)
     );
     const links = cells.filter(cell => cell.isLink());
 
@@ -51,6 +59,18 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         const bw: number = cell.attributes.bandwidth;
         logicNames[cell.id] = netName;
         code += `logic${bw > 1 ? ` [${bw - 1}:0]` : ''} ${netName};\n`;
+    });
+    multiplexerCells.forEach(cell => {
+        const netName = getPortName(cell);
+        const bw: number = cell.attributes.bandwidth;
+        logicNames[cell.id] = netName;
+        code += `logic${bw > 1 ? ` [${bw - 1}:0]` : ''} ${netName};\n`;
+    });
+    adderSubtractorCells.forEach(cell => {
+        const netName = getPortName(cell);
+        const bw: number = cell.attributes.bandwidth;
+        logicNames[cell.id] = netName;
+        code += `logic [${bw}:0] ${netName};\n`;
     });
     code += `\n`;
 
@@ -88,6 +108,32 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         if (type === 'not') {
             expr = `~${inputSignals[0] || '/* unconnected */'}`;
         }
+
+        code += `assign ${netName} = ${expr};\n`;
+
+        const outputPorts = cellPorts.filter(p => p.group === 'output');
+        outputPorts.forEach(p => {
+            const key = `${cell.id}:${p.id}`;
+            if (connectionMap[key]) {
+                connectionMap[key].forEach(outSignal => {
+                    code += `assign ${outSignal} = ${netName};\n`;
+                });
+            }
+        });
+        code += `\n`;
+    });
+    adderSubtractorCells.forEach(cell => {
+        const type = cell.attributes.elType;
+        const netName = logicNames[cell.id];
+        const cellPorts = cell.attributes.ports?.items || [];
+        const inputPorts = cellPorts.filter(p => p.group === 'input');
+
+        const inputSignals = inputPorts.map(p => {
+            const key = `${cell.id}:${p.id}`;
+            return connectionMap[key] ? connectionMap[key].join(` ${operatorMap[type]} `) : '/* unconnected */';
+        });
+
+        const expr = inputSignals.join(` ${adderSubtractorMap[type]} `) || '/* unconnected */';
 
         code += `assign ${netName} = ${expr};\n`;
 

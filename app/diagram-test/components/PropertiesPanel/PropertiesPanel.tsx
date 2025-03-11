@@ -625,7 +625,7 @@ const PropertiesPanel = () => {
             handlePortElementChange();
             return;
         }
-        else if (selectedElement.attributes.elType === 'input') {
+        else if (selectedElement.attributes.elType === 'output') {
             handlePortElementChange();
             return;
         }
