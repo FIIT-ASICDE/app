@@ -2,7 +2,6 @@ import { OrganisationDisplay } from "@/lib/types/organisation";
 import { UsersOverview } from "@/lib/types/user";
 import { Building, Calendar, Ellipsis, PinOff } from "lucide-react";
 import Link from "next/link";
-import { Suspense } from "react";
 
 import { getDateString } from "@/components/generic/generic";
 import { NoData } from "@/components/no-data/no-data";
@@ -68,26 +67,22 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <Suspense
-                            fallback={<div>Loading pinned repositories...</div>}
-                        >
-                            <div className="flex flex-col gap-y-3">
-                                {pinnedRepositories.length === 0 && (
-                                    <NoData
-                                        icon={PinOff}
-                                        message={
-                                            "No pinned repositories found."
-                                        }
-                                    />
-                                )}
-                                {pinnedRepositories.map((repository) => (
-                                    <PinnedRepositoryCardDisplay
-                                        key={"pinned" + repository.id}
-                                        repository={repository}
-                                    />
-                                ))}
-                            </div>
-                        </Suspense>
+                        <div className="flex flex-col gap-y-3">
+                            {pinnedRepositories.length === 0 && (
+                                <NoData
+                                    icon={PinOff}
+                                    message={
+                                        "No pinned repositories found."
+                                    }
+                                />
+                            )}
+                            {pinnedRepositories.map((repository) => (
+                                <PinnedRepositoryCardDisplay
+                                    key={"pinned" + repository.id}
+                                    repository={repository}
+                                />
+                            ))}
+                        </div>
                     </CardContent>
                 </Card>
 
@@ -116,26 +111,22 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <Suspense
-                            fallback={<div>Loading organisations...</div>}
-                        >
-                            <div className="flex flex-col gap-y-3">
-                                {organisations.length === 0 && (
-                                    <NoData
-                                        icon={Building}
-                                        message={"No organisations found."}
+                        <div className="flex flex-col gap-y-3">
+                            {organisations.length === 0 && (
+                                <NoData
+                                    icon={Building}
+                                    message={"No organisations found."}
+                                />
+                            )}
+                            {organisations.map(
+                                (organisation: OrganisationDisplay) => (
+                                    <OrganisationCardDisplay
+                                        key={organisation.id}
+                                        organisation={organisation}
                                     />
-                                )}
-                                {organisations.map(
-                                    (organisation: OrganisationDisplay) => (
-                                        <OrganisationCardDisplay
-                                            key={organisation.id}
-                                            organisation={organisation}
-                                        />
-                                    ),
-                                )}
-                            </div>
-                        </Suspense>
+                                ),
+                            )}
+                        </div>
                     </CardContent>
                 </Card>
             </main>
