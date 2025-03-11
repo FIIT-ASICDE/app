@@ -405,7 +405,7 @@ function usersAdminOrganisations() {
                 image: org.image || undefined,
                 bio: org.bio || undefined,
                 memberCount: org._count.users,
-                userRole: "admin",
+                userRole: "ADMIN",
             }));
         },
     );
@@ -996,7 +996,7 @@ function deleteAccount() {
             include: { metadata: true },
         });
 
-        return await prisma.$transaction(async (tx) => {
+        return prisma.$transaction(async (tx) => {
             if (user.metadata) {
                 const userMetadataId = user.metadata.id;
 
@@ -1100,18 +1100,20 @@ async function getUsersOrgs(
         orderBy: [{ name: "asc" }],
     });
 
-    const transformedOrgs: OrganisationDisplay[] = organizations.map((org) => ({
-        id: org.id,
-        name: org.name,
-        image: org.image || undefined,
-        bio: org.bio || undefined,
-        memberCount: org._count.users,
-        userRole: org.users[0]?.role === "ADMIN" ? "admin" : "member",
-    }));
+    const transformedOrgs: Array<OrganisationDisplay> = organizations.map(
+        (org) => ({
+            id: org.id,
+            name: org.name,
+            image: org.image || undefined,
+            bio: org.bio || undefined,
+            memberCount: org._count.users,
+            userRole: org.users[0]?.role,
+        }),
+    );
 
     return transformedOrgs.sort((a, b) => {
-        if (a.userRole === "admin" && b.userRole !== "admin") return -1;
-        if (a.userRole !== "admin" && b.userRole === "admin") return 1;
+        if (a.userRole === "ADMIN" && b.userRole !== "ADMIN") return -1;
+        if (a.userRole !== "ADMIN" && b.userRole === "ADMIN") return 1;
         return a.name.localeCompare(b.name);
     });
 }

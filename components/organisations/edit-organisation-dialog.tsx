@@ -135,7 +135,7 @@ export const EditOrganisationDialog = ({
         }
     };
 
-    if (organisation.userRole !== "admin") {
+    if (organisation.userRole !== "ADMIN") {
         return undefined;
     }
 

@@ -1,6 +1,6 @@
-import { Skeleton } from "@/components/ui/skeleton"
-import { Card, CardHeader } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
+import { Card, CardHeader } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const CardSkeleton = () => {
     return (
@@ -9,11 +9,11 @@ export const CardSkeleton = () => {
                 <div className="flex flex-row justify-between">
                     <div className="flex min-w-0 flex-row items-center gap-x-3">
                         <Skeleton className="rounded-full">
-                            <Avatar className="text-muted-foreground"/>
+                            <Avatar className="text-muted-foreground" />
                         </Skeleton>
                     </div>
                 </div>
             </CardHeader>
         </Card>
     );
-}
+};
