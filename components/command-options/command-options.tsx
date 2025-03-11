@@ -2,14 +2,12 @@ import { CommandElement, CommandElementGroup } from "@/lib/types/generic";
 import { OnboardedUser } from "@/lib/types/user";
 import {
     Building,
-    FolderPlus,
     Folders,
     LayoutDashboard,
     Settings,
     SunMoon,
     UserRound,
     UserRoundPen,
-    UserRoundPlus,
 } from "lucide-react";
 
 interface CommandOptionsProps {
@@ -52,23 +50,6 @@ export const CommandOptions = ({
                     displayTitle: "All organisations",
                     icon: Building,
                     link: "/orgs",
-                } satisfies CommandElement,
-            ] satisfies Array<CommandElement>,
-        } satisfies CommandElementGroup,
-        {
-            groupDisplayTitle: "Actions",
-            elements: [
-                {
-                    displayTitle: "Create repository",
-                    icon: FolderPlus,
-                    link: "/" + user.username + "/repositories",
-                    action: "openCreateRepositoryDialog",
-                } satisfies CommandElement,
-                {
-                    displayTitle: "Create organisation",
-                    icon: UserRoundPlus,
-                    link: "/" + user.username + "/organisations",
-                    action: "openCreateOrganisationDialog",
                 } satisfies CommandElement,
             ] satisfies Array<CommandElement>,
         } satisfies CommandElementGroup,

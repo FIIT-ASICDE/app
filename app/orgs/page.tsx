@@ -1,7 +1,7 @@
 import { OrganisationsPage } from "@/app/orgs/organisations-page";
+import { api } from "@/lib/trpc/server";
 
 import { parseBoolean } from "@/components/generic/generic";
-import { api } from "@/lib/trpc/server";
 
 interface AllOrganisationsPageProps {
     searchParams?: Promise<{

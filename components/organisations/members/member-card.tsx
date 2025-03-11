@@ -53,7 +53,7 @@ export const MemberCard = ({
                     </div>
                 </div>
                 <div className="flex flex-shrink-0 flex-row space-x-3">
-                    {userIsAdmin && organisationMember.role === "member" && (
+                    {userIsAdmin && organisationMember.role === "MEMBER" && (
                         <ManageMemberDialog
                             organisationId={organisationId}
                             organisationMember={organisationMember}

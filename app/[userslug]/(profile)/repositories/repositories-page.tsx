@@ -13,6 +13,7 @@ import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagin
 import { LayoutOptions } from "@/components/layout/layout-options";
 import { NoData } from "@/components/no-data/no-data";
 import { CreateRepositoryDialog } from "@/components/repositories/create-repository-dialog";
+import { ImportRepositoryDialog } from "@/components/repositories/import-repository-dialog";
 import RepositoryCard from "@/components/repositories/repository-card";
 import { RepositoryFilter } from "@/components/repositories/repository-filter";
 import Search from "@/components/ui/search";
@@ -56,9 +57,12 @@ export default async function RepositoriesPage({
                         }}
                     />
                     {canUserCreate && (
-                        <CreateRepositoryDialog
-                            usersOrganisations={userOrgs ?? []}
-                        />
+                        <div className="flex flex-row gap-x-3">
+                            <ImportRepositoryDialog />
+                            <CreateRepositoryDialog
+                                usersOrganisations={userOrgs ?? []}
+                            />
+                        </div>
                     )}
                 </div>
             </div>

@@ -10,16 +10,12 @@ interface EditorProps {
     filePath: string;
     language?: string;
     theme?: string;
-    autoDetectHighContrast?: boolean;
-    readOnly?: boolean;
 }
 
 export default function Editor({
     filePath,
     language = "systemverilog",
     theme = "vs-dark",
-    autoDetectHighContrast = false,
-    readOnly,
 }: EditorProps) {
     const editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
     const monacoEl = useRef<HTMLElement | null>(null);
@@ -32,8 +28,7 @@ export default function Editor({
         editor.current = monaco.editor.create(monacoEl.current, {
             language,
             theme,
-            autoDetectHighContrast,
-            readOnly,
+            automaticLayout: true,
         });
 
         if (process.env.NODE_ENV === "production") {

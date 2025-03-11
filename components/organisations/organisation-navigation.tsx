@@ -24,7 +24,7 @@ export const OrganisationNavigation = ({
 
     const settingsAccess = () => {
         if (!organisation.userRole) return "none";
-        else if (organisation.userRole === "admin") return "interactive";
+        else if (organisation.userRole === "ADMIN") return "interactive";
         return "nonInteractive";
     };
 

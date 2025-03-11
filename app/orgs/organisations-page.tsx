@@ -1,7 +1,5 @@
 import { PaginationResult } from "@/lib/types/generic";
-import {
-    OrganisationDisplay,
-} from "@/lib/types/organisation";
+import { OrganisationDisplay } from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 import { Building } from "lucide-react";
 

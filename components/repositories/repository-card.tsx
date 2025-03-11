@@ -5,6 +5,7 @@ import { api } from "@/lib/trpc/react";
 import { Repository } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { Pin, Star } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
@@ -28,6 +29,8 @@ export default function RepositoryCard({
     isUserOwner,
     className,
 }: RepositoryCardProps) {
+    const router = useRouter();
+
     const repositoryDisplayName: string =
         repository.ownerName + "/" + repository.name;
     const repositoryLink: string = "/" + repositoryDisplayName;
@@ -40,6 +43,7 @@ export default function RepositoryCard({
             repoId: repository.id,
             favorite: !repository.favorite,
         });
+        router.refresh();
     };
 
     const handlePinClicked = async () => {
@@ -48,6 +52,7 @@ export default function RepositoryCard({
             repoId: repository.id,
             pinned: !repository.pinned,
         });
+        router.refresh();
     };
 
     return (

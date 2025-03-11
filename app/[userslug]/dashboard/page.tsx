@@ -22,11 +22,12 @@ export default async function UserDashboardPage({
 
     const pageSize: number = 3;
 
-    const { favoriteRepositories, pagination } = await api.repo.fetchUserFavoriteRepos({
-        username: userSlug,
-        page: currentPage,
-        pageSize: pageSize,
-    });
+    const { favoriteRepositories, pagination } =
+        await api.repo.fetchUserFavoriteRepos({
+            username: userSlug,
+            page: currentPage,
+            pageSize: pageSize,
+        });
 
     return (
         <DashboardPage

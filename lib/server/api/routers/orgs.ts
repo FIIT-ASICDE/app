@@ -15,7 +15,6 @@ import {
     OrganisationDisplay,
     OrganisationMember,
     OrganisationOverview,
-    OrganisationRole,
     OrganizationSettings,
 } from "@/lib/types/organisation";
 import { UserDisplay } from "@/lib/types/user";
@@ -144,7 +143,7 @@ function getMembers() {
                     image:
                         member.userMetadata.user.image ||
                         "/avatars/default.png",
-                    role: mapOrganizationRoleToOrganisationRole(member.role),
+                    role: member.role,
                 })),
                 pagination: {
                     total: totalCount,
@@ -242,7 +241,7 @@ function createOrg() {
                         name: userMetadata.firstName,
                         surname: userMetadata.surname,
                         image: userMetadata.user.image || undefined,
-                        role: role === "ADMIN" ? "admin" : "member",
+                        role: role,
                     })),
                 } satisfies Organisation;
             });
@@ -472,7 +471,7 @@ function fetchUserOrgs() {
                     image: orgUser.organization.image || "/avatars/default.png",
                     bio: orgUser.organization.bio || undefined,
                     memberCount: orgUser.organization._count.users,
-                    userRole: orgUser.role.toLowerCase() as OrganisationRole,
+                    userRole: orgUser.role.toLowerCase() as OrganizationRole,
                 })),
                 pagination: {
                     total: totalCount,
@@ -523,17 +522,15 @@ async function orgByName(
                       name: userMetadata.firstName,
                       surname: userMetadata.surname,
                       image: userMetadata.user.image || undefined,
-                      role: (role === "ADMIN"
-                          ? "admin"
-                          : "member") as OrganisationRole,
+                      role: role,
                   }))
                   .sort((a, b) => {
-                      if (a.role === "admin" && b.role === "member") return -1;
-                      if (a.role === "member" && b.role === "admin") return 1;
+                      if (a.role === "ADMIN" && b.role === "MEMBER") return -1;
+                      if (a.role === "MEMBER" && b.role === "ADMIN") return 1;
                       return a.name.localeCompare(b.name);
                   });
     const isUserAdmin = members.some(
-        (m) => m.id === currentUser?.id && m.role === "admin",
+        (m) => m.id === currentUser?.id && m.role === "ADMIN",
     );
 
     return {
@@ -584,7 +581,7 @@ function usersOrgs() {
                         name: org.name,
                         image: org.image ?? undefined,
                         bio: org.bio ?? undefined,
-                        userRole: role === "ADMIN" ? "admin" : "member",
+                        userRole: role,
                     };
                     return userOrg;
                 });
@@ -1085,18 +1082,6 @@ function expelMember() {
                 },
             });
         });
-}
-
-// ONLY TEMPORARILY - TODO MISO treba zrusit na FE celu OrganisationRole a zacat pouzivat OrganizationRole aj na FE
-function mapOrganizationRoleToOrganisationRole(
-    organizationRole: OrganizationRole,
-): OrganisationRole {
-    const roleMapping: Record<OrganizationRole, OrganisationRole> = {
-        MEMBER: "member",
-        ADMIN: "admin",
-    };
-
-    return roleMapping[organizationRole];
 }
 
 async function isUserMember(

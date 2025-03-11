@@ -1,6 +1,6 @@
 import { readGithubRepoBranches, readUsersGithubRepos } from "@/lib/github";
 import { paginationSchema } from "@/lib/schemas/common-schemas";
-import { cloneRepoSchema, repoBySlugsSchema } from "@/lib/schemas/repo-schemas";
+import { cloneRepoSchema } from "@/lib/schemas/repo-schemas";
 import { doesRepoExist } from "@/lib/server/api/routers/repos";
 import { createTRPCRouter, protectedProcedure } from "@/lib/server/api/trpc";
 import { ReturnTypeOf } from "@octokit/core/dist-types/types";
@@ -10,6 +10,7 @@ import { exec } from "child_process";
 import { access, mkdir, rm } from "fs/promises";
 import path from "path";
 import util from "util";
+import { z } from "zod";
 
 const execPromise = util.promisify(exec);
 
@@ -21,7 +22,15 @@ export const githubRouter = createTRPCRouter({
 
 function userGithubRepos() {
     return protectedProcedure
-        .input(paginationSchema)
+        .input(
+            paginationSchema.extend({
+                affiliation: z.enum([
+                    "owner",
+                    "collaborator",
+                    "organization_member",
+                ]),
+            }),
+        )
         .query(
             async ({
                 ctx,
@@ -29,6 +38,7 @@ function userGithubRepos() {
             }): ReturnTypeOf<typeof readUsersGithubRepos> => {
                 return readUsersGithubRepos(
                     ctx.session,
+                    input.affiliation,
                     input.page,
                     input.pageSize,
                 );
@@ -146,12 +156,18 @@ function clone() {
 
 function githubRepoBranches() {
     return protectedProcedure
-        .input(repoBySlugsSchema)
+        .input(
+            z.object({
+                githubFullName: z.string(),
+            }),
+        )
         .query(async ({ ctx, input }): Promise<Array<string>> => {
+            const [ownerSlug, repositorySlug] = input.githubFullName.split("/");
+
             return readGithubRepoBranches(
                 ctx.session,
-                input.ownerSlug,
-                input.repositorySlug,
+                ownerSlug,
+                repositorySlug,
             );
         });
 }

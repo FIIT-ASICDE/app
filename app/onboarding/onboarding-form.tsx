@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FileText, Loader2, Save, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -32,8 +33,16 @@ export function OnboardingForm() {
         },
     });
 
-    const completeOnboardingMutation =
-        api.user.completeOnboarding.useMutation();
+    const completeOnboardingMutation = api.user.completeOnboarding.useMutation({
+        onSuccess: () => {
+            toast.success("Onboarding successful", {
+                description: "Welcome!",
+            });
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        },
+    });
     async function onSubmit(data: z.infer<typeof onboardSchema>) {
         const onboarded = await completeOnboardingMutation.mutateAsync(data);
         router.replace("/" + onboarded.username);

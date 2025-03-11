@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { api } from "@/lib/trpc/server";
+import { headers } from "next/headers";
 import Link from "next/link";
 
 import { CommandBar } from "@/components/header/header-command";
@@ -13,6 +14,10 @@ export default async function Header() {
     if (!user || user?.type === "non-onboarded") {
         return <></>;
     }
+
+    const pathname: string | null =
+        (await headers()).get("x-invoke-path") || "none";
+    console.log(pathname);
 
     return (
         <div>

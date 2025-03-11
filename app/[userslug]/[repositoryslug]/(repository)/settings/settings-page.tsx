@@ -56,7 +56,7 @@ const data = {
         favorite: false,
         pinned: false,
         createdAt: new Date(),
-        userRole: "admin",
+        userRole: "ADMIN",
 
         contributors: [
             {

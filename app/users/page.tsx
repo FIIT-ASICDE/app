@@ -1,6 +1,7 @@
 import { UsersPage } from "@/app/users/users-page";
-import { parseBoolean } from "@/components/generic/generic";
 import { api } from "@/lib/trpc/server";
+
+import { parseBoolean } from "@/components/generic/generic";
 
 interface AllUsersPageProps {
     searchParams?: Promise<{
@@ -20,16 +21,16 @@ export default async function AllUsersPage({
     const rows: boolean = parseBoolean(usersSearchParams?.rows) ?? false;
 
     const pageSize: number = 8;
-    
+
     const { users, pagination } = await api.user.fetchAllUsers({
         nameSearchTerm: query,
         page: currentPage,
         pageSize: pageSize,
     });
 
-    const usersOrganisations = await api.user.usersAdminOrganisations()
+    const usersOrganisations = await api.user.usersAdminOrganisations();
 
-    const usersRepositories = await api.user.usersAdminRepos()
+    const usersRepositories = await api.user.usersAdminRepos();
     return (
         <UsersPage
             users={users}

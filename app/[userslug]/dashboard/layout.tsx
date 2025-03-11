@@ -1,31 +1,18 @@
-import { auth } from "@/auth";
-import { api } from "@/lib/trpc/server";
 import { TRPCError } from "@trpc/server";
 import React from "react";
 
 import Header from "@/components/header/header";
-import { ProfileHeader } from "@/components/profile/profile-header";
-import { Separator } from "@/components/ui/separator";
 
 export default async function ProfileLayout({
     children,
-    params,
 }: Readonly<{
     children: React.ReactNode;
     params: Promise<{ userslug: string }>;
 }>) {
-    const session = await auth();
-    const userSlug = (await params).userslug;
     try {
-        const profile = await api.user.byUsername({ username: userSlug });
         return (
             <>
                 <Header />
-                <ProfileHeader
-                    isItMe={session?.user.id === profile.id}
-                    profile={profile}
-                />
-                <Separator className="mx-6 w-auto border-accent" />
                 {children}
             </>
         );

@@ -23,16 +23,12 @@ export type RepositoryOverview = Omit<Repository, "contributors" | "tree"> & {
     stats: LanguageStatistics;
 };
 
-export type RepositoryOverview = Omit<Repository, "contributors" | "tree"> & {
-    readme?: FileItem;
-};
-
 export type RepoUserRole =
-    | "owner"
-    | "admin"
-    | "contributor"
-    | "viewer"
-    | "guest";
+    | "OWNER"
+    | "ADMIN"
+    | "CONTRIBUTOR"
+    | "VIEWER"
+    | "GUEST";
 
 export type RepositoryDisplay = {
     id: string;
@@ -99,8 +95,15 @@ export type LanguageStatistics = {
 };
 
 interface GithubRepoDisplay {
+    ownerName: string;
+    ownerImage: string;
     name: string;
     visibility: RepositoryVisibility;
     githubFullName: string;
     description?: string;
 }
+
+export type GithubRepositoryAffiliation =
+    | "owner"
+    | "collaborator"
+    | "organization_member";

@@ -34,9 +34,9 @@ import {
 
 interface RepositoryFilterProps {
     filters: {
-        pinned: PinnedRepositoriesFilter;
-        favorite: FavoriteRepositoriesFilter;
-        public: PublicRepositoriesFilter;
+        pinned?: PinnedRepositoriesFilter;
+        favorite?: FavoriteRepositoriesFilter;
+        public?: PublicRepositoriesFilter;
     };
 }
 
@@ -45,14 +45,15 @@ export const RepositoryFilter = ({ filters }: RepositoryFilterProps) => {
     const pathname = usePathname();
     const router = useRouter();
 
-    const [pinnedFilter, setPinnedFilter] = useState<PinnedRepositoriesFilter>(
-        filters.pinned,
-    );
-    const [favoriteFilter, setFavoriteFilter] =
-        useState<FavoriteRepositoriesFilter>(filters.favorite);
-    const [publicFilter, setPublicFilter] = useState<PublicRepositoriesFilter>(
-        filters.public,
-    );
+    const [pinnedFilter, setPinnedFilter] = useState<
+        PinnedRepositoriesFilter | undefined
+    >(filters.pinned);
+    const [favoriteFilter, setFavoriteFilter] = useState<
+        FavoriteRepositoriesFilter | undefined
+    >(filters.favorite);
+    const [publicFilter, setPublicFilter] = useState<
+        PublicRepositoriesFilter | undefined
+    >(filters.public);
 
     useEffect(() => {
         setPinnedFilter(filters.pinned);
@@ -115,10 +116,18 @@ export const RepositoryFilter = ({ filters }: RepositoryFilterProps) => {
         router.replace(pathname);
     };
 
+    if (
+        pinnedFilter === undefined &&
+        favoriteFilter === undefined &&
+        publicFilter === undefined
+    ) {
+        return <></>;
+    }
+
     return (
         <div className="mb-0 flex flex-row space-x-3">
             <div className="hidden h-8 flex-row justify-center gap-x-2 md:flex">
-                {pinnedFilter !== "all" && (
+                {pinnedFilter !== undefined && pinnedFilter !== "all" && (
                     <Badge
                         variant="secondary"
                         className="h-10 cursor-pointer space-x-1"
@@ -132,7 +141,7 @@ export const RepositoryFilter = ({ filters }: RepositoryFilterProps) => {
                         <X className="h-4 w-4 text-muted-foreground" />
                     </Badge>
                 )}
-                {favoriteFilter !== "all" && (
+                {favoriteFilter !== undefined && favoriteFilter !== "all" && (
                     <Badge
                         variant="secondary"
                         className="h-10 cursor-pointer space-x-1"
@@ -149,7 +158,7 @@ export const RepositoryFilter = ({ filters }: RepositoryFilterProps) => {
                         <X className="h-4 w-4 text-muted-foreground" />
                     </Badge>
                 )}
-                {publicFilter !== "all" && (
+                {publicFilter !== undefined && publicFilter !== "all" && (
                     <Badge
                         variant="secondary"
                         className="h-10 cursor-pointer space-x-1"
@@ -173,147 +182,182 @@ export const RepositoryFilter = ({ filters }: RepositoryFilterProps) => {
                 }
                 dropdownContent={
                     <DropdownMenuContent className="w-52 space-y-1">
-                        <DropdownMenuLabel className="text-center">
-                            Filter by pinned
-                        </DropdownMenuLabel>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="w-full">
-                                    {pinnedFilter === "all" ? (
-                                        <>
+                        {pinnedFilter !== undefined && (
+                            <>
+                                <DropdownMenuLabel className="text-center">
+                                    Filter by pinned
+                                </DropdownMenuLabel>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full"
+                                        >
+                                            {pinnedFilter === "all" ? (
+                                                <>
+                                                    <Folders /> All
+                                                </>
+                                            ) : pinnedFilter === "pinned" ? (
+                                                <>
+                                                    <Pin /> Pinned
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <PinOff /> Not pinned
+                                                </>
+                                            )}
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem
+                                            onClick={() =>
+                                                handlePinnedFilterClick("all")
+                                            }
+                                        >
                                             <Folders /> All
-                                        </>
-                                    ) : pinnedFilter === "pinned" ? (
-                                        <>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() =>
+                                                handlePinnedFilterClick(
+                                                    "pinned",
+                                                )
+                                            }
+                                        >
                                             <Pin /> Pinned
-                                        </>
-                                    ) : (
-                                        <>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() =>
+                                                handlePinnedFilterClick(
+                                                    "notPinned",
+                                                )
+                                            }
+                                        >
                                             <PinOff /> Not pinned
-                                        </>
-                                    )}
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuItem
-                                    onClick={() =>
-                                        handlePinnedFilterClick("all")
-                                    }
-                                >
-                                    <Folders /> All
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    onClick={() =>
-                                        handlePinnedFilterClick("pinned")
-                                    }
-                                >
-                                    <Pin /> Pinned
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    onClick={() =>
-                                        handlePinnedFilterClick("notPinned")
-                                    }
-                                >
-                                    <PinOff /> Not pinned
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                        <DropdownMenuSeparator />
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                                <DropdownMenuSeparator />
+                            </>
+                        )}
 
-                        <DropdownMenuLabel className="text-center">
-                            Filter by favorite
-                        </DropdownMenuLabel>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="w-full">
-                                    {favoriteFilter === "all" ? (
-                                        <>
+                        {favoriteFilter !== undefined && (
+                            <>
+                                <DropdownMenuLabel className="text-center">
+                                    Filter by favorite
+                                </DropdownMenuLabel>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full"
+                                        >
+                                            {favoriteFilter === "all" ? (
+                                                <>
+                                                    <Folders /> All
+                                                </>
+                                            ) : favoriteFilter ===
+                                              "favorite" ? (
+                                                <>
+                                                    <Star fill="currentColor" />{" "}
+                                                    Favorite
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Star /> Not favorite
+                                                </>
+                                            )}
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem
+                                            onClick={() =>
+                                                handleFavoriteFilterClick("all")
+                                            }
+                                        >
                                             <Folders /> All
-                                        </>
-                                    ) : favoriteFilter === "favorite" ? (
-                                        <>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() =>
+                                                handleFavoriteFilterClick(
+                                                    "favorite",
+                                                )
+                                            }
+                                        >
                                             <Star fill="currentColor" />{" "}
                                             Favorite
-                                        </>
-                                    ) : (
-                                        <>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() =>
+                                                handleFavoriteFilterClick(
+                                                    "notFavorite",
+                                                )
+                                            }
+                                        >
                                             <Star /> Not favorite
-                                        </>
-                                    )}
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuItem
-                                    onClick={() =>
-                                        handleFavoriteFilterClick("all")
-                                    }
-                                >
-                                    <Folders /> All
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    onClick={() =>
-                                        handleFavoriteFilterClick("favorite")
-                                    }
-                                >
-                                    <Star fill="currentColor" /> Favorite
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    onClick={() =>
-                                        handleFavoriteFilterClick("notFavorite")
-                                    }
-                                >
-                                    <Star /> Not favorite
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                        <DropdownMenuSeparator />
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                                <DropdownMenuSeparator />
+                            </>
+                        )}
 
-                        <DropdownMenuLabel className="text-center">
-                            Filter by visibility
-                        </DropdownMenuLabel>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="w-full">
-                                    {publicFilter === "all" ? (
-                                        <>
+                        {publicFilter !== undefined && (
+                            <>
+                                <DropdownMenuLabel className="text-center">
+                                    Filter by visibility
+                                </DropdownMenuLabel>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full"
+                                        >
+                                            {publicFilter === "all" ? (
+                                                <>
+                                                    <Folders /> All
+                                                </>
+                                            ) : publicFilter === "public" ? (
+                                                <>
+                                                    <Globe /> Public
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Lock /> Private
+                                                </>
+                                            )}
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem
+                                            onClick={() =>
+                                                handlePublicFilterClick("all")
+                                            }
+                                        >
                                             <Folders /> All
-                                        </>
-                                    ) : publicFilter === "public" ? (
-                                        <>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() =>
+                                                handlePublicFilterClick(
+                                                    "public",
+                                                )
+                                            }
+                                        >
                                             <Globe /> Public
-                                        </>
-                                    ) : (
-                                        <>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() =>
+                                                handlePublicFilterClick(
+                                                    "private",
+                                                )
+                                            }
+                                        >
                                             <Lock /> Private
-                                        </>
-                                    )}
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuItem
-                                    onClick={() =>
-                                        handlePublicFilterClick("all")
-                                    }
-                                >
-                                    <Folders /> All
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    onClick={() =>
-                                        handlePublicFilterClick("public")
-                                    }
-                                >
-                                    <Globe /> Public
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    onClick={() =>
-                                        handlePublicFilterClick("private")
-                                    }
-                                >
-                                    <Lock /> Private
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                        <DropdownMenuSeparator />
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                                <DropdownMenuSeparator />
+                            </>
+                        )}
 
                         <Button
                             variant="outline"

@@ -6,6 +6,8 @@ import { CardType } from "@/lib/types/generic";
 import { Invitation } from "@/lib/types/invitation";
 import { cn } from "@/lib/utils";
 import { Calendar, CircleCheck, CircleX } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
@@ -21,26 +23,65 @@ import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 interface InvitationCardDisplayProps {
     invitation: Invitation;
     className?: string;
-    setInvitations: (invitations: Invitation[]) => void;
 }
 
 export const InvitationCardDisplay = ({
     invitation,
     className,
-    setInvitations,
 }: InvitationCardDisplayProps) => {
+    const router = useRouter();
+
     const invitationDisplayData = getInvitationDisplayData(invitation);
+
+    const onAcceptedSuccessAction = () => {
+        toast.success("Invitation successfully accepted", {
+            description:
+                invitation.type === "repository"
+                    ? "You are now a collaborator on the " +
+                      invitationDisplayData.displayName +
+                      " repository"
+                    : "You are now a member of the " +
+                      invitationDisplayData.displayName +
+                      " organisation",
+        });
+        router.refresh();
+    };
+
+    const onDeclinedSuccessAction = () => {
+        toast.success("Invitation successfully declined");
+        router.refresh();
+    };
+
     const acceptOrgMutation = api.user.acceptOrgInvitation.useMutation({
-        onSuccess: (newInvitations) => setInvitations(newInvitations),
+        onSuccess: onAcceptedSuccessAction,
+        onError: (error) => {
+            toast.error(error.message);
+            router.refresh();
+        },
     });
+
     const declineOrgMutation = api.user.declineOrgInvitation.useMutation({
-        onSuccess: (newInvitations) => setInvitations(newInvitations),
+        onSuccess: onDeclinedSuccessAction,
+        onError: (error) => {
+            toast.error(error.message);
+            router.refresh();
+        },
     });
+
     const acceptRepoMutation = api.user.acceptRepoInvitation.useMutation({
-        onSuccess: (newInvitations) => setInvitations(newInvitations),
+        onSuccess: onAcceptedSuccessAction,
+        onError: (error) => {
+            toast.error(error.message);
+            router.refresh();
+        },
     });
+
     const declineRepoMutation = api.user.declineRepoInvitation.useMutation({
-        onSuccess: (newInvitations) => setInvitations(newInvitations),
+        onSuccess: onDeclinedSuccessAction,
+        onError: (error) => {
+            toast.error(error.message);
+            router.refresh();
+        },
     });
 
     return (
@@ -94,21 +135,25 @@ export const InvitationCardDisplay = ({
                     <Button
                         variant="outline"
                         onClick={() => {
-                            if(invitation.type == "organisation") {
+                            if (invitation.type == "organisation") {
                                 if (!invitation.organisation?.id) return;
                                 declineOrgMutation.mutate({
                                     organizationId: invitation.organisation.id,
                                 });
                             } else {
-                                if(!invitation.repository?.id) return;
+                                if (!invitation.repository?.id) return;
                                 declineRepoMutation.mutate({
                                     repositoryId: invitation.repository.id,
-                                })
+                                });
                             }
                         }}
-                        disabled={declineOrgMutation.isPending || declineRepoMutation.isPending}
+                        disabled={
+                            declineOrgMutation.isPending ||
+                            declineRepoMutation.isPending
+                        }
                     >
-                        {declineOrgMutation.isPending || declineRepoMutation.isPending ? (
+                        {declineOrgMutation.isPending ||
+                        declineRepoMutation.isPending ? (
                             "Declining..."
                         ) : (
                             <>
@@ -121,21 +166,25 @@ export const InvitationCardDisplay = ({
                         variant="default"
                         className="hover:bg-primary-button-hover"
                         onClick={() => {
-                            if(invitation.type == "organisation") {
+                            if (invitation.type == "organisation") {
                                 if (!invitation.organisation?.id) return;
                                 acceptOrgMutation.mutate({
                                     organizationId: invitation.organisation.id,
                                 });
                             } else {
-                                if(!invitation.repository?.id) return;
+                                if (!invitation.repository?.id) return;
                                 acceptRepoMutation.mutate({
                                     repositoryId: invitation.repository.id,
-                                })
+                                });
                             }
                         }}
-                        disabled={acceptOrgMutation.isPending || acceptRepoMutation.isPending}
+                        disabled={
+                            acceptOrgMutation.isPending ||
+                            acceptRepoMutation.isPending
+                        }
                     >
-                        {acceptOrgMutation.isPending || acceptRepoMutation.isPending ? (
+                        {acceptOrgMutation.isPending ||
+                        acceptRepoMutation.isPending ? (
                             "Accepting..."
                         ) : (
                             <>

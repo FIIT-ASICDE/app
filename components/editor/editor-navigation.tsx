@@ -1,186 +1,184 @@
-"use client";
-
-import { imgSrc } from "@/lib/client-file-utils";
-import { cn } from "@/lib/utils";
-import {
-    Building,
-    Command,
-    File,
-    Folders,
-    Home,
-    LogOut,
-    Search,
-    Settings,
-    Terminal,
-} from "lucide-react";
-import { signOut } from "next-auth/react";
+import type {
+    BottomPanelContentTab,
+    SidebarContentTab,
+} from "@/lib/types/editor";
+import { Command, File, SearchIcon, Settings, Terminal } from "lucide-react";
 import Link from "next/link";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, RefObject, SetStateAction, useState } from "react";
+import { ImperativePanelGroupHandle } from "react-resizable-panels";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
 import { CommandBarDialog } from "@/components/command-bar-dialog/command-bar-dialog";
 import { useUser } from "@/components/context/user-context";
 import { NavigationButton } from "@/components/editor/navigation-button";
 import { SidebarNavigationButton } from "@/components/editor/sidebar-navigation-button";
+import { HeaderDropdown } from "@/components/header/header-dropdown";
 import GithubIcon from "@/components/icons/github";
 import LogoIcon from "@/components/icons/logo";
-import { TooltipDropdown } from "@/components/tooltip-dropdown/tooltip-dropdown";
-import {
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
-import { TabsList } from "@/components/ui/tabs";
 
 interface EditorNavigationProps {
-    activeSidebarContent: string;
-    setActiveSidebarContentAction: Dispatch<SetStateAction<string>>;
+    activeSidebarContent: SidebarContentTab;
+    setActiveSidebarContent: Dispatch<SetStateAction<SidebarContentTab>>;
+    activeBottomPanelContent: BottomPanelContentTab;
+    setActiveBottomPanelContent: Dispatch<
+        SetStateAction<BottomPanelContentTab>
+    >;
+    verticalGroupRef: RefObject<ImperativePanelGroupHandle>;
+    horizontalGroupRef: RefObject<ImperativePanelGroupHandle>;
+    verticalCollapsed: boolean;
+    setVerticalCollapsed: Dispatch<SetStateAction<boolean>>;
+    horizontalCollapsed: boolean;
+    setHorizontalCollapsed: Dispatch<SetStateAction<boolean>>;
+    lastOpenedBottomPanelSize: number;
+    setLastOpenedBottomPanelSize: Dispatch<SetStateAction<number>>;
+    lastOpenedSidebarSize: number;
+    setLastOpenedSidebarSize: Dispatch<SetStateAction<number>>;
 }
 
-export default function EditorNavigation({
+export const EditorNavigation = ({
     activeSidebarContent,
-    setActiveSidebarContentAction,
-}: EditorNavigationProps) {
+    setActiveSidebarContent,
+    activeBottomPanelContent,
+    setActiveBottomPanelContent,
+    verticalGroupRef,
+    horizontalGroupRef,
+    verticalCollapsed,
+    setVerticalCollapsed,
+    horizontalCollapsed,
+    setHorizontalCollapsed,
+    lastOpenedBottomPanelSize,
+    setLastOpenedBottomPanelSize,
+    lastOpenedSidebarSize,
+    setLastOpenedSidebarSize,
+}: EditorNavigationProps) => {
     const { user } = useUser();
-    const [commandOpen, setCommandOpen] = useState(false);
+
+    const [commandOpen, setCommandOpen] = useState<boolean>(false);
+
+    const toggleVerticalCollapse = (
+        bottomPanelContentTab: BottomPanelContentTab,
+    ) => {
+        if (verticalGroupRef.current) {
+            if (bottomPanelContentTab === activeBottomPanelContent) {
+                if (verticalCollapsed) {
+                    verticalGroupRef.current.setLayout([
+                        100 - lastOpenedBottomPanelSize,
+                        lastOpenedBottomPanelSize,
+                    ]);
+                    setVerticalCollapsed(false);
+                } else {
+                    setLastOpenedBottomPanelSize(
+                        verticalGroupRef.current.getLayout()[1],
+                    );
+                    verticalGroupRef.current.setLayout([100, 0]);
+                    setVerticalCollapsed(true);
+                }
+            } else {
+                verticalGroupRef.current.setLayout([
+                    100 - lastOpenedBottomPanelSize,
+                    lastOpenedBottomPanelSize,
+                ]);
+                setVerticalCollapsed(false);
+            }
+        }
+    };
+
+    const toggleHorizontalCollapse = (sidebarContentTab: SidebarContentTab) => {
+        if (horizontalGroupRef.current) {
+            if (sidebarContentTab === activeSidebarContent) {
+                if (horizontalCollapsed) {
+                    horizontalGroupRef.current.setLayout([
+                        lastOpenedSidebarSize,
+                        100 - lastOpenedSidebarSize,
+                    ]);
+                    setHorizontalCollapsed(false);
+                } else {
+                    setLastOpenedSidebarSize(
+                        horizontalGroupRef.current.getLayout()[0],
+                    );
+                    horizontalGroupRef.current.setLayout([0, 100]);
+                    setHorizontalCollapsed(true);
+                }
+            } else {
+                horizontalGroupRef.current.setLayout([
+                    lastOpenedSidebarSize,
+                    100 - lastOpenedSidebarSize,
+                ]);
+                setHorizontalCollapsed(false);
+            }
+        }
+    };
 
     return (
         <>
-            <div className="fixed left-0 top-0 z-50 flex h-screen w-14 flex-col rounded-none border-r bg-header">
+            <div className="flex h-full w-14 flex-col rounded-none border-r bg-header">
                 <div className="flex flex-col items-center gap-2 p-2">
-                    <NavigationButton
-                        icon={LogoIcon}
-                        tooltip="Home"
-                        onClick={() => {}}
-                    />
+                    <Link href={"/"}>
+                        <NavigationButton icon={LogoIcon} tooltip="Home" />
+                    </Link>
                     <NavigationButton
                         icon={Command}
                         tooltip="Command"
                         onClick={() => setCommandOpen(!commandOpen)}
                     />
                 </div>
+
                 <Separator
                     orientation="horizontal"
-                    className="mx-auto w-3/5 bg-gray-600"
+                    className="mx-auto w-3/5 bg-accent"
                 />
-                <TabsList className="flex flex-1 flex-col items-center gap-2 bg-header p-2">
+
+                <div className="flex flex-1 flex-col items-center gap-2 bg-header p-2">
                     <SidebarNavigationButton
                         value="fileExplorer"
                         icon={File}
                         tooltip="File Explorer"
                         activeSidebarContent={activeSidebarContent}
-                        setActiveSidebarContent={setActiveSidebarContentAction}
+                        onClick={() => {
+                            toggleHorizontalCollapse("fileExplorer");
+                            setActiveSidebarContent("fileExplorer");
+                        }}
                     />
                     <SidebarNavigationButton
                         value="search"
-                        icon={Search}
+                        icon={SearchIcon}
                         tooltip="Search"
                         activeSidebarContent={activeSidebarContent}
-                        setActiveSidebarContent={setActiveSidebarContentAction}
+                        onClick={() => {
+                            toggleHorizontalCollapse("search");
+                            setActiveSidebarContent("search");
+                        }}
                     />
                     <SidebarNavigationButton
                         value="sourceControl"
                         icon={GithubIcon}
                         tooltip="Source Control"
                         activeSidebarContent={activeSidebarContent}
-                        setActiveSidebarContent={setActiveSidebarContentAction}
+                        onClick={() => {
+                            toggleHorizontalCollapse("sourceControl");
+                            setActiveSidebarContent("sourceControl");
+                        }}
                     />
-                </TabsList>
+                </div>
+
                 <div className="flex flex-col items-center gap-2 p-2">
                     <NavigationButton
                         icon={Terminal}
                         tooltip="Terminal"
-                        onClick={() => {}}
+                        onClick={() => {
+                            toggleVerticalCollapse("terminal");
+                            setActiveBottomPanelContent("terminal");
+                        }}
                     />
                     <NavigationButton
                         icon={Settings}
                         tooltip="Settings"
-                        onClick={() => {}}
+                        onClick={() => {
+                            toggleVerticalCollapse("settings");
+                            setActiveBottomPanelContent("settings");
+                        }}
                     />
-                    <TooltipDropdown
-                        tooltip="Account"
-                        dropdownTrigger={
-                            <button
-                                className={cn(
-                                    "flex h-10 w-10 items-center justify-center rounded-full p-0",
-                                    "text-header-foreground",
-                                    "hover:bg-header-button-hover hover:text-header-foreground",
-                                )}
-                            >
-                                <AvatarDisplay
-                                    displayType={"card"}
-                                    image={imgSrc(user.image)}
-                                    name={user.name + " " + user.surname}
-                                />
-                            </button>
-                        }
-                        dropdownContent={
-                            <DropdownMenuContent>
-                                <DropdownMenuLabel>
-                                    <div className="flex flex-row items-center gap-x-3">
-                                        <AvatarDisplay
-                                            displayType={"card"}
-                                            image={imgSrc(user.image)}
-                                            name={
-                                                user.name + " " + user.surname
-                                            }
-                                        />
-                                        <div className="flex flex-col gap-x-3">
-                                            <span className="text-sm">
-                                                {user.name} {user.surname}
-                                            </span>
-                                            <span className="text-xs text-muted-foreground">
-                                                {user.username}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <Link
-                                    href={"/" + user.username}
-                                    className="text-sm"
-                                >
-                                    <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
-                                        <span>Home</span>
-                                        <Home className="text-muted-foreground" />
-                                    </DropdownMenuItem>
-                                </Link>
-                                <Link
-                                    href={"/" + user.username + "/repositories"}
-                                    className="text-sm"
-                                >
-                                    <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
-                                        <span>Repositories</span>
-                                        <Folders className="text-muted-foreground" />
-                                    </DropdownMenuItem>
-                                </Link>
-                                <Link
-                                    href={
-                                        "/" + user.username + "/organisations"
-                                    }
-                                    className="text-sm"
-                                >
-                                    <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
-                                        <span>Organisations</span>
-                                        <Building className="text-muted-foreground" />
-                                    </DropdownMenuItem>
-                                </Link>
-                                <DropdownMenuSeparator />
-                                <button
-                                    className="w-full"
-                                    onClick={() => signOut()}
-                                >
-                                    <DropdownMenuItem className="flex cursor-pointer justify-between p-2">
-                                        <span>Log out</span>
-                                        <LogOut className="text-muted-foreground" />
-                                    </DropdownMenuItem>
-                                </button>
-                            </DropdownMenuContent>
-                        }
-                        tooltipSide="right"
-                    />
+                    <HeaderDropdown user={user} />
                 </div>
             </div>
 
@@ -191,4 +189,4 @@ export default function EditorNavigation({
             />
         </>
     );
-}
+};

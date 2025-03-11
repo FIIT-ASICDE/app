@@ -71,9 +71,7 @@ export default function OverviewPage({ overview }: OverviewPageProps) {
                             {pinnedRepositories.length === 0 && (
                                 <NoData
                                     icon={PinOff}
-                                    message={
-                                        "No pinned repositories found."
-                                    }
+                                    message={"No pinned repositories found."}
                                 />
                             )}
                             {pinnedRepositories.map((repository) => (

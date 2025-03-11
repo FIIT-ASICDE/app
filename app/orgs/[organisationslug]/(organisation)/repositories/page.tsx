@@ -1,8 +1,6 @@
 import RepositoriesPage from "@/app/orgs/[organisationslug]/(organisation)/repositories/repositories-page";
 import { api } from "@/lib/trpc/server";
-import {
-    PublicRepositoriesFilter,
-} from "@/lib/types/repository";
+import { PublicRepositoriesFilter } from "@/lib/types/repository";
 
 import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
 
@@ -43,7 +41,10 @@ export default async function OrganisationRepositoriesPage({
     const { repositories, pagination } = await api.repo.fetchOrgRepos({
         organizationName: orgSlug,
         nameSearchTerm: query,
-        publicFilter: reposSearchParams?.public !== undefined ? reposSearchParams.public === "true" : undefined,
+        publicFilter:
+            reposSearchParams?.public !== undefined
+                ? reposSearchParams.public === "true"
+                : undefined,
         page: currentPage,
         pageSize: pageSize,
     });

@@ -33,8 +33,8 @@ export const OrganisationCardDisplay = ({
                 className,
             )}
         >
-            <CardHeader className="p-3">
-                <div className="flex flex-row justify-between">
+            <CardHeader className="p-3 pr-6">
+                <div className="flex flex-row justify-between gap-x-3">
                     <div className="flex min-w-0 flex-row items-center gap-x-3">
                         <AvatarDisplay
                             displayType={"card"}
@@ -54,11 +54,9 @@ export const OrganisationCardDisplay = ({
                         {organisation.memberCount && (
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <div className="flex w-12 flex-row items-center gap-x-1 text-muted-foreground">
+                                    <div className="flex flex-row items-center gap-x-1 text-muted-foreground">
                                         <UsersRound className="h-5 w-5" />
-                                        <div className="w-8">
-                                            {organisation.memberCount}
-                                        </div>
+                                        {organisation.memberCount}
                                     </div>
                                 </TooltipTrigger>
                                 <TooltipContent className="text-muted-foreground">

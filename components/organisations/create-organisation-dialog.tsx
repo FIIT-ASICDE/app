@@ -17,6 +17,7 @@ import {
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useState } from "react";
 import { UseFormReturn, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
@@ -68,19 +69,21 @@ export const CreateOrganisationDialog = () => {
         { enabled: initialMembersSearch !== "" },
     );
 
-    const createOrgMutation = api.org.create.useMutation();
+    const createOrgMutation = api.org.create.useMutation({
+        onSuccess: () => {
+            toast.success("Organisation successfully created");
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        },
+    });
 
     const onCreateOrganisation = async (
         data: z.infer<typeof createOrganisationFormSchema>,
     ) => {
         let image: string | undefined = undefined;
         if (data.image?.type === "local") {
-            const fileHash = await handleUpload(data.image.file);
-            if (!fileHash) {
-                // TODO kili handle error
-                return;
-            }
-            image = fileHash;
+            image = await handleUpload(data.image.file);
         } else if (data.image?.type === "remote") {
             image = data.image.src;
         }
@@ -93,6 +96,7 @@ export const CreateOrganisationDialog = () => {
         };
         const validatedData = createOrgProcedureSchema.parse(transformedData);
         const newOrg = await createOrgMutation.mutateAsync(validatedData);
+
         router.push(`/orgs/${newOrg.name}`);
     };
 

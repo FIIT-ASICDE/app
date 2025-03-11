@@ -24,17 +24,15 @@ export const ToggleMembersVisibilityDialog = ({
     organisation,
     afterToggleAction,
 }: ToggleMembersVisibilityDialogProps) => {
-    const showMembers = organisation.showMembers;
-
     const getChangeMembersVisibilityMessage = () => {
         return (
             <span>
                 This will result in{" "}
                 <span className="font-bold">
-                    {showMembers ? "hiding" : "showing"}
+                    {organisation.showMembers ? "hiding" : "showing"}
                 </span>{" "}
-                the members of your organisation {showMembers ? "from" : "to"}{" "}
-                the public.
+                the members of your organisation{" "}
+                {organisation.showMembers ? "from" : "to"} the public.
             </span>
         );
     };
@@ -44,7 +42,7 @@ export const ToggleMembersVisibilityDialog = ({
         memberVisibilityMutation
             .mutateAsync({
                 orgId: organisation.id,
-                showMembers: !showMembers,
+                showMembers: !organisation.showMembers,
             })
             .then(afterToggleAction);
     };
@@ -60,7 +58,7 @@ export const ToggleMembersVisibilityDialog = ({
                         <Loader2 className="animate-spin" />
                     ) : (
                         <>
-                            {showMembers ? (
+                            {organisation.showMembers ? (
                                 <>
                                     <EyeOff />
                                     Hide members
@@ -93,7 +91,7 @@ export const ToggleMembersVisibilityDialog = ({
                             className="w-full hover:bg-primary-button-hover"
                             variant="default"
                         >
-                            {showMembers ? (
+                            {organisation.showMembers ? (
                                 <>
                                     <EyeOff />
                                     Hide members

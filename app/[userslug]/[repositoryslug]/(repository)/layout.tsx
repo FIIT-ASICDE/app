@@ -2,6 +2,7 @@ import { api } from "@/lib/trpc/server";
 import { TRPCError } from "@trpc/server";
 import React from "react";
 
+import Header from "@/components/header/header";
 import { RepositoryHeader } from "@/components/repositories/repository-header";
 import { Separator } from "@/components/ui/separator";
 
@@ -24,10 +25,11 @@ export default async function RepositoryLayout({
 
         return (
             <>
+                <Header />
                 <RepositoryHeader
                     repository={repo}
                     canEdit={
-                        repo.userRole === "admin" || repo.userRole === "owner"
+                        repo.userRole === "ADMIN" || repo.userRole === "OWNER"
                     }
                 />
                 <Separator className="mx-6 w-auto border-accent" />

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { UseFormReturn, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
@@ -50,6 +51,11 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface CreateRepositoryDialogProps {
     usersOrganisations: Array<Omit<OrganisationDisplay, "memberCount">>;
@@ -71,7 +77,15 @@ export const CreateRepositoryDialog = ({
         },
     });
 
-    const createRepoMutation = api.repo.create.useMutation();
+    const createRepoMutation = api.repo.create.useMutation({
+        onSuccess: () => {
+            toast.success("Repository successfully created");
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        },
+    });
+
     const onCreateRepository = async (
         data: z.infer<typeof createRepositoryFormSchema>,
     ) => {
@@ -99,15 +113,24 @@ export const CreateRepositoryDialog = ({
 
     return (
         <Dialog>
-            <DialogTrigger asChild>
-                <Button
-                    variant="default"
-                    className="hover:bg-primary-button-hover"
-                >
-                    <FolderPlus />
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <DialogTrigger asChild>
+                        <Button
+                            variant="default"
+                            className="hover:bg-primary-button-hover"
+                        >
+                            <FolderPlus className="h-4 w-4 sm:mr-2" />
+                            <span className="hidden sm:inline">
+                                Create repository
+                            </span>
+                        </Button>
+                    </DialogTrigger>
+                </TooltipTrigger>
+                <TooltipContent className="sm:hidden">
                     Create repository
-                </Button>
-            </DialogTrigger>
+                </TooltipContent>
+            </Tooltip>
             <DialogContent className="max-h-[90vh] max-w-[425px] overflow-clip p-0">
                 <ScrollArea className="h-full max-h-[90vh]">
                     <div className="p-6">

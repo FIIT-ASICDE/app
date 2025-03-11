@@ -30,8 +30,8 @@ export const PinnedRepositoryCardDisplay = ({
                 className,
             )}
         >
-            <CardHeader className="p-3">
-                <div className="flex justify-between">
+            <CardHeader className="p-3 pr-6">
+                <div className="flex justify-between gap-x-3">
                     <div className="flex min-w-0 flex-row items-center gap-x-3">
                         <AvatarDisplay
                             displayType={"card"}

@@ -42,6 +42,10 @@ export const createRepositoryFormSchema = z.object({
     }),
 });
 
+export const importRepositoryFormSchema = z.object({
+    repository: z.object({}),
+});
+
 export const editRepositoryFormSchema = z.object({
     name: z
         .string()
@@ -71,4 +75,6 @@ export const cloneRepoSchema = z.object({
     visibility: z.enum(["public", "private"], {
         required_error: "Visibility is required.",
     }),
+    ownerType: z.enum(["user", "org"]),
+    ownerId: z.string().uuid(),
 });

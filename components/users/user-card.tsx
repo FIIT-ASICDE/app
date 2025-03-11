@@ -40,13 +40,11 @@ export const UserCard = ({
                         image={imgSrc(user.image)}
                         name={user.username}
                     />
-                    <div className="flex flex-col gap-x-3">
-                        <DynamicTitle
-                            title={user.username}
-                            link={userLink}
-                            className="tracking-normal"
-                        />
-                    </div>
+                    <DynamicTitle
+                        title={user.username}
+                        link={userLink}
+                        className="tracking-normal"
+                    />
                 </div>
                 <div className="flex flex-shrink-0 flex-row space-x-3">
                     <InviteUserDialog

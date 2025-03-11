@@ -12,14 +12,13 @@ import {
 import { createTRPCRouter, protectedProcedure } from "@/lib/server/api/trpc";
 import { PaginationResult } from "@/lib/types/generic";
 import {
-    RepoUserRole,
     Repository,
     RepositoryDisplay,
     RepositoryItem,
     RepositoryOverview,
 } from "@/lib/types/repository";
 import { PrismaType } from "@/prisma";
-import { $Enums, RepoRole } from "@prisma/client";
+import { $Enums } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { mkdir } from "fs/promises";
 import { Session } from "next-auth";
@@ -49,7 +48,7 @@ function create() {
                 throw new TRPCError({
                     code: "CONFLICT",
                     message:
-                        "A repository with this name already exists under this owner.",
+                        "A repository with this name already exists under this owner",
                 });
             }
 
@@ -75,7 +74,7 @@ function create() {
                     throw new TRPCError({
                         code: "FORBIDDEN",
                         message:
-                            "You must be a member of the organization to create repositories.",
+                            "You must be a member of the organisation to create repositories",
                     });
                 }
                 ownerName = organization.name;
@@ -85,7 +84,7 @@ function create() {
                 if (ownerId !== session.user.id) {
                     throw new TRPCError({
                         code: "FORBIDDEN",
-                        message: "Invalid owner ID.",
+                        message: "Invalid owner ID",
                     });
                 }
 
@@ -100,7 +99,7 @@ function create() {
                 if (!user || !user.name) {
                     throw new TRPCError({
                         code: "NOT_FOUND",
-                        message: "Owner not found.",
+                        message: "Owner not found",
                     });
                 }
 
@@ -157,7 +156,7 @@ function create() {
                     description: repo.description ?? undefined,
                     ownerImage: ownerImage ?? undefined,
                     createdAt: repo.createdAt,
-                    userRole: dbUserRoleToAppUserRole(userRole),
+                    userRole: userRole,
                 } satisfies Repository;
             });
         });
@@ -183,7 +182,7 @@ function searchByOwnerAndRepoSlug() {
             if (!repo) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Repo not found",
+                    message: "Repository not found",
                 });
             }
 
@@ -213,7 +212,7 @@ function searchByOwnerAndRepoSlug() {
                 description: repo.description ?? undefined,
                 ownerImage: owner.image,
                 createdAt: repo.createdAt,
-                userRole: dbUserRoleToAppUserRole(userRepoRelation?.repoRole),
+                userRole: userRepoRelation?.repoRole ?? "GUEST",
                 tree: contentsTree,
             } satisfies Repository;
         });
@@ -267,7 +266,7 @@ function repositoryOverview() {
                 description: repo.description ?? undefined,
                 ownerImage: owner.image,
                 createdAt: repo.createdAt,
-                userRole: dbUserRoleToAppUserRole(userRepoRelation?.repoRole),
+                userRole: userRepoRelation?.repoRole ?? "GUEST",
                 readme,
                 stats,
             } satisfies RepositoryOverview;
@@ -293,7 +292,7 @@ function loadRepoItem() {
             if (!repo) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Repo not found",
+                    message: "Repository not found",
                 });
             }
 
@@ -331,7 +330,7 @@ function reposByOwnerSlug() {
             if (!organization && !user) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Repos not found",
+                    message: "Repositories not found",
                 });
             }
 
@@ -388,9 +387,8 @@ function reposByOwnerSlug() {
                     description: repo.description ?? undefined,
                     ownerImage: ownerImage ?? undefined,
                     createdAt: repo.createdAt,
-                    userRole: dbUserRoleToAppUserRole(
-                        repo.userOrganizationRepo.at(0)?.repoRole,
-                    ),
+                    userRole:
+                        repo.userOrganizationRepo.at(0)?.repoRole ?? "GUEST",
                 };
             });
         });
@@ -527,7 +525,7 @@ function fetchUserRepos() {
                     favorite: repoUser.favorite,
                     pinned: repoUser.pinned ?? false,
                     createdAt: repoUser.repo.createdAt,
-                    userRole: mapRepoRoleToUserRole(repoUser.repoRole),
+                    userRole: repoUser.repoRole,
                 }),
             );
 
@@ -1052,21 +1050,6 @@ async function toggleRepoState(
     };
 }
 
-function dbUserRoleToAppUserRole(userRole?: $Enums.RepoRole): RepoUserRole {
-    if (!userRole) return "guest";
-
-    switch (userRole) {
-        case "ADMIN":
-            return "admin";
-        case "CONTRIBUTOR":
-            return "contributor";
-        case "VIEWER":
-            return "viewer";
-        case "OWNER":
-            return "owner";
-    }
-}
-
 async function ownerBySlug(
     prisma: PrismaType,
     ownerSlug: string,
@@ -1147,18 +1130,6 @@ async function repoBySlug(
             },
         },
     });
-}
-
-// ONLY TEMPORARILY - TODO MISO treba zrusit na FE celu RepoUserRole a zacat pouzivat RepoRole aj na FE
-function mapRepoRoleToUserRole(repoRole: RepoRole): RepoUserRole {
-    const roleMapping: Record<RepoRole, RepoUserRole> = {
-        OWNER: "owner",
-        ADMIN: "admin",
-        CONTRIBUTOR: "contributor",
-        VIEWER: "viewer",
-    };
-
-    return roleMapping[repoRole] ?? "guest"; // Ak by náhodou nebolo v enum, dáme "guest"
 }
 
 export async function doesRepoExist(
