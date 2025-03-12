@@ -830,9 +830,7 @@ function repoSettings() {
                 ownerImage: owner.image,
                 createdAt: repo.createdAt,
                 contributors,
-                userRole: dbUserRoleToAppUserRole(
-                    repo.userOrganizationRepo[0].repoRole,
-                ),
+                userRole: repo.userOrganizationRepo[0].repoRole,
             };
 
             return {
@@ -910,8 +908,8 @@ function deleteRepo() {
             // Only OWNER or ADMIN can delete a repository
             if (
                 !userRepoRelation ||
-                (userRepoRelation.repoRole !== RepoRole.OWNER &&
-                    userRepoRelation.repoRole !== RepoRole.ADMIN)
+                (userRepoRelation.repoRole !== $Enums.RepoRole.OWNER &&
+                    userRepoRelation.repoRole !== $Enums.RepoRole.ADMIN)
             ) {
                 throw new TRPCError({
                     code: "FORBIDDEN",
@@ -1642,7 +1640,7 @@ async function resolveRepoOwnerAndName(
     const ownerRelation = await prisma.repoUserOrganization.findFirst({
         where: {
             repoId,
-            repoRole: RepoRole.OWNER,
+            repoRole: $Enums.RepoRole.OWNER,
         },
         include: {
             userMetadata: {
@@ -1664,7 +1662,7 @@ async function resolveRepoOwnerAndName(
     const adminOrgRelation = await prisma.repoUserOrganization.findFirst({
         where: {
             repoId,
-            repoRole: RepoRole.ADMIN,
+            repoRole: $Enums.RepoRole.ADMIN,
             organizationId: { not: null },
         },
         include: {
