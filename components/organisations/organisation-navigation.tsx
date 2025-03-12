@@ -23,8 +23,7 @@ export const OrganisationNavigation = ({
     };
 
     const settingsAccess = () => {
-        if (!organisation.userRole) return "none";
-        else if (organisation.userRole === "ADMIN") return "interactive";
+        if (organisation.userRole === "ADMIN") return "interactive";
         return "nonInteractive";
     };
 

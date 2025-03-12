@@ -58,7 +58,7 @@ export const BlockContributorDialog = ({
                     <span className="font-semibold text-foreground">
                         {contributor.username}
                     </span>
-                    &#39;s contribution.
+                    &#39;s contribution
                 </TooltipContent>
             </Tooltip>
             <DialogContent>

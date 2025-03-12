@@ -5,6 +5,7 @@ import type {
     LanguageStatisticsItem,
 } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
+import { ChartPie } from "lucide-react";
 import { ReactElement, useState } from "react";
 import {
     Cell,
@@ -16,6 +17,7 @@ import {
 } from "recharts";
 
 import { languageColors } from "@/components/generic/generic";
+import { NoData } from "@/components/no-data/no-data";
 import { Label } from "@/components/ui/label";
 
 interface LanguageStatisticsChartProps {
@@ -38,14 +40,24 @@ type ActiveShapeProps = Omit<
 export default function LanguageStatisticsChart({
     languageStatistics,
 }: LanguageStatisticsChartProps) {
+    const [activeIndex, setActiveIndex] = useState<number | undefined>();
+
+    if (languageStatistics.percentages.length === 0) {
+        return (
+            <NoData
+                icon={ChartPie}
+                message="No language statistics data found."
+                className="m-6"
+            />
+        );
+    }
+
     const chartData = languageStatistics.percentages.map(
         (languageStatisticsItem: LanguageStatisticsItem) => ({
             ...languageStatisticsItem,
             value: languageStatisticsItem.percentage,
         }),
     );
-
-    const [activeIndex, setActiveIndex] = useState<number | undefined>();
 
     const onPieEnter = (_: unknown, index: number) => {
         setActiveIndex(index);

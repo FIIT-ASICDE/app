@@ -172,7 +172,7 @@ function createOrg() {
                 });
             }
 
-            return await ctx.prisma.$transaction(async (tx) => {
+            return ctx.prisma.$transaction(async (tx) => {
                 const creatorUserMetadata =
                     await tx.userMetadata.findFirstOrThrow({
                         where: { userId: ctx.session.user.id },
@@ -233,6 +233,7 @@ function createOrg() {
                     bio: orgUsers.bio ?? undefined,
                     createdAt: orgUsers.createdAt,
                     repositories: [],
+                    showMembers: true,
                     members: orgUsers.users.map(({ userMetadata, role }) => ({
                         id: userMetadata.user.id,
                         // AuthJS requires name to be nullable, but it will be always there
@@ -358,7 +359,7 @@ function byName() {
                 image: org.image ?? undefined,
                 bio: org.bio ?? undefined,
                 memberCount: org.members.length,
-                userRole,
+                userRole: userRole,
             };
         });
 }
