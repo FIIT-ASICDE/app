@@ -16,7 +16,7 @@ import {
     MailX,
     SquareArrowRight,
     TriangleAlert,
-    UsersRound,
+    UsersRound
 } from "lucide-react";
 import { useState } from "react";
 
@@ -36,6 +36,8 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { InviteContributorDialog } from "@/components/repositories/invite-contributor-dialog";
 
 interface SettingsPageProps {
     userSlug: string;
@@ -209,23 +211,37 @@ export default function SettingsPage({ tab }: SettingsPageProps) {
                                     image: user.image,
                                 }}
                                 repositoryId={repository.id}
+                                isItMe={true}
                             />
-                            {repository.contributors ? (
+                            {repository.contributors && (
                                 repository.contributors.map(
                                     (contributor: UserDisplay) => (
                                         <ContributorCard
                                             key={contributor.id}
                                             contributor={contributor}
                                             repositoryId={repository.id}
+                                            isItMe={contributor.id === user.id}
                                         />
                                     ),
                                 )
-                            ) : (
-                                <p className="text-sm text-muted-foreground">
-                                    You are the only contributor on this
-                                    repository.
-                                </p>
                             )}
+
+                            <Separator className="w-auto px-6 border-accent" />
+
+                            <div className="flex flex-row justify-between items-center gap-x-3">
+                                {repository.contributors ? (
+                                    <p className="text-sm text-muted-foreground">
+                                        You and {repository.contributors.length} other user{repository.contributors.length > 1 && "s"} can contribute to this repository.
+                                    </p>
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">
+                                        You are the only contributor on this
+                                        repository.
+                                    </p>
+                                )}
+
+                                <InviteContributorDialog repositoryName={repository.name} />
+                            </div>
                         </CardContent>
                     </Card>
                 )}

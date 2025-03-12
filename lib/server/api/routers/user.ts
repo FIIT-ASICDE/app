@@ -803,6 +803,8 @@ function inviteUserToRepo() {
                 },
             });
 
+            console.log(userMetadata + " " + repo + " " + senderMetadata);
+
             if (!userMetadata || !repo || !senderMetadata) {
                 throw new TRPCError({
                     code: "NOT_FOUND",

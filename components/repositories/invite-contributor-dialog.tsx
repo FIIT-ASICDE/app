@@ -1,43 +1,34 @@
-"use client";
-
+import { MailPlus, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { UserDisplay } from "@/lib/types/user";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { api } from "@/lib/trpc/react";
-import { UserDisplay } from "@/lib/types/user";
-import { Search, UserRoundPlus } from "lucide-react";
-import { useState } from "react";
 import { toast } from "sonner";
-
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { Button } from "@/components/ui/button";
-import {
-    CommandDialog,
-    CommandEmpty,
-    CommandInput,
-    CommandItem,
-} from "@/components/ui/command";
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
-    DialogFooter,
+    DialogDescription, DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
+    DialogTrigger
 } from "@/components/ui/dialog";
+import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
+import { CommandDialog, CommandEmpty, CommandInput, CommandItem } from "@/components/ui/command";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-interface InviteMemberDialogProps {
-    organisationName: string;
+interface InviteContributorDialogProps {
+    repositoryName: string;
 }
 
-export const InviteMemberDialog = ({
-    organisationName,
-}: InviteMemberDialogProps) => {
+export const InviteContributorDialog = ({
+    repositoryName,
+}: InviteContributorDialogProps) => {
     const [query, setQuery] = useState<string>("");
     const [selectedUser, setSelectedUser] = useState<UserDisplay | undefined>(undefined);
     const [commandOpen, setCommandOpen] = useState<boolean>(false);
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-    const decodedOrganisationName = decodeURIComponent(organisationName.trim());
+    const decodedRepositoryName = decodeURIComponent(repositoryName.trim());
 
     const debouncedQuery = useDebounce(query, 500);
 
@@ -50,12 +41,12 @@ export const InviteMemberDialog = ({
             },
         );
 
-    const inviteMutation = api.user.inviteUserToOrganization.useMutation({
+    const inviteMutation = api.user.inviteUserToRepo.useMutation({
         onSuccess: () => {
             toast.success("Invitation sent successfully", {
                 description:
                     selectedUser?.username +
-                    " has been invited to join your organisation.",
+                    " has been invited to collaborate on your repository.",
             });
 
             setDialogOpen(false);
@@ -66,11 +57,11 @@ export const InviteMemberDialog = ({
         },
     });
 
-    const handleInviteMember = () => {
+    const handleInviteContributor = () => {
         if (!selectedUser) return;
         inviteMutation.mutate({
             userId: selectedUser.id,
-            organisationName: organisationName,
+            repositoryName: repositoryName,
         });
     };
 
@@ -89,18 +80,17 @@ export const InviteMemberDialog = ({
                     variant="default"
                     className="hover:bg-primary-button-hover"
                 >
-                    <UserRoundPlus />
-                    Invite member
+                    <MailPlus />
+                    Invite contributor
                 </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle className="mb-5 text-center">
-                        Invite a member
+                        Invite a contributor
                     </DialogTitle>
                     <DialogDescription>
-                        Please select a user that will get an invite to your
-                        organisation.
+                        Please select a user that will get an invite to collaborate on your repository.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -170,9 +160,9 @@ export const InviteMemberDialog = ({
                         <span className="font-bold">
                             {" " + selectedUser.username + " "}
                         </span>
-                        to join your organisation
+                        to collaborate on your repository
                         <span className="font-bold">
-                            {" " + decodedOrganisationName}
+                            {" " + decodedRepositoryName}
                         </span>
                         .
                     </p>
@@ -180,7 +170,7 @@ export const InviteMemberDialog = ({
 
                 <DialogFooter className="justify-center">
                     <Button
-                        onClick={handleInviteMember}
+                        onClick={handleInviteContributor}
                         className="w-full hover:bg-primary-button-hover"
                         variant="default"
                         disabled={!selectedUser || inviteMutation.isPending}

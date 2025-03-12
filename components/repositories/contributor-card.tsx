@@ -4,20 +4,20 @@ import { imgSrc } from "@/lib/client-file-utils";
 import { UserDisplay } from "@/lib/types/user";
 
 import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { useUser } from "@/components/context/user-context";
 import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
 import { BlockContributorDialog } from "@/components/repositories/block-contributor-dialog";
 
 interface ContributorCardProps {
     contributor: UserDisplay;
     repositoryId: string;
+    isItMe: boolean;
 }
 
 export const ContributorCard = ({
     contributor,
     repositoryId,
+    isItMe,
 }: ContributorCardProps) => {
-    const { user } = useUser();
 
     const contributorLink: string = "/" + contributor.username;
 
@@ -35,7 +35,9 @@ export const ContributorCard = ({
                     className="text-base"
                 />
             </div>
-            {contributor.id !== user.id && (
+            {isItMe ? (
+                <div className="text-muted-foreground text-sm p-1.5">You</div>
+            ) : (
                 <BlockContributorDialog
                     contributor={contributor}
                     repositoryId={repositoryId}

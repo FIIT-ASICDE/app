@@ -69,7 +69,6 @@ export async function readUsersGithubRepos(
     };
 
     const repos = response.data.map((repo): GithubRepoDisplay => {
-        console.log(repo);
         return {
             ownerName: repo.owner.login,
             ownerImage: repo.owner.avatar_url,
