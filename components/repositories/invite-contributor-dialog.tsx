@@ -1,20 +1,27 @@
-import { MailPlus, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { UserDisplay } from "@/lib/types/user";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { api } from "@/lib/trpc/react";
+import { UserDisplay } from "@/lib/types/user";
+import { MailPlus, Search } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
+
+import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
+import { Button } from "@/components/ui/button";
+import {
+    CommandDialog,
+    CommandEmpty,
+    CommandInput,
+    CommandItem,
+} from "@/components/ui/command";
 import {
     Dialog,
     DialogContent,
-    DialogDescription, DialogFooter,
+    DialogDescription,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger
+    DialogTrigger,
 } from "@/components/ui/dialog";
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { CommandDialog, CommandEmpty, CommandInput, CommandItem } from "@/components/ui/command";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface InviteContributorDialogProps {
@@ -25,7 +32,9 @@ export const InviteContributorDialog = ({
     repositoryName,
 }: InviteContributorDialogProps) => {
     const [query, setQuery] = useState<string>("");
-    const [selectedUser, setSelectedUser] = useState<UserDisplay | undefined>(undefined);
+    const [selectedUser, setSelectedUser] = useState<UserDisplay | undefined>(
+        undefined,
+    );
     const [commandOpen, setCommandOpen] = useState<boolean>(false);
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
     const decodedRepositoryName = decodeURIComponent(repositoryName.trim());
@@ -90,7 +99,8 @@ export const InviteContributorDialog = ({
                         Invite a contributor
                     </DialogTitle>
                     <DialogDescription>
-                        Please select a user that will get an invite to collaborate on your repository.
+                        Please select a user that will get an invite to
+                        collaborate on your repository.
                     </DialogDescription>
                 </DialogHeader>
 

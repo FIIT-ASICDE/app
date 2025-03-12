@@ -16,7 +16,7 @@ import {
     MailX,
     SquareArrowRight,
     TriangleAlert,
-    UsersRound
+    UsersRound,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -27,6 +27,7 @@ import { InvitationCard } from "@/components/profile/invitation-card";
 import { ChangeVisibilityDialog } from "@/components/repositories/change-visibility-dialog";
 import { ContributorCard } from "@/components/repositories/contributor-card";
 import { DeleteRepositoryDialog } from "@/components/repositories/delete-repository-dialog";
+import { InviteContributorDialog } from "@/components/repositories/invite-contributor-dialog";
 import { RepositorySettingsTabs } from "@/components/repositories/repository-settings-tabs";
 import { TransferOwnershipDialog } from "@/components/repositories/transfer-ownership-dialog";
 import {
@@ -37,7 +38,6 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { InviteContributorDialog } from "@/components/repositories/invite-contributor-dialog";
 
 interface SettingsPageProps {
     userSlug: string;
@@ -213,7 +213,7 @@ export default function SettingsPage({ tab }: SettingsPageProps) {
                                 repositoryId={repository.id}
                                 isItMe={true}
                             />
-                            {repository.contributors && (
+                            {repository.contributors &&
                                 repository.contributors.map(
                                     (contributor: UserDisplay) => (
                                         <ContributorCard
@@ -223,15 +223,18 @@ export default function SettingsPage({ tab }: SettingsPageProps) {
                                             isItMe={contributor.id === user.id}
                                         />
                                     ),
-                                )
-                            )}
+                                )}
 
-                            <Separator className="w-auto px-6 border-accent" />
+                            <Separator className="w-auto border-accent px-6" />
 
-                            <div className="flex flex-row justify-between items-center gap-x-3">
+                            <div className="flex flex-row items-center justify-between gap-x-3">
                                 {repository.contributors ? (
                                     <p className="text-sm text-muted-foreground">
-                                        You and {repository.contributors.length} other user{repository.contributors.length > 1 && "s"} can contribute to this repository.
+                                        You and {repository.contributors.length}{" "}
+                                        other user
+                                        {repository.contributors.length > 1 &&
+                                            "s"}{" "}
+                                        can contribute to this repository.
                                     </p>
                                 ) : (
                                     <p className="text-sm text-muted-foreground">
@@ -240,7 +243,9 @@ export default function SettingsPage({ tab }: SettingsPageProps) {
                                     </p>
                                 )}
 
-                                <InviteContributorDialog repositoryName={repository.name} />
+                                <InviteContributorDialog
+                                    repositoryName={repository.name}
+                                />
                             </div>
                         </CardContent>
                     </Card>

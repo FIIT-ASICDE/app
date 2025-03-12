@@ -18,7 +18,6 @@ export const ContributorCard = ({
     repositoryId,
     isItMe,
 }: ContributorCardProps) => {
-
     const contributorLink: string = "/" + contributor.username;
 
     return (
@@ -36,7 +35,7 @@ export const ContributorCard = ({
                 />
             </div>
             {isItMe ? (
-                <div className="text-muted-foreground text-sm p-1.5">You</div>
+                <div className="p-1.5 text-sm text-muted-foreground">You</div>
             ) : (
                 <BlockContributorDialog
                     contributor={contributor}

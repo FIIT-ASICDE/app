@@ -34,7 +34,9 @@ export const InviteMemberDialog = ({
     organisationName,
 }: InviteMemberDialogProps) => {
     const [query, setQuery] = useState<string>("");
-    const [selectedUser, setSelectedUser] = useState<UserDisplay | undefined>(undefined);
+    const [selectedUser, setSelectedUser] = useState<UserDisplay | undefined>(
+        undefined,
+    );
     const [commandOpen, setCommandOpen] = useState<boolean>(false);
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
     const decodedOrganisationName = decodeURIComponent(organisationName.trim());

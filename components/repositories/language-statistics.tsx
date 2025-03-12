@@ -5,6 +5,7 @@ import type {
     LanguageStatisticsItem,
 } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
+import { ChartPie } from "lucide-react";
 import { ReactElement, useState } from "react";
 import {
     Cell,
@@ -16,9 +17,8 @@ import {
 } from "recharts";
 
 import { languageColors } from "@/components/generic/generic";
-import { Label } from "@/components/ui/label";
 import { NoData } from "@/components/no-data/no-data";
-import { ChartPie } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 interface LanguageStatisticsChartProps {
     languageStatistics: LanguageStatistics;
@@ -40,7 +40,6 @@ type ActiveShapeProps = Omit<
 export default function LanguageStatisticsChart({
     languageStatistics,
 }: LanguageStatisticsChartProps) {
-
     const [activeIndex, setActiveIndex] = useState<number | undefined>();
 
     if (languageStatistics.percentages.length === 0) {
