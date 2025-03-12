@@ -140,9 +140,7 @@ function getMembers() {
                     username: member.userMetadata.user.name ?? "",
                     name: member.userMetadata.firstName,
                     surname: member.userMetadata.surname,
-                    image:
-                        member.userMetadata.user.image ||
-                        "/avatars/default.png",
+                    image: member.userMetadata.user.image || undefined,
                     role: member.role,
                 })),
                 pagination: {
@@ -324,7 +322,7 @@ function search() {
                 organisations: organizations.map((org) => ({
                     id: org.id,
                     name: org.name,
-                    image: org.image || "/avatars/default.png",
+                    image: org.image || undefined,
                     bio: org.bio || undefined,
                     memberCount: org._count.users,
                 })),
@@ -469,7 +467,7 @@ function fetchUserOrgs() {
                 usersOrganisations: organizations.map((orgUser) => ({
                     id: orgUser.organization.id,
                     name: orgUser.organization.name,
-                    image: orgUser.organization.image || "/avatars/default.png",
+                    image: orgUser.organization.image || undefined,
                     bio: orgUser.organization.bio || undefined,
                     memberCount: orgUser.organization._count.users,
                     userRole: orgUser.role.toLowerCase() as OrganizationRole,
