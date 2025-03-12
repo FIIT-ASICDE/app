@@ -1,7 +1,6 @@
 import { readGithubRepoBranches, readUsersGithubRepos } from "@/lib/github";
 import { paginationSchema } from "@/lib/schemas/common-schemas";
 import { cloneRepoSchema } from "@/lib/schemas/repo-schemas";
-import { doesRepoExist } from "@/lib/server/api/routers/repos";
 import { createTRPCRouter, protectedProcedure } from "@/lib/server/api/trpc";
 import { ReturnTypeOf } from "@octokit/core/dist-types/types";
 import { $Enums } from "@prisma/client";
@@ -52,28 +51,98 @@ function clone() {
         .mutation(async ({ ctx, input }) => {
             const user = await ctx.prisma.user.findUnique({
                 where: { id: ctx.session.user.id },
+                include: { metadata: true },
             });
-            if (!user) {
+
+            if (!user || !user.metadata) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
                     message: "User not found",
                 });
             }
 
+            if (input.ownerType === "user") {
+                if (input.ownerId !== ctx.session.user.id) {
+                    throw new TRPCError({
+                        code: "FORBIDDEN",
+                        message:
+                            "You can only create repositories for yourself",
+                    });
+                }
+            } else if (input.ownerType === "org") {
+                const orgUser = await ctx.prisma.organizationUser.findUnique({
+                    where: {
+                        userMetadataId_organizationId: {
+                            userMetadataId: user.metadata.id,
+                            organizationId: input.ownerId,
+                        },
+                    },
+                });
+
+                if (!orgUser || orgUser.role !== "ADMIN") {
+                    throw new TRPCError({
+                        code: "FORBIDDEN",
+                        message:
+                            "You must be an admin of the organization to create repositories",
+                    });
+                }
+            }
+
+            // Get the owner name (user or organization)
+            let ownerName = user.name;
+            if (input.ownerType === "org") {
+                const organization = await ctx.prisma.organization.findUnique({
+                    where: { id: input.ownerId },
+                });
+
+                if (!organization) {
+                    throw new TRPCError({
+                        code: "NOT_FOUND",
+                        message: "Organization not found",
+                    });
+                }
+
+                ownerName = organization.name;
+            }
+
+            if (!ownerName) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "Owner name is required",
+                });
+            }
+
             const ownerReposRoot = path.join(
                 process.env.REPOSITORIES_STORAGE_ROOT!,
-                user.name!,
+                ownerName,
             );
             await mkdir(ownerReposRoot, { recursive: true });
             const [, repoName] = input.githubFullName.split("/");
             const targetDirName = input.name || repoName;
             const targetPath = path.join(ownerReposRoot, targetDirName);
 
-            const repoExists = await doesRepoExist(
-                ctx.prisma,
-                targetDirName,
-                ctx.session.user.id,
-            );
+            // check if repo with same name exists for this owner
+            const repoExists = await ctx.prisma.repo.findFirst({
+                where: {
+                    name: targetDirName,
+                    userOrganizationRepo:
+                        input.ownerType === "user"
+                            ? {
+                                  some: {
+                                      userMetadata: {
+                                          userId: ctx.session.user.id,
+                                      },
+                                      organizationId: null,
+                                  },
+                              }
+                            : {
+                                  some: {
+                                      organizationId: input.ownerId,
+                                  },
+                              },
+                },
+            });
+
             if (repoExists) {
                 throw new TRPCError({
                     code: "CONFLICT",
@@ -95,7 +164,7 @@ function clone() {
             if (input.branch) {
                 cmd += ` -b ${input.branch}`;
             }
-            cmd += ` ${cloneUrl} ${targetPath}`;
+            cmd += ` ${cloneUrl} '${targetPath}'`;
 
             try {
                 await execPromise(cmd);
@@ -111,22 +180,25 @@ function clone() {
                         },
                     });
 
-                    const userMetadata =
-                        await tx.userMetadata.findUniqueOrThrow({
-                            where: { userId: ctx.session.user.id },
-                        });
-
                     await tx.repoUserOrganization.create({
                         data: {
                             repoId: repo.id,
-                            userMetadataId: userMetadata.id,
-                            repoRole: $Enums.RepoRole.OWNER,
+                            userMetadataId: user.metadata!.id,
+                            organizationId:
+                                input.ownerType === "org"
+                                    ? input.ownerId
+                                    : null,
+                            repoRole:
+                                input.ownerType === "user"
+                                    ? $Enums.RepoRole.OWNER
+                                    : $Enums.RepoRole.ADMIN,
                             favorite: false,
+                            pinned: false,
                         },
                     });
                 });
 
-                return { ownerName: user.name, repoName: targetDirName };
+                return { ownerName, repoName: targetDirName };
             } catch (error) {
                 if (
                     await access(targetPath)
