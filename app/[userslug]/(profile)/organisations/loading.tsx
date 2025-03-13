@@ -1,0 +1,22 @@
+import { Skeleton } from "@/components/ui/skeleton"
+import { RepoOrgSubmenuSkeleton } from "@/components/skeletons/repo-org-submenu-skeleton";
+import { UserRoundPlus } from "lucide-react";
+import { RepoOrgCardSkeleton } from "@/components/skeletons/repo-org-card-skeleton";
+
+export default function Loading() {
+    return (
+        <Skeleton className="bg-background text-foreground">
+            <RepoOrgSubmenuSkeleton
+                searchText="Search organisations..."
+                createText="Create organisation"
+                icon={UserRoundPlus}
+            />
+            <main>
+                <div className="m-6 grid grid-cols-1 gap-3 lg:grid-cols-2">
+                    <RepoOrgCardSkeleton/>
+                    <RepoOrgCardSkeleton/>
+                </div>
+            </main>
+        </Skeleton>
+    );
+}
