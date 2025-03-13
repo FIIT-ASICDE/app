@@ -13,6 +13,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 interface ChangeVisibilityDialogProps {
     repository: Repository;
@@ -42,7 +43,15 @@ export const ChangeVisibilityDialog = ({
         }
     };
 
-    const changeVisibilityMutation = api.repo.changeVisibility.useMutation();
+    const changeVisibilityMutation = api.repo.changeVisibility.useMutation({
+        onSuccess: () => {
+            toast.success("Repository visibility changed successfully");
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
+
     const handleChangeVisibility = () => {
         const setTo: boolean = repository.visibility !== "public";
         changeVisibilityMutation
@@ -82,8 +91,8 @@ export const ChangeVisibilityDialog = ({
                     <DialogTrigger asChild>
                         <Button
                             onClick={() => handleChangeVisibility()}
-                            className="w-full hover:bg-destructive-hover"
-                            variant="destructive"
+                            className="w-full hover:bg-primary-button-hover"
+                            variant="default"
                         >
                             {repository.visibility === "public" ? (
                                 <>
