@@ -10,6 +10,7 @@ export default function Loading() {
                 searchText="Search repositories..."
                 createText="Create repository"
                 icon={FolderPlus}
+                importFromGithub={true}
             />
             <main>
                 <div className="m-6 grid grid-cols-1 gap-3 lg:grid-cols-2">

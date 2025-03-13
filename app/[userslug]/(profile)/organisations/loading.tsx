@@ -10,6 +10,7 @@ export default function Loading() {
                 searchText="Search organisations..."
                 createText="Create organisation"
                 icon={UserRoundPlus}
+                importFromGithub={false}
             />
             <main>
                 <div className="m-6 grid grid-cols-1 gap-3 lg:grid-cols-2">
