@@ -13,9 +13,7 @@ export default async function RepositoryLayout({
     children: React.ReactNode;
     params: Promise<{ userslug: string; repositoryslug: string }>;
 }) {
-    let { userslug, repositoryslug } = await params;
-    userslug = userslug.replace(/%20/g, " ");
-    repositoryslug = repositoryslug.replace(/%20/g, " ");
+    const { userslug, repositoryslug } = await params;
 
     try {
         const repo = await api.repo.search({

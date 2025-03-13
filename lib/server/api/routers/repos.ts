@@ -11,16 +11,19 @@ import {
 } from "@/lib/schemas/repo-schemas";
 import { createTRPCRouter, protectedProcedure } from "@/lib/server/api/trpc";
 import { PaginationResult } from "@/lib/types/generic";
+import { Invitation, InvitationStatus } from "@/lib/types/invitation";
 import {
     Repository,
     RepositoryDisplay,
     RepositoryItem,
     RepositoryOverview,
+    RepositorySettings,
 } from "@/lib/types/repository";
+import { UserDisplay } from "@/lib/types/user";
 import { PrismaType } from "@/prisma";
 import { $Enums } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { mkdir } from "fs/promises";
+import { access, mkdir, rename, rm } from "fs/promises";
 import { Session } from "next-auth";
 import path from "path";
 import { z } from "zod";
@@ -35,6 +38,10 @@ export const repoRouter = createTRPCRouter({
     fetchUserRepos: fetchUserRepos(),
     fetchOrgRepos: fetchOrgRepos(),
     fetchUserFavoriteRepos: fetchUserFavoriteRepos(),
+    settings: repoSettings(),
+    changeVisibility: changeVisibility(),
+    delete: deleteRepo(),
+    transfer: transfer(),
 });
 
 function create() {
@@ -753,6 +760,370 @@ function fetchUserFavoriteRepos() {
         });
 }
 
+function repoSettings() {
+    return protectedProcedure
+        .input(repoBySlugsSchema)
+        .query(async ({ ctx, input }): Promise<RepositorySettings> => {
+            const owner = await ownerBySlug(
+                ctx.prisma,
+                decodeURIComponent(input.ownerSlug.trim()),
+            );
+            const decodedRepositorySlug = decodeURIComponent(
+                input.repositorySlug.trim(),
+            );
+            const repo = await repoBySlug(
+                ctx.prisma,
+                decodedRepositorySlug,
+                ctx.session.user.id,
+                owner,
+            );
+            if (!repo) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Repo not found",
+                });
+            }
+
+            const isUserAdmin =
+                repo.userOrganizationRepo.at(0)?.repoRole === "ADMIN";
+
+            const invitations = await reposInvitations(ctx.prisma, repo.id);
+
+            const pendingInvitations = await Promise.all(
+                invitations
+                    .filter(
+                        (inv) => inv.status === $Enums.InvitationStatus.PENDING,
+                    )
+                    .map(async (inv) => await formatInvitation(inv, owner)),
+            );
+
+            const acceptedInvitations = await Promise.all(
+                invitations
+                    .filter(
+                        (inv) =>
+                            inv.status === $Enums.InvitationStatus.ACCEPTED,
+                    )
+                    .map(async (inv) => await formatInvitation(inv, owner)),
+            );
+            const declinedInvitations = await Promise.all(
+                invitations
+                    .filter(
+                        (inv) =>
+                            inv.status === $Enums.InvitationStatus.DECLINED,
+                    )
+                    .map(async (inv) => await formatInvitation(inv, owner)),
+            );
+
+            const contributors = (
+                await repoContributors(ctx.prisma, repo.id)
+            ).filter((c) => c.id !== ctx.session.user.id);
+
+            const repository: Repository = {
+                id: repo.id,
+                ownerId: owner.id!,
+                ownerName: owner.name!,
+                name: repo.name,
+                visibility: repo.public ? "public" : "private",
+                favorite: repo.userOrganizationRepo[0].favorite ?? false,
+                pinned: false,
+                description: repo.description ?? undefined,
+                ownerImage: owner.image,
+                createdAt: repo.createdAt,
+                contributors,
+                userRole: repo.userOrganizationRepo[0].repoRole,
+            };
+
+            return {
+                repository,
+                pendingInvitations,
+                acceptedInvitations,
+                declinedInvitations,
+                isUserAdmin,
+            };
+        });
+}
+
+function changeVisibility() {
+    return protectedProcedure
+        .input(z.object({ repoId: z.string().uuid(), public: z.boolean() }))
+        .mutation(async ({ ctx, input }) => {
+            const repo = await ctx.prisma.repo.findUniqueOrThrow({
+                where: { id: input.repoId },
+                include: {
+                    userOrganizationRepo: {
+                        select: { repoRole: true },
+                        where: {
+                            userMetadata: { userId: ctx.session.user.id },
+                        },
+                    },
+                },
+            });
+
+            if (repo.userOrganizationRepo.length > 1) {
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message:
+                        "Failed server condition, there must be max one userOrganizationRepo row for a user",
+                });
+            }
+
+            if (
+                repo.userOrganizationRepo[0].repoRole !==
+                    $Enums.RepoRole.ADMIN &&
+                repo.userOrganizationRepo[0].repoRole !== $Enums.RepoRole.OWNER
+            ) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "You aren't admin of this repo",
+                });
+            }
+
+            await ctx.prisma.repo.update({
+                where: { id: input.repoId },
+                data: { public: input.public },
+            });
+        });
+}
+
+function deleteRepo() {
+    return protectedProcedure
+        .input(z.object({ repoId: z.string().uuid() }))
+        .mutation(async ({ ctx, input }) => {
+            const userMetadata =
+                await ctx.prisma.userMetadata.findUniqueOrThrow({
+                    where: { userId: ctx.session.user.id },
+                });
+
+            // check if the user has permission to delete the repository
+            const userRepoRelation =
+                await ctx.prisma.repoUserOrganization.findUnique({
+                    where: {
+                        userMetadataId_repoId: {
+                            userMetadataId: userMetadata.id,
+                            repoId: input.repoId,
+                        },
+                    },
+                });
+
+            // Only OWNER or ADMIN can delete a repository
+            if (
+                !userRepoRelation ||
+                (userRepoRelation.repoRole !== $Enums.RepoRole.OWNER &&
+                    userRepoRelation.repoRole !== $Enums.RepoRole.ADMIN)
+            ) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message:
+                        "You don't have permission to delete this repository",
+                });
+            }
+
+            const repoPath = await resolveRepoPath(
+                ctx.prisma,
+                userRepoRelation.repoId,
+            );
+
+            return await ctx.prisma.$transaction(async (tx) => {
+                // delete all repository invitations
+                await tx.repoUserInvitation.deleteMany({
+                    where: { repoId: input.repoId },
+                });
+
+                // delete all repository user organization relationships
+                await tx.repoUserOrganization.deleteMany({
+                    where: { repoId: input.repoId },
+                });
+
+                // delete the repository itself
+                await tx.repo.delete({
+                    where: { id: input.repoId },
+                });
+
+                // delete the repository itself from file system
+                try {
+                    if (!repoPath) return;
+                    await access(repoPath);
+                    await rm(repoPath, { recursive: true, force: true });
+                } catch (fsError) {
+                    console.error(
+                        `Error deleting repository files at ${repoPath}:`,
+                        fsError,
+                    );
+                }
+            });
+        });
+}
+
+function transfer() {
+    return protectedProcedure
+        .input(
+            z.object({
+                repoId: z.string().uuid(),
+                newOwnerType: z.enum(["user", "org"]),
+                newOwnerId: z.string().uuid(),
+            }),
+        )
+        .mutation(async ({ ctx, input }) => {
+            const currentUserRole =
+                await ctx.prisma.repoUserOrganization.findFirstOrThrow({
+                    select: { repoRole: true, organizationId: true },
+                    where: {
+                        AND: [
+                            { userMetadata: { userId: ctx.session.user.id } },
+                            { repoId: input.repoId },
+                        ],
+                    },
+                });
+
+            if (
+                currentUserRole.repoRole !== $Enums.RepoRole.ADMIN &&
+                currentUserRole.repoRole !== $Enums.RepoRole.OWNER
+            ) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message:
+                        "You don't have permission to transfer this repository",
+                });
+            }
+
+            const oldRepoPath = await resolveRepoPath(ctx.prisma, input.repoId);
+            if (!oldRepoPath) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Repository not found",
+                });
+            }
+            const isOwnerByOrg = currentUserRole.organizationId !== null;
+
+            let newOwner: { ownerName: string; repoName: string };
+            if (input.newOwnerType === "user") {
+                newOwner = await transferOwnershipToUser(
+                    ctx.prisma,
+                    input.repoId,
+                    input.newOwnerId,
+                    isOwnerByOrg,
+                );
+            } else {
+                newOwner = await transferOwnershipToOrg(
+                    ctx.prisma,
+                    input.repoId,
+                    input.newOwnerId,
+                    isOwnerByOrg,
+                );
+            }
+
+            const newRepoPath = path.join(
+                process.env.REPOSITORIES_STORAGE_ROOT!,
+                newOwner.ownerName,
+                newOwner.repoName,
+            );
+
+            const newOwnerDir = path.join(
+                process.env.REPOSITORIES_STORAGE_ROOT!,
+                newOwner.ownerName,
+            );
+
+            try {
+                await mkdir(newOwnerDir, { recursive: true });
+                await rename(oldRepoPath, newRepoPath);
+
+                return {
+                    ownerName: newOwner.ownerName,
+                    repoName: newOwner.repoName,
+                };
+            } catch (error) {
+                console.error("Failed to move repository files:", error);
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to move repository files",
+                });
+            }
+        });
+}
+
+async function transferOwnershipToUser(
+    prisma: PrismaType,
+    repoId: string,
+    userId: string,
+    isOwnerByOrg: boolean,
+): Promise<{ ownerName: string; repoName: string }> {
+    return prisma.$transaction(async (tx) => {
+        // going from org owned repo to user owned one, delete all organizationId
+        // from roles
+        if (isOwnerByOrg) {
+            await tx.repoUserOrganization.updateMany({
+                where: { repoId },
+                data: { organizationId: null },
+            });
+        }
+
+        const userMetadata = await tx.userMetadata.findUniqueOrThrow({
+            include: { user: true },
+            where: { userId },
+        });
+        const userRole = await tx.repoUserOrganization.findUnique({
+            where: {
+                userMetadataId_repoId: {
+                    repoId,
+                    userMetadataId: userMetadata.id,
+                },
+            },
+        });
+
+        // if user already has an role, promote him to owner
+        if (userRole) {
+            await tx.repoUserOrganization.update({
+                where: {
+                    userMetadataId_repoId: {
+                        repoId: userRole.repoId,
+                        userMetadataId: userRole.userMetadataId,
+                    },
+                },
+                data: { repoRole: $Enums.RepoRole.OWNER },
+            });
+        } else {
+            await tx.repoUserOrganization.create({
+                data: {
+                    userMetadataId: userMetadata.id,
+                    repoId: repoId,
+                    repoRole: $Enums.RepoRole.OWNER,
+                    favorite: false,
+                },
+            });
+        }
+        const repo = await tx.repo.findUniqueOrThrow({ where: { id: repoId } });
+        return { ownerName: userMetadata.user.name!, repoName: repo.name };
+    });
+}
+
+async function transferOwnershipToOrg(
+    prisma: PrismaType,
+    repoId: string,
+    orgId: string,
+    isOwnerByOrg: boolean,
+): Promise<{ ownerName: string; repoName: string }> {
+    return prisma.$transaction(async (tx) => {
+        // going from user owned repo to org owned one, demote current owner
+        if (!isOwnerByOrg) {
+            await tx.repoUserOrganization.updateMany({
+                where: { repoId, repoRole: $Enums.RepoRole.OWNER },
+                data: { repoRole: $Enums.RepoRole.ADMIN },
+            });
+        }
+
+        await tx.repoUserOrganization.updateMany({
+            where: { repoId },
+            data: { organizationId: orgId },
+        });
+
+        const org = await tx.organization.findUniqueOrThrow({
+            where: { id: orgId },
+        });
+        const repo = await tx.repo.findUniqueOrThrow({ where: { id: repoId } });
+        return { ownerName: org.name, repoName: repo.name };
+    });
+}
+
 export async function pinnedRepos(
     prisma: PrismaType,
     ownerId: string,
@@ -1146,4 +1517,171 @@ export async function doesRepoExist(
             ],
         },
     });
+}
+
+async function reposInvitations(prisma: PrismaType, repoId: string) {
+    return prisma.repoUserInvitation.findMany({
+        where: { repoId },
+        include: {
+            repo: true,
+            userMetadata: {
+                include: {
+                    user: true,
+                },
+            },
+            senderMetadata: {
+                include: {
+                    user: true,
+                },
+            },
+        },
+    });
+}
+
+const formatInvitation = async (
+    inv: Awaited<ReturnType<typeof reposInvitations>>[number],
+    owner: Awaited<ReturnType<typeof ownerBySlug>>,
+): Promise<Invitation> => {
+    const sender: UserDisplay = {
+        id: inv.senderMetadata.user.id,
+        username: inv.senderMetadata.user.name!,
+        image: inv.senderMetadata.user.image || undefined,
+    };
+
+    const receiver: UserDisplay = {
+        id: inv.userMetadata.user.id,
+        username: inv.userMetadata.user.name!,
+        image: inv.userMetadata.user.image || undefined,
+    };
+
+    const repo: RepositoryDisplay = {
+        id: inv.repo.id,
+        ownerName: owner.name,
+        ownerImage: owner.image,
+        name: inv.repo.name,
+        visibility: inv.repo.public ? "public" : "private",
+    };
+
+    let status: InvitationStatus;
+    switch (inv.status) {
+        case "PENDING":
+            status = "pending";
+            break;
+        case "ACCEPTED":
+            status = "accepted";
+            break;
+        case "DECLINED":
+            status = "declined";
+            break;
+    }
+
+    return {
+        id: `${inv.userMetadataId}_${inv.repoId}`,
+        type: "repository",
+        sender,
+        repository: repo,
+        receiver,
+        status,
+        createdAt: inv.createdAt,
+        resolvedAt: inv.resolvedAt || undefined,
+    };
+};
+
+async function repoContributors(
+    prisma: PrismaType,
+    repoId: string,
+): Promise<Array<UserDisplay>> {
+    const roles = await prisma.repoUserOrganization.findMany({
+        where: { repoId },
+        include: {
+            userMetadata: {
+                include: { user: true },
+            },
+        },
+    });
+
+    return roles.map((role): UserDisplay => {
+        return {
+            id: role.userMetadata.user.id,
+            username: role.userMetadata.user.name!,
+            image: role.userMetadata.user.image || undefined,
+        };
+    });
+}
+
+async function resolveRepoPath(
+    prisma: PrismaType,
+    repoId: string,
+): Promise<string | null> {
+    const repoNames = await resolveRepoOwnerAndName(prisma, repoId);
+    if (!repoNames) return null;
+
+    return path.join(
+        process.env.REPOSITORIES_STORAGE_ROOT!,
+        repoNames.ownerName,
+        repoNames.repoName,
+    );
+}
+
+async function resolveRepoOwnerAndName(
+    prisma: PrismaType,
+    repoId: string,
+): Promise<{ ownerName: string; repoName: string } | null> {
+    const repo = await prisma.repo.findUnique({
+        where: { id: repoId },
+        select: { name: true },
+    });
+
+    if (!repo) {
+        return null;
+    }
+
+    // 2. first check if it's a user-owned repository (has OWNER role)
+    const ownerRelation = await prisma.repoUserOrganization.findFirst({
+        where: {
+            repoId,
+            repoRole: $Enums.RepoRole.OWNER,
+        },
+        include: {
+            userMetadata: {
+                select: {
+                    user: true,
+                },
+            },
+        },
+    });
+
+    if (ownerRelation) {
+        return {
+            ownerName: ownerRelation.userMetadata.user.name!,
+            repoName: repo.name,
+        };
+    }
+
+    // 4. If no OWNER relation, check for organization ownership (ADMIN role with org)
+    const adminOrgRelation = await prisma.repoUserOrganization.findFirst({
+        where: {
+            repoId,
+            repoRole: $Enums.RepoRole.ADMIN,
+            organizationId: { not: null },
+        },
+        include: {
+            organization: {
+                select: {
+                    name: true,
+                },
+            },
+        },
+    });
+
+    // 5. if there's an ADMIN relation with org, it's org-owned
+    if (adminOrgRelation && adminOrgRelation.organization) {
+        const ownerName = adminOrgRelation.organization.name;
+        return {
+            ownerName,
+            repoName: repo.name,
+        };
+    }
+
+    return null;
 }

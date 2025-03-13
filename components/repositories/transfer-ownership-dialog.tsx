@@ -1,5 +1,5 @@
 import { imgSrc } from "@/lib/client-file-utils";
-import { OrganisationDisplay } from "@/lib/types/organisation";
+import { api } from "@/lib/trpc/react";
 import { Repository } from "@/lib/types/repository";
 import { SquareArrowRight } from "lucide-react";
 import { useState } from "react";
@@ -30,48 +30,25 @@ interface TransferOwnershipDialogProps {
     repository: Repository;
 }
 
-const data = {
-    usersOrganisations: [
-        {
-            id: "f3f67850-e8cf-428d-84ae-853c46031f46",
-            name: "Google",
-            image: "/avatars/organisation-avatar1.png",
-            memberCount: 30,
-            userRole: "ADMIN",
-        } satisfies OrganisationDisplay,
-        {
-            id: "313b8b5a-6348-4742-a4f8-ce78a0188c70",
-            name: "Microsoft",
-            image: "/avatars/organisation-avatar2.png",
-            memberCount: 5,
-            userRole: "MEMBER",
-        } satisfies OrganisationDisplay,
-        {
-            id: "c0b62ada-c8c7-4574-91a4-a007a75181f5",
-            name: "ASICDE",
-            image: "/avatars/organisation-avatar3.jpg",
-            memberCount: 160,
-            userRole: "MEMBER",
-        } satisfies OrganisationDisplay,
-    ] satisfies Array<OrganisationDisplay>,
-};
-
 export const TransferOwnershipDialog = ({
     repository,
 }: TransferOwnershipDialogProps) => {
     const { user } = useUser();
     const userIsOwner: boolean | null = user && user.id === repository.ownerId;
 
-    const usersOrganisations: Array<OrganisationDisplay> =
-        data.usersOrganisations;
+    const usersOrganisations = api.org.userOrgs.useQuery({
+        usersId: user.id,
+        role: "ADMIN",
+    });
 
     const [newOwnerId, setNewOwnerId] = useState<string>("");
 
     const getNewOwnerData = () => {
         if (usersOrganisations) {
-            const usersOrganisation: OrganisationDisplay | undefined =
-                usersOrganisations.find((item) => item.id === newOwnerId);
-            if (usersOrganisation !== undefined) {
+            const usersOrganisation = usersOrganisations.data?.find(
+                (item) => item.id === newOwnerId,
+            );
+            if (usersOrganisation) {
                 return {
                     name: usersOrganisation.name,
                     image: usersOrganisation.image,
@@ -210,10 +187,8 @@ export const TransferOwnershipDialog = ({
                         {usersOrganisations && (
                             <SelectGroup>
                                 <SelectLabel>Your organisations</SelectLabel>
-                                {usersOrganisations.map(
-                                    (
-                                        usersOrganisation: OrganisationDisplay,
-                                    ) => {
+                                {usersOrganisations.data?.map(
+                                    (usersOrganisation) => {
                                         if (
                                             usersOrganisation.id ===
                                             repository.ownerId

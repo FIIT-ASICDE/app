@@ -140,9 +140,7 @@ function getMembers() {
                     username: member.userMetadata.user.name ?? "",
                     name: member.userMetadata.firstName,
                     surname: member.userMetadata.surname,
-                    image:
-                        member.userMetadata.user.image ||
-                        "/avatars/default.png",
+                    image: member.userMetadata.user.image || undefined,
                     role: member.role,
                 })),
                 pagination: {
@@ -324,7 +322,7 @@ function search() {
                 organisations: organizations.map((org) => ({
                     id: org.id,
                     name: org.name,
-                    image: org.image || "/avatars/default.png",
+                    image: org.image || undefined,
                     bio: org.bio || undefined,
                     memberCount: org._count.users,
                 })),
@@ -469,7 +467,7 @@ function fetchUserOrgs() {
                 usersOrganisations: organizations.map((orgUser) => ({
                     id: orgUser.organization.id,
                     name: orgUser.organization.name,
-                    image: orgUser.organization.image || "/avatars/default.png",
+                    image: orgUser.organization.image || undefined,
                     bio: orgUser.organization.bio || undefined,
                     memberCount: orgUser.organization._count.users,
                     userRole: orgUser.role.toLowerCase() as OrganizationRole,
@@ -892,54 +890,6 @@ function settings() {
                 }),
             );
 
-            const formatInvitation = async (
-                inv: Awaited<ReturnType<typeof orgsInvitations>>[0],
-            ): Promise<Invitation> => {
-                const sender: UserDisplay = {
-                    id: inv.senderMetadata.user.id,
-                    username: inv.senderMetadata.user.name!,
-                    image: inv.senderMetadata.user.image || undefined,
-                };
-
-                const receiver: UserDisplay = {
-                    id: inv.userMetadata.user.id,
-                    username: inv.userMetadata.user.name!,
-                    image: inv.userMetadata.user.image || undefined,
-                };
-
-                const organisation: OrganisationDisplay = {
-                    id: inv.organization.id,
-                    name: inv.organization.name,
-                    image: inv.organization.image || undefined,
-                    bio: inv.organization.bio || undefined,
-                    memberCount: 0,
-                };
-
-                let status: InvitationStatus;
-                switch (inv.status) {
-                    case "PENDING":
-                        status = "pending";
-                        break;
-                    case "ACCEPTED":
-                        status = "accepted";
-                        break;
-                    case "DECLINED":
-                        status = "declined";
-                        break;
-                }
-
-                return {
-                    id: `${inv.userMetadataId}_${inv.organizationId}`,
-                    type: "organisation",
-                    sender,
-                    organisation,
-                    receiver,
-                    status,
-                    createdAt: inv.createdAt,
-                    resolvedAt: inv.resolvedAt || undefined,
-                };
-            };
-
             const pendingInvitations = await Promise.all(
                 invitations
                     .filter(
@@ -1121,6 +1071,54 @@ async function orgsInvitations(prisma: PrismaType, organizationId: string) {
         },
     });
 }
+
+const formatInvitation = async (
+    inv: Awaited<ReturnType<typeof orgsInvitations>>[number],
+): Promise<Invitation> => {
+    const sender: UserDisplay = {
+        id: inv.senderMetadata.user.id,
+        username: inv.senderMetadata.user.name!,
+        image: inv.senderMetadata.user.image || undefined,
+    };
+
+    const receiver: UserDisplay = {
+        id: inv.userMetadata.user.id,
+        username: inv.userMetadata.user.name!,
+        image: inv.userMetadata.user.image || undefined,
+    };
+
+    const organisation: OrganisationDisplay = {
+        id: inv.organization.id,
+        name: inv.organization.name,
+        image: inv.organization.image || undefined,
+        bio: inv.organization.bio || undefined,
+        memberCount: 0,
+    };
+
+    let status: InvitationStatus;
+    switch (inv.status) {
+        case "PENDING":
+            status = "pending";
+            break;
+        case "ACCEPTED":
+            status = "accepted";
+            break;
+        case "DECLINED":
+            status = "declined";
+            break;
+    }
+
+    return {
+        id: `${inv.userMetadataId}_${inv.organizationId}`,
+        type: "organisation",
+        sender,
+        organisation,
+        receiver,
+        status,
+        createdAt: inv.createdAt,
+        resolvedAt: inv.resolvedAt || undefined,
+    };
+};
 
 async function getOrgAsMember(
     prisma: PrismaType,

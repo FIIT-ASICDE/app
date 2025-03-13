@@ -1,7 +1,10 @@
+import { api } from "@/lib/trpc/react";
 import { Repository } from "@/lib/types/repository";
 import { CircleX } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useUser } from "@/components/context/user-context";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -21,15 +24,21 @@ interface DeleteRepositoryDialogProps {
 export const DeleteRepositoryDialog = ({
     repository,
 }: DeleteRepositoryDialogProps) => {
+    const router = useRouter();
+    const { user } = useUser();
+
     const [deleteRepositoryInput, setDeleteRepositoryInput] =
         useState<string>("");
 
     const deleteConfirmationPhrase: string =
         repository.ownerName + "/" + repository.name;
 
+    const deleteRepoMutation = api.repo.delete.useMutation();
+
     const handleDeleteRepository = () => {
-        /* TODO: handle repository deletion */
-        console.log("Delete repository with ID: " + repository.id);
+        deleteRepoMutation
+            .mutateAsync({ repoId: repository.id })
+            .then(() => router.replace("/" + user.username));
     };
 
     return (

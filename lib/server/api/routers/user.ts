@@ -486,7 +486,7 @@ function fulltextSearchUsers() {
             return users.map((user) => ({
                 id: user.id,
                 username: user.name ?? "",
-                image: user.image || "/avatars/default.png",
+                image: user.image || undefined,
             }));
         });
 }
@@ -1157,12 +1157,12 @@ async function getUserInvitations(
         sender: {
             id: inv.senderMetadata.user.id,
             username: inv.senderMetadata.user.name ?? "",
-            image: inv.senderMetadata.user.image ?? "/avatars/default.png",
+            image: inv.senderMetadata.user.image || undefined,
         },
         organisation: {
             id: inv.organization.id,
             name: inv.organization.name,
-            image: inv.organization.image ?? "/avatars/default.png",
+            image: inv.organization.image || undefined,
             bio: inv.organization.bio ?? undefined,
             memberCount: inv.organization._count.users,
         },
@@ -1176,7 +1176,7 @@ async function getUserInvitations(
         sender: {
             id: inv.senderMetadata.user.id,
             username: inv.senderMetadata.user.name ?? "",
-            image: inv.senderMetadata.user.image ?? "/avatars/default.png",
+            image: inv.senderMetadata.user.image || undefined,
         },
         repository: {
             id: inv.repo.id,
