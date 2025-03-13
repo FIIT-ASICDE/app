@@ -31,6 +31,10 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         !cell.isLink() &&
         Object.keys(complexLogicMap).includes(cell.attributes.elType)
     );
+    const encodeDecodeCells = cells.filter(cell =>
+        !cell.isLink() &&
+        ['decoder', 'encoder'].includes(cell.attributes.elType)
+    );
     const links = cells.filter(cell => cell.isLink());
 
     function getPortName(cell: dia.Cell): string {
@@ -54,30 +58,40 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
     let code = `// SystemVerilog code generated from diagram\n\n`;
     code += `module ${moduleName} (\n${portDeclarations.join(',\n')}\n);\n\n`;
 
-    const logicNames: { [key: string]: string } = {};
+    const elementNames: { [key: string]: string } = {};
     logicCells.forEach(cell => {
         const netName = getPortName(cell);
         const bw: number = cell.attributes.bandwidth;
-        logicNames[cell.id] = netName;
+        elementNames[cell.id] = netName;
         code += `logic${bw > 1 ? ` [${bw - 1}:0]` : ''} ${netName};\n`;
     });
     multiplexerCells.forEach(cell => {
         const netName = getPortName(cell);
         const bw: number = cell.attributes.bandwidth;
-        logicNames[cell.id] = netName;
+        elementNames[cell.id] = netName;
         code += `logic${bw > 1 ? ` [${bw - 1}:0]` : ''} ${netName};\n`;
     });
     complexLogicCells.forEach(cell => {
         const netName = getPortName(cell);
         const bw: number = cell.attributes.bandwidth;
-        logicNames[cell.id] = netName;
+        elementNames[cell.id] = netName;
         if (cell.attributes.elType === 'comparator') {
             code += `logic ${netName};\n`;
         }
         else {
             code += `logic [${bw}:0] ${netName};\n`;
         }
+    });
+    encodeDecodeCells.forEach(cell => {
+        const netName = getPortName(cell);
+        const bw: number = cell.attributes.bandwidth;
+        elementNames[cell.id] = netName;
 
+        if (cell.attributes.elType === 'decoder') {
+            code += `logic [${(1 << bw) - 1}:0] ${netName};\n`; // 2^bandwidth - количество выходов
+        } else if (cell.attributes.elType === 'encoder') {
+            code += `logic [${Math.ceil(Math.log2(bw)) - 1}:0] ${netName};\n`; // log2(bandwidth) бит на выходе
+        }
     });
     code += `\n`;
 
@@ -99,7 +113,7 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
 
     logicCells.forEach(cell => {
         const type = cell.attributes.elType;
-        const netName = logicNames[cell.id];
+        const netName = elementNames[cell.id];
         const cellPorts = cell.attributes.ports?.items || [];
         const inputPorts = cellPorts.filter(p => p.group === 'input');
 
@@ -131,7 +145,7 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
     });
     complexLogicCells.forEach(cell => {
         const type = cell.attributes.elType;
-        const netName = logicNames[cell.id];
+        const netName = elementNames[cell.id];
         const cellPorts = cell.attributes.ports?.items || [];
         const inputPorts = cellPorts.filter(p => p.group === 'input');
 
@@ -190,6 +204,58 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
             code += `        default: ${outputSignal} = {WIDTH{1'bx}};\n`;
             code += `    endcase\n`;
             code += `end\n\n`;
+        }
+    });
+    encodeDecodeCells.forEach(cell => {
+        const type = cell.attributes.elType;
+        const netName = elementNames[cell.id];
+        const cellPorts = cell.attributes.ports?.items || [];
+
+        // Входной порт (один для decoder, несколько для encoder)
+        const inputPorts = cellPorts.filter(p => p.group === 'input');
+        const inputKey = `${cell.id}:${inputPorts[0]?.id}`;
+        const inputSignal = connectionMap[inputKey] ? connectionMap[inputKey][0] : '/* unconnected */';
+
+        // Выходной порт
+        const outputPort = cellPorts.find(p => p.group === 'output');
+        const outputKey = `${cell.id}:${outputPort?.id}`;
+        const outputSignal = connectionMap[outputKey] ? connectionMap[outputKey][0] : netName;
+
+        if (type === 'decoder') {
+            const bw = cell.attributes.bandwidth;
+            const outputSize = 1 << bw;  // 2^bandwidth
+            const defaultValue = `'b${'0'.repeat(outputSize)}`;
+            code += `always_comb begin\n`;
+            code += `    case (${inputSignal})\n`;
+
+            for (let i = 0; i < outputSize; i++) {
+                code += `        ${bw}'b${i.toString(2).padStart(bw, '0')}: ${netName} = ${outputSize}'b${(1 << i).toString(2).padStart(outputSize, '0')};\n`;
+            }
+
+            code += `        default: ${netName} = ${outputSize}${defaultValue};\n`;
+            code += `    endcase\n`;
+            code += `end\n\n`;
+
+            code += `assign ${outputSignal} = ${netName};\n\n`;
+        }
+
+        if (type === 'encoder') {
+            const bw = cell.attributes.bandwidth;
+            const outBits = Math.ceil(Math.log2(bw));
+            const defaultValue = `'b${'0'.repeat(outBits)}`;
+
+            code += `always_comb begin\n`;
+            code += `    case (${inputSignal})\n`;
+
+            for (let i = 0; i < bw; i++) {
+                code += `        ${bw}'b${(1 << i).toString(2).padStart(bw, '0')}: ${netName} = ${outBits}'b${i.toString(2).padStart(outBits, '0')};\n`;
+            }
+
+            code += `        default: ${netName} = ${outBits}${defaultValue};\n`;
+            code += `    endcase\n`;
+            code += `end\n\n`;
+
+            code += `assign ${outputSignal} = ${netName};\n\n`;
         }
     });
 

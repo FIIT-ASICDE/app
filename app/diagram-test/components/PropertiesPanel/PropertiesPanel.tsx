@@ -37,6 +37,10 @@ import {JointJSSubtractor} from "../Shapes/complexLogic/JointJSSubtractor";
 import {Subtractor} from "../Shapes/classes/subtractor";
 import {JointJSComparator} from "../Shapes/complexLogic/JointJSComparator";
 import {Comparator} from "../Shapes/classes/comparator";
+import {JointJSDecoder} from "../Shapes/complexLogic/JointJSDecoder";
+import {Decoder} from "../Shapes/classes/decoder";
+import {JointJSEncoder} from "../Shapes/complexLogic/JointJSEncoder";
+import {Encoder} from "../Shapes/classes/encoder";
 import { MdErrorOutline } from "react-icons/md";
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { dia } from "@joint/core";
@@ -98,7 +102,7 @@ const PropertiesPanel = () => {
     useEffect(() => {
         if (selectedElement) {
             const props: Properties = {
-                label: selectedElement.attributes.attrs?.label?.text || '',
+                label: selectedElement.attributes.name || '',
                 bandwidth: selectedElement.attributes.bandwidth || 1,
                 inputPorts: selectedElement.attributes.inPorts || 0,
                 createdInPorts: selectedElement.attributes.moduleInPorts || selectedElement.attributes.combineInPorts || [],
@@ -145,34 +149,34 @@ const PropertiesPanel = () => {
         }
     }, [selectedElement]);
 
-
-    useEffect(() => {
-        if (!selectedElement) return;
-
-        const elType = selectedElement.attributes.elType;
-        const labelText = selectedElement.attributes.attrs?.label?.text || "";
-        const labelLines4 = labelText.split('\n\n\n\n');
-        const labelLines1 = labelText.split('\n');
-
-        if (['comparator', 'adder', 'subtractor'].includes(elType)) {
-            setProperties(prev => ({
-                ...prev,
-                label: labelLines4[1],
-                comparatorType: labelLines4[0],
-            }));
-        } else if (['decoder', 'encoder', 'ram', 'register'].includes(elType)) {
-            setProperties(prev => ({
-                ...prev,
-                label: labelLines1[1],
-            }));
-        }
-        else if (['newModule'].includes(elType)) {
-            setProperties(prev => ({
-                ...prev,
-                label: labelLines1[0],
-            }));
-        }
-    }, [selectedElement]);
+    //
+    // useEffect(() => {
+    //     if (!selectedElement) return;
+    //
+    //     const elType = selectedElement.attributes.elType;
+    //     const labelText = selectedElement.attributes.attrs?.label?.text || "";
+    //     const labelLines4 = labelText.split('\n\n\n\n');
+    //     const labelLines1 = labelText.split('\n');
+    //
+    //     if (['comparator', 'adder', 'subtractor'].includes(elType)) {
+    //         setProperties(prev => ({
+    //             ...prev,
+    //             label: labelLines4[1],
+    //             comparatorType: labelLines4[0],
+    //         }));
+    //     } else if (['decoder', 'encoder', 'ram', 'register'].includes(elType)) {
+    //         setProperties(prev => ({
+    //             ...prev,
+    //             label: labelLines1[1],
+    //         }));
+    //     }
+    //     else if (['newModule'].includes(elType)) {
+    //         setProperties(prev => ({
+    //             ...prev,
+    //             label: labelLines1[0],
+    //         }));
+    //     }
+    // }, [selectedElement]);
 
     function validateField(fieldName: string, fieldValue: any): string {
         // Проверяем строковые поля (label, instance, port name)
@@ -555,9 +559,6 @@ const PropertiesPanel = () => {
         };
 
         const elType = selectedElement.attributes.elType;
-
-
-
         const complexElement = complexLogicTypes[elType];
 
         if (complexElement) {
@@ -575,6 +576,30 @@ const PropertiesPanel = () => {
             const newComplexElement = complexElement.create(complexElementData);
             graph.addCell(newComplexElement);
             setSelectedElement(newComplexElement);
+        }
+    };
+    const handleEncodeDecodeChange = () => {
+        if (!selectedElement) return;
+
+        const encodeDecodeTypes = {
+            'decoder': { class: Decoder, create: JointJSDecoder },
+            'encoder': { class: Encoder, create: JointJSEncoder },
+        };
+
+        const elType = selectedElement.attributes.elType;
+        const encodeDecode = encodeDecodeTypes[elType];
+
+        if (encodeDecode) {
+            const { x, y } = selectedElement.position();
+            const encodeDecodeData = new encodeDecode.class();
+            encodeDecodeData.name = properties.label || '';
+            encodeDecodeData.dataBandwidth = properties.bandwidth || 1;
+            encodeDecodeData.position = { x, y };
+
+            graph.removeCells([selectedElement]);
+            const newEncodeDecodeElement = encodeDecode.create(encodeDecodeData);
+            graph.addCell(newEncodeDecodeElement);
+            setSelectedElement(newEncodeDecodeElement);
         }
     };
 
@@ -606,7 +631,12 @@ const PropertiesPanel = () => {
             return;
         }
         else if (selectedElement.attributes.elType === 'decoder') {
-            attrsToUpdate.label = { text: 'DECODER\n' + properties.label };
+            handleEncodeDecodeChange();
+            return;
+        }
+        else if (selectedElement.attributes.elType === 'encoder') {
+            handleEncodeDecodeChange();
+            return;
         }
         else if (selectedElement.attributes.elType === 'ram') {
             selectedElement.attributes.addressBandwidth = properties.addressBandwidth;
@@ -617,9 +647,7 @@ const PropertiesPanel = () => {
             handleMemoryPortChange();
             return;
         }
-        else if (selectedElement.attributes.elType === 'encoder') {
-            attrsToUpdate.label = { text: 'ENCODER\n' + properties.label };
-        }
+
         else if (selectedElement.attributes.elType === 'newModule') {
             handleModulePortChange();
             // attrsToUpdate.label = { text: properties.label + '\n' + properties.instance };
