@@ -14,7 +14,7 @@ export default async function UserSettingsPage({
     params,
     searchParams,
 }: UserSettingsPageProps) {
-    const userSlug = (await params).userslug;
+    const userSlug = decodeURIComponent((await params).userslug);
 
     const settingsSearchParams = await searchParams;
     const tab: UserSettingsTab = (settingsSearchParams?.tab ||
