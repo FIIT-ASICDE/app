@@ -8,9 +8,9 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { getDateString } from "@/components/generic/generic";
-import { NoData } from "@/components/no-data/no-data";
+import { NoData } from "@/components/generic/no-data";
 import { MemberCardDisplay } from "@/components/organisations/members/member-card-display";
-import { PinnedRepositoryCardDisplay } from "@/components/profile/pinned-repository-card-display";
+import { PinnedRepositoryCardDisplay } from "@/components/repositories/pinned-repository-card-display";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Tooltip,

@@ -14,11 +14,11 @@ import {
 } from "lucide-react";
 import { Suspense } from "react";
 
-import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
-import { NoData } from "@/components/no-data/no-data";
-import { FavoriteRepositoryCardDisplay } from "@/components/profile/favorite-repository-card-display";
-import { InvitationCardDisplay } from "@/components/profile/invitation-card-display";
-import { RecentRepositoryCardDisplay } from "@/components/profile/recent-repository-card-display";
+import { DynamicPagination } from "@/components/generic/dynamic-pagination";
+import { NoData } from "@/components/generic/no-data";
+import { FavoriteRepositoryCardDisplay } from "@/components/repositories/favorite-repository-card-display";
+import { InvitationCardDisplay } from "@/components/invitations/invitation-card-display";
+import { RecentRepositoryCardDisplay } from "@/components/repositories/recent-repository-card-display";
 import {
     Card,
     CardContent,

@@ -7,7 +7,7 @@ import { Loader2, UsersRound } from "lucide-react";
 import * as React from "react";
 import { useState } from "react";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
 import {
     Command,
     CommandGroup,

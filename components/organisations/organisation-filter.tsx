@@ -12,7 +12,7 @@ import {
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { TooltipDropdown } from "@/components/tooltip-dropdown/tooltip-dropdown";
+import { TooltipDropdown } from "@/components/generic/tooltip-dropdown";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

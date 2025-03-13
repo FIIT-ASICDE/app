@@ -1,6 +1,6 @@
 import { FileIcon } from "lucide-react";
 
-import { MarkdownRenderer } from "@/components/file/markdown-renderer";
+import { MarkdownRenderer } from "@/components/repositories/code/markdown-renderer";
 import { getTimeDeltaString } from "@/components/generic/generic";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

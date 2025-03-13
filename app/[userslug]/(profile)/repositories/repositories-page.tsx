@@ -9,9 +9,9 @@ import {
 import { cn } from "@/lib/utils";
 import { Folders } from "lucide-react";
 
-import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
-import { LayoutOptions } from "@/components/layout/layout-options";
-import { NoData } from "@/components/no-data/no-data";
+import { DynamicPagination } from "@/components/generic/dynamic-pagination";
+import { LayoutOptions } from "@/components/generic/layout-options";
+import { NoData } from "@/components/generic/no-data";
 import { CreateRepositoryDialog } from "@/components/repositories/create-repository-dialog";
 import { ImportRepositoryDialog } from "@/components/repositories/import-repository-dialog";
 import RepositoryCard from "@/components/repositories/repository-card";

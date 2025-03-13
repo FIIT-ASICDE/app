@@ -3,7 +3,7 @@ import { api } from "@/lib/trpc/server";
 import Link from "next/link";
 
 import { CommandBar } from "@/components/header/header-command";
-import { NavigationLoggedIn } from "@/components/header/navigation-logged-in";
+import { NavigationLoggedIn } from "@/components/header/navigation/navigation-logged-in";
 import LogoIcon from "@/components/icons/logo";
 
 export default async function Header() {

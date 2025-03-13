@@ -5,7 +5,7 @@ import { MailPlus, Search } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { Button } from "@/components/ui/button";
 import {
     CommandDialog,

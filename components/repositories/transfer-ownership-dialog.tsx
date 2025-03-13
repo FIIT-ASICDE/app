@@ -4,7 +4,7 @@ import { Repository } from "@/lib/types/repository";
 import { SquareArrowRight } from "lucide-react";
 import { useState } from "react";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { useUser } from "@/components/context/user-context";
 import { Button } from "@/components/ui/button";
 import {

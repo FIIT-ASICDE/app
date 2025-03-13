@@ -7,10 +7,10 @@ import { cn } from "@/lib/utils";
 import { Pin, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
+import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { getCardStripe } from "@/components/generic/generic";
-import { VisibilityBadge } from "@/components/repositories/visibility-badge";
+import { VisibilityBadge } from "@/components/repositories/visibility/visibility-badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
     Tooltip,

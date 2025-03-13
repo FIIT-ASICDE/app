@@ -4,11 +4,11 @@ import { RepositoryDisplay } from "@/lib/types/repository";
 import { UserDisplay } from "@/lib/types/user";
 import { cn } from "@/lib/utils";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
+import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { getCardStripe } from "@/components/generic/generic";
 import { Card, CardContent } from "@/components/ui/card";
-import { InviteUserDialog } from "@/components/users/invite-user-dialog";
+import { InviteUserDialog } from "@/components/invitations/invite-user-dialog";
 
 interface UserCardProps {
     user: UserDisplay;

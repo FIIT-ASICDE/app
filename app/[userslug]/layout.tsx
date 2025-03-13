@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { redirectIfNotOnboarded } from "@/lib/onboarding-guard";
 import React from "react";
 
-import ProtectedLayout from "@/components/protected-layout/protected-layout";
+import ProtectedLayout from "@/components/generic/protected-layout";
 
 export default async function UserLayout({
     children,

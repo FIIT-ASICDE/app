@@ -1,7 +1,7 @@
 import { GithubRepoDisplay } from "@/lib/types/repository";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
+import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { SelectItem } from "@/components/ui/select";
 
 interface SelectRepositoryItemProps {

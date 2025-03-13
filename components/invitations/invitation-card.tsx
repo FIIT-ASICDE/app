@@ -4,8 +4,8 @@ import { Invitation } from "@/lib/types/invitation";
 import { cn } from "@/lib/utils";
 import { CircleCheck, CircleDot, CircleX, Clock } from "lucide-react";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
+import { DynamicTitle } from "@/components/generic/dynamic-title";
 import {
     datePretty,
     getCardStripe,

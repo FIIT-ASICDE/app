@@ -7,10 +7,10 @@ import {
 import { cn } from "@/lib/utils";
 import { UsersRound } from "lucide-react";
 
-import { DynamicPagination } from "@/components/dynamic-pagination/dynamic-pagination";
-import { LayoutOptions } from "@/components/layout/layout-options";
-import { NoData } from "@/components/no-data/no-data";
-import { InviteMemberDialog } from "@/components/organisations/members/invite-member-dialog";
+import { DynamicPagination } from "@/components/generic/dynamic-pagination";
+import { LayoutOptions } from "@/components/generic/layout-options";
+import { NoData } from "@/components/generic/no-data";
+import { InviteMemberDialog } from "@/components/invitations/invite-member-dialog";
 import { MemberCard } from "@/components/organisations/members/member-card";
 import { OrganisationFilter } from "@/components/organisations/organisation-filter";
 import Search from "@/components/ui/search";

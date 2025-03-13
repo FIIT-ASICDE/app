@@ -15,8 +15,8 @@ import { signOut } from "next-auth/react";
 import Link from "next/link";
 import * as React from "react";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
+import { DynamicTitle } from "@/components/generic/dynamic-title";
 import {
     DropdownMenu,
     DropdownMenuContent,

@@ -1,8 +1,8 @@
 import { imgSrc } from "@/lib/client-file-utils";
 import { Repository } from "@/lib/types/repository";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
+import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { EditRepositoryDialog } from "@/components/repositories/edit-repository-dialog";
 import { RepositoryNavigation } from "@/components/repositories/repository-navigation";
 

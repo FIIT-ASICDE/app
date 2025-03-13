@@ -18,7 +18,7 @@ import { UseFormReturn, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { useUser } from "@/components/context/user-context";
 import { Button } from "@/components/ui/button";
 import {

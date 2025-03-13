@@ -9,7 +9,7 @@ import { Building, Folder, Loader2, Mail } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -33,7 +33,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { InviteUserDialogTabs } from "@/components/users/invite-user-dialog-tabs";
+import { InviteUserDialogTabs } from "@/components/invitations/invite-user-dialog-tabs";
 
 interface InviteUserDialogProps {
     selectedUser: UserDisplay;

@@ -1,23 +1,23 @@
 import { imgSrc } from "@/lib/client-file-utils";
 import { RepositoryDisplay } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
-import { Pin } from "lucide-react";
+import { Star } from "lucide-react";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
+import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { getCardStripe } from "@/components/generic/generic";
-import { VisibilityBadge } from "@/components/repositories/visibility-badge";
+import { VisibilityBadge } from "@/components/repositories/visibility/visibility-badge";
 import { Card, CardHeader } from "@/components/ui/card";
 
-interface PinnedRepositoryCardDisplayProps {
+interface FavoriteRepositoryCardDisplayProps {
     repository: RepositoryDisplay;
     className?: string;
 }
 
-export const PinnedRepositoryCardDisplay = ({
+export const FavoriteRepositoryCardDisplay = ({
     repository,
     className,
-}: PinnedRepositoryCardDisplayProps) => {
+}: FavoriteRepositoryCardDisplayProps) => {
     const repositoryDisplayName: string =
         repository.ownerName + "/" + repository.name;
     const repositoryLink: string = "/" + repositoryDisplayName;
@@ -26,12 +26,12 @@ export const PinnedRepositoryCardDisplay = ({
         <Card
             className={cn(
                 "max-w-full p-0 pl-1.5 shadow-lg",
-                getCardStripe("pinnedRepository"),
+                getCardStripe("favoriteRepository"),
                 className,
             )}
         >
-            <CardHeader className="p-3 pr-6">
-                <div className="flex justify-between gap-x-3">
+            <CardHeader className="p-3">
+                <div className="flex justify-between">
                     <div className="flex min-w-0 flex-row items-center gap-x-3">
                         <AvatarDisplay
                             displayType={"card"}
@@ -46,7 +46,7 @@ export const PinnedRepositoryCardDisplay = ({
                     </div>
                     <div className="flex flex-shrink-0 items-center justify-center gap-x-3">
                         <VisibilityBadge visibility={repository.visibility} />
-                        <Pin
+                        <Star
                             fill="currentColor"
                             className="h-5 w-5 text-foreground"
                         />

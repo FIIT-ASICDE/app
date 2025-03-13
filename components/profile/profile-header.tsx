@@ -1,8 +1,8 @@
 import { imgSrc } from "@/lib/client-file-utils";
 import { OnboardedUser } from "@/lib/types/user";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
+import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { EditProfileDialog } from "@/components/profile/edit-profile-dialog";
 import { ProfileNavigation } from "@/components/profile/profile-navigation";
 
