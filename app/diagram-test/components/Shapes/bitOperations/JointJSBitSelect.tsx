@@ -4,12 +4,13 @@ import { shapes } from "@joint/core";
 export const JointJSBitSelect = (bitSelect: BitSelect) => {
 
     const selectOutPorts = bitSelect.outPorts || [];
-    const inCount = selectOutPorts.length;
-    const dimension = 100 + (inCount - 2) * 20;
+    const outCount = selectOutPorts.length;
+    const dimension = 100 + (outCount - 2) * 20;
+    const totalBandwidth = selectOutPorts.reduce((sum, port) => sum + port.bandwidth, 0);
 
     const portItems = [];
-    for (let i = 0; i < inCount; i++) {
-        const portY = (dimension / (inCount + 1)) * (i+1);
+    for (let i = 0; i < outCount; i++) {
+        const portY = (dimension / (outCount + 1)) * (i+1);
         portItems.push({
             id: `output${i}`,
             bandwidth: selectOutPorts[i].bandwidth,
@@ -22,6 +23,7 @@ export const JointJSBitSelect = (bitSelect: BitSelect) => {
     portItems.push({
         id: 'input1',
         group: 'input',
+        bandwidth: totalBandwidth,
         args: {
             x: 0,
             y: dimension / 2
@@ -33,7 +35,7 @@ export const JointJSBitSelect = (bitSelect: BitSelect) => {
         elType: 'bitSelect',
         name: bitSelect.name,
         bandwidth: bitSelect.dataBandwidth,
-        inPorts: inCount,
+        outPorts: outCount,
         selectOutPorts: selectOutPorts,
         position: { x: bitSelect.position?.x || 100, y: bitSelect.position?.y || 100 },
         size: { width: dimension/2, height: dimension},

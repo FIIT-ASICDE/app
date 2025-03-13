@@ -35,6 +35,10 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         !cell.isLink() &&
         ['decoder', 'encoder'].includes(cell.attributes.elType)
     );
+    const bitManipulationCells = cells.filter(cell =>
+        !cell.isLink() &&
+        ['bitSelect', 'bitCombine'].includes(cell.attributes.elType)
+    );
     const links = cells.filter(cell => cell.isLink());
 
     function getPortName(cell: dia.Cell): string {
@@ -255,6 +259,51 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
             code += `    endcase\n`;
             code += `end\n\n`;
 
+            code += `assign ${outputSignal} = ${netName};\n\n`;
+        }
+    });
+    bitManipulationCells.forEach(cell => {
+        const type = cell.attributes.elType;
+        const netName = elementNames[cell.id];
+        const cellPorts = cell.attributes.ports?.items || [];
+
+        if (type === 'bitSelect') {
+            // Входной порт
+            const inputPort = cellPorts.find(p => p.group === 'input');
+            const inputKey = `${cell.id}:${inputPort?.id}`;
+            const inputSignal = connectionMap[inputKey] ? connectionMap[inputKey][0] : '/* unconnected */';
+
+            // Выходные порты с их диапазонами бит
+            let bitStart = 0;
+            code += `logic [${inputPort.bandwidth - 1}:0] ${netName};\n`;
+
+            cellPorts.filter(p => p.group === 'output').forEach(outputPort => {
+                const outputKey = `${cell.id}:${outputPort.id}`;
+                const outputSignal = connectionMap[outputKey] ? connectionMap[outputKey][0] : outputPort.name;
+                const bitEnd = bitStart + outputPort.bandwidth - 1;
+
+                code += `assign ${outputSignal} = ${netName}[${bitEnd}:${bitStart}];\n`;
+                bitStart += outputPort.bandwidth;
+            });
+
+            code += `\n`;
+        }
+
+        if (type === 'bitCombine') {
+            // Входные порты в обратном порядке
+            const inputPorts = cellPorts.filter(p => p.group === 'input').reverse();
+            const inputSignals = inputPorts.map(p => {
+                const key = `${cell.id}:${p.id}`;
+                return connectionMap[key] ? connectionMap[key][0] : '/* unconnected */';
+            });
+
+            // Выходной порт
+            const outputPort = cellPorts.find(p => p.group === 'output');
+            const outputKey = `${cell.id}:${outputPort?.id}`;
+            const outputSignal = connectionMap[outputKey] ? connectionMap[outputKey][0] : netName;
+
+            code += `logic [${outputPort.bandwidth - 1}:0] ${netName};\n`;
+            code += `assign ${netName} = {${inputSignals.join(', ')}};\n`;
             code += `assign ${outputSignal} = ${netName};\n\n`;
         }
     });

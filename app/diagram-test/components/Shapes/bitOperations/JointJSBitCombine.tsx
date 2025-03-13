@@ -5,8 +5,9 @@ export const JointJSBitCombine = (bitCombine: BitCombine) => {
 
     const combineInPorts = bitCombine.inPorts || [];
     const inCount = combineInPorts.length;
-
     const dimension = 100 + (inCount - 2) * 20;
+    const totalBandwidth = combineInPorts.reduce((sum, port) => sum + port.bandwidth, 0);
+
 
     const portItems = [];
     for (let i = 0; i < inCount; i++) {
@@ -23,6 +24,7 @@ export const JointJSBitCombine = (bitCombine: BitCombine) => {
     portItems.push({
         id: 'output1',
         group: 'output',
+        bandwidth: totalBandwidth,
         args: {
             x: dimension/2,
             y: dimension / 2
