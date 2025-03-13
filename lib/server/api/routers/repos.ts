@@ -495,6 +495,7 @@ function fetchUserRepos() {
             const repos = await prisma.repoUserOrganization.findMany({
                 where: {
                     userMetadataId,
+                    organizationId: null,
                     repo: {
                         name: {
                             contains: decodedQuery ?? "",
