@@ -47,7 +47,7 @@ export function OnboardingForm() {
         const onboarded = await completeOnboardingMutation.mutateAsync(data);
         router.replace("/" + onboarded.username);
         router.refresh();
-    };
+    }
 
     return (
         <fieldset disabled={completeOnboardingMutation.isPending}>

@@ -44,7 +44,7 @@ export const ChangeVisibilityDialog = ({
 
     const changeVisibilityMutation = api.repo.changeVisibility.useMutation();
     const handleChangeVisibility = () => {
-        const setTo = repository.visibility === "public" ? false : true;
+        const setTo: boolean = repository.visibility !== "public";
         changeVisibilityMutation
             .mutateAsync({ repoId: repository.id, public: setTo })
             .then(router.refresh);
