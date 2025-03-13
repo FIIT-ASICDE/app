@@ -1,4 +1,5 @@
 import { SlidersHorizontal, LayoutGrid, Rows3 } from "lucide-react";
+import GithubIcon from "@/components/icons/github";
 import { Button } from "@/components/ui/button";
 import { ElementType } from "react";
 import { Search as SearchIcon } from "lucide-react";
@@ -8,9 +9,10 @@ interface RepoOrgSubmenuProps {
     searchText: string;
     createText: string;
     icon: ElementType;
+    importFromGithub: boolean;
 }
 
-export const RepoOrgSubmenuSkeleton = ({searchText, createText, icon: Icon}: RepoOrgSubmenuProps) => {
+export const RepoOrgSubmenuSkeleton = ({searchText, createText, icon: Icon, importFromGithub}: RepoOrgSubmenuProps) => {
     
     return (
         <div className="flex items-center justify-between">
@@ -23,30 +25,53 @@ export const RepoOrgSubmenuSkeleton = ({searchText, createText, icon: Icon}: Rep
                         className="pl-9"
                     />
                 </div>
-                <div className="flex items-center space-x-1">
-                    <div className="rounded bg-transparent p-2">
-                        <LayoutGrid />
-                    </div>
-                    <div className="rounded bg-transparent p-2">
-                        <Rows3 />
+                <div className="hidden lg:flex">
+                    <div className="flex items-center space-x-1">
+                        <div className="rounded bg-transparent p-2">
+                            <LayoutGrid />
+                        </div>
+                        <div className="rounded bg-transparent p-2">
+                            <Rows3 />
+                        </div>
                     </div>
                 </div>
             </div>
             <div className="m-6 mb-0 flex flex-row space-x-3">
                 <div className="mb-0 flex flex-row space-x-3">
                     <div className="hidden h-8 flex-row justify-center gap-x-2 md:flex">
-                        <div className="rounded bg-transparent p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                        <div className="rounded bg-transparent p-2 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                             <SlidersHorizontal />
                         </div>
                     </div>
                 </div>
-                <Button
-                    variant="default"
-                    className="hover:bg-primary-button-hover"
-                >
-                    <Icon />
-                    {createText}
-                </Button>
+                {importFromGithub === true ? (
+                    <div className="flex flex-row gap-x-3">
+                        <Button variant="outline">
+                            <GithubIcon className="h-4 w-4 sm:mr-2" />
+                            <span className="hidden sm:inline">
+                                Import repository
+                            </span>
+                        </Button>
+                        <Button
+                            variant="default"
+                            className="hover:bg-primary-button-hover"
+                        >
+                            <Icon className="h-4 w-4 sm:mr-2"/>
+                            <span className="hidden sm:inline">
+                                {createText}
+                            </span>
+                        </Button>
+                    </div> 
+                ) : (
+                    <Button
+                        variant="default"
+                        className="hover:bg-primary-button-hover"
+                    >
+                        <Icon/>
+                        {createText}
+                    </Button>
+                    
+                )}
             </div>
         </div>
     );
