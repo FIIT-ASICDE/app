@@ -3,7 +3,7 @@ import { TRPCReactProvider } from "@/lib/trpc/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import React, { Suspense } from "react";
 
-import DevControls from "@/components/dev-controls/dev-controls";
+import DevControls from "@/components/dev/dev-controls";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 

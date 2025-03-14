@@ -3,8 +3,8 @@
 import type { RepositoryItem } from "@/lib/types/repository";
 import { FileX } from "lucide-react";
 
-import { FileTreeItem } from "@/components/editor/file-tree-item";
-import { NoData } from "@/components/no-data/no-data";
+import { FileTreeItem } from "@/components/editor/file/file-tree-item";
+import { NoData } from "@/components/generic/no-data";
 
 interface FileTreeProps {
     tree: Array<RepositoryItem>;

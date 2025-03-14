@@ -3,9 +3,9 @@
 import { imgSrc } from "@/lib/client-file-utils";
 import { UserDisplay } from "@/lib/types/user";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
-import { BlockContributorDialog } from "@/components/repositories/block-contributor-dialog";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
+import { DynamicTitle } from "@/components/generic/dynamic-title";
+import { BlockContributorDialog } from "@/components/repositories/contributors/block-contributor-dialog";
 
 interface ContributorCardProps {
     contributor: UserDisplay;

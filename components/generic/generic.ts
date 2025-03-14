@@ -127,14 +127,14 @@ export const parseFilterValue = (
     return parseBoolean(value) === undefined
         ? "all"
         : parseBoolean(value)
-          ? filterType === "role"
-              ? "admin"
-              : filterType
-          : filterType === "public"
-            ? "private"
-            : filterType === "role"
-              ? "member"
-              : "not" + filterType;
+            ? filterType === "role"
+                ? "admin"
+                : filterType
+            : filterType === "public"
+                ? "private"
+                : filterType === "role"
+                    ? "member"
+                    : "not" + filterType;
 };
 
 export const datePretty = (date: Date | undefined) => {
@@ -175,12 +175,15 @@ export const languageColors: Record<string, string> = {
     flow9: "#EA580C",
     fsharp: "#4F46E5",
     freemarker2: "#F97316",
+    g4: "#EF4444",
     go: "#06B6D4",
     graphql: "#DB2777",
+    gz: "#C084FC",
     handlebars: "#C2410C",
     hcl: "#7E22CE",
     html: "#F97316",
     ini: "#4B5563",
+    interp: "#EAB308",
     java: "#DC2626",
     javascript: "#FACC15",
     json: "#CA8A04",
@@ -203,9 +206,11 @@ export const languageColors: Record<string, string> = {
     pgsql: "#1E3A8A",
     php: "#6366F1",
     pla: "#22C55E",
+    png: "#B91C1C",
     postiats: "#EAB308",
     powerquery: "#CA8A04",
     powershell: "#1E40AF",
+    properties: "#EA580C",
     proto: "#9A3412",
     pug: "#D97706",
     python: "#3B82F6",
@@ -229,7 +234,9 @@ export const languageColors: Record<string, string> = {
     swift: "#F97316",
     systemverilog: "#15803D",
     tcl: "#93C5FD",
+    tokens: "#4F4F4F",
     twig: "#22C55E",
+    txt: "#2F2F2F",
     typescript: "#1E40AF",
     typespec: "#2563EB",
     vb: "#1E3A8A",
@@ -237,130 +244,7 @@ export const languageColors: Record<string, string> = {
     wgsl: "#A855F7",
     xml: "#EA580C",
     yaml: "#FCA5A5",
+    yml: "#FCA5A5",
+    other: "#F0F0F0",
+    default: "#8884d8",
 };
-
-export const MARKDOWN_CONTENT_EXAMPLE: string = `
-# 🚀 Complete Markdown Demo
-
-## Text Formatting
-
-This is a paragraph with **bold text**, *italic text*, and ***bold italic text***. You can also use __underscores__ for _italics_ and **_bold italics_**.
-
-You can also add \`inline code\` like this.
-
-## Links and Images
-
-[Visit Next.js](https://nextjs.org) - External link example
-
-## Lists
-
-### Unordered List
-- First item
-- Second item
-  - Nested item 1
-  - Nested item 2
-- Third item
-
-### Ordered List
-1. First step
-2. Second step
-   1. Nested step 1
-   2. Nested step 2
-3. Third step
-
-## Blockquotes
-
-> This is a blockquote. You can use it to emphasize some text or show quotes.
-> 
-> It can span multiple paragraphs if you add a > on the empty line
->
-> - You can also use other markdown elements inside blockquotes
-> - Like lists
-> - And **bold** text
-
-## Code Blocks
-
-Here's some inline code: \`const greeting = "Hello, World!"\`
-
-And here's a code block with syntax highlighting:
-
-\`\`\`typescript
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
-
-const getUser = async (id: string): Promise<User> => {
-  try {
-    const response = await fetch(\`/api/users/\${id}\`);
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching user:', error);
-    throw error;
-  }
-};
-\`\`\`
-
-Here's some CSS:
-
-\`\`\`css
-.container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-}
-\`\`\`
-
-## Tables (GitHub Flavored Markdown)
-
-| Feature | Description | Status |
-|---------|-------------|--------|
-| Tables | GFM tables support | ✅ |
-| Lists | Ordered and unordered lists | ✅ |
-| Code Blocks | Syntax highlighting | ✅ |
-| Blockquotes | Quote formatting | ✅ |
-
-## Task Lists (GitHub Flavored Markdown)
-
-- [x] Implement markdown renderer
-- [x] Add syntax highlighting
-- [x] Support GitHub Flavored Markdown
-- [ ] Add more features
-
-## Line Breaks and Horizontal Rules
-
-This is a paragraph with a line break.  
-This is the next line (using two spaces at the end of the previous line).
-
----
-
-## Special Characters & Escaping
-
-You can use special characters by escaping them: \* \` \# \[ \]
-
-## Mathematical Expressions (if supported)
-
-Here's an example of inline math: \`$E = mc^2$\`
-
-And block math:
-
-\`\`\`math
-\\sum_{n=1}^\\infty \\frac{1}{n^2} = \\frac{\\pi^2}{6}
-\`\`\`
-
-## Emoji Support 
-
-- 👋 Hello
-- 🎉 Celebration
-- 💻 Coding
-- 🚀 Launch
-- ✨ Sparkles
-
----
-
-> 💡 **Pro Tip:** This markdown example showcases all the features supported by our MarkdownRenderer component.
-`;

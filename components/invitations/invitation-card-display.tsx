@@ -9,14 +9,14 @@ import { Calendar, CircleCheck, CircleX } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
+import { DynamicTitle } from "@/components/generic/dynamic-title";
 import {
     getCardStripe,
     getInvitationDisplayData,
     getTimeDeltaString,
 } from "@/components/generic/generic";
-import { InvitationBadge } from "@/components/profile/invitation-badge";
+import { InvitationBadge } from "@/components/invitations/invitation-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 

@@ -17,7 +17,7 @@ import {
 } from "recharts";
 
 import { languageColors } from "@/components/generic/generic";
-import { NoData } from "@/components/no-data/no-data";
+import { NoData } from "@/components/generic/no-data";
 import { Label } from "@/components/ui/label";
 
 interface LanguageStatisticsChartProps {
@@ -83,6 +83,10 @@ export default function LanguageStatisticsChart({
         );
     }) as unknown as (props: object) => ReactElement;
 
+    languageStatistics.percentages.forEach((item) => {
+        console.log(item.language);
+    });
+
     return (
         <div className="relative mx-auto w-full rounded-lg">
             <div className="relative h-[170px]">
@@ -104,8 +108,7 @@ export default function LanguageStatisticsChart({
                                 <Cell
                                     key={`cell-${index}`}
                                     fill={
-                                        languageColors[item.language] ||
-                                        "#8884d8"
+                                        languageColors[item.language] || languageColors["default"]
                                     }
                                 />
                             ))}
@@ -127,7 +130,7 @@ export default function LanguageStatisticsChart({
                                 className="h-3 w-3 rounded-full"
                                 style={{
                                     backgroundColor:
-                                        languageColors[item.language],
+                                        languageColors[item.language] || languageColors["default"],
                                 }}
                             />
                             {item.language}

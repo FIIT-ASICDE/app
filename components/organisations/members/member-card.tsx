@@ -2,8 +2,8 @@ import { imgSrc } from "@/lib/client-file-utils";
 import { OrganisationMember } from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
+import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { getCardStripe } from "@/components/generic/generic";
 import { ManageMemberDialog } from "@/components/organisations/members/manage-member-dialog";
 import { RoleBadge } from "@/components/organisations/members/role-badge";

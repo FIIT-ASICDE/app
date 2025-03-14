@@ -21,13 +21,13 @@ import {
 import { useState } from "react";
 
 import { useUser } from "@/components/context/user-context";
-import { NoData } from "@/components/no-data/no-data";
-import { InvitationsTabs } from "@/components/organisations/invitations-tabs";
-import { InvitationCard } from "@/components/profile/invitation-card";
-import { ChangeVisibilityDialog } from "@/components/repositories/change-visibility-dialog";
-import { ContributorCard } from "@/components/repositories/contributor-card";
+import { NoData } from "@/components/generic/no-data";
+import { InvitationsTabs } from "@/components/invitations/invitations-tabs";
+import { InvitationCard } from "@/components/invitations/invitation-card";
+import { ChangeVisibilityDialog } from "@/components/repositories/visibility/change-visibility-dialog";
+import { ContributorCard } from "@/components/repositories/contributors/contributor-card";
 import { DeleteRepositoryDialog } from "@/components/repositories/delete-repository-dialog";
-import { InviteContributorDialog } from "@/components/repositories/invite-contributor-dialog";
+import { InviteContributorDialog } from "@/components/invitations/invite-contributor-dialog";
 import { RepositorySettingsTabs } from "@/components/repositories/repository-settings-tabs";
 import { TransferOwnershipDialog } from "@/components/repositories/transfer-ownership-dialog";
 import {

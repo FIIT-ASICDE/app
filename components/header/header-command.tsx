@@ -4,7 +4,7 @@ import { OnboardedUser } from "@/lib/types/user";
 import { Search } from "lucide-react";
 import { useState } from "react";
 
-import { CommandBarDialog } from "@/components/command-bar-dialog/command-bar-dialog";
+import { CommandBarDialog } from "@/components/command/command-bar-dialog";
 import { Button } from "@/components/ui/button";
 
 interface CommandBarProps {

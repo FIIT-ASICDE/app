@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils";
 import { Calendar, Code } from "lucide-react";
 import Link from "next/link";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
+import { DynamicTitle } from "@/components/generic/dynamic-title";
 import {
     getCardStripe,
     getTimeDeltaString,

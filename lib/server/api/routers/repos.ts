@@ -119,7 +119,7 @@ function create() {
                 ownerName,
                 name,
             );
-            return await prisma.$transaction(async (tx) => {
+            return prisma.$transaction(async (tx) => {
                 const repo = await tx.repo.create({
                     data: {
                         name,
@@ -242,7 +242,7 @@ function repositoryOverview() {
             if (!repo) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Repo not found",
+                    message: "Repository not found",
                 });
             }
 
@@ -371,7 +371,7 @@ function reposByOwnerSlug() {
             if (!repos) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Repo not found",
+                    message: "Repository not found",
                 });
             }
 
@@ -464,7 +464,7 @@ function fetchUserRepos() {
             if (!owner || !owner.metadata) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Owner not found.",
+                    message: "Owner not found",
                 });
             }
 
@@ -582,7 +582,7 @@ function fetchOrgRepos() {
             if (!organization) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Organization not found.",
+                    message: "Organisation not found",
                 });
             }
 
@@ -594,7 +594,7 @@ function fetchOrgRepos() {
             if (!user) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "User not found.",
+                    message: "User not found",
                 });
             }
 
@@ -702,7 +702,7 @@ function fetchUserFavoriteRepos() {
             if (!userMetadata) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "User not found.",
+                    message: "User not found",
                 });
             }
 
@@ -781,7 +781,7 @@ function repoSettings() {
             if (!repo) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Repo not found",
+                    message: "Repository not found",
                 });
             }
 
@@ -875,7 +875,7 @@ function changeVisibility() {
             ) {
                 throw new TRPCError({
                     code: "FORBIDDEN",
-                    message: "You aren't admin of this repo",
+                    message: "You are not an admin of this repository",
                 });
             }
 
@@ -915,7 +915,7 @@ function deleteRepo() {
                 throw new TRPCError({
                     code: "FORBIDDEN",
                     message:
-                        "You don't have permission to delete this repository",
+                        "You do not have permission to delete this repository",
                 });
             }
 
@@ -924,7 +924,7 @@ function deleteRepo() {
                 userRepoRelation.repoId,
             );
 
-            return await ctx.prisma.$transaction(async (tx) => {
+            return ctx.prisma.$transaction(async (tx) => {
                 // delete all repository invitations
                 await tx.repoUserInvitation.deleteMany({
                     where: { repoId: input.repoId },
@@ -983,7 +983,7 @@ function transfer() {
                 throw new TRPCError({
                     code: "FORBIDDEN",
                     message:
-                        "You don't have permission to transfer this repository",
+                        "You do not have permission to transfer ownership of this repository",
                 });
             }
 
@@ -1402,7 +1402,7 @@ async function toggleRepoState(
         // user can't pin repo of an organization
         throw new TRPCError({
             code: "FORBIDDEN",
-            message: "Can't pin orgs repo",
+            message: "Cannot pin a repository of an organisation",
         });
     }
 
@@ -1449,7 +1449,7 @@ async function ownerBySlug(
     if (!user) {
         throw new TRPCError({
             code: "NOT_FOUND",
-            message: "Repo not found",
+            message: "Repository not found",
         });
     }
 

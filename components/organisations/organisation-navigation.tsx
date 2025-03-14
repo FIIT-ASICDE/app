@@ -5,7 +5,7 @@ import { BookUser, Folders, Settings, UsersRound } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { getCurrentPage } from "@/components/generic/generic";
-import { NavigationButton } from "@/components/navigation-button/navigation-button";
+import { NavigationButton } from "@/components/generic/navigation-button";
 
 interface OrganisationNavigationProps {
     organisation: OrganisationDisplay;

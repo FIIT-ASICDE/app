@@ -20,13 +20,13 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { NoData } from "@/components/no-data/no-data";
+import { NoData } from "@/components/generic/no-data";
 import { DeleteOrganisationDialog } from "@/components/organisations/delete-organisation-dialog";
-import { InvitationsTabs } from "@/components/organisations/invitations-tabs";
+import { InvitationsTabs } from "@/components/invitations/invitations-tabs";
 import { LeaveOrganisationDialog } from "@/components/organisations/leave-organisation-dialog";
 import { ToggleMembersVisibilityDialog } from "@/components/organisations/members/toggle-members-visibility-dialog";
 import { OrganisationSettingsTabs } from "@/components/organisations/organisation-settings-tabs";
-import { InvitationCard } from "@/components/profile/invitation-card";
+import { InvitationCard } from "@/components/invitations/invitation-card";
 import {
     Card,
     CardContent,

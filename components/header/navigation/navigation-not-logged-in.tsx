@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 export const NavigationNotLoggedIn = () => {
     return (
         <nav className="absolute right-0 mr-2 flex flex-row items-center gap-2">
-            <Link href={"/"}>
+            <Link href={"/public"}>
                 <Button
                     variant="default"
                     className="bg-header-button px-6 text-base font-normal hover:bg-header-button-hover"

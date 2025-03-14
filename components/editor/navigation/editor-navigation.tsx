@@ -7,10 +7,10 @@ import Link from "next/link";
 import { Dispatch, RefObject, SetStateAction, useState } from "react";
 import { ImperativePanelGroupHandle } from "react-resizable-panels";
 
-import { CommandBarDialog } from "@/components/command-bar-dialog/command-bar-dialog";
+import { CommandBarDialog } from "@/components/command/command-bar-dialog";
 import { useUser } from "@/components/context/user-context";
-import { NavigationButton } from "@/components/editor/navigation-button";
-import { SidebarNavigationButton } from "@/components/editor/sidebar-navigation-button";
+import { NavigationButton } from "@/components/editor/navigation/navigation-button";
+import { SidebarNavigationButton } from "@/components/editor/navigation/sidebar-navigation-button";
 import { HeaderDropdown } from "@/components/header/header-dropdown";
 import GithubIcon from "@/components/icons/github";
 import LogoIcon from "@/components/icons/logo";
@@ -113,7 +113,7 @@ export const EditorNavigation = ({
         <>
             <div className="flex h-full w-14 flex-col rounded-none border-r bg-header">
                 <div className="flex flex-col items-center gap-2 p-2">
-                    <Link href={"/"}>
+                    <Link href={"/public"}>
                         <NavigationButton icon={LogoIcon} tooltip="Home" />
                     </Link>
                     <NavigationButton

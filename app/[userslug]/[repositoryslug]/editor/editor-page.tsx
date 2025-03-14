@@ -9,7 +9,7 @@ import dynamic from "next/dynamic";
 import { type ElementRef, useRef, useState } from "react";
 
 import { BottomPanelTabContent } from "@/components/editor/bottom-panel-tab-content";
-import { EditorNavigation } from "@/components/editor/editor-navigation";
+import { EditorNavigation } from "@/components/editor/navigation/editor-navigation";
 import { SidebarTabContent } from "@/components/editor/sidebar-tab-content";
 import {
     ResizableHandle,

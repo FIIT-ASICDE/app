@@ -4,9 +4,9 @@ import type { Repository } from "@/lib/types/repository";
 import { FileX, SearchIcon } from "lucide-react";
 import { useState } from "react";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { FileTree } from "@/components/editor/file-tree";
-import { NoData } from "@/components/no-data/no-data";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
+import { FileTree } from "@/components/editor/file/file-tree";
+import { NoData } from "@/components/generic/no-data";
 import { Input } from "@/components/ui/input";
 
 interface SidebarTabContentProps {

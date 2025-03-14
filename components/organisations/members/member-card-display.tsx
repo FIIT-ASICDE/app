@@ -1,9 +1,9 @@
 import { imgSrc } from "@/lib/client-file-utils";
 import { OrganisationMember } from "@/lib/types/organisation";
 
-import { AvatarDisplay } from "@/components/avatar-display/avatar-display";
-import { DynamicTitle } from "@/components/dynamic-title-link/dynamic-title";
-import { RoleIcon } from "@/components/organisations/role-icon";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
+import { DynamicTitle } from "@/components/generic/dynamic-title";
+import { RoleIcon } from "@/components/organisations/members/role-icon";
 import {
     Tooltip,
     TooltipContent,

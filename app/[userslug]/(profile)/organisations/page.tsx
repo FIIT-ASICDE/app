@@ -3,11 +3,9 @@ import { auth } from "@/auth";
 import { api } from "@/lib/trpc/server";
 import { RoleOrganisationFilter } from "@/lib/types/organisation";
 
-import { $Enums } from ".prisma/client";
+import { OrganizationRole } from ".prisma/client";
 
 import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
-
-import OrganizationRole = $Enums.OrganizationRole;
 
 interface UserOrganisationsPageProps {
     params: Promise<{

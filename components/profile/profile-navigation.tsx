@@ -5,7 +5,7 @@ import { BookUser, Building, Folders, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { getCurrentPage } from "@/components/generic/generic";
-import { NavigationButton } from "@/components/navigation-button/navigation-button";
+import { NavigationButton } from "@/components/generic/navigation-button";
 
 interface ProfileNavigationProps {
     profile: User;

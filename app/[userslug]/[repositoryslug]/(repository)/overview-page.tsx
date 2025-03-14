@@ -1,10 +1,10 @@
 import { RepositoryOverview } from "@/lib/types/repository";
 import { Calendar, FileX2 } from "lucide-react";
 
-import { MarkdownRenderer } from "@/components/file/markdown-renderer";
+import { MarkdownRenderer } from "@/components/repositories/code/markdown-renderer";
 import { getDateString } from "@/components/generic/generic";
-import { NoData } from "@/components/no-data/no-data";
-import LanguageStatisticsChart from "@/components/repositories/language-statistics";
+import { NoData } from "@/components/generic/no-data";
+import LanguageStatisticsChart from "@/components/repositories/code/language-statistics";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface OverviewPageProps {

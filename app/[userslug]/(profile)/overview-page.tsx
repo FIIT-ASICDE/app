@@ -4,9 +4,9 @@ import { Building, Calendar, Ellipsis, PinOff } from "lucide-react";
 import Link from "next/link";
 
 import { getDateString } from "@/components/generic/generic";
-import { NoData } from "@/components/no-data/no-data";
-import { OrganisationCardDisplay } from "@/components/profile/organisation-card-display";
-import { PinnedRepositoryCardDisplay } from "@/components/profile/pinned-repository-card-display";
+import { NoData } from "@/components/generic/no-data";
+import { OrganisationCardDisplay } from "@/components/organisations/organisation-card-display";
+import { PinnedRepositoryCardDisplay } from "@/components/repositories/pinned-repository-card-display";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Tooltip,
