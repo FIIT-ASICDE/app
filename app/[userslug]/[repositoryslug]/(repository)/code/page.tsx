@@ -1,6 +1,6 @@
-import CodePage from "@/app/[userslug]/[repositoryslug]/(repository)/code/code-page";
 import { api } from "@/lib/trpc/server";
 import { Repository } from "@/lib/types/repository";
+import CodePage from "@/app/[userslug]/[repositoryslug]/(repository)/code/code-page";
 
 interface RepositoryCodePageProps {
     params: Promise<{
