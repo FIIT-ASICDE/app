@@ -21,7 +21,7 @@ export const UserCardSkeleton = ({
                     <Skeleton className={cn("h-4 w-32", titleClassName)} />
                 </div>
                 <div className="flex flex-shrink-0 flex-row space-x-3">
-                    <Skeleton>
+                    <Skeleton className="bg-transparent">
                         <button disabled className="rounded p-1.5 align-middle cursor-not-allowed">
                             <Mail className="h-5 w-5 text-muted-foreground" />
                         </button>
