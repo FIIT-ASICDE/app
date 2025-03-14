@@ -1,0 +1,42 @@
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { TableRowSkeleton } from "@/components/skeletons/table-row-skeleton";
+
+export const FileExplorerSkeleton = () => {
+    return (
+        <Table className="w-full">
+            <TableHeader>
+                <TableRow className="text-muted-foreground">
+                    <TableHead>Name</TableHead>
+                    <TableHead className="text-right">Last activity</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                <TableRowSkeleton
+                    type="directory"
+                    fileNameClassName="w-32"
+                    lastActivityClassName="w-16"
+                />
+                <TableRowSkeleton
+                    type="directory"
+                    fileNameClassName="w-44"
+                    lastActivityClassName="w-20"
+                />
+                <TableRowSkeleton
+                    type="file"
+                    fileNameClassName="w-48"
+                    lastActivityClassName="w-12"
+                />
+                <TableRowSkeleton
+                    type="file"
+                    fileNameClassName="w-24"
+                    lastActivityClassName="w-24"
+                />
+                <TableRowSkeleton
+                    type="file"
+                    fileNameClassName="w-36"
+                    lastActivityClassName="w-20"
+                />
+            </TableBody>
+        </Table>
+    );
+};

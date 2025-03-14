@@ -1,24 +1,13 @@
-import { Calendar } from "lucide-react";
-
 import { CardSkeleton } from "@/components/skeletons/card-skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DescriptionSkeleton } from "@/components/skeletons/description-skeleton";
 
 export default function Loading() {
     return (
         <div className="m-6 flex flex-col gap-x-3 md:flex-row">
             <aside className="flex w-full flex-col gap-y-3 md:w-1/3">
-                <Skeleton>
-                    <Card>
-                        <CardContent className="pt-6">
-                            <div className="flex flex-col items-start">
-                                <div className="flex items-center text-muted-foreground">
-                                    <Calendar className="mr-2 h-5 w-5" />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </Skeleton>
+                <DescriptionSkeleton />
             </aside>
 
             <Skeleton className="mt-3 flex h-8 w-full flex-col gap-y-3 md:mt-0 md:w-2/3">

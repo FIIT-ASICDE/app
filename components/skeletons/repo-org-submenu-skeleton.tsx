@@ -12,8 +12,12 @@ interface RepoOrgSubmenuProps {
     importFromGithub: boolean;
 }
 
-export const RepoOrgSubmenuSkeleton = ({searchText, createText, icon: Icon, importFromGithub}: RepoOrgSubmenuProps) => {
-    
+export const RepoOrgSubmenuSkeleton = ({
+    searchText,
+    createText,
+    icon: Icon,
+    importFromGithub
+}: RepoOrgSubmenuProps) => {
     return (
         <div className="flex items-center justify-between">
             <div className="m-6 mb-0 flex w-1/2 items-center space-x-5">
@@ -44,7 +48,7 @@ export const RepoOrgSubmenuSkeleton = ({searchText, createText, icon: Icon, impo
                         </div>
                     </div>
                 </div>
-                {importFromGithub === true ? (
+                {importFromGithub ? (
                     <div className="flex flex-row gap-x-3">
                         <Button variant="outline">
                             <GithubIcon className="h-4 w-4 sm:mr-2" />
