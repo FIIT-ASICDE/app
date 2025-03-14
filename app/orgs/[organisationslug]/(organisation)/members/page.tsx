@@ -2,11 +2,9 @@ import MembersPage from "@/app/orgs/[organisationslug]/(organisation)/members/me
 import { api } from "@/lib/trpc/server";
 import { RoleOrganisationFilter } from "@/lib/types/organisation";
 
-import { $Enums } from ".prisma/client";
+import { OrganizationRole } from ".prisma/client";
 
 import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
-
-import OrganizationRole = $Enums.OrganizationRole;
 
 interface OrganisationMembersPageProps {
     params: Promise<{

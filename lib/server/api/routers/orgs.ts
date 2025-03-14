@@ -72,7 +72,7 @@ function getMembers() {
             if (!organization) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Organization not found",
+                    message: "Organisation not found",
                 });
             }
 
@@ -166,7 +166,7 @@ function createOrg() {
             if (existingOrg) {
                 throw new TRPCError({
                     code: "CONFLICT",
-                    message: "An organization with this name already exists",
+                    message: "An organisation with this name already exists",
                 });
             }
 
@@ -220,7 +220,7 @@ function createOrg() {
                 if (!orgUsers) {
                     throw new TRPCError({
                         code: "INTERNAL_SERVER_ERROR",
-                        message: "Failed to create organization",
+                        message: "Failed to create organisation",
                     });
                 }
 
@@ -263,11 +263,11 @@ function editOrg() {
             if (userRole !== $Enums.OrganizationRole.ADMIN) {
                 throw new TRPCError({
                     code: "FORBIDDEN",
-                    message: "You are not an admin of this organization",
+                    message: "You are not an admin of this organisation",
                 });
             }
 
-            return await ctx.prisma.organization.update({
+            return ctx.prisma.organization.update({
                 where: { id: input.orgId },
                 data: {
                     name: input.name ?? org.name,
@@ -502,7 +502,7 @@ async function orgByName(
     if (!organization) {
         throw new TRPCError({
             code: "NOT_FOUND",
-            message: "Organization not found",
+            message: "Organisation not found",
         });
     }
 
@@ -623,7 +623,7 @@ function leave() {
                 if (!userOrg) {
                     throw new TRPCError({
                         code: "NOT_FOUND",
-                        message: "You are not a member of this organization",
+                        message: "You are not a member of this organisation",
                     });
                 }
 
@@ -643,7 +643,7 @@ function leave() {
                         throw new TRPCError({
                             code: "FORBIDDEN",
                             message:
-                                "Cannot leave organization with repositories. Transfer or delete them first.",
+                                "Cannot leave an organisation with repositories, transfer their ownership or delete them first",
                         });
                     }
 
@@ -668,7 +668,7 @@ function leave() {
                     return {
                         success: true,
                         message:
-                            "Organization deleted as you were the last member",
+                            "Organisation deleted as you were the last member",
                     };
                 }
 
@@ -690,7 +690,7 @@ function leave() {
                         throw new TRPCError({
                             code: "BAD_REQUEST",
                             message:
-                                "You are the only admin. Specify another user to promote to admin before leaving.",
+                                "You are the only admin, specify another user to promote to admin before leaving",
                         });
                     }
 
@@ -724,7 +724,7 @@ function leave() {
                             throw new TRPCError({
                                 code: "BAD_REQUEST",
                                 message:
-                                    "The specified user is not a member of this organization",
+                                    "The specified user is not a member of this organisation",
                             });
                         }
 
@@ -753,7 +753,7 @@ function leave() {
 
                 return {
                     success: true,
-                    message: "Successfully left the organization",
+                    message: "Successfully left the organisation",
                 };
             });
         });
@@ -797,13 +797,13 @@ function deleteOrg() {
                 if (!userOrg) {
                     throw new TRPCError({
                         code: "NOT_FOUND",
-                        message: "You are not a member of this organization",
+                        message: "You are not a member of this organisation",
                     });
                 }
                 if (userOrg.role !== $Enums.OrganizationRole.ADMIN) {
                     throw new TRPCError({
                         code: "FORBIDDEN",
-                        message: "You are not an admin of this organization",
+                        message: "You are not an admin of this organisation",
                     });
                 }
 
@@ -815,7 +815,7 @@ function deleteOrg() {
                     throw new TRPCError({
                         code: "FORBIDDEN",
                         message:
-                            "Cannot delete organization with repositories. Transfer or delete them first.",
+                            "Cannot delete an organisation with repositories. Transfer their ownership or delete them first",
                     });
                 }
 
@@ -946,7 +946,7 @@ function setShowMembers() {
             if (userRole !== $Enums.RepoRole.ADMIN) {
                 throw new TRPCError({
                     code: "FORBIDDEN",
-                    message: "You are not an admin of this organization",
+                    message: "You are not an admin of this organisation",
                 });
             }
 
@@ -987,7 +987,7 @@ function promoteToAdmin() {
             ) {
                 throw new TRPCError({
                     code: "FORBIDDEN",
-                    message: "You are not an admin of this organization",
+                    message: "You are not an admin of this organisation",
                 });
             }
 
@@ -1022,7 +1022,7 @@ function expelMember() {
             if (!currentUserRole) {
                 throw new TRPCError({
                     code: "FORBIDDEN",
-                    message: "You are not an admin of this organization",
+                    message: "You are not an admin of this organisation",
                 });
             }
 
@@ -1146,7 +1146,7 @@ async function getOrgAsMember(
     if (!organization) {
         throw new TRPCError({
             code: "NOT_FOUND",
-            message: "Organization not found",
+            message: "Organisation not found",
         });
     }
 
@@ -1162,7 +1162,7 @@ async function getOrgAsMember(
     if (!userOrg) {
         throw new TRPCError({
             code: "FORBIDDEN",
-            message: "You are not a member of this organization",
+            message: "You are not a member of this organisation",
         });
     }
 

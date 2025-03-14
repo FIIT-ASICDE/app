@@ -167,7 +167,7 @@ function editUser() {
             if (withSameUsername) {
                 throw new TRPCError({
                     code: "CONFLICT",
-                    message: "Username is already taken",
+                    message: "This username is already taken",
                 });
             }
 
@@ -380,7 +380,7 @@ function usersAdminOrganisations() {
             if (!userMetadata) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "User metadata not found.",
+                    message: "User metadata not found",
                 });
             }
 
@@ -424,7 +424,7 @@ function usersAdminRepos() {
             if (!userMetadata) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "User metadata not found.",
+                    message: "User metadata not found",
                 });
             }
 
@@ -528,7 +528,7 @@ function acceptOrgInvitation() {
             if (!invitation) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Invitation not found or already accepted.",
+                    message: "Invitation not found or already accepted",
                 });
             }
 
@@ -661,7 +661,7 @@ function declineOrgInvitation() {
             if (!invitation) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Invitation not found or already processed.",
+                    message: "Invitation not found or already processed",
                 });
             }
 
@@ -740,7 +740,7 @@ function inviteUserToOrganization() {
             if (existingMembership) {
                 throw new TRPCError({
                     code: "CONFLICT",
-                    message: "User is already a member of this organization",
+                    message: "User is already a member of this organisation",
                 });
             }
 
@@ -758,7 +758,7 @@ function inviteUserToOrganization() {
                         throw new TRPCError({
                             code: "CONFLICT",
                             message:
-                                "User is already invited to this organization",
+                                "User is already invited to this organisation",
                         });
                     }
                 }
@@ -823,7 +823,7 @@ function inviteUserToRepo() {
             if (existingMembership) {
                 throw new TRPCError({
                     code: "CONFLICT",
-                    message: "User is already a member of this repository",
+                    message: "User is already a contributor on this repository",
                 });
             }
 
@@ -840,7 +840,7 @@ function inviteUserToRepo() {
                     if (error.code === "P2002") {
                         throw new TRPCError({
                             code: "CONFLICT",
-                            message: "User is already invited to this repo",
+                            message: "User is already invited to this repository",
                         });
                     }
                 }
@@ -889,7 +889,7 @@ function acceptRepoInvitation() {
             if (!invitation) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Invitation not found or already accepted.",
+                    message: "Invitation not found or already accepted",
                 });
             }
 
@@ -963,7 +963,7 @@ function declineRepoInvitation() {
             if (!invitation) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
-                    message: "Invitation not found or already processed.",
+                    message: "Invitation not found or already processed",
                 });
             }
 

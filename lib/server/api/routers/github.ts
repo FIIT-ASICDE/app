@@ -66,7 +66,7 @@ function clone() {
                     throw new TRPCError({
                         code: "FORBIDDEN",
                         message:
-                            "You can only create repositories for yourself",
+                            "You can only create repositories for yourself or for an organisation you are a part of",
                     });
                 }
             } else if (input.ownerType === "org") {
@@ -83,7 +83,7 @@ function clone() {
                     throw new TRPCError({
                         code: "FORBIDDEN",
                         message:
-                            "You must be an admin of the organization to create repositories",
+                            "You must be an admin of an organisation to create repositories",
                     });
                 }
             }
@@ -98,7 +98,7 @@ function clone() {
                 if (!organization) {
                     throw new TRPCError({
                         code: "NOT_FOUND",
-                        message: "Organization not found",
+                        message: "Organisation not found",
                     });
                 }
 
