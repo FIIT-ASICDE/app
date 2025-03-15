@@ -43,7 +43,6 @@ function highlightAllInputPorts(
 }
 function getPortBandwidth(cell: dia.Cell, portId: string): number {
     const ports = cell.get('ports')?.items ?? [];
-    console.log(ports);
     const found = ports.find((p: any) => p.id === portId);
     return found?.bandwidth ?? -1;
 }

@@ -160,52 +160,20 @@ const PropertiesPanel = () => {
         }
     }, [selectedElement]);
 
-    //
-    // useEffect(() => {
-    //     if (!selectedElement) return;
-    //
-    //     const elType = selectedElement.attributes.elType;
-    //     const labelText = selectedElement.attributes.attrs?.label?.text || "";
-    //     const labelLines4 = labelText.split('\n\n\n\n');
-    //     const labelLines1 = labelText.split('\n');
-    //
-    //     if (['comparator', 'adder', 'subtractor'].includes(elType)) {
-    //         setProperties(prev => ({
-    //             ...prev,
-    //             label: labelLines4[1],
-    //             comparatorType: labelLines4[0],
-    //         }));
-    //     } else if (['decoder', 'encoder', 'ram', 'register'].includes(elType)) {
-    //         setProperties(prev => ({
-    //             ...prev,
-    //             label: labelLines1[1],
-    //         }));
-    //     }
-    //     else if (['newModule'].includes(elType)) {
-    //         setProperties(prev => ({
-    //             ...prev,
-    //             label: labelLines1[0],
-    //         }));
-    //     }
-    // }, [selectedElement]);
 
     function validateField(fieldName: string, fieldValue: any): string {
-        // Проверяем строковые поля (label, instance, port name)
         if (typeof fieldValue === 'string') {
             if (!fieldValue.trim()) {
                 return "The field can't be empty";
             }
         }
 
-        // Проверяем числовые поля (bandwidth и др.)
         if (typeof fieldValue === 'number') {
             if (fieldValue <= 0) {
                 return "The value must be > 0";
             }
         }
 
-
-        // Если нет ошибок
         return "";
     }
 
@@ -724,7 +692,6 @@ const PropertiesPanel = () => {
 
         selectedElement.attr(attrsToUpdate);
         updateElement(selectedElement);
-        console.log(selectedElement);
         setShowSaveNotification(true);
     };
     function handleCopy() {
@@ -748,7 +715,6 @@ const PropertiesPanel = () => {
 
         const pos = newCell.position();
         newCell.position(pos.x + 20, pos.y + 20);
-        console.log(newCell);
         graph.addCell(newCell);
 
         setSelectedElement(newCell);

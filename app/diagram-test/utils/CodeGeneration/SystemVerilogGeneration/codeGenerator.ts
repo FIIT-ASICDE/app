@@ -40,7 +40,16 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         ['bitSelect', 'bitCombine'].includes(cell.attributes.elType)
     );
     const moduleCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'newModule');
+    const sramCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'ram');
+    const registerCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'register');
     const links = cells.filter(cell => cell.isLink());
+
+
+    const excludedNames = new Set([
+        ...moduleCells.map(cell => cell.attributes.name),
+        ...sramCells.map(cell => cell.attributes.name),
+        ...registerCells.map(cell => cell.attributes.name),
+    ]);
 
     function getPortName(cell: dia.Cell): string {
         return cell.attributes.name;
@@ -339,7 +348,7 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         code += `    ${portMappings.join(',\n    ')}\n`;
         code += `);\n\n`;
     });
-    const registerCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'register');
+
 
     registerCells.forEach(cell => {
         const regName = getPortName(cell);
@@ -397,11 +406,46 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
 
         code += `end\n\n`;
     });
+    sramCells.forEach(cell => {
+        const ramName = getPortName(cell);
+        const dataWidth = cell.attributes.bandwidth;
+        const depth = 1 << cell.attributes.addressBandwidth; // 2^addressBandwidth
+
+        const clkKey = `${cell.id}:clk`;
+        const dataInKey = `${cell.id}:data_in`;
+        const addrKey = `${cell.id}:addr`;
+        const weKey = `${cell.id}:we`;
+        const dataOutKey = `${cell.id}:data_out`;
+
+        const clkSignal = connectionMap[clkKey] ? connectionMap[clkKey][0] : '/* unconnected */';
+        const dataInSignal = connectionMap[dataInKey] ? connectionMap[dataInKey][0] : '/* unconnected */';
+        const addrSignal = connectionMap[addrKey] ? connectionMap[addrKey][0] : '/* unconnected */';
+        const weSignal = connectionMap[weKey] ? connectionMap[weKey][0] : '/* unconnected */';
+        const dataOutSignal = outputConnectionMap[dataOutKey] ? outputConnectionMap[dataOutKey][0] : ramName;
+
+        // Определяем edge для clk
+        const clkEdge = cell.attributes.clkEdge === 'falling' ? 'negedge' : 'posedge';
+
+        // Объявляем память
+        code += `logic [${dataWidth - 1}:0] ${ramName} [0:${depth - 1}];\n\n`;
+
+        // always_ff блок для записи
+        code += `always_ff @(${clkEdge} ${clkSignal}) begin\n`;
+        code += `    if (${weSignal})\n`;
+        code += `        ${ramName}[${addrSignal}] <= ${dataInSignal};\n`;
+        code += `end\n\n`;
+
+        // assign для чтения
+        code += `assign ${dataOutSignal} = ${ramName}[${addrSignal}];\n\n`;
+    });
 
     outputCells.forEach(cell => {
         const outputName = getPortName(cell);
         const inputKey = `${cell.id}:${cell.attributes.ports.items[0].id}`;
-        if (connectionMap[inputKey]) {
+        console.log(inputKey);
+        console.log(connectionMap);
+
+        if (connectionMap[inputKey] && !excludedNames.has(connectionMap[inputKey][0])) {
             connectionMap[inputKey].forEach(inputSignal => {
                 code += `assign ${outputName} = ${inputSignal};\n`;
             });

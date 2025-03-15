@@ -28,7 +28,6 @@ export const useResizable = ({
 
         function onMouseMove(mouseMoveEvent: MouseEvent) {
             let newWidth;
-            console.log(direction);
             if (direction === 'right') {
                 newWidth = startWidth + mouseMoveEvent.clientX - startPosition;
             } else {
