@@ -1,6 +1,6 @@
+import { DescriptionSkeleton } from "@/components/skeletons/description-skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DescriptionSkeleton } from "@/components/skeletons/description-skeleton";
 
 export default function Loading() {
     return (
@@ -11,19 +11,19 @@ export default function Loading() {
                 <Skeleton>
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-muted-foreground">Language statistics</CardTitle>
+                            <CardTitle className="text-muted-foreground">
+                                Language statistics
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="w-full">
-                                <div className="flex flex-col items-center w-full h-[170px]">
-                                    <div className="relative w-40 h-40">
-                                        <Skeleton className="rounded-full absolute h-40 w-40" />
-                                        <div
-                                            className="rounded-full absolute h-28 w-28 bg-card top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-                                        />
+                                <div className="flex h-[170px] w-full flex-col items-center">
+                                    <div className="relative h-40 w-40">
+                                        <Skeleton className="absolute h-40 w-40 rounded-full" />
+                                        <div className="absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-card" />
                                     </div>
                                 </div>
-                                <div className="flex flex-col gap-y-2 mt-6 w-full">
+                                <div className="mt-6 flex w-full flex-col gap-y-2">
                                     <div className="w-full">
                                         <Skeleton className="h-4 flex-1" />
                                     </div>
@@ -53,4 +53,4 @@ export default function Loading() {
             </main>
         </div>
     );
-};
+}

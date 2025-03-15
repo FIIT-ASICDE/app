@@ -7,8 +7,8 @@ import { Loader2, Search, UserRoundMinus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { useUser } from "@/components/context/user-context";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { Button } from "@/components/ui/button";
 import {
     CommandDialog,

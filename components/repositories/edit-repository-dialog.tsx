@@ -1,11 +1,14 @@
 "use client";
 
 import { editRepositoryFormSchema } from "@/lib/schemas/repo-schemas";
+import { api } from "@/lib/trpc/react";
 import { Repository } from "@/lib/types/repository";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FileText, Pen, Save, UserRound } from "lucide-react";
-import { useEffect } from "react";
+import { FileText, Loader2, Pen, Save, UserRound } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -42,9 +45,11 @@ interface EditRepositoryDialogProps {
 export const EditRepositoryDialog = ({
     repository,
 }: EditRepositoryDialogProps) => {
+    const router = useRouter();
     const form = useForm<z.infer<typeof editRepositoryFormSchema>>({
         resolver: zodResolver(editRepositoryFormSchema),
         defaultValues: {
+            repoId: repository.id,
             name: repository.name,
             description: repository.description,
         },
@@ -53,30 +58,34 @@ export const EditRepositoryDialog = ({
     useEffect(() => {
         if (repository) {
             form.reset({
+                repoId: repository.id,
                 name: repository.name,
                 description: repository.description,
             });
         }
     }, [repository, form]);
 
-    /* TODO: lukas */
-    /*const editMutation = api.repository.edit.useMutation({
+    const editMutation = api.repo.edit.useMutation({
         onSuccess: () => {
             toast.success("Repository successfully updated");
         },
         onError: (error) => {
             toast.error(error.message);
-        }
-    });*/
+        },
+    });
 
+    const [open, setOpen] = useState<boolean>(false);
     const onSaveRepositoryChanges = async (
         data: z.infer<typeof editRepositoryFormSchema>,
     ) => {
-        console.log(data);
+        editMutation.mutateAsync(data).then((repoNames) => {
+            setOpen(false);
+            router.replace(`/${repoNames.ownerName}/${repoNames.repoName}`);
+        });
     };
 
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <Tooltip>
                 <TooltipTrigger asChild>
                     <DialogTrigger className="mt-1 rounded bg-transparent p-2 text-muted-foreground hover:bg-accent">
@@ -102,7 +111,7 @@ export const EditRepositoryDialog = ({
                         <Form {...form}>
                             <form>
                                 <fieldset
-                                    // disabled={editMutation.isPending}
+                                    disabled={editMutation.isPending}
                                     className="space-y-3 pt-3"
                                 >
                                     <FormField
@@ -145,6 +154,7 @@ export const EditRepositoryDialog = ({
                                                         />
                                                     </div>
                                                 </FormControl>
+                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
@@ -162,8 +172,14 @@ export const EditRepositoryDialog = ({
                                     )}
                                     disabled={!form.formState.isDirty}
                                 >
-                                    <Save />
-                                    Save changes
+                                    {editMutation.isPending ? (
+                                        <Loader2 className="animate-spin" />
+                                    ) : (
+                                        <>
+                                            <Save />
+                                            Save changes
+                                        </>
+                                    )}
                                 </Button>
                             </DialogTrigger>
                         </DialogFooter>

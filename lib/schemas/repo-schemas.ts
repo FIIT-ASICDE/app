@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+const REPO_NAME_PATTERN = /^[a-zA-Z0-9-_]+$/;
+
 export const repoBySlugsSchema = z.object({
     ownerSlug: z
         .string()
@@ -11,7 +13,7 @@ export const repoBySlugsSchema = z.object({
         .min(1, "Repository slug must be at least 1 character")
         .max(100, "Repository slug cannot exceed 100 characters")
         .regex(
-            /^[a-zA-Z0-9-_]+$/,
+            REPO_NAME_PATTERN,
             "Repository slug must contain only letters, numbers, underscores, and hyphens",
         )
         .transform((value) => value.trim()),
@@ -28,7 +30,7 @@ export const createRepositoryFormSchema = z.object({
         .min(1, "Repository name is required")
         .max(100, "Repository name cannot exceed 100 characters")
         .regex(
-            /^[a-zA-Z0-9._-]+$/,
+            REPO_NAME_PATTERN,
             "Repository name can only contain letters, numbers, periods, underscores, and hyphens",
         )
         .transform((value) => value.trim()),
@@ -47,12 +49,13 @@ export const importRepositoryFormSchema = z.object({
 });
 
 export const editRepositoryFormSchema = z.object({
+    repoId: z.string().uuid(),
     name: z
         .string()
         .min(1, "Repository name is required")
         .max(100, "Repository name cannot exceed 100 characters")
         .regex(
-            /^[a-zA-Z0-9._-]+$/,
+            REPO_NAME_PATTERN,
             "Repository name can only contain letters, numbers, periods, underscores, and hyphens",
         )
         .transform((value) => value.trim()),

@@ -109,9 +109,9 @@ export type GithubRepositoryAffiliation =
     | "organization_member";
 
 export interface RepositorySettings {
-	repository: Repository
+    repository: Repository;
     pendingInvitations: Array<Invitation>;
     acceptedInvitations: Array<Invitation>;
     declinedInvitations: Array<Invitation>;
-	isUserAdmin: boolean;
+    isUserAdmin: boolean;
 }

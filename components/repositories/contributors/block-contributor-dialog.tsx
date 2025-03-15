@@ -1,5 +1,7 @@
+import { api } from "@/lib/trpc/react";
 import { UserDisplay } from "@/lib/types/user";
 import { CircleX } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -33,14 +35,16 @@ export const BlockContributorDialog = ({
 
     const deleteConfirmationPhrase: string = contributor.username;
 
+    const router = useRouter();
+    const revokeContributorMutation = api.repo.removeContributor.useMutation();
+
     const handleRevokeContribution = () => {
-        /* TODO: handle contributor deletion */
-        console.log(
-            "Revoke " +
-                contributor.username +
-                "'s contribution right on repository with ID: " +
-                repositoryId,
-        );
+        revokeContributorMutation
+            .mutateAsync({
+                contributorId: contributor.id,
+                repoId: repositoryId,
+            })
+            .then(router.refresh);
     };
 
     return (
