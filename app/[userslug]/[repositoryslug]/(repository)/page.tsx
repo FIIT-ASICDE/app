@@ -1,5 +1,5 @@
-import { api } from "@/lib/trpc/server";
 import OverviewPage from "@/app/[userslug]/[repositoryslug]/(repository)/overview-page";
+import { api } from "@/lib/trpc/server";
 
 interface RepositoryHomeProps {
     params: Promise<{
@@ -19,4 +19,4 @@ export default async function RepositoryHome({ params }: RepositoryHomeProps) {
     });
 
     return <OverviewPage repository={repo} />;
-};
+}
