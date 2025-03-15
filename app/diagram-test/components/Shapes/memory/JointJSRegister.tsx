@@ -7,7 +7,7 @@ export const JointJSRegister = (register: Register) => {
     const portItems = [];
     const inLeftCount = 3;
 
-    const registerRefD = register.resetPort
+    let registerRefD = register.resetPort
         ? (register.clkEdge === 'rising'
             ? (register.rstEdge === 'rising'
                 ? 'M 0 0 L 50 0 L 50 100 L 0 100 L 0 70 L 10 75 L 0 80 Z'  // Case 1
@@ -19,14 +19,15 @@ export const JointJSRegister = (register: Register) => {
             ? 'M 0 0 L 50 0 L 50 100 L 0 100 L 0 70 L 10 75 L 0 80 Z'  // Case 4
             : 'M 0 0 L 50 0 L 50 100 L 0 100 L 0 70 L 10 75 L 0 80 Z M 0 75 a 2,2 0 1,0 0,-0.1 Z');  // Case 5
 
-    // const port_padding_x = register.resetPort && register.clkEdge !== 'rising' ? 25 : 0;
-    // const port_padding_y = register.resetPort && register.rstEdge === 'falling' ? 105 : -5;
 
+    registerRefD = register.qInverted
+        ? `${registerRefD} M 46 50 a 2,2 0 1,0 0,-0.1 Z`
+        : registerRefD;
 
     const portLeftY = (idx: number) => (dimension / (inLeftCount + 1)) * (idx + 1);
 
     portItems.push({
-        id: 'input1',
+        id: 'd',
         bandwidth: register.dataBandwidth,
         group: 'input',
         args: {
@@ -39,7 +40,7 @@ export const JointJSRegister = (register: Register) => {
     });
     if (register.enablePort) {
         portItems.push({
-            id: 'input2',
+            id: 'en',
             bandwidth: 1,
             group: 'input',
             args: {
@@ -54,7 +55,7 @@ export const JointJSRegister = (register: Register) => {
 
 
     portItems.push({
-        id: 'input3',
+        id: 'clk',
         bandwidth: 1,
         group: 'input',
         args: {
@@ -71,7 +72,7 @@ export const JointJSRegister = (register: Register) => {
 
     if (register.resetPort) {
         portItems.push({
-            id: 'input4',
+            id: 'rst',
             bandwidth: 1,
             group: 'input',
             args: {
@@ -96,7 +97,7 @@ export const JointJSRegister = (register: Register) => {
     }
 
     portItems.push({
-        id: 'output1',
+        id: 'q',
         bandwidth: register.dataBandwidth,
         group: 'output',
         args: {
@@ -116,6 +117,8 @@ export const JointJSRegister = (register: Register) => {
         enablePort: register.enablePort,
         clkEdge: register.clkEdge,
         rstEdge: register.rstEdge,
+        rstType: register.rstType,
+        qInverted: register.qInverted,
         position: { x: register.position?.x || 100, y: register.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {
@@ -206,7 +209,7 @@ export const JointJSRegister = (register: Register) => {
                             textAnchor: 'start',
                             fontSize: 12,
                             fill: '#000',
-                            x: -15,
+                            x: -20,
                             y: 4
                         }
                     }

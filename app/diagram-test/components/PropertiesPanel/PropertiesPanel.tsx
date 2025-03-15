@@ -58,8 +58,10 @@ interface Properties {
     createdOutPorts?: { name: string; bandwidth: number }[];
     resetPort?: boolean;
     enablePort?: boolean;
+    qInverted?: boolean;
     clkEdge?: 'rising' | 'falling';
     rstEdge?: 'rising' | 'falling';
+    rstType?: 'async' | 'sync';
 }
 
 
@@ -78,8 +80,10 @@ const PropertiesPanel = () => {
         createdOutPorts: [],
         resetPort: false,
         enablePort: false,
+        qInverted: false,
         clkEdge: 'rising',
-        rstEdge: 'rising',
+        rstEdge: 'falling',
+        rstType: 'async',
     });
     const [portWidthMode, setPortWidthMode] = useState<'bit' | 'vector' | 'struct'>('bit');
     const [logicWidthMode, setLogicWidthMode] = useState<'bit' | 'vector'>('bit');
@@ -112,8 +116,10 @@ const PropertiesPanel = () => {
                 addressBandwidth: selectedElement.attributes.addressBandwidth || 8,
                 resetPort: selectedElement.attributes.resetPort ?? false,
                 enablePort: selectedElement.attributes.enablePort ?? false,
+                qInverted: selectedElement.attributes.qInverted ?? false,
                 clkEdge: selectedElement.attributes.clkEdge || 'rising',
-                rstEdge: selectedElement.attributes.rstEdge || 'rising',
+                rstEdge: selectedElement.attributes.rstEdge || 'falling',
+                rstType: selectedElement.attributes.rstType || 'async',
 
             };
             if (selectedElement.isLink()) {
@@ -145,6 +151,11 @@ const PropertiesPanel = () => {
                 createdOutPorts: [],
                 resetPort: false,
                 enablePort: false,
+                qInverted: false,
+                clkEdge: 'rising',
+                rstEdge: 'falling',
+                rstType: 'async',
+
             });
         }
     }, [selectedElement]);
@@ -474,6 +485,8 @@ const PropertiesPanel = () => {
             registerData.position = { x, y };
             registerData.clkEdge = properties.clkEdge;
             registerData.rstEdge = properties.rstEdge;
+            registerData.qInverted = properties.qInverted;
+            registerData.rstType = properties.rstType;
 
             graph.removeCells([selectedElement]);
             const newRegister = JointJSRegister(registerData);
@@ -1302,17 +1315,39 @@ const PropertiesPanel = () => {
                                     onChange={handleChange}
                                 />
                             </label>
+                            <label>
+                                Q Output Inversion:
+                                <input
+                                    type="checkbox"
+                                    name="qInverted"
+                                    checked={!!properties.qInverted}
+                                    onChange={handleChange}
+                                />
+                            </label>
                             {(properties.resetPort) && (
-                                <label>
-                                    Reset Edge:
-                                    <select
-                                        name="rstEdge"
-                                        value={properties.rstEdge}
-                                        onChange={handleChange}>
-                                        <option value="rising">Rising</option>
-                                        <option value="falling">Falling</option>
-                                    </select>
-                                </label>
+                                <>
+                                    <label>
+                                        Reset Edge:
+                                        <select
+                                            name="rstEdge"
+                                            value={properties.rstEdge}
+                                            onChange={handleChange}>
+                                            <option value="rising">Rising</option>
+                                            <option value="falling">Falling</option>
+                                        </select>
+                                    </label>
+                                    <label>
+                                        Reset Type:
+                                        <select
+                                            name="rstType"
+                                            value={properties.rstType}
+                                            onChange={handleChange}>
+                                            <option value="async">Asynchronous</option>
+                                            <option value="sync">Synchronous</option>
+                                        </select>
+                                    </label>
+
+                                </>
                             )}
                         </>
                     )}

@@ -331,9 +331,6 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
 
         portMappings = portMappings.concat(outputPorts.map(p => {
             const key = `${cell.id}:${p.id}`;
-            console.log(key);
-            console.log(outputConnectionMap);
-
             const outputConnectedSignal = outputConnectionMap[key] ? outputConnectionMap[key][0] : '/* unconnected */';
             return `.${p.name}(${outputConnectedSignal})`;
         }));
@@ -341,6 +338,64 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         code += `${moduleName} ${instanceName} (\n`;
         code += `    ${portMappings.join(',\n    ')}\n`;
         code += `);\n\n`;
+    });
+    const registerCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'register');
+
+    registerCells.forEach(cell => {
+        const regName = getPortName(cell);
+        const bw = cell.attributes.bandwidth;
+
+        const clkKey = `${cell.id}:clk`;
+        const rstKey = `${cell.id}:rst`;
+        const enKey = `${cell.id}:en`;
+        const dKey = `${cell.id}:d`;
+        const qKey = `${cell.id}:q`;
+
+        const clkSignal = connectionMap[clkKey] ? connectionMap[clkKey][0] : '/* unconnected */';
+        const rstSignal = connectionMap[rstKey] ? connectionMap[rstKey][0] : '/* unconnected */';
+        const enSignal = connectionMap[enKey] ? connectionMap[enKey][0] : '1\'b1'; // Если нет en, подразумеваем, что всегда включено
+        const dSignal = connectionMap[dKey] ? connectionMap[dKey][0] : '/* unconnected */';
+        const qSignal = outputConnectionMap[qKey] ? outputConnectionMap[qKey][0] : regName;
+
+        // clk
+        const clkEdge = cell.attributes.clkEdge === 'falling' ? 'negedge' : 'posedge';
+
+        // rst
+        let rstCondition = '';
+        if (cell.attributes.resetPort) {
+            const rstEdge = cell.attributes.rstEdge === 'falling' ? 'negedge' : 'posedge';
+            if (cell.attributes.rstType === 'async') {
+                rstCondition = ` or ${rstEdge} ${rstSignal}`;
+            }
+        }
+
+        // always_ff
+        code += `always_ff @(${clkEdge} ${clkSignal}${rstCondition}) begin\n`;
+
+        // resetPort
+        if (cell.attributes.resetPort) {
+            code += `    if (${rstSignal})\n`;
+            code += `        ${qSignal} <= '0;\n`;
+        }
+
+        // enablePort
+        if (cell.attributes.enablePort) {
+            if (cell.attributes.resetPort){
+                code += `    else if (${enSignal})\n`;
+            }
+            else {
+                code += `    if (${enSignal})\n`;
+            }
+
+        } else if (cell.attributes.resetPort) {
+            code += `    else\n`;
+        }
+
+        // qInverted
+        const dAssignment = cell.attributes.qInverted ? `~${dSignal}` : dSignal;
+        code += `        ${qSignal} <= ${dAssignment};\n`;
+
+        code += `end\n\n`;
     });
 
     outputCells.forEach(cell => {

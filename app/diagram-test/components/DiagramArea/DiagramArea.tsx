@@ -236,8 +236,10 @@ const DiagramArea = () => {
             register.dataBandwidth = 1;
             register.resetPort = true;
             register.enablePort = true;
+            register.qInverted = false;
             register.clkEdge = "rising";
-            register.rstEdge = "rising";
+            register.rstEdge = "falling";
+            register.rstType = "async";
             element = JointJSRegister(register);
             break;
         case 'bitSelect':
