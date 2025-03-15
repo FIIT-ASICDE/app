@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { getCardStripe } from "@/components/generic/generic";
-import { Card, CardContent } from "@/components/ui/card";
 import { InviteUserDialog } from "@/components/invitations/invite-user-dialog";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface UserCardProps {
     user: UserDisplay;

@@ -1,5 +1,6 @@
-import { Button } from "@/components/ui/button";
 import { Folder, Mail, TriangleAlert, UsersRound } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const RepositorySettingsTabsSkeleton = () => {
@@ -9,7 +10,7 @@ export const RepositorySettingsTabsSkeleton = () => {
                 <Button
                     disabled
                     variant="secondary"
-                    className="flex w-1/2 flex-row gap-x-3 md:w-full hover:bg-transparent"
+                    className="flex w-1/2 flex-row gap-x-3 hover:bg-transparent md:w-full"
                 >
                     <Folder />
                     <span className="hidden sm:inline">General</span>
@@ -18,7 +19,7 @@ export const RepositorySettingsTabsSkeleton = () => {
                 <Button
                     disabled
                     variant="outline"
-                    className="flex w-1/2 flex-row gap-x-3 md:w-full hover:bg-transparent"
+                    className="flex w-1/2 flex-row gap-x-3 hover:bg-transparent md:w-full"
                 >
                     <UsersRound />
                     <span className="hidden sm:inline">Contributors</span>
@@ -26,7 +27,7 @@ export const RepositorySettingsTabsSkeleton = () => {
 
                 <Button
                     variant="outline"
-                    className="flex w-1/2 flex-row gap-x-3 md:w-full hover:bg-transparent"
+                    className="flex w-1/2 flex-row gap-x-3 hover:bg-transparent md:w-full"
                 >
                     <Mail />
                     <span className="hidden sm:inline">Invitations</span>
@@ -34,7 +35,7 @@ export const RepositorySettingsTabsSkeleton = () => {
 
                 <Button
                     variant="outline"
-                    className="flex w-1/2 flex-row gap-x-3 border-destructive hover:bg-transparent md:w-full bg-background"
+                    className="flex w-1/2 flex-row gap-x-3 border-destructive bg-background hover:bg-transparent md:w-full"
                 >
                     <TriangleAlert />
                     <span className="hidden sm:inline">Danger zone</span>

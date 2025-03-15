@@ -2,10 +2,12 @@ import { imgSrc } from "@/lib/client-file-utils";
 import { api } from "@/lib/trpc/react";
 import { Repository } from "@/lib/types/repository";
 import { SquareArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
-import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { useUser } from "@/components/context/user-context";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -16,6 +18,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
     Select,
     SelectContent,
@@ -25,9 +28,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TransferOwnershipDialogProps {
     repository: Repository;
@@ -74,15 +74,17 @@ export const TransferOwnershipDialog = ({
         },
         onError: (error) => {
             toast.error(error.message);
-        }
+        },
     });
 
     const handleTransferOwnership = () => {
-        const newOwnerData: {
-            name: string,
-            image: string | undefined,
-            type: "user" | "org",
-        } | undefined = getNewOwnerData();
+        const newOwnerData:
+            | {
+                  name: string;
+                  image: string | undefined;
+                  type: "user" | "org";
+              }
+            | undefined = getNewOwnerData();
 
         if (newOwnerData !== undefined) {
             transferMutation.mutate({
@@ -99,11 +101,13 @@ export const TransferOwnershipDialog = ({
             return <></>;
         }
 
-        const newOwnerData: {
-            name: string,
-            image: string | undefined,
-            type: "user" | "org",
-        } | undefined = getNewOwnerData();
+        const newOwnerData:
+            | {
+                  name: string;
+                  image: string | undefined;
+                  type: "user" | "org";
+              }
+            | undefined = getNewOwnerData();
 
         if (newOwnerData) {
             return (
@@ -130,21 +134,27 @@ export const TransferOwnershipDialog = ({
             </DialogTrigger>
             <DialogContent className="max-h-[90vh] max-w-[425px] overflow-clip p-0">
                 <ScrollArea className="h-full max-h-[90vh]">
-                    <div className="p-6 space-y-3">
+                    <div className="space-y-3 p-6">
                         <DialogHeader>
                             <DialogTitle className="mb-5 text-center">
                                 Transfer ownership
                             </DialogTitle>
                             <DialogDescription>
-                                You are about to transfer ownership of your repository{" "}
-                                <span className="font-bold">{repository.name}</span>.
+                                You are about to transfer ownership of your
+                                repository{" "}
+                                <span className="font-bold">
+                                    {repository.name}
+                                </span>
+                                .
                             </DialogDescription>
                         </DialogHeader>
                         <span>
                             To confirm this action, please select a new owner.
                         </span>
                         <Select
-                            onValueChange={(newOwnerId) => setNewOwnerId(newOwnerId)}
+                            onValueChange={(newOwnerId) =>
+                                setNewOwnerId(newOwnerId)
+                            }
                             defaultValue={repository.ownerId}
                         >
                             <SelectTrigger>
@@ -154,7 +164,9 @@ export const TransferOwnershipDialog = ({
                                 {!userIsOwner ? (
                                     <>
                                         <SelectGroup>
-                                            <SelectLabel>Current owner</SelectLabel>
+                                            <SelectLabel>
+                                                Current owner
+                                            </SelectLabel>
                                             <SelectItem
                                                 key={repository.ownerId}
                                                 value={repository.ownerId}
@@ -166,9 +178,13 @@ export const TransferOwnershipDialog = ({
                                                         image={imgSrc(
                                                             repository.ownerImage,
                                                         )}
-                                                        name={repository.ownerName}
+                                                        name={
+                                                            repository.ownerName
+                                                        }
                                                     />
-                                                    <span>{repository.ownerName}</span>
+                                                    <span>
+                                                        {repository.ownerName}
+                                                    </span>
                                                 </div>
                                             </SelectItem>
                                         </SelectGroup>
@@ -182,7 +198,9 @@ export const TransferOwnershipDialog = ({
                                                 <div className="flex flex-row items-center space-x-3">
                                                     <AvatarDisplay
                                                         displayType={"select"}
-                                                        image={imgSrc(user.image)}
+                                                        image={imgSrc(
+                                                            user.image,
+                                                        )}
                                                         name={user.username}
                                                     />
                                                     <span>{user.username}</span>
@@ -192,7 +210,9 @@ export const TransferOwnershipDialog = ({
                                     </>
                                 ) : (
                                     <SelectGroup>
-                                        <SelectLabel>Current owner (you)</SelectLabel>
+                                        <SelectLabel>
+                                            Current owner (you)
+                                        </SelectLabel>
                                         <SelectItem
                                             key={repository.ownerId}
                                             value={repository.ownerId}
@@ -206,14 +226,18 @@ export const TransferOwnershipDialog = ({
                                                     )}
                                                     name={repository.ownerName}
                                                 />
-                                                <span>{repository.ownerName}</span>
+                                                <span>
+                                                    {repository.ownerName}
+                                                </span>
                                             </div>
                                         </SelectItem>
                                     </SelectGroup>
                                 )}
                                 {usersOrganisations && (
                                     <SelectGroup>
-                                        <SelectLabel>Your organisations</SelectLabel>
+                                        <SelectLabel>
+                                            Your organisations
+                                        </SelectLabel>
                                         {usersOrganisations.data?.map(
                                             (usersOrganisation) => {
                                                 if (
@@ -224,13 +248,19 @@ export const TransferOwnershipDialog = ({
                                                 }
                                                 return (
                                                     <SelectItem
-                                                        key={usersOrganisation.id}
-                                                        value={usersOrganisation.id}
+                                                        key={
+                                                            usersOrganisation.id
+                                                        }
+                                                        value={
+                                                            usersOrganisation.id
+                                                        }
                                                         className="cursor-pointer hover:bg-accent"
                                                     >
                                                         <div className="flex flex-row items-center space-x-3">
                                                             <AvatarDisplay
-                                                                displayType={"select"}
+                                                                displayType={
+                                                                    "select"
+                                                                }
                                                                 image={imgSrc(
                                                                     usersOrganisation.image,
                                                                 )}
@@ -239,7 +269,9 @@ export const TransferOwnershipDialog = ({
                                                                 }
                                                             />
                                                             <span>
-                                                                {usersOrganisation.name}
+                                                                {
+                                                                    usersOrganisation.name
+                                                                }
                                                             </span>
                                                         </div>
                                                     </SelectItem>
@@ -252,14 +284,17 @@ export const TransferOwnershipDialog = ({
                         </Select>
                         <DialogFooter className="justify-center">
                             <div className="flex w-full flex-col space-y-3">
-                                {newOwnerId !== "" && newOwnerId !== repository.ownerId && (
-                                    <div className="mt-2 mb-3 w-full text-center text-sm text-muted-foreground">
-                                        {getTransferOwnershipMessage()}
-                                    </div>
-                                )}
+                                {newOwnerId !== "" &&
+                                    newOwnerId !== repository.ownerId && (
+                                        <div className="mb-3 mt-2 w-full text-center text-sm text-muted-foreground">
+                                            {getTransferOwnershipMessage()}
+                                        </div>
+                                    )}
                                 <DialogTrigger asChild>
                                     <Button
-                                        onClick={() => handleTransferOwnership()}
+                                        onClick={() =>
+                                            handleTransferOwnership()
+                                        }
                                         className="w-full hover:bg-destructive-hover"
                                         variant="destructive"
                                         disabled={

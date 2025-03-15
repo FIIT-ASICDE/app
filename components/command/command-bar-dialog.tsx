@@ -41,14 +41,20 @@ export const CommandBarDialog = ({
                                         <Link
                                             href={element.link}
                                             key={i}
-                                            onClick={() => setCommandOpen(false)}
+                                            onClick={() =>
+                                                setCommandOpen(false)
+                                            }
                                         >
                                             <CommandItem className="cursor-pointer">
                                                 <element.icon className="text-muted-foreground" />
-                                                <span>{element.displayTitle}</span>
+                                                <span>
+                                                    {element.displayTitle}
+                                                </span>
                                                 {element.shortcut && (
                                                     <CommandShortcut>
-                                                        {element.shortcut.join("+")}
+                                                        {element.shortcut.join(
+                                                            "+",
+                                                        )}
                                                     </CommandShortcut>
                                                 )}
                                             </CommandItem>

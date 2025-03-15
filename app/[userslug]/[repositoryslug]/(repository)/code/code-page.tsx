@@ -4,8 +4,8 @@ import { type FileItem, type RepositoryItem } from "@/lib/types/repository";
 import { Folders } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { FilePreview } from "@/components/repositories/code/file-preview";
 import FileExplorer from "@/components/repositories/code/file-explorer";
+import { FilePreview } from "@/components/repositories/code/file-preview";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 

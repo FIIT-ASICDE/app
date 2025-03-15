@@ -127,14 +127,14 @@ export const parseFilterValue = (
     return parseBoolean(value) === undefined
         ? "all"
         : parseBoolean(value)
-            ? filterType === "role"
-                ? "admin"
-                : filterType
-            : filterType === "public"
-                ? "private"
-                : filterType === "role"
-                    ? "member"
-                    : "not" + filterType;
+          ? filterType === "role"
+              ? "admin"
+              : filterType
+          : filterType === "public"
+            ? "private"
+            : filterType === "role"
+              ? "member"
+              : "not" + filterType;
 };
 
 export const datePretty = (date: Date | undefined) => {

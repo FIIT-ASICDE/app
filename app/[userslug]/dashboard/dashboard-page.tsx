@@ -16,8 +16,8 @@ import { Suspense } from "react";
 
 import { DynamicPagination } from "@/components/generic/dynamic-pagination";
 import { NoData } from "@/components/generic/no-data";
-import { FavoriteRepositoryCardDisplay } from "@/components/repositories/favorite-repository-card-display";
 import { InvitationCardDisplay } from "@/components/invitations/invitation-card-display";
+import { FavoriteRepositoryCardDisplay } from "@/components/repositories/favorite-repository-card-display";
 import { RecentRepositoryCardDisplay } from "@/components/repositories/recent-repository-card-display";
 import {
     Card,

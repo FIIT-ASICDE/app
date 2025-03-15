@@ -10,6 +10,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
+import { InviteUserDialogTabs } from "@/components/invitations/invite-user-dialog-tabs";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -33,7 +34,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { InviteUserDialogTabs } from "@/components/invitations/invite-user-dialog-tabs";
 
 interface InviteUserDialogProps {
     selectedUser: UserDisplay;

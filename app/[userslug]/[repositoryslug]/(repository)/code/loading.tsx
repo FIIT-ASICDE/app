@@ -1,8 +1,9 @@
 import { Search as SearchIcon } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+
 import { FileExplorerSkeleton } from "@/components/skeletons/file-explorer-skeleton";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {
     return (
@@ -28,4 +29,4 @@ export default function Loading() {
             </Skeleton>
         </div>
     );
-};
+}

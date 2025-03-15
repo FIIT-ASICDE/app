@@ -20,8 +20,8 @@ import { UseFormReturn, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { useUser } from "@/components/context/user-context";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { MultiSelect } from "@/components/generic/multi-select";
 import { Button } from "@/components/ui/button";
 import {

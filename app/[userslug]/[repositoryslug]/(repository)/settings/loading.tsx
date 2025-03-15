@@ -1,8 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, Folder, Lock } from "lucide-react";
+
 import { RepositorySettingsTabsSkeleton } from "@/components/skeletons/repository-settings-tabs-skeleton";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {
     return (
@@ -29,7 +30,11 @@ export default function Loading() {
                                             Change repository visibility
                                         </span>
                                         <span className="text-sm text-muted-foreground">
-                                            This repository is currently <span className="font-bold">public</span>.
+                                            This repository is currently{" "}
+                                            <span className="font-bold">
+                                                public
+                                            </span>
+                                            .
                                         </span>
                                     </div>
                                 </div>
@@ -48,4 +53,4 @@ export default function Loading() {
             </main>
         </div>
     );
-};
+}

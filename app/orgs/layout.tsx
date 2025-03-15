@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 
-import Header from "@/components/header/header";
 import ProtectedLayout from "@/components/generic/protected-layout";
+import Header from "@/components/header/header";
 
 export default async function AllOrganisationsLayout({
     children,

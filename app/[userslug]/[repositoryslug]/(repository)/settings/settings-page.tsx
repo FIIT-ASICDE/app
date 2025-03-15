@@ -22,14 +22,14 @@ import { useState } from "react";
 
 import { useUser } from "@/components/context/user-context";
 import { NoData } from "@/components/generic/no-data";
-import { InvitationsTabs } from "@/components/invitations/invitations-tabs";
 import { InvitationCard } from "@/components/invitations/invitation-card";
-import { ChangeVisibilityDialog } from "@/components/repositories/visibility/change-visibility-dialog";
+import { InvitationsTabs } from "@/components/invitations/invitations-tabs";
+import { InviteContributorDialog } from "@/components/invitations/invite-contributor-dialog";
 import { ContributorCard } from "@/components/repositories/contributors/contributor-card";
 import { DeleteRepositoryDialog } from "@/components/repositories/delete-repository-dialog";
-import { InviteContributorDialog } from "@/components/invitations/invite-contributor-dialog";
 import { RepositorySettingsTabs } from "@/components/repositories/repository-settings-tabs";
 import { TransferOwnershipDialog } from "@/components/repositories/transfer-ownership-dialog";
+import { ChangeVisibilityDialog } from "@/components/repositories/visibility/change-visibility-dialog";
 import {
     Card,
     CardContent,
@@ -221,7 +221,7 @@ export default function SettingsPage({ settings, tab }: SettingsPageProps) {
 
                             {invitationsTab === "accepted" && (
                                 <div>
-                                    {pendingInvitations.length === 0 ? (
+                                    {acceptedInvitations.length === 0 ? (
                                         <NoData
                                             icon={MailX}
                                             message={
@@ -252,7 +252,7 @@ export default function SettingsPage({ settings, tab }: SettingsPageProps) {
 
                             {invitationsTab === "declined" && (
                                 <div>
-                                    {pendingInvitations.length === 0 ? (
+                                    {declinedInvitations.length === 0 ? (
                                         <NoData
                                             icon={MailX}
                                             message={

@@ -1,7 +1,8 @@
-import { TableCell, TableRow } from "@/components/ui/table";
-import { File as FileIcon, Folder } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { File as FileIcon, Folder } from "lucide-react";
+
+import { Skeleton } from "@/components/ui/skeleton";
+import { TableCell, TableRow } from "@/components/ui/table";
 
 interface TableRowSkeletonProps {
     type: "directory" | "file";
@@ -27,8 +28,13 @@ export const TableRowSkeleton = ({
                 )}
                 <Skeleton className={cn("h-4 w-40", fileNameClassName)} />
             </TableCell>
-            <TableCell className="text-muted-foreground relative">
-                <Skeleton className={cn("h-4 w-20 absolute right-0 top-[1.125rem]", lastActivityClassName)} />
+            <TableCell className="relative text-muted-foreground">
+                <Skeleton
+                    className={cn(
+                        "absolute right-0 top-[1.125rem] h-4 w-20",
+                        lastActivityClassName,
+                    )}
+                />
             </TableCell>
         </TableRow>
     );

@@ -44,6 +44,7 @@ export const repoRouter = createTRPCRouter({
     delete: deleteRepo(),
     transfer: transfer(),
     edit: edit(),
+    removeContributor: removeContributor(),
 });
 
 function create() {
@@ -810,6 +811,7 @@ function repoSettings() {
                     )
                     .map(async (inv) => await formatInvitation(inv, owner)),
             );
+
             const declinedInvitations = await Promise.all(
                 invitations
                     .filter(
@@ -1136,6 +1138,127 @@ function edit() {
                 ownerName: repoOwnerInfo.ownerName,
                 repoName: input.name,
             };
+        });
+}
+
+function removeContributor() {
+    return protectedProcedure
+        .input(
+            z.object({
+                contributorId: z.string().uuid(),
+                repoId: z.string().uuid(),
+            }),
+        )
+        .mutation(async ({ ctx, input }) => {
+            const currentUserMetadata =
+                await ctx.prisma.userMetadata.findUniqueOrThrow({
+                    where: { userId: ctx.session.user.id },
+                });
+
+            const currentUserRepoRelation =
+                await ctx.prisma.repoUserOrganization.findUnique({
+                    where: {
+                        userMetadataId_repoId: {
+                            userMetadataId: currentUserMetadata.id,
+                            repoId: input.repoId,
+                        },
+                    },
+                    select: { repoRole: true },
+                });
+
+            if (
+                !currentUserRepoRelation ||
+                (currentUserRepoRelation.repoRole !== "ADMIN" &&
+                    currentUserRepoRelation.repoRole !== "OWNER")
+            ) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message:
+                        "You don't have permission to remove contributors from this repository",
+                });
+            }
+
+            const contributorMetadata =
+                await ctx.prisma.userMetadata.findUnique({
+                    where: { userId: input.contributorId },
+                });
+
+            if (!contributorMetadata) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Contributor not found",
+                });
+            }
+
+            const contributorRepoRelation =
+                await ctx.prisma.repoUserOrganization.findUnique({
+                    where: {
+                        userMetadataId_repoId: {
+                            userMetadataId: contributorMetadata.id,
+                            repoId: input.repoId,
+                        },
+                    },
+                    select: { repoRole: true },
+                });
+
+            if (!contributorRepoRelation) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message:
+                        "This user is not a contributor to this repository",
+                });
+            }
+
+            // prevent removing an OWNER (only OWNER can remove themselves)
+            if (
+                contributorRepoRelation.repoRole === "OWNER" &&
+                currentUserRepoRelation.repoRole !== "OWNER"
+            ) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "You cannot remove an owner from the repository",
+                });
+            }
+
+            // prevent removing yourself if you're the only OWNER
+            if (
+                contributorMetadata.id === currentUserMetadata.id &&
+                contributorRepoRelation.repoRole === "OWNER"
+            ) {
+                const ownersCount = await ctx.prisma.repoUserOrganization.count(
+                    {
+                        where: {
+                            repoId: input.repoId,
+                            repoRole: { in: ["OWNER", "ADMIN"] },
+                        },
+                    },
+                );
+
+                if (ownersCount <= 1) {
+                    throw new TRPCError({
+                        code: "FORBIDDEN",
+                        message:
+                            "You cannot remove yourself as the only owner. Transfer ownership first.",
+                    });
+                }
+            }
+
+            await ctx.prisma.repoUserOrganization.delete({
+                where: {
+                    userMetadataId_repoId: {
+                        userMetadataId: contributorMetadata.id,
+                        repoId: input.repoId,
+                    },
+                },
+            });
+
+            // Also delete any invitations for this user to this repo
+            await ctx.prisma.repoUserInvitation.deleteMany({
+                where: {
+                    userMetadataId: contributorMetadata.id,
+                    repoId: input.repoId,
+                },
+            });
         });
 }
 
