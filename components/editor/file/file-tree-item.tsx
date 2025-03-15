@@ -43,17 +43,17 @@ export const FileTreeItem = ({
                     <>
                         <span className="mr-2">
                             {expanded ? (
-                                <ChevronDown className="h-4 w-4" />
+                                <ChevronDown className="min-h-4 max-h-4 min-w-4 max-w-4" />
                             ) : (
-                                <ChevronRight className="h-4 w-4" />
+                                <ChevronRight className="min-h-4 max-h-4 min-w-4 max-w-4" />
                             )}
                         </span>
-                        <Folder className="mr-2 h-4 w-4" />
+                        <Folder className="mr-2 min-h-4 max-h-4 min-w-4 max-w-4" fill="currentColor" />
                     </>
                 ) : (
                     <>
                         <span className="mr-2 w-4"></span>
-                        <FileIcon className="mr-2 h-4 w-4" />
+                        <FileIcon className="mr-2 min-h-4 max-h-4 min-w-4 max-w-4" />
                     </>
                 )}
                 <span className="truncate">{item.name}</span>
