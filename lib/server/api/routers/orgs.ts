@@ -341,15 +341,11 @@ function byName() {
         .input(z.string())
         .query(async ({ ctx, input }): Promise<OrganisationDisplay> => {
             const decodedInput = decodeURIComponent(input);
-            const { org } = await orgByName(
+            const { org, userRole } = await orgByName(
                 ctx.prisma,
                 decodedInput,
                 ctx.session?.user,
             );
-
-            const userRole = org.members.find(
-                (m) => m.id === ctx.session?.user.id,
-            )?.role;
 
             return {
                 id: org.id,
@@ -358,6 +354,7 @@ function byName() {
                 bio: org.bio ?? undefined,
                 memberCount: org.members.length,
                 userRole: userRole,
+                showMembers: org.showMembers,
             };
         });
 }
@@ -367,7 +364,7 @@ function orgOverview() {
         .input(z.string())
         .query(async ({ ctx, input }): Promise<OrganisationOverview> => {
             const decodedInput = decodeURIComponent(input);
-            const { isUserAdmin, org } = await orgByName(
+            const { userRole, org } = await orgByName(
                 ctx.prisma,
                 decodedInput,
                 ctx.session?.user,
@@ -375,11 +372,11 @@ function orgOverview() {
             const pinnedOrgRepos = await pinnedRepos(
                 ctx.prisma,
                 org.id,
-                isUserAdmin,
+                userRole === "ADMIN",
             );
 
             return {
-                isUserAdmin,
+                isUserAdmin: userRole === "ADMIN",
                 organisation: {
                     id: org.id,
                     name: org.name,
@@ -487,7 +484,7 @@ async function orgByName(
     name: string,
     currentUser?: Session["user"],
 ): Promise<{
-    isUserAdmin: boolean;
+    userRole: $Enums.OrganizationRole | undefined;
     org: Omit<Organisation, "repositories">;
 }> {
     const organization = await prisma.organization.findFirst({
@@ -506,13 +503,13 @@ async function orgByName(
         });
     }
 
-    const isMember = await isUserMember(prisma, {
+    const userRole = await userOrgRole(prisma, {
         by: "id",
         id: currentUser!.id,
     });
 
     const members: Array<OrganisationMember> =
-        !isMember || organization.hideMembers
+        !userRole || organization.hideMembers
             ? []
             : organization.users
                   .map(({ userMetadata, role }) => ({
@@ -528,18 +525,16 @@ async function orgByName(
                       if (a.role === "MEMBER" && b.role === "ADMIN") return 1;
                       return a.name.localeCompare(b.name);
                   });
-    const isUserAdmin = members.some(
-        (m) => m.id === currentUser?.id && m.role === "ADMIN",
-    );
 
     return {
-        isUserAdmin,
+        userRole,
         org: {
             id: organization.id,
             name: organization.name,
             image: organization.image ?? undefined,
             bio: organization.bio ?? undefined,
             createdAt: organization.createdAt,
+            showMembers: !organization.hideMembers,
             members,
         },
     };
@@ -1041,6 +1036,15 @@ async function isUserMember(
         | { by: "id"; id: string }
         | { by: "userMetadataId"; userMetadataId: string },
 ): Promise<boolean> {
+    return !!(await userOrgRole(prisma, getBy));
+}
+
+async function userOrgRole(
+    prisma: PrismaType,
+    getBy:
+        | { by: "id"; id: string }
+        | { by: "userMetadataId"; userMetadataId: string },
+): Promise<$Enums.OrganizationRole | undefined> {
     const userRole = await prisma.organizationUser.findFirst({
         where: {
             ...(getBy.by === "id"
@@ -1048,7 +1052,7 @@ async function isUserMember(
                 : { userMetadataId: getBy.userMetadataId }),
         },
     });
-    return !!userRole;
+    return userRole?.role;
 }
 
 async function orgsInvitations(prisma: PrismaType, organizationId: string) {
