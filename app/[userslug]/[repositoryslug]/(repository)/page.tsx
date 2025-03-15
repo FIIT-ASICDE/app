@@ -10,6 +10,7 @@ interface RepositoryHomeProps {
 
 export default async function RepositoryHome({ params }: RepositoryHomeProps) {
     const { userslug, repositoryslug } = await params;
+    console.log(userslug, repositoryslug);
 
     // Don't have to try catch if the search fails, because in the layout.tsx
     // there is a check and if it would fail this wouldn't have run
