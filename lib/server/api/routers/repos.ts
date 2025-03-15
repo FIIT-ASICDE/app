@@ -6,6 +6,7 @@ import {
 } from "@/lib/files/repo-files";
 import {
     createRepositoryFormSchema,
+    editRepositoryFormSchema,
     repoBySlugsSchema,
     repoItemSchema,
 } from "@/lib/schemas/repo-schemas";
@@ -42,6 +43,7 @@ export const repoRouter = createTRPCRouter({
     changeVisibility: changeVisibility(),
     delete: deleteRepo(),
     transfer: transfer(),
+    edit: edit(),
 });
 
 function create() {
@@ -180,6 +182,7 @@ function searchByOwnerAndRepoSlug() {
             const decodedRepositorySlug = decodeURIComponent(
                 input.repositorySlug.trim(),
             );
+
             const repo = await repoBySlug(
                 ctx.prisma,
                 decodedRepositorySlug,
@@ -200,6 +203,7 @@ function searchByOwnerAndRepoSlug() {
                         "Failed server condition, there must be max one userOrganizationRepo row for a user",
                 });
             }
+
             const userRepoRelation = repo.userOrganizationRepo.at(0);
             const repoPath = path.join(
                 process.env.REPOSITORIES_STORAGE_ROOT!,
@@ -1039,6 +1043,99 @@ function transfer() {
                     message: "Failed to move repository files",
                 });
             }
+        });
+}
+
+function edit() {
+    return protectedProcedure
+        .input(editRepositoryFormSchema)
+        .mutation(async ({ ctx, input }) => {
+            const userId = ctx.session.user.id;
+            const userMetadata =
+                await ctx.prisma.userMetadata.findUniqueOrThrow({
+                    where: { userId },
+                });
+
+            const userRepoRelation =
+                await ctx.prisma.repoUserOrganization.findUnique({
+                    where: {
+                        userMetadataId_repoId: {
+                            userMetadataId: userMetadata.id,
+                            repoId: input.repoId,
+                        },
+                    },
+                    select: {
+                        repoRole: true,
+                    },
+                });
+
+            if (
+                !userRepoRelation ||
+                (userRepoRelation.repoRole !== "ADMIN" &&
+                    userRepoRelation.repoRole !== "OWNER")
+            ) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message:
+                        "You don't have permission to edit this repository",
+                });
+            }
+
+            const currentRepo = await ctx.prisma.repo.findUniqueOrThrow({
+                where: { id: input.repoId },
+                select: { name: true },
+            });
+
+            const repoOwnerInfo = await resolveRepoOwnerAndName(
+                ctx.prisma,
+                input.repoId,
+            );
+            if (!repoOwnerInfo) {
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to resolve repository owner information",
+                });
+            }
+
+            if (currentRepo.name !== input.name) {
+                const currentRepoPath = path.join(
+                    process.env.REPOSITORIES_STORAGE_ROOT!,
+                    repoOwnerInfo.ownerName,
+                    currentRepo.name,
+                );
+
+                const newRepoPath = path.join(
+                    process.env.REPOSITORIES_STORAGE_ROOT!,
+                    repoOwnerInfo.ownerName,
+                    input.name,
+                );
+                try {
+                    await mkdir(path.dirname(newRepoPath), { recursive: true });
+                    await rename(currentRepoPath, newRepoPath);
+                } catch (error) {
+                    console.error("Failed to move repository files:", error);
+                    throw new TRPCError({
+                        code: "INTERNAL_SERVER_ERROR",
+                        message: "Failed to move repository files",
+                        cause: error,
+                    });
+                }
+            }
+
+            await ctx.prisma.repo.update({
+                where: {
+                    id: input.repoId,
+                },
+                data: {
+                    name: input.name,
+                    description: input.description,
+                },
+            });
+
+            return {
+                ownerName: repoOwnerInfo.ownerName,
+                repoName: input.name,
+            };
         });
 }
 
