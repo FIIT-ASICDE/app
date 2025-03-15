@@ -11,8 +11,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { useUser } from "@/components/context/user-context";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
 import GithubIcon from "@/components/icons/github";
 import { SelectRepositoryItem } from "@/components/repositories/select-repository-item";
 import { Button } from "@/components/ui/button";

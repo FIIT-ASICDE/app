@@ -4,8 +4,8 @@ import type { Repository } from "@/lib/types/repository";
 import { FileX, SearchIcon } from "lucide-react";
 import { useState } from "react";
 
-import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { FileTree } from "@/components/editor/file/file-tree";
+import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { NoData } from "@/components/generic/no-data";
 import { Input } from "@/components/ui/input";
 

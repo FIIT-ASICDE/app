@@ -1,7 +1,7 @@
 import { CardSkeleton } from "@/components/skeletons/card-skeleton";
+import { DescriptionSkeleton } from "@/components/skeletons/description-skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DescriptionSkeleton } from "@/components/skeletons/description-skeleton";
 
 export default function Loading() {
     return (

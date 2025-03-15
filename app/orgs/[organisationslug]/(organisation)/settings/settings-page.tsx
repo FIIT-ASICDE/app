@@ -21,12 +21,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { NoData } from "@/components/generic/no-data";
-import { DeleteOrganisationDialog } from "@/components/organisations/delete-organisation-dialog";
+import { InvitationCard } from "@/components/invitations/invitation-card";
 import { InvitationsTabs } from "@/components/invitations/invitations-tabs";
+import { DeleteOrganisationDialog } from "@/components/organisations/delete-organisation-dialog";
 import { LeaveOrganisationDialog } from "@/components/organisations/leave-organisation-dialog";
 import { ToggleMembersVisibilityDialog } from "@/components/organisations/members/toggle-members-visibility-dialog";
 import { OrganisationSettingsTabs } from "@/components/organisations/organisation-settings-tabs";
-import { InvitationCard } from "@/components/invitations/invitation-card";
 import {
     Card,
     CardContent,

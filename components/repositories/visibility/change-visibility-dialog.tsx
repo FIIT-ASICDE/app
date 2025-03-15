@@ -2,6 +2,7 @@ import { api } from "@/lib/trpc/react";
 import { Repository } from "@/lib/types/repository";
 import { Globe, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +14,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { toast } from "sonner";
 
 interface ChangeVisibilityDialogProps {
     repository: Repository;
@@ -49,7 +49,7 @@ export const ChangeVisibilityDialog = ({
         },
         onError: (error) => {
             toast.error(error.message);
-        }
+        },
     });
 
     const handleChangeVisibility = () => {

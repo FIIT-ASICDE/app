@@ -1,8 +1,9 @@
-import { SlidersHorizontal, LayoutGrid, Rows3 } from "lucide-react";
+import { LayoutGrid, Rows3, SlidersHorizontal } from "lucide-react";
+import { Search as SearchIcon } from "lucide-react";
+import { ElementType } from "react";
+
 import GithubIcon from "@/components/icons/github";
 import { Button } from "@/components/ui/button";
-import { ElementType } from "react";
-import { Search as SearchIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 interface RepoOrgSubmenuProps {
@@ -16,18 +17,14 @@ export const RepoOrgSubmenuSkeleton = ({
     searchText,
     createText,
     icon: Icon,
-    importFromGithub
+    importFromGithub,
 }: RepoOrgSubmenuProps) => {
     return (
         <div className="flex items-center justify-between">
             <div className="m-6 mb-0 flex w-1/2 items-center space-x-5">
                 <div className="relative w-full">
                     <SearchIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        disabled
-                        placeholder={searchText}
-                        className="pl-9"
-                    />
+                    <Input disabled placeholder={searchText} className="pl-9" />
                 </div>
                 <div className="hidden lg:flex">
                     <div className="flex items-center space-x-1">
@@ -60,23 +57,22 @@ export const RepoOrgSubmenuSkeleton = ({
                             variant="default"
                             className="hover:bg-primary-button-hover"
                         >
-                            <Icon className="h-4 w-4 sm:mr-2"/>
+                            <Icon className="h-4 w-4 sm:mr-2" />
                             <span className="hidden sm:inline">
                                 {createText}
                             </span>
                         </Button>
-                    </div> 
+                    </div>
                 ) : (
                     <Button
                         variant="default"
                         className="hover:bg-primary-button-hover"
                     >
-                        <Icon/>
+                        <Icon />
                         {createText}
                     </Button>
-                    
                 )}
             </div>
         </div>
     );
-}
+};

@@ -1,5 +1,11 @@
-import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TableRowSkeleton } from "@/components/skeletons/table-row-skeleton";
+import {
+    Table,
+    TableBody,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
 
 export const FileExplorerSkeleton = () => {
     return (

@@ -840,7 +840,8 @@ function inviteUserToRepo() {
                     if (error.code === "P2002") {
                         throw new TRPCError({
                             code: "CONFLICT",
-                            message: "User is already invited to this repository",
+                            message:
+                                "User is already invited to this repository",
                         });
                     }
                 }
