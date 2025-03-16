@@ -235,27 +235,29 @@ export function generateVHDLCode(graph: dia.Graph): string {
         if (!selectPort || !outputPort) return;
 
         const selectKey = `${cell.id}:${selectPort.id}`;
-        const selectSignal = connectionMap[selectKey] ? connectionMap[selectKey][0] : '/* unconnected */';
+        const selectSignal = connectionMap[selectKey] ? connectionMap[selectKey][0] : "'0'";
         const outputKey = `${cell.id}:${outputPort.id}`;
         const outputSignal = connectionMap[outputKey] ? connectionMap[outputKey][0] : netName;
 
+        const inSignals = Array.from({ length: inPorts }, (_, i) => {
+            const key = `${cell.id}:input${i + 1}`;
+            return connectionMap[key] ? connectionMap[key][0] : "'0'";
+        });
+
         if (inPorts === 2) {
-            const inSignals = [0, 1].map(i => {
-                const key = `${cell.id}:input${i + 1}`;
-                return connectionMap[key] ? connectionMap[key][0] : '/* unconnected */';
-            });
-            code += `assign ${outputSignal} = ${selectSignal} ? ${inSignals[1]} : ${inSignals[0]};\n`;
+            code += `    ${outputSignal} <= ${inSignals[0]} WHEN ${selectSignal} = '0' ELSE ${inSignals[1]};\n\n`;
         } else {
-            code += `always_comb begin\n`;
-            code += `    case (${selectSignal})\n`;
+            code += `    PROCESS (${selectSignal}, ${inSignals.join(", ")})\n`;
+            code += `    BEGIN\n`;
+            code += `        CASE ${selectSignal} IS\n`;
+
             for (let i = 0; i < inPorts; i++) {
-                const key = `${cell.id}:input${i + 1}`;
-                const inSignal = connectionMap[key] ? connectionMap[key][0] : '/* unconnected */';
-                code += `        ${inPorts === 4 ? '2' : '3'}'b${i.toString(2).padStart(inPorts === 4 ? 2 : 3, '0')}: ${outputSignal} = ${inSignal};\n`;
+                code += `            WHEN "${i.toString(2).padStart(Math.ceil(Math.log2(inPorts)), '0')}" => ${outputSignal} <= ${inSignals[i]};\n`;
             }
-            code += `        default: ${outputSignal} = {WIDTH{1'bx}};\n`;
-            code += `    endcase\n`;
-            code += `end\n\n`;
+
+            code += `            WHEN OTHERS => ${outputSignal} <= (OTHERS => 'X');\n`;
+            code += `        END CASE;\n`;
+            code += `    END PROCESS;\n\n`;
         }
     });
     encodeDecodeCells.forEach(cell => {
