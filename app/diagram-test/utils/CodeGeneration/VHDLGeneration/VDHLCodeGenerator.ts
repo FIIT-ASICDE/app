@@ -236,8 +236,6 @@ export function generateVHDLCode(graph: dia.Graph): string {
 
         const selectKey = `${cell.id}:${selectPort.id}`;
         const selectSignal = connectionMap[selectKey] ? connectionMap[selectKey][0] : "'0'";
-        const outputKey = `${cell.id}:${outputPort.id}`;
-        const outputSignal = connectionMap[outputKey] ? connectionMap[outputKey][0] : netName;
 
         const inSignals = Array.from({ length: inPorts }, (_, i) => {
             const key = `${cell.id}:input${i + 1}`;
@@ -245,21 +243,22 @@ export function generateVHDLCode(graph: dia.Graph): string {
         });
 
         if (inPorts === 2) {
-            code += `    ${outputSignal} <= ${inSignals[0]} WHEN ${selectSignal} = '0' ELSE ${inSignals[1]};\n\n`;
+            code += `    ${netName} <= ${inSignals[0]} WHEN ${selectSignal} = '0' ELSE ${inSignals[1]};\n\n`;
         } else {
             code += `    PROCESS (${selectSignal}, ${inSignals.join(", ")})\n`;
             code += `    BEGIN\n`;
             code += `        CASE ${selectSignal} IS\n`;
 
             for (let i = 0; i < inPorts; i++) {
-                code += `            WHEN "${i.toString(2).padStart(Math.ceil(Math.log2(inPorts)), '0')}" => ${outputSignal} <= ${inSignals[i]};\n`;
+                code += `            WHEN "${i.toString(2).padStart(Math.ceil(Math.log2(inPorts)), '0')}" => ${netName} <= ${inSignals[i]};\n`;
             }
 
-            code += `            WHEN OTHERS => ${outputSignal} <= (OTHERS => 'X');\n`;
+            code += `            WHEN OTHERS => ${netName} <= (OTHERS => 'X');\n`;
             code += `        END CASE;\n`;
             code += `    END PROCESS;\n\n`;
         }
     });
+
     encodeDecodeCells.forEach(cell => {
         const type = cell.attributes.elType;
         const netName = elementNames[cell.id];
@@ -268,29 +267,23 @@ export function generateVHDLCode(graph: dia.Graph): string {
 
         const inputPorts = cellPorts.filter(p => p.group === 'input');
         const inputKey = `${cell.id}:${inputPorts[0]?.id}`;
-        const inputSignal = connectionMap[inputKey] ? connectionMap[inputKey][0] : '/* unconnected */';
-
-
-        const outputPort = cellPorts.find(p => p.group === 'output');
-        const outputKey = `${cell.id}:${outputPort?.id}`;
-        const outputSignal = connectionMap[outputKey] ? connectionMap[outputKey][0] : netName;
+        const inputSignal = connectionMap[inputKey] ? connectionMap[inputKey][0] : "'0'";
 
         if (type === 'decoder') {
             const bw = cell.attributes.bandwidth;
             const outputSize = 1 << bw;  // 2^bandwidth
-            const defaultValue = `'b${'0'.repeat(outputSize)}`;
-            code += `always_comb begin\n`;
-            code += `    case (${inputSignal})\n`;
+            const defaultValue = `${'0'.repeat(outputSize)}`;
+            code += `    PROCESS (${inputSignal})\n`;
+            code += `    BEGIN\n`;
+            code += `        CASE ${inputSignal} IS\n`;
 
             for (let i = 0; i < outputSize; i++) {
-                code += `        ${bw}'b${i.toString(2).padStart(bw, '0')}: ${netName} = ${outputSize}'b${(1 << i).toString(2).padStart(outputSize, '0')};\n`;
+                code += `            WHEN "${i.toString(2).padStart(bw, '0')}" => ${netName} <= "${(1 << i).toString(2).padStart(outputSize, '0')}";\n`;
             }
 
-            code += `        default: ${netName} = ${outputSize}${defaultValue};\n`;
-            code += `    endcase\n`;
-            code += `end\n\n`;
-
-            code += `assign ${outputSignal} = ${netName};\n\n`;
+            code += `            WHEN OTHERS => ${netName} <= (OTHERS => '0');\n`;
+            code += `        END CASE;\n`;
+            code += `    END PROCESS;\n\n`;
         }
 
         if (type === 'encoder') {
@@ -298,18 +291,17 @@ export function generateVHDLCode(graph: dia.Graph): string {
             const outBits = Math.ceil(Math.log2(bw));
             const defaultValue = `'b${'0'.repeat(outBits)}`;
 
-            code += `always_comb begin\n`;
-            code += `    case (${inputSignal})\n`;
+            code += `    PROCESS (${inputSignal})\n`;
+            code += `    BEGIN\n`;
+            code += `        CASE ${inputSignal} IS\n`;
 
             for (let i = 0; i < bw; i++) {
-                code += `        ${bw}'b${(1 << i).toString(2).padStart(bw, '0')}: ${netName} = ${outBits}'b${i.toString(2).padStart(outBits, '0')};\n`;
+                code += `            WHEN "${(1 << i).toString(2).padStart(bw, '0')}" => ${netName} <= "${i.toString(2).padStart(outBits, '0')}";\n`;
             }
 
-            code += `        default: ${netName} = ${outBits}${defaultValue};\n`;
-            code += `    endcase\n`;
-            code += `end\n\n`;
-
-            code += `assign ${outputSignal} = ${netName};\n\n`;
+            code += `            WHEN OTHERS => ${netName} <= (OTHERS => '0');\n`;
+            code += `        END CASE;\n`;
+            code += `    END PROCESS;\n\n`;
         }
     });
     bitManipulationCells.forEach(cell => {
