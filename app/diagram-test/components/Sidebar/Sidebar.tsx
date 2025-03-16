@@ -17,7 +17,8 @@ import {
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import { useDiagramContext } from '../../context/useDiagramContext';
-import { generateSystemVerilogCode } from '../../utils/CodeGeneration/SystemVerilogGeneration/codeGenerator';
+import { generateSystemVerilogCode } from '../../utils/CodeGeneration/SystemVerilogGeneration/SystemVerilogCodeGenerator';
+import { generateVHDLCode } from '../../utils/CodeGeneration/VHDLGeneration/VDHLCodeGenerator';
 import ResizablePanel from '../common/ResizablePanel';
 import styles from './Sidebar.module.css';
 
@@ -58,13 +59,23 @@ const Sidebar = () => {
     };
 
 
-    const handleGenerateCode = () => {
+    const handleGenerateSystemVerilogCode = () => {
         const code = generateSystemVerilogCode(graph);
         const blob = new Blob([code], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = 'diagram.sv';
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+    const handleGenerateVHDLCode = () => {
+        const code = generateVHDLCode(graph);
+        const blob = new Blob([code], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'diagram.vhd';
         a.click();
         URL.revokeObjectURL(url);
     };
@@ -570,14 +581,24 @@ const Sidebar = () => {
                 </div>
                 {!isSaveLoadCollapsed && (
                     <div style={iconListStyle}>
-                        <Tippy content="Generate Code" placement="right" delay={[500, 0]}>
+                        <Tippy content="Generate SystemVerilog Code" placement="right" delay={[500, 0]}>
                             <div
                                 className={styles.iconItem}
 
-                                onClick={handleGenerateCode}
+                                onClick={handleGenerateSystemVerilogCode}
                             >
                                 <FaCode size={24} />
-                                <span>Generate Code</span>
+                                <span>Generate SystemVerilog Code</span>
+                            </div>
+                        </Tippy>
+                        <Tippy content="Generate VHDL Code" placement="right" delay={[500, 0]}>
+                            <div
+                                className={styles.iconItem}
+
+                                onClick={handleGenerateVHDLCode}
+                            >
+                                <FaCode size={24} />
+                                <span>Generate VHDL Code</span>
                             </div>
                         </Tippy>
                         <Tippy content="Save Diagram" placement="right" delay={[500, 0]}>
