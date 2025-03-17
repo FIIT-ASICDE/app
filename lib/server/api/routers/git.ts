@@ -13,9 +13,9 @@ import { z } from "zod";
 
 const execPromise = util.promisify(exec);
 
-export const githubRouter = createTRPCRouter({
-    userRepos: userGithubRepos(),
-    branches: githubRepoBranches(),
+export const gitRouter = createTRPCRouter({
+    userGithubRepos: userGithubRepos(),
+    githubBranches: githubRepoBranches(),
     clone: clone(),
 });
 

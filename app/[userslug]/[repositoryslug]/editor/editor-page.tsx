@@ -30,11 +30,11 @@ const data = {
     changes: [
         {
             itemPath: "file1.txt",
-            change: { type: "added" }
+            change: { type: "added" },
         } satisfies RepositoryItemChange,
         {
             itemPath: "file2.txt",
-            change: { type: "modified" }
+            change: { type: "modified" },
         } satisfies RepositoryItemChange,
         {
             itemPath: "file3.txt",
@@ -45,14 +45,14 @@ const data = {
             change: {
                 type: "moved",
                 oldPath: "old-location/file4.txt",
-            }
+            },
         } satisfies RepositoryItemChange,
         {
             itemPath: "file5.txt",
             change: {
                 type: "renamed",
-                oldName: "file5-old-name.txt"
-            }
+                oldName: "file5-old-name.txt",
+            },
         } satisfies RepositoryItemChange,
     ] satisfies Array<RepositoryItemChange>,
 };
@@ -80,9 +80,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
 
     const handleCloseSidebar = () => {
         if (horizontalGroupRef && horizontalGroupRef.current) {
-            setLastOpenedSidebarSize(
-                horizontalGroupRef.current.getLayout()[0],
-            );
+            setLastOpenedSidebarSize(horizontalGroupRef.current.getLayout()[0]);
             horizontalGroupRef.current.setLayout([0, 100]);
             setHorizontalCollapsed(true);
         }
@@ -115,6 +113,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
                 setLastOpenedBottomPanelSize={setLastOpenedBottomPanelSize}
                 lastOpenedSidebarSize={lastOpenedSidebarSize}
                 setLastOpenedSidebarSize={setLastOpenedSidebarSize}
+                isGitRepo={repository.isGitRepo}
             />
 
             <ResizablePanelGroup

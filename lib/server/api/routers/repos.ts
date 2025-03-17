@@ -212,6 +212,13 @@ function searchByOwnerAndRepoSlug() {
                 repo.name,
             );
             const contentsTree = loadRepoItems(repoPath, 0, false);
+            const isGitRepo =
+                contentsTree.findIndex(
+                    (item) =>
+                        (item.type === "directory" ||
+                            item.type === "directory-display") &&
+                        item.name === ".git",
+                ) !== -1;
 
             return {
                 id: repo.id,
@@ -226,6 +233,7 @@ function searchByOwnerAndRepoSlug() {
                 createdAt: repo.createdAt,
                 userRole: userRepoRelation?.repoRole ?? "GUEST",
                 tree: contentsTree,
+                isGitRepo,
             } satisfies Repository;
         });
 }

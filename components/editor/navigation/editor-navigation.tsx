@@ -2,7 +2,14 @@ import type {
     BottomPanelContentTab,
     SidebarContentTab,
 } from "@/lib/types/editor";
-import { Cog, Command, File, GitCommitHorizontal, Play, SearchIcon } from "lucide-react";
+import {
+    Cog,
+    Command,
+    File,
+    GitCommitHorizontal,
+    Play,
+    SearchIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { Dispatch, RefObject, SetStateAction, useState } from "react";
 import type { ImperativePanelGroupHandle } from "react-resizable-panels";
@@ -19,7 +26,9 @@ interface EditorNavigationProps {
     activeSidebarContent: SidebarContentTab;
     setActiveSidebarContent: Dispatch<SetStateAction<SidebarContentTab>>;
     activeBottomPanelContent: BottomPanelContentTab;
-    setActiveBottomPanelContent: Dispatch<SetStateAction<BottomPanelContentTab>>;
+    setActiveBottomPanelContent: Dispatch<
+        SetStateAction<BottomPanelContentTab>
+    >;
     verticalGroupRef: RefObject<ImperativePanelGroupHandle>;
     horizontalGroupRef: RefObject<ImperativePanelGroupHandle>;
     verticalCollapsed: boolean;
@@ -30,6 +39,7 @@ interface EditorNavigationProps {
     setLastOpenedBottomPanelSize: Dispatch<SetStateAction<number>>;
     lastOpenedSidebarSize: number;
     setLastOpenedSidebarSize: Dispatch<SetStateAction<number>>;
+    isGitRepo?: boolean;
 }
 
 export const EditorNavigation = ({
@@ -47,6 +57,7 @@ export const EditorNavigation = ({
     setLastOpenedBottomPanelSize,
     lastOpenedSidebarSize,
     setLastOpenedSidebarSize,
+    isGitRepo,
 }: EditorNavigationProps) => {
     const { user } = useUser();
 
@@ -146,16 +157,18 @@ export const EditorNavigation = ({
                             setActiveSidebarContent("search");
                         }}
                     />
-                    <SidebarNavigationButton
-                        value="sourceControl"
-                        icon={GitCommitHorizontal}
-                        tooltip="Source Control"
-                        activeSidebarContent={activeSidebarContent}
-                        onClick={() => {
-                            toggleHorizontalCollapse("sourceControl");
-                            setActiveSidebarContent("sourceControl");
-                        }}
-                    />
+                    {isGitRepo && (
+                        <SidebarNavigationButton
+                            value="sourceControl"
+                            icon={GitCommitHorizontal}
+                            tooltip="Source Control"
+                            activeSidebarContent={activeSidebarContent}
+                            onClick={() => {
+                                toggleHorizontalCollapse("sourceControl");
+                                setActiveSidebarContent("sourceControl");
+                            }}
+                        />
+                    )}
                 </div>
 
                 <div className="flex flex-col items-center gap-2 p-2">
