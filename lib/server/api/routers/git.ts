@@ -1,7 +1,7 @@
 import { readGithubRepoBranches, readUsersGithubRepos } from "@/lib/github";
 import { paginationSchema } from "@/lib/schemas/common-schemas";
-import { cloneRepoSchema, repoBySlugsSchema } from "@/lib/schemas/repo-schemas";
-import { ownerBySlug, repoBySlug } from "@/lib/server/api/routers/repos";
+import { cloneRepoSchema, commitSchema } from "@/lib/schemas/git-schemas";
+import { hasUserRole, resolveRepoPath } from "@/lib/server/api/routers/repos";
 import { createTRPCRouter, protectedProcedure } from "@/lib/server/api/trpc";
 import { RepositoryItemChange } from "@/lib/types/repository";
 import { ReturnTypeOf } from "@octokit/core/dist-types/types";
@@ -20,6 +20,7 @@ export const gitRouter = createTRPCRouter({
     githubBranches: githubRepoBranches(),
     clone: clone(),
     changes: gitChanges(),
+    commit: gitCommit(),
 });
 
 function userGithubRepos() {
@@ -231,58 +232,30 @@ function clone() {
 
 function gitChanges() {
     return protectedProcedure
-        .input(repoBySlugsSchema)
+        .input(z.object({ repoId: z.string().uuid() }))
         .query(
             async ({
                 ctx,
                 input,
             }): Promise<{ changes: Array<RepositoryItemChange> }> => {
-                const owner = await ownerBySlug(ctx.prisma, input.ownerSlug);
-                const decodedRepositorySlug = decodeURIComponent(
-                    input.repositorySlug.trim(),
-                );
-                const repo = await repoBySlug(
+                await hasUserRole(
                     ctx.prisma,
-                    decodedRepositorySlug,
+                    input.repoId,
                     ctx.session.user.id,
-                    owner,
+                    ["OWNER", "ADMIN", "CONTRIBUTOR"],
                 );
-                if (!repo) {
+
+                const repoPath = await resolveRepoPath(
+                    ctx.prisma,
+                    input.repoId,
+                );
+
+                if (!repoPath) {
                     throw new TRPCError({
                         code: "NOT_FOUND",
                         message: "Repository not found",
                     });
                 }
-
-                const userMetadata =
-                    await ctx.prisma.userMetadata.findFirstOrThrow({
-                        where: { userId: ctx.session.user.id },
-                    });
-
-                const userRepoRelation =
-                    await ctx.prisma.repoUserOrganization.findUniqueOrThrow({
-                        where: {
-                            userMetadataId_repoId: {
-                                userMetadataId: userMetadata.id,
-                                repoId: repo.id,
-                            },
-                        },
-                    });
-
-                const allowedRoles = ["OWNER", "ADMIN", "CONTRIBUTOR"];
-                if (!allowedRoles.includes(userRepoRelation.repoRole)) {
-                    throw new TRPCError({
-                        code: "FORBIDDEN",
-                        message:
-                            "You need at least contributor role to view git changes",
-                    });
-                }
-
-                const repoPath = path.join(
-                    process.env.REPOSITORIES_STORAGE_ROOT!,
-                    owner.name,
-                    repo.name,
-                );
 
                 const gitDirPath = path.join(repoPath, ".git");
                 try {
@@ -387,6 +360,109 @@ function gitChanges() {
                 }
             },
         );
+}
+
+function gitCommit() {
+    return protectedProcedure
+        .input(commitSchema)
+        .mutation(async ({ ctx, input }) => {
+            await hasUserRole(ctx.prisma, input.repoId, ctx.session.user.id, [
+                "OWNER",
+                "ADMIN",
+                "CONTRIBUTOR",
+            ]);
+            const repoPath = await resolveRepoPath(ctx.prisma, input.repoId);
+
+            if (!repoPath) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Repository path could not be resolved",
+                });
+            }
+
+            try {
+                // set git configuration for the commit
+                const userEmail = ctx.session.user.email;
+                const userName = ctx.session.user.name || "User";
+
+                await execPromise(
+                    `git -C "${repoPath}" config user.email "${userEmail}"`,
+                );
+                await execPromise(
+                    `git -C "${repoPath}" config user.name "${userName}"`,
+                );
+
+                for (const file of input.files) {
+                    // Sanitize the file path to prevent command injection.
+                    const sanitizedFile = file.itemPath.replace(/"/g, '\\"');
+                    await execPromise(
+                        `git -C "${repoPath}" add "${sanitizedFile}"`,
+                    );
+
+                    if (
+                        file.change.type === "moved" ||
+                        file.change.type === "renamed"
+                    ) {
+                        const oldFile =
+                            file.change.type === "moved"
+                                ? file.change.oldPath
+                                : file.change.oldName;
+                        const sanitizedOldFile = oldFile.replace(/"/g, '\\"');
+                        await execPromise(
+                            `git -C "${repoPath}" add "${sanitizedOldFile}"`,
+                        );
+                    }
+                }
+
+                const escapedMessage = input.message.replace(/"/g, '\\"');
+                const { stdout } = await execPromise(
+                    `git -C "${repoPath}" commit -m "${escapedMessage}"`,
+                );
+
+                const { stdout: commitHash } = await execPromise(
+                    `git -C "${repoPath}" rev-parse HEAD`,
+                );
+
+                return {
+                    success: true,
+                    message: stdout,
+                    commitHash: commitHash.trim(),
+                };
+            } catch (error) {
+                console.error("Error executing git commands:", error);
+
+                // check if it's a "nothing to commit" error
+                if (
+                    error instanceof Error &&
+                    error.message.includes("nothing to commit")
+                ) {
+                    return {
+                        success: false,
+                        message: "Nothing to commit. Working tree clean.",
+                        commitHash: null,
+                    };
+                }
+
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to commit changes",
+                    cause: error,
+                });
+            } finally {
+                try {
+                    await execPromise(
+                        `git -C "${repoPath}" config --unset user.email`,
+                    );
+
+                    await execPromise(
+                        `git -C "${repoPath}" config --unset user.name`,
+                    );
+                } catch (resetError) {
+                    // log but don't throw, don't want to fail the commit if resetting config fails
+                    console.error("Error resetting git config:", resetError);
+                }
+            }
+        });
 }
 
 function githubRepoBranches() {

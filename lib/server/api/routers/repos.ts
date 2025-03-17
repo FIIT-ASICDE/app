@@ -1838,7 +1838,7 @@ async function repoContributors(
     });
 }
 
-async function resolveRepoPath(
+export async function resolveRepoPath(
     prisma: PrismaType,
     repoId: string,
 ): Promise<string | null> {
@@ -1913,4 +1913,34 @@ async function resolveRepoOwnerAndName(
     }
 
     return null;
+}
+
+export async function hasUserRole(
+    prisma: PrismaType,
+    repoId: string,
+    currentUserId: string,
+    roles: Array<$Enums.RepoRole>,
+) {
+    const repo = await prisma.repo.findUniqueOrThrow({ where: { id: repoId } });
+
+    const userMetadata = await prisma.userMetadata.findFirstOrThrow({
+        where: { userId: currentUserId },
+    });
+
+    const userRepoRelation =
+        await prisma.repoUserOrganization.findUniqueOrThrow({
+            where: {
+                userMetadataId_repoId: {
+                    userMetadataId: userMetadata.id,
+                    repoId: repo.id,
+                },
+            },
+        });
+
+    if (!roles.includes(userRepoRelation.repoRole)) {
+        throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You need at least contributor role to view git changes",
+        });
+    }
 }

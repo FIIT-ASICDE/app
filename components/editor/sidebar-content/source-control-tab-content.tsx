@@ -1,25 +1,38 @@
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useState } from "react";
+import { commitSchema } from "@/lib/schemas/git-schemas";
 import type { RepositoryItemChange } from "@/lib/types/repository";
-import { RepositoryItemChangeDisplay } from "@/components/editor/changes/repository-item-change-display";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileText, GitCommitHorizontal } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { z } from "zod";
+
+import { RepositoryItemChangeDisplay } from "@/components/editor/changes/repository-item-change-display";
 import { CloseButton } from "@/components/editor/navigation/close-button";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface SourceControlTabContentProps {
+    repoId: string;
     changes: Array<RepositoryItemChange>;
     handleCloseSidebar: () => void;
+    onCommitAction?: (data: z.infer<typeof commitSchema>) => Promise<void>;
 }
 
 export const SourceControlTabContent = ({
+    repoId,
     changes,
     handleCloseSidebar,
+    onCommitAction,
 }: SourceControlTabContentProps) => {
-    const [changesSelected, setChangesSelected] = useState<Array<RepositoryItemChange>>([]);
+    const [changesSelected, setChangesSelected] = useState<
+        Array<RepositoryItemChange>
+    >([]);
     const allChangesSelected: boolean =
         changes.length > 0 && changesSelected.length === changes.length;
 
@@ -34,26 +47,25 @@ export const SourceControlTabContent = ({
     };
 
     const handleCommitChanges = () => {
-        // TODO: handle commit changes
-        console.log("Commit " + changesSelected.length + " changes with message: " + commitMessage);
-        changesSelected.map((change: RepositoryItemChange) => {
-            console.log("Changed itemPath: " + change.itemPath);
+        onCommitAction?.({
+            message: commitMessage,
+            files: changesSelected,
+            repoId,
+        }).then(() => {
+            setChangesSelected([]);
+            setCommitMessage("");
         });
-
-        setChangesSelected([]);
-        setCommitMessage("");
     };
 
     return (
-        <ScrollArea className="h-full w-full relative">
-            <div className="p-4 text-nowrap">
+        <ScrollArea className="relative h-full w-full">
+            <div className="text-nowrap p-4">
                 <header className="flex flex-row items-center justify-between pb-4">
                     <span className="text-xl font-medium">Source control</span>
                     <CloseButton onClick={handleCloseSidebar} />
                 </header>
                 <div className="space-y-3">
-                    <div
-                        className="flex flex-row gap-x-3 items-center cursor-pointer border border-transparent hover:border-accent p-1 px-2 rounded">
+                    <div className="flex cursor-pointer flex-row items-center gap-x-3 rounded border border-transparent p-1 px-2 hover:border-accent">
                         <Checkbox
                             id="all-changes"
                             checked={allChangesSelected}
@@ -62,12 +74,17 @@ export const SourceControlTabContent = ({
                         />
                         <Label
                             htmlFor="all-changes"
-                            className="flex flex-row gap-x-2 items-baseline justify-between text-sm cursor-pointer flex-1"
+                            className="flex flex-1 cursor-pointer flex-row items-baseline justify-between gap-x-2 text-sm"
                         >
                             <span>All changes</span>
                             <Tooltip>
-                                <TooltipTrigger asChild className="text-muted-foreground">
-                                    <div className="min-w-4 text-center">{changes.length}</div>
+                                <TooltipTrigger
+                                    asChild
+                                    className="text-muted-foreground"
+                                >
+                                    <div className="min-w-4 text-center">
+                                        {changes.length}
+                                    </div>
                                 </TooltipTrigger>
                                 <TooltipContent side="right">
                                     {changes.length} total changes
@@ -77,14 +94,19 @@ export const SourceControlTabContent = ({
                     </div>
 
                     <div className="flex flex-col gap-y-1">
-                        {changes.map((itemChange: RepositoryItemChange, index: number) => (
-                            <RepositoryItemChangeDisplay
-                                key={index}
-                                itemChange={itemChange}
-                                changesSelected={changesSelected}
-                                setChangesSelected={setChangesSelected}
-                            />
-                        ))}
+                        {changes.map(
+                            (
+                                itemChange: RepositoryItemChange,
+                                index: number,
+                            ) => (
+                                <RepositoryItemChangeDisplay
+                                    key={index}
+                                    itemChange={itemChange}
+                                    changesSelected={changesSelected}
+                                    setChangesSelected={setChangesSelected}
+                                />
+                            ),
+                        )}
                     </div>
 
                     <div className="relative">
@@ -101,21 +123,28 @@ export const SourceControlTabContent = ({
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <div className="cursor-not-allowed">
-                                    <Button variant="outline" className="w-full" disabled>
+                                    <Button
+                                        variant="outline"
+                                        className="w-full"
+                                        disabled
+                                    >
                                         <GitCommitHorizontal />
                                         Commit
                                     </Button>
                                 </div>
                             </TooltipTrigger>
                             <TooltipContent>
-                                {changesSelected.length === 0 ?
-                                    "Select changes to commit first" :
-                                    "Commit message cannot be empty"
-                                }
+                                {changesSelected.length === 0
+                                    ? "Select changes to commit first"
+                                    : "Commit message cannot be empty"}
                             </TooltipContent>
                         </Tooltip>
                     ) : (
-                        <Button variant="outline" className="w-full" onClick={handleCommitChanges}>
+                        <Button
+                            variant="outline"
+                            className="w-full"
+                            onClick={handleCommitChanges}
+                        >
                             <GitCommitHorizontal />
                             Commit
                         </Button>

@@ -1,5 +1,6 @@
 "use client";
 
+import { commitSchema } from "@/lib/schemas/git-schemas";
 import { api } from "@/lib/trpc/react";
 import type {
     BottomPanelContentTab,
@@ -8,6 +9,7 @@ import type {
 import type { Repository } from "@/lib/types/repository";
 import dynamic from "next/dynamic";
 import { type ElementRef, useRef, useState } from "react";
+import { z } from "zod";
 
 import { BottomPanelTabContent } from "@/components/editor/bottom-panel-content/bottom-panel-tab-content";
 import { EditorNavigation } from "@/components/editor/navigation/editor-navigation";
@@ -47,15 +49,19 @@ export default function EditorPage({ repository }: EditorPageProps) {
         useState<number>(20);
 
     const changes = api.git.changes.useQuery(
-        {
-            ownerSlug: repository.ownerName,
-            repositorySlug: repository.name,
-        },
+        { repoId: repository.id },
         {
             enabled: repository.isGitRepo,
             refetchInterval: 5_000,
         },
     );
+
+    const commitMutation = api.git.commit.useMutation();
+
+    const handleOnCommit = async (data: z.infer<typeof commitSchema>) => {
+        await commitMutation.mutateAsync(data);
+        await changes.refetch();
+    };
 
     const handleCloseSidebar = () => {
         if (horizontalGroupRef && horizontalGroupRef.current) {
@@ -126,6 +132,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
                                 repository={repository}
                                 changes={changes.data?.changes ?? []}
                                 handleCloseSidebar={handleCloseSidebar}
+                                onCommitAction={handleOnCommit}
                             />
                         </ResizablePanel>
 
