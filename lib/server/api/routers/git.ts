@@ -1,7 +1,9 @@
 import { readGithubRepoBranches, readUsersGithubRepos } from "@/lib/github";
 import { paginationSchema } from "@/lib/schemas/common-schemas";
-import { cloneRepoSchema } from "@/lib/schemas/repo-schemas";
+import { cloneRepoSchema, repoBySlugsSchema } from "@/lib/schemas/repo-schemas";
+import { ownerBySlug, repoBySlug } from "@/lib/server/api/routers/repos";
 import { createTRPCRouter, protectedProcedure } from "@/lib/server/api/trpc";
+import { RepositoryItemChange } from "@/lib/types/repository";
 import { ReturnTypeOf } from "@octokit/core/dist-types/types";
 import { $Enums } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
@@ -17,6 +19,7 @@ export const gitRouter = createTRPCRouter({
     userGithubRepos: userGithubRepos(),
     githubBranches: githubRepoBranches(),
     clone: clone(),
+    changes: gitChanges(),
 });
 
 function userGithubRepos() {
@@ -224,6 +227,166 @@ function clone() {
                 throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
             }
         });
+}
+
+function gitChanges() {
+    return protectedProcedure
+        .input(repoBySlugsSchema)
+        .query(
+            async ({
+                ctx,
+                input,
+            }): Promise<{ changes: Array<RepositoryItemChange> }> => {
+                const owner = await ownerBySlug(ctx.prisma, input.ownerSlug);
+                const decodedRepositorySlug = decodeURIComponent(
+                    input.repositorySlug.trim(),
+                );
+                const repo = await repoBySlug(
+                    ctx.prisma,
+                    decodedRepositorySlug,
+                    ctx.session.user.id,
+                    owner,
+                );
+                if (!repo) {
+                    throw new TRPCError({
+                        code: "NOT_FOUND",
+                        message: "Repository not found",
+                    });
+                }
+
+                const userMetadata =
+                    await ctx.prisma.userMetadata.findFirstOrThrow({
+                        where: { userId: ctx.session.user.id },
+                    });
+
+                const userRepoRelation =
+                    await ctx.prisma.repoUserOrganization.findUniqueOrThrow({
+                        where: {
+                            userMetadataId_repoId: {
+                                userMetadataId: userMetadata.id,
+                                repoId: repo.id,
+                            },
+                        },
+                    });
+
+                const allowedRoles = ["OWNER", "ADMIN", "CONTRIBUTOR"];
+                if (!allowedRoles.includes(userRepoRelation.repoRole)) {
+                    throw new TRPCError({
+                        code: "FORBIDDEN",
+                        message:
+                            "You need at least contributor role to view git changes",
+                    });
+                }
+
+                const repoPath = path.join(
+                    process.env.REPOSITORIES_STORAGE_ROOT!,
+                    owner.name,
+                    repo.name,
+                );
+
+                const gitDirPath = path.join(repoPath, ".git");
+                try {
+                    await access(gitDirPath);
+                } catch (error) {
+                    throw new TRPCError({
+                        code: "BAD_REQUEST",
+                        message: "This repository doesn't have git initialized",
+                        cause: error,
+                    });
+                }
+
+                try {
+                    await execPromise(`git -C "${repoPath}" add .`);
+                    const { stdout: statusOutput } = await execPromise(
+                        `git -C "${repoPath}" status --porcelain`,
+                    );
+
+                    const renamedFiles = new Map<string, string>();
+                    statusOutput
+                        .split("\n")
+                        .filter(Boolean)
+                        .forEach((line) => {
+                            const parts = line.trim().split("  ");
+                            if (parts.length >= 3 && parts[0].startsWith("R")) {
+                                const oldPath = parts[1];
+                                const newPath = parts[2];
+                                renamedFiles.set(newPath, oldPath);
+                            }
+                        });
+
+                    const changes: RepositoryItemChange[] = statusOutput
+                        .split("\n")
+                        .filter((line) => line.trim() !== "")
+                        .map((line) => {
+                            const statusCode = line.substring(0, 2).trim();
+                            const filePath = line.substring(3).trim();
+
+                            if (statusCode === "A") {
+                                return {
+                                    itemPath: filePath,
+                                    change: { type: "added" },
+                                };
+                            } else if (statusCode === "M") {
+                                return {
+                                    itemPath: filePath,
+                                    change: { type: "modified" },
+                                };
+                            } else if (statusCode === "D") {
+                                return {
+                                    itemPath: filePath,
+                                    change: { type: "deleted" },
+                                };
+                            } else if (statusCode === "R") {
+                                const parts = line
+                                    .substring(2)
+                                    .trim()
+                                    .split(" -> ");
+                                if (parts.length === 2) {
+                                    if (
+                                        path.basename(parts[0]) ===
+                                        path.basename(parts[1])
+                                    ) {
+                                        return {
+                                            itemPath: parts[1],
+                                            change: {
+                                                type: "moved",
+                                                oldPath: parts[0],
+                                            },
+                                        };
+                                    }
+
+                                    return {
+                                        itemPath: parts[1],
+                                        change: {
+                                            type: "renamed",
+                                            oldName: parts[0],
+                                        },
+                                    };
+                                }
+
+                                return {
+                                    itemPath: filePath,
+                                    change: { type: "modified" },
+                                };
+                            } else {
+                                return {
+                                    itemPath: filePath,
+                                    change: { type: "added" },
+                                };
+                            }
+                        });
+
+                    await execPromise(`git -C "${repoPath}" reset`);
+                    return { changes };
+                } catch (error) {
+                    console.error("Error executing git commands:", error);
+                    throw new TRPCError({
+                        code: "INTERNAL_SERVER_ERROR",
+                        message: "Failed to execute git commands",
+                    });
+                }
+            },
+        );
 }
 
 function githubRepoBranches() {

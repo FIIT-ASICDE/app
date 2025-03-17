@@ -1650,7 +1650,7 @@ async function toggleRepoState(
     };
 }
 
-async function ownerBySlug(
+export async function ownerBySlug(
     prisma: PrismaType,
     ownerSlug: string,
 ): Promise<{ type: "org" | "user"; id: string; name: string; image?: string }> {
@@ -1689,7 +1689,7 @@ async function ownerBySlug(
     };
 }
 
-async function repoBySlug(
+export async function repoBySlug(
     prisma: PrismaType,
     slug: string,
     sessionUserId: string,

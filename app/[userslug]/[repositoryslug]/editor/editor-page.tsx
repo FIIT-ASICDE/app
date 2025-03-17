@@ -1,10 +1,11 @@
 "use client";
 
+import { api } from "@/lib/trpc/react";
 import type {
     BottomPanelContentTab,
     SidebarContentTab,
 } from "@/lib/types/editor";
-import type { Repository, RepositoryItemChange } from "@/lib/types/repository";
+import type { Repository } from "@/lib/types/repository";
 import dynamic from "next/dynamic";
 import { type ElementRef, useRef, useState } from "react";
 
@@ -26,37 +27,6 @@ const DynamicEditor = dynamic(() => import("@/components/editor/editor"), {
     ssr: false,
 });
 
-const data = {
-    changes: [
-        {
-            itemPath: "file1.txt",
-            change: { type: "added" },
-        } satisfies RepositoryItemChange,
-        {
-            itemPath: "file2.txt",
-            change: { type: "modified" },
-        } satisfies RepositoryItemChange,
-        {
-            itemPath: "file3.txt",
-            change: { type: "deleted" },
-        } satisfies RepositoryItemChange,
-        {
-            itemPath: "new-location/file4.txt",
-            change: {
-                type: "moved",
-                oldPath: "old-location/file4.txt",
-            },
-        } satisfies RepositoryItemChange,
-        {
-            itemPath: "file5.txt",
-            change: {
-                type: "renamed",
-                oldName: "file5-old-name.txt",
-            },
-        } satisfies RepositoryItemChange,
-    ] satisfies Array<RepositoryItemChange>,
-};
-
 export default function EditorPage({ repository }: EditorPageProps) {
     const [activeSidebarContent, setActiveSidebarContent] =
         useState<SidebarContentTab>("fileExplorer");
@@ -76,7 +46,16 @@ export default function EditorPage({ repository }: EditorPageProps) {
     const [lastOpenedBottomPanelSize, setLastOpenedBottomPanelSize] =
         useState<number>(20);
 
-    const changes: Array<RepositoryItemChange> = data.changes;
+    const changes = api.git.changes.useQuery(
+        {
+            ownerSlug: repository.ownerName,
+            repositorySlug: repository.name,
+        },
+        {
+            enabled: repository.isGitRepo,
+            refetchInterval: 5_000,
+        },
+    );
 
     const handleCloseSidebar = () => {
         if (horizontalGroupRef && horizontalGroupRef.current) {
@@ -145,7 +124,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
                             <SidebarTabContent
                                 activeSidebarContent={activeSidebarContent}
                                 repository={repository}
-                                changes={changes}
+                                changes={changes.data?.changes ?? []}
                                 handleCloseSidebar={handleCloseSidebar}
                             />
                         </ResizablePanel>
