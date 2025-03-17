@@ -453,24 +453,30 @@ export const ImportRepositoryDialog = () => {
                         </div>
 
                         <DialogFooter className="mt-5">
-                            <DialogTrigger asChild>
-                                <Button
-                                    type="submit"
-                                    variant="outline"
-                                    className="w-full"
-                                    onClick={handleImportRepository}
-                                    disabled={cloneGithubRepoMutation.isPending}
-                                >
-                                    {cloneGithubRepoMutation.isPending ? (
-                                        <Loader2 />
+                            <Button
+                                type="submit"
+                                variant="outline"
+                                className="w-full"
+                                onClick={handleImportRepository}
+                                disabled={cloneGithubRepoMutation.isPending}
+                            >
+                                {cloneGithubRepoMutation.isPending ? (
+                                    <>
+                                        <Loader2 className="animate-spin" />
+                                        Cloning repository...
+                                    </>
+                                ) : cloneGithubRepoMutation.isSuccess ? (
+                                    <>
+                                        <Loader2 className="animate-spin" />
+                                        Redirecting...
+                                    </>
                                     ) : (
                                         <>
                                             <GithubIcon />
                                             Import
                                         </>
-                                    )}
-                                </Button>
-                            </DialogTrigger>
+                                )}
+                            </Button>
                         </DialogFooter>
                     </div>
                 </ScrollArea>

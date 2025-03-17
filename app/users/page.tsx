@@ -20,7 +20,7 @@ export default async function AllUsersPage({
     const currentPage = Number(usersSearchParams?.page) || 1;
     const rows: boolean = parseBoolean(usersSearchParams?.rows) ?? false;
 
-    const pageSize: number = 8;
+    const pageSize: number = 12;
 
     const { users, pagination } = await api.user.fetchAllUsers({
         nameSearchTerm: query,

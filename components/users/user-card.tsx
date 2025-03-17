@@ -33,7 +33,7 @@ export const UserCard = ({
                 className,
             )}
         >
-            <CardContent className="flex flex-row items-center justify-between p-4">
+            <CardContent className="flex flex-row items-center justify-between p-4 gap-x-3">
                 <div className="flex min-w-0 flex-row items-center gap-x-3">
                     <AvatarDisplay
                         displayType={"card"}
@@ -44,6 +44,7 @@ export const UserCard = ({
                         title={user.username}
                         link={userLink}
                         className="tracking-normal"
+                        tooltipVisible
                     />
                 </div>
                 <div className="flex flex-shrink-0 flex-row space-x-3">

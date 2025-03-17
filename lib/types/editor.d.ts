@@ -1,3 +1,10 @@
-export type SidebarContentTab = "fileExplorer" | "search" | "sourceControl";
+export type SidebarContentTab =
+    | "fileExplorer"
+    | "search"
+    | "sourceControl";
 
-export type BottomPanelContentTab = "terminal" | "settings";
+export type BottomPanelContentTab =
+    | "simulation"
+    | "synthesis"
+    | "terminal"
+    | "settings";

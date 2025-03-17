@@ -1,5 +1,7 @@
 import { BadgeType, CardType, FilterType } from "@/lib/types/generic";
 import { Invitation } from "@/lib/types/invitation";
+import { FavoriteRepositoriesFilter, PinnedRepositoriesFilter, PublicRepositoriesFilter } from "@/lib/types/repository";
+import { RoleOrganisationFilter } from "@/lib/types/organisation";
 
 export const getTimeDeltaString = (lastActivity: Date): string => {
     const now = new Date();
@@ -123,18 +125,29 @@ export const parseBoolean = (value: string | undefined) => {
 export const parseFilterValue = (
     filterType: FilterType,
     value: string | undefined,
-) => {
-    return parseBoolean(value) === undefined
-        ? "all"
-        : parseBoolean(value)
-          ? filterType === "role"
-              ? "admin"
-              : filterType
-          : filterType === "public"
-            ? "private"
-            : filterType === "role"
-              ? "member"
-              : "not" + filterType;
+):
+    | PinnedRepositoriesFilter
+    | FavoriteRepositoriesFilter
+    | PublicRepositoriesFilter
+    | RoleOrganisationFilter => {
+    const booleanValue: boolean | undefined = parseBoolean(value);
+
+    if (booleanValue === undefined) {
+        return "all";
+    }
+
+    switch (filterType) {
+        case "role":
+            return booleanValue ? "admin" : "member";
+        case "public":
+            return booleanValue ? "public" : "private";
+        case "pinned":
+            return booleanValue ? "pinned" : "notPinned";
+        case "favorite":
+            return booleanValue ? "favorite" : "notFavorite";
+        default:
+            return "all";
+    }
 };
 
 export const datePretty = (date: Date | undefined) => {

@@ -1,3 +1,4 @@
+import { Invitation } from "@/lib/types/invitation";
 import { UserDisplay } from "@/lib/types/user";
 
 export type Repository = {
@@ -81,8 +82,6 @@ export type RepositorySettingsTab =
     | "invitations"
     | "danger";
 
-export type RepositoryInvitationsTab = "pending" | "accepted" | "declined";
-
 export type LanguageStatisticsItem = {
     language: string;
     loc: number;
@@ -115,3 +114,11 @@ export interface RepositorySettings {
     declinedInvitations: Array<Invitation>;
     isUserAdmin: boolean;
 }
+
+export type RepositoryItemChange = {
+    itemPath: string;
+    change:
+        | { type: "added" | "modified" | "deleted" }
+        | { type: "renamed"; oldName: string }
+        | { type: "moved"; oldPath: string };
+};

@@ -2,17 +2,16 @@ import type {
     BottomPanelContentTab,
     SidebarContentTab,
 } from "@/lib/types/editor";
-import { Command, File, SearchIcon, Settings, Terminal } from "lucide-react";
+import { Cog, Command, File, GitCommitHorizontal, Play, SearchIcon } from "lucide-react";
 import Link from "next/link";
 import { Dispatch, RefObject, SetStateAction, useState } from "react";
-import { ImperativePanelGroupHandle } from "react-resizable-panels";
+import type { ImperativePanelGroupHandle } from "react-resizable-panels";
 
 import { CommandBarDialog } from "@/components/command/command-bar-dialog";
 import { useUser } from "@/components/context/user-context";
 import { NavigationButton } from "@/components/editor/navigation/navigation-button";
 import { SidebarNavigationButton } from "@/components/editor/navigation/sidebar-navigation-button";
 import { HeaderDropdown } from "@/components/header/header-dropdown";
-import GithubIcon from "@/components/icons/github";
 import LogoIcon from "@/components/icons/logo";
 import { Separator } from "@/components/ui/separator";
 
@@ -20,9 +19,7 @@ interface EditorNavigationProps {
     activeSidebarContent: SidebarContentTab;
     setActiveSidebarContent: Dispatch<SetStateAction<SidebarContentTab>>;
     activeBottomPanelContent: BottomPanelContentTab;
-    setActiveBottomPanelContent: Dispatch<
-        SetStateAction<BottomPanelContentTab>
-    >;
+    setActiveBottomPanelContent: Dispatch<SetStateAction<BottomPanelContentTab>>;
     verticalGroupRef: RefObject<ImperativePanelGroupHandle>;
     horizontalGroupRef: RefObject<ImperativePanelGroupHandle>;
     verticalCollapsed: boolean;
@@ -151,7 +148,7 @@ export const EditorNavigation = ({
                     />
                     <SidebarNavigationButton
                         value="sourceControl"
-                        icon={GithubIcon}
+                        icon={GitCommitHorizontal}
                         tooltip="Source Control"
                         activeSidebarContent={activeSidebarContent}
                         onClick={() => {
@@ -163,22 +160,26 @@ export const EditorNavigation = ({
 
                 <div className="flex flex-col items-center gap-2 p-2">
                     <NavigationButton
-                        icon={Terminal}
-                        tooltip="Terminal"
+                        icon={Play}
+                        tooltip="Simulation"
                         onClick={() => {
-                            toggleVerticalCollapse("terminal");
-                            setActiveBottomPanelContent("terminal");
+                            toggleVerticalCollapse("simulation");
+                            setActiveBottomPanelContent("simulation");
                         }}
                     />
                     <NavigationButton
-                        icon={Settings}
-                        tooltip="Settings"
+                        icon={Cog}
+                        tooltip="Synthesis"
                         onClick={() => {
-                            toggleVerticalCollapse("settings");
-                            setActiveBottomPanelContent("settings");
+                            toggleVerticalCollapse("synthesis");
+                            setActiveBottomPanelContent("synthesis");
                         }}
                     />
-                    <HeaderDropdown user={user} />
+                    <HeaderDropdown
+                        user={user}
+                        avatarDisplayType="select"
+                        className="my-2"
+                    />
                 </div>
             </div>
 
