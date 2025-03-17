@@ -2,7 +2,7 @@ import type {
     BottomPanelContentTab,
     SidebarContentTab,
 } from "@/lib/types/editor";
-import { Cog, Command, File, Play, SearchIcon } from "lucide-react";
+import { Cog, Command, File, GitCommitHorizontal, Play, SearchIcon } from "lucide-react";
 import Link from "next/link";
 import { Dispatch, RefObject, SetStateAction, useState } from "react";
 import type { ImperativePanelGroupHandle } from "react-resizable-panels";
@@ -12,7 +12,6 @@ import { useUser } from "@/components/context/user-context";
 import { NavigationButton } from "@/components/editor/navigation/navigation-button";
 import { SidebarNavigationButton } from "@/components/editor/navigation/sidebar-navigation-button";
 import { HeaderDropdown } from "@/components/header/header-dropdown";
-import GithubIcon from "@/components/icons/github";
 import LogoIcon from "@/components/icons/logo";
 import { Separator } from "@/components/ui/separator";
 
@@ -149,7 +148,7 @@ export const EditorNavigation = ({
                     />
                     <SidebarNavigationButton
                         value="sourceControl"
-                        icon={GithubIcon}
+                        icon={GitCommitHorizontal}
                         tooltip="Source Control"
                         activeSidebarContent={activeSidebarContent}
                         onClick={() => {

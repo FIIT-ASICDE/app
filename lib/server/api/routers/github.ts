@@ -164,7 +164,7 @@ function clone() {
             if (input.branch) {
                 cmd += ` -b ${input.branch}`;
             }
-            cmd += ` ${cloneUrl} '${targetPath}'`;
+            cmd += ` ${cloneUrl} "${targetPath}"`;
 
             try {
                 await execPromise(cmd);

@@ -4,17 +4,15 @@ import { RepositoryItemChange } from "@/lib/types/repository";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { RepositoryItemChangeIcon } from "@/components/editor/changes/repository-item-change-icon";
 import { Dispatch, SetStateAction } from "react";
-import { FileIcon, Folder } from "lucide-react";
+import { FileIcon } from "lucide-react";
 
 interface ItemChangeDisplayProps {
-    index: number;
     itemChange: RepositoryItemChange;
     changesSelected: Array<RepositoryItemChange>;
     setChangesSelected: Dispatch<SetStateAction<Array<RepositoryItemChange>>>;
 }
 
 export const RepositoryItemChangeDisplay = ({
-    index,
     itemChange,
     changesSelected,
     setChangesSelected,
@@ -33,13 +31,13 @@ export const RepositoryItemChangeDisplay = ({
     };
 
     const getChangeTooltipContent = (itemChange: RepositoryItemChange) => {
-        if (["added", "modified", "deleted"].includes(itemChange.changeType)) {
-            return <span>{itemChange.changeType[0].toUpperCase() + itemChange.changeType.slice(1)}</span>
-        } else if (itemChange.changeType === "renamed") {
-            const oldName: string | undefined = itemChange.itemPath.split("/").pop();
-            return <span>Renamed from <span className="text-foreground">{oldName}</span> to <span className="text-foreground">{itemChange.change}</span></span>
-        } else if (itemChange.changeType === "moved") {
-            return <span>Moved from <span className="text-foreground">{itemChange.itemPath}</span> to <span className="text-foreground">{itemChange.change}</span></span>
+        if (["added", "modified", "deleted"].includes(itemChange.change.type)) {
+            return <span>{itemChange.change.type[0].toUpperCase() + itemChange.change.type.slice(1)}</span>
+        } else if (itemChange.change.type === "renamed") {
+            const oldName: string | undefined = itemChange.change.oldName.split("/").pop();
+            return <span>Renamed from <span className="text-foreground">{oldName}</span> to <span className="text-foreground">{itemChange.itemPath}</span></span>
+        } else if (itemChange.change.type === "moved") {
+            return <span>Moved from <span className="text-foreground">{itemChange.change.oldPath}</span> to <span className="text-foreground">{itemChange.itemPath}</span></span>
         }
     };
 
@@ -58,12 +56,18 @@ export const RepositoryItemChangeDisplay = ({
         );
     };
 
+    const handleOpenDiff = () => {
+        // TODO: diff editor
+        console.log("Show Diff editor of item: " + itemChange.itemPath);
+    };
+
     return (
         <div
             className="flex flex-row gap-x-3 items-center cursor-pointer border border-transparent hover:border-accent p-1 px-2 rounded"
+            role="button"
+            onDoubleClick={handleOpenDiff}
         >
             <Checkbox
-                id={"change-" + index}
                 checked={changesSelected.includes(itemChange)}
                 onCheckedChange={(newChecked: boolean) => {
                     handleCheckboxChange(itemChange, newChecked);
@@ -71,14 +75,10 @@ export const RepositoryItemChangeDisplay = ({
                 className="checked:bg-primary"
             />
             <Label
-                htmlFor={"change-" + index}
                 className="flex flex-row gap-x-2 items-center justify-between text-sm cursor-pointer flex-1 font-normal"
             >
                 <div className="flex flex-row gap-x-2 items-center">
-                    {itemChange.itemType === "file" ?
-                        <FileIcon className="w-4 h-4" /> :
-                        <Folder className="w-4 h-4" fill="currentcolor" />
-                    }
+                    <FileIcon className="w-4 h-4" />
                     {itemChange.itemPath.split("/").pop()}
                 </div>
                 {getChangeContent(itemChange)}

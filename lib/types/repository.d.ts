@@ -1,5 +1,5 @@
-import { UserDisplay } from "@/lib/types/user";
 import { Invitation } from "@/lib/types/invitation";
+import { UserDisplay } from "@/lib/types/user";
 
 export type Repository = {
     id: string;
@@ -115,17 +115,10 @@ export interface RepositorySettings {
     isUserAdmin: boolean;
 }
 
-export type RepositoryItemChangeType =
-    | "added"
-    | "modified"
-    | "deleted"
-    | "moved"
-    | "renamed";
-
 export type RepositoryItemChange = {
-    itemId: string;
     itemPath: string;
-    itemType: "file" | "directory";
-    changeType: RepositoryItemChangeType;
-    change?: string;  // nothing if added, modified & deleted, if moved then new file location, if renamed then new name
+    change:
+        | { type: "added" | "modified" | "deleted" }
+        | { type: "renamed"; oldName: string }
+        | { type: "moved"; oldPath: string };
 };

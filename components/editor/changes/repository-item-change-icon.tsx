@@ -19,7 +19,7 @@ export const RepositoryItemChangeIcon = ({
 }: ItemChangeIconProps) => {
     const fullClassName: string = cn("w-4 h-4", className);
     
-    switch (itemChange.changeType) {
+    switch (itemChange.change.type) {
         case "added":
             return <Plus className={fullClassName} />
         case "modified":

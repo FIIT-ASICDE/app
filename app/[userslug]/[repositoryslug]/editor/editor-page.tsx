@@ -29,36 +29,30 @@ const DynamicEditor = dynamic(() => import("@/components/editor/editor"), {
 const data = {
     changes: [
         {
-            itemId: "1",
             itemPath: "file1.txt",
-            itemType: "file",
-            changeType: "added",
+            change: { type: "added" }
         } satisfies RepositoryItemChange,
         {
-            itemId: "2",
             itemPath: "file2.txt",
-            itemType: "file",
-            changeType: "modified",
+            change: { type: "modified" }
         } satisfies RepositoryItemChange,
         {
-            itemId: "3",
             itemPath: "file3.txt",
-            itemType: "file",
-            changeType: "deleted",
+            change: { type: "deleted" },
         } satisfies RepositoryItemChange,
         {
-            itemId: "4",
-            itemPath: "dir1",
-            itemType: "directory",
-            changeType: "moved",
-            change: "new/dir/path"
+            itemPath: "new-location/file4.txt",
+            change: {
+                type: "moved",
+                oldPath: "old-location/file4.txt",
+            }
         } satisfies RepositoryItemChange,
         {
-            itemId: "5",
-            itemPath: "dir2",
-            itemType: "directory",
-            changeType: "renamed",
-            change: "dir2-new-name"
+            itemPath: "file5.txt",
+            change: {
+                type: "renamed",
+                oldName: "file5-old-name.txt"
+            }
         } satisfies RepositoryItemChange,
     ] satisfies Array<RepositoryItemChange>,
 };

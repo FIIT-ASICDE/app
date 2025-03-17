@@ -4,11 +4,10 @@ import { useState } from "react";
 import type { RepositoryItemChange } from "@/lib/types/repository";
 import { RepositoryItemChangeDisplay } from "@/components/editor/changes/repository-item-change-display";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileText } from "lucide-react";
+import { FileText, GitCommitHorizontal } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import GithubIcon from "@/components/icons/github";
 import { CloseButton } from "@/components/editor/navigation/close-button";
 
 interface SourceControlTabContentProps {
@@ -37,6 +36,9 @@ export const SourceControlTabContent = ({
     const handleCommitChanges = () => {
         // TODO: handle commit changes
         console.log("Commit " + changesSelected.length + " changes with message: " + commitMessage);
+        changesSelected.map((change: RepositoryItemChange) => {
+            console.log("Changed itemPath: " + change.itemPath);
+        });
 
         setChangesSelected([]);
         setCommitMessage("");
@@ -78,7 +80,6 @@ export const SourceControlTabContent = ({
                         {changes.map((itemChange: RepositoryItemChange, index: number) => (
                             <RepositoryItemChangeDisplay
                                 key={index}
-                                index={index}
                                 itemChange={itemChange}
                                 changesSelected={changesSelected}
                                 setChangesSelected={setChangesSelected}
@@ -101,7 +102,7 @@ export const SourceControlTabContent = ({
                             <TooltipTrigger asChild>
                                 <div className="cursor-not-allowed">
                                     <Button variant="outline" className="w-full" disabled>
-                                        <GithubIcon />
+                                        <GitCommitHorizontal />
                                         Commit
                                     </Button>
                                 </div>
@@ -115,7 +116,7 @@ export const SourceControlTabContent = ({
                         </Tooltip>
                     ) : (
                         <Button variant="outline" className="w-full" onClick={handleCommitChanges}>
-                            <GithubIcon />
+                            <GitCommitHorizontal />
                             Commit
                         </Button>
                     )}
