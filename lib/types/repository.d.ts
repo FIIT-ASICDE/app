@@ -17,6 +17,8 @@ export type Repository = {
     tree?: Array<RepositoryItem>;
     createdAt?: Date;
     userRole?: RepoUserRole;
+
+    isGitRepo?: boolean;
 };
 
 export type RepositoryOverview = Omit<Repository, "contributors" | "tree"> & {

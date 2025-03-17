@@ -212,6 +212,13 @@ function searchByOwnerAndRepoSlug() {
                 repo.name,
             );
             const contentsTree = loadRepoItems(repoPath, 0, false);
+            const isGitRepo =
+                contentsTree.findIndex(
+                    (item) =>
+                        (item.type === "directory" ||
+                            item.type === "directory-display") &&
+                        item.name === ".git",
+                ) !== -1;
 
             return {
                 id: repo.id,
@@ -226,6 +233,7 @@ function searchByOwnerAndRepoSlug() {
                 createdAt: repo.createdAt,
                 userRole: userRepoRelation?.repoRole ?? "GUEST",
                 tree: contentsTree,
+                isGitRepo,
             } satisfies Repository;
         });
 }
@@ -1642,7 +1650,7 @@ async function toggleRepoState(
     };
 }
 
-async function ownerBySlug(
+export async function ownerBySlug(
     prisma: PrismaType,
     ownerSlug: string,
 ): Promise<{ type: "org" | "user"; id: string; name: string; image?: string }> {
@@ -1681,7 +1689,7 @@ async function ownerBySlug(
     };
 }
 
-async function repoBySlug(
+export async function repoBySlug(
     prisma: PrismaType,
     slug: string,
     sessionUserId: string,
@@ -1830,7 +1838,7 @@ async function repoContributors(
     });
 }
 
-async function resolveRepoPath(
+export async function resolveRepoPath(
     prisma: PrismaType,
     repoId: string,
 ): Promise<string | null> {
@@ -1905,4 +1913,34 @@ async function resolveRepoOwnerAndName(
     }
 
     return null;
+}
+
+export async function hasUserRole(
+    prisma: PrismaType,
+    repoId: string,
+    currentUserId: string,
+    roles: Array<$Enums.RepoRole>,
+) {
+    const repo = await prisma.repo.findUniqueOrThrow({ where: { id: repoId } });
+
+    const userMetadata = await prisma.userMetadata.findFirstOrThrow({
+        where: { userId: currentUserId },
+    });
+
+    const userRepoRelation =
+        await prisma.repoUserOrganization.findUniqueOrThrow({
+            where: {
+                userMetadataId_repoId: {
+                    userMetadataId: userMetadata.id,
+                    repoId: repo.id,
+                },
+            },
+        });
+
+    if (!roles.includes(userRepoRelation.repoRole)) {
+        throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You need at least contributor role to view git changes",
+        });
+    }
 }

@@ -52,19 +52,19 @@ export const ImportRepositoryDialog = () => {
         role: "ADMIN",
     });
 
-    const githubOwnerRepositories = api.github.userRepos.useQuery({
+    const githubOwnerRepositories = api.git.userGithubRepos.useQuery({
         affiliation: "owner",
         page: 1,
         pageSize: 100,
     });
 
-    const githubCollaboratorRepositories = api.github.userRepos.useQuery({
+    const githubCollaboratorRepositories = api.git.userGithubRepos.useQuery({
         affiliation: "collaborator",
         page: 1,
         pageSize: 100,
     });
 
-    const githubMemberRepositories = api.github.userRepos.useQuery({
+    const githubMemberRepositories = api.git.userGithubRepos.useQuery({
         affiliation: "organization_member",
         page: 1,
         pageSize: 100,
@@ -82,7 +82,7 @@ export const ImportRepositoryDialog = () => {
     const [selectedVisibility, setSelectedVisibility] =
         useState<string>("public");
 
-    const cloneGithubRepoMutation = api.github.clone.useMutation({
+    const cloneGithubRepoMutation = api.git.clone.useMutation({
         onSuccess: () => {
             toast.success("Repository successfully cloned.");
         },
@@ -105,7 +105,7 @@ export const ImportRepositoryDialog = () => {
         );
     };
 
-    const branches = api.github.branches.useQuery(
+    const branches = api.git.githubBranches.useQuery(
         {
             githubFullName: selectedRepository?.githubFullName ?? "",
         },
@@ -470,11 +470,11 @@ export const ImportRepositoryDialog = () => {
                                         <Loader2 className="animate-spin" />
                                         Redirecting...
                                     </>
-                                    ) : (
-                                        <>
-                                            <GithubIcon />
-                                            Import
-                                        </>
+                                ) : (
+                                    <>
+                                        <GithubIcon />
+                                        Import
+                                    </>
                                 )}
                             </Button>
                         </DialogFooter>
