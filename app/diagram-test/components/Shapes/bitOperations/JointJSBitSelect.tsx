@@ -13,8 +13,10 @@ export const JointJSBitSelect = (bitSelect: BitSelect) => {
         const portY = (dimension / (outCount + 1)) * (i+1);
         portItems.push({
             id: `output${i}`,
-            bandwidth: selectOutPorts[i].bandwidth,
+            bandwidth: (selectOutPorts[i].endBit - selectOutPorts[i].startBit) + 1,
             name: selectOutPorts[i].name,
+            startBit: selectOutPorts[i].startBit,
+            endBit: selectOutPorts[i].endBit,
             group: 'output',
             args: { x: dimension/2, y: portY }
         });

@@ -54,8 +54,8 @@ interface Properties {
     addressBandwidth?: number;
     inputPorts?: number;
     instance?: string;
-    createdInPorts?: { name: string; bandwidth: number }[];
-    createdOutPorts?: { name: string; bandwidth: number }[];
+    createdInPorts?: { name: string; bandwidth: number; startBit?: number; endBit?: number }[];
+    createdOutPorts?: { name: string; bandwidth: number; startBit?: number; endBit?: number }[];
     resetPort?: boolean;
     enablePort?: boolean;
     qInverted?: boolean;
@@ -90,7 +90,7 @@ const PropertiesPanel = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [showAddPortDialog, setShowAddPortDialog] = useState(false);
     const [newPortType, setNewPortType] = useState<'input' | 'output'>('input');
-    const [newPortData, setNewPortData] = useState({ name: '', bandwidth: 1 });
+    const [newPortData, setNewPortData] = useState({ name: '', bandwidth: 1, startBit: 0, endBit: 0 });
     const [isEditingPort, setIsEditingPort] = useState(false);
     const [editPortIndex, setEditPortIndex] = useState<number | null>(null);
     const [editPortType, setEditPortType] = useState<'input' | 'output'>('input');
@@ -221,7 +221,7 @@ const PropertiesPanel = () => {
 
     const handleAddInputPort = () => {
         setNewPortType('input');
-        setNewPortData({ name: '', bandwidth: 1 });
+        setNewPortData({ name: '', bandwidth: 1, startBit: 0, endBit: 0 });
         setShowAddPortDialog(true);
 
         setIsEditingPort(false);
@@ -230,7 +230,7 @@ const PropertiesPanel = () => {
 
     const handleAddOutputPort = () => {
         setNewPortType('output');
-        setNewPortData({ name: '', bandwidth: 1 });
+        setNewPortData({ name: '', bandwidth: 1, startBit: 0, endBit: 0 });
         setShowAddPortDialog(true);
 
         setIsEditingPort(false);
@@ -242,7 +242,7 @@ const PropertiesPanel = () => {
         const { name, value } = e.target;
         setNewPortData(prev => ({
             ...prev,
-            [name]: name === 'bandwidth' ? Number(value) : value
+            [name]: name === 'bandwidth' || name === 'startBit' || name === 'endBit' ? Number(value) : value
         }));
     };
 
@@ -255,7 +255,7 @@ const PropertiesPanel = () => {
             setErrorMessage('Port Name is mandatory');
             return;
         }
-        if (newPortData.bandwidth < 1) {
+        if (['bitCombine', 'newModule'].includes(selectedElement.attributes.elType) && newPortData.bandwidth < 1) {
             setErrorMessage('Bandwidth must be > 0');
             return;
         }
@@ -267,6 +267,8 @@ const PropertiesPanel = () => {
                 updated[editPortIndex] = {
                     name: newPortData.name,
                     bandwidth: newPortData.bandwidth,
+                    startBit: newPortData.startBit,
+                    endBit: newPortData.endBit
                 };
                 setProperties(prev => ({
                     ...prev,
@@ -277,6 +279,8 @@ const PropertiesPanel = () => {
                 updated[editPortIndex] = {
                     name: newPortData.name,
                     bandwidth: newPortData.bandwidth,
+                    startBit: newPortData.startBit,
+                    endBit: newPortData.endBit
                 };
                 setProperties(prev => ({
                     ...prev,
@@ -294,6 +298,8 @@ const PropertiesPanel = () => {
                         {
                             name: newPortData.name,
                             bandwidth: newPortData.bandwidth,
+                            startBit: newPortData.startBit,
+                            endBit: newPortData.endBit
                         }
                     ]
                 }));
@@ -305,6 +311,8 @@ const PropertiesPanel = () => {
                         {
                             name: newPortData.name,
                             bandwidth: newPortData.bandwidth,
+                            startBit: newPortData.startBit,
+                            endBit: newPortData.endBit
                         }
                     ]
                 }));
@@ -376,6 +384,8 @@ const PropertiesPanel = () => {
         newBitSelect.outPorts = properties.createdOutPorts.map((p, i) => ({
             name: p.name,
             bandwidth: p.bandwidth,
+            startBit: p.startBit,
+            endBit: p.endBit
         }));
 
         const { x, y } = selectedElement.position();
@@ -426,6 +436,8 @@ const PropertiesPanel = () => {
         setNewPortData({
             name: currentPort.name,
             bandwidth: currentPort.bandwidth,
+            startBit: currentPort.startBit || 0,
+            endBit: currentPort.endBit || 0
         });
 
         setShowAddPortDialog(true);
@@ -1446,7 +1458,7 @@ const PropertiesPanel = () => {
                             <h4>Output Ports</h4>
                             {properties.createdOutPorts.map((p, idx) => (
                                 <div key={idx} className={styles.portItem}>
-                                    <span>{p.name} (bw={p.bandwidth})</span>
+                                    <span>{p.name} ({p.startBit} - {p.endBit})</span>
 
                                     <FaEdit
                                         className={styles.portIcon}
@@ -1532,15 +1544,41 @@ const PropertiesPanel = () => {
                                 </div>
                             )}
                         </label>
-                        <label>
-                            Bandwidth:
-                            <input
-                                type="number"
-                                name="bandwidth"
-                                value={newPortData.bandwidth}
-                                onChange={handleNewPortDataChange}
-                            />
-                        </label>
+                        {(['bitCombine', 'newModule'].includes(selectedElement.attributes.elType)) && (
+                            <label>
+                                Bandwidth:
+                                <input
+                                    type="number"
+                                    name="bandwidth"
+                                    value={newPortData.bandwidth}
+                                    onChange={handleNewPortDataChange}
+                                />
+                            </label>
+                        )
+                        }
+                        {(['bitSelect'].includes(selectedElement.attributes.elType)) && (
+                            <>
+                                <label>
+                                    Start Bit:
+                                    <input
+                                        type="number"
+                                        name="startBit"
+                                        value={newPortData.startBit}
+                                        onChange={handleNewPortDataChange}
+                                    />
+                                </label>
+                                <label>
+                                    End Bit:
+                                    <input
+                                        type="number"
+                                        name="endBit"
+                                        value={newPortData.endBit}
+                                        onChange={handleNewPortDataChange}
+                                    />
+                                </label>
+                            </>
+                        )
+                        }
                         <div className={styles.modalButtons}>
                             <button onClick={handleNewPortSubmit}>Add Port</button>
                             <button onClick={handleNewPortCancel}>Cancel</button>

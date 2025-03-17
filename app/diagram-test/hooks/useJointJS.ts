@@ -27,14 +27,23 @@ function highlightAllInputPorts(
 
         const ports = elem.get('ports')?.items || [];
         ports.forEach((p) => {
-            // Интересуют только input-порты
             if (p.group === 'input') {
-                const portBw = p.bandwidth ?? -1;
-                if (portBw === neededBw) {
-                    // Подсвечиваем зелёным
+                let portBw = p.bandwidth ?? -1;
+                if (elem.attributes.elType === 'bitSelect') {
+                    const ports = elem.get('ports')?.items ?? [];
+                    const outputPorts = ports.filter((p: any) => p.group === 'output');
+                    const maxEndBit = outputPorts.reduce((max: number, p: any) => {
+                        const bw = p.endBit ?? 0;
+                        return bw > max ? bw : max;
+                    }, 0);
+                    portBw = maxEndBit + 1;
+                }
+                if (elem.attributes.elType === 'bitSelect' && portBw <= neededBw){
+                    elem.portProp(p.id, 'attrs/portCircle/fill', 'green');
+                }
+                else if (elem.attributes.elType !== 'bitSelect' && portBw === neededBw) {
                     elem.portProp(p.id, 'attrs/portCircle/fill', 'green');
                 } else {
-                    // Иначе — красным
                     elem.portProp(p.id, 'attrs/portCircle/fill', 'red');
                 }
             }
@@ -228,16 +237,28 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                     }
 
                     const sourceBw = getPortBandwidth(sourceView.model, sourcePortId);
-                    const targetBw = getPortBandwidth(targetView.model, targetPortId);
-                    console.log(sourceBw);
-                    console.log(targetBw);
+                    let targetBw = getPortBandwidth(targetView.model, targetPortId);
+
+                    if (targetView.model.attributes.elType === 'bitSelect') {
+                        const ports = targetView.model.get('ports')?.items ?? [];
+                        // Фильтруем output-порты
+                        const outputPorts = ports.filter((p: any) => p.group === 'output');
+                        // Находим максимальное значение bandwidth среди output-портов
+                        const maxEndBit = outputPorts.reduce((max: number, p: any) => {
+                            const bw = p.endBit ?? 0;
+                            return bw > max ? bw : max;
+                        }, 0);
+                        targetBw = maxEndBit + 1;
+                    }
 
                     if (sourceBw < 0 || targetBw < 0) {
                         return false;
                     }
 
-                    // Если bandwidth не совпадает, запрещаем соединение
-                    if (sourceBw !== targetBw) {
+                    if (targetView.model.attributes.elType === 'bitSelect' && sourceBw < targetBw){
+                        return false;
+                    }
+                    if (targetView.model.attributes.elType !== 'bitSelect' && sourceBw !== targetBw) {
                         return false;
                     }
 
