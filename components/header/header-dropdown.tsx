@@ -27,22 +27,30 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import type { AvatarDisplayType } from "@/lib/types/generic";
+import { cn } from "@/lib/utils";
 
 interface HeaderDropdownProps {
     user: OnboardedUser;
+    avatarDisplayType?: AvatarDisplayType;
+    className?: string;
 }
 
-export const HeaderDropdown = ({ user }: HeaderDropdownProps) => {
+export const HeaderDropdown = ({
+    user,
+    avatarDisplayType,
+    className,
+}: HeaderDropdownProps) => {
     const { username, name, surname, image } = user;
 
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger className="rounded-full">
+            <DropdownMenuTrigger className={cn("rounded-full", className)}>
                 <AvatarDisplay
-                    displayType={"card"}
+                    displayType={avatarDisplayType ?? "card"}
                     image={imgSrc(image)}
                     name={name + " " + surname}
-                    className="bg-header-button-hover text-header-foreground"
+                    className= "bg-header-button-hover text-header-foreground"
                 />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="min-w-44">

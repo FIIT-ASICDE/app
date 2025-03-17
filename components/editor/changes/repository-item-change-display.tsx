@@ -2,8 +2,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RepositoryItemChange } from "@/lib/types/repository";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { ItemChangeIcon } from "@/components/editor/item-change-icon";
+import { RepositoryItemChangeIcon } from "@/components/editor/changes/repository-item-change-icon";
 import { Dispatch, SetStateAction } from "react";
+import { FileIcon, Folder } from "lucide-react";
 
 interface ItemChangeDisplayProps {
     index: number;
@@ -12,7 +13,7 @@ interface ItemChangeDisplayProps {
     setChangesSelected: Dispatch<SetStateAction<Array<RepositoryItemChange>>>;
 }
 
-export const ItemChangeDisplay = ({
+export const RepositoryItemChangeDisplay = ({
     index,
     itemChange,
     changesSelected,
@@ -46,8 +47,8 @@ export const ItemChangeDisplay = ({
         return (
             <Tooltip>
                 <TooltipTrigger asChild className="text-muted-foreground">
-                    <div>
-                        <ItemChangeIcon itemChange={itemChange} />
+                    <div className="w-4">
+                        <RepositoryItemChangeIcon itemChange={itemChange} />
                     </div>
                 </TooltipTrigger>
                 <TooltipContent side="right" className="text-muted-foreground">
@@ -59,7 +60,7 @@ export const ItemChangeDisplay = ({
 
     return (
         <div
-            className="flex flex-row gap-x-2 items-center cursor-pointer hover:bg-accent p-1 px-2 rounded"
+            className="flex flex-row gap-x-3 items-center cursor-pointer border border-transparent hover:border-accent p-1 px-2 rounded"
         >
             <Checkbox
                 id={"change-" + index}
@@ -71,9 +72,15 @@ export const ItemChangeDisplay = ({
             />
             <Label
                 htmlFor={"change-" + index}
-                className="flex flex-row gap-x-2 items-baseline justify-between text-sm cursor-pointer flex-1 font-normal"
+                className="flex flex-row gap-x-2 items-center justify-between text-sm cursor-pointer flex-1 font-normal"
             >
-                {itemChange.itemPath}
+                <div className="flex flex-row gap-x-2 items-center">
+                    {itemChange.itemType === "file" ?
+                        <FileIcon className="w-4 h-4" /> :
+                        <Folder className="w-4 h-4" fill="currentcolor" />
+                    }
+                    {itemChange.itemPath.split("/").pop()}
+                </div>
                 {getChangeContent(itemChange)}
             </Label>
         </div>

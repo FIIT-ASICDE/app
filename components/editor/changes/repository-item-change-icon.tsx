@@ -13,7 +13,7 @@ interface ItemChangeIconProps {
     className?: string;
 }
 
-export const ItemChangeIcon = ({
+export const RepositoryItemChangeIcon = ({
     itemChange,
     className,
 }: ItemChangeIconProps) => {
