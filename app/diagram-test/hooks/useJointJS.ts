@@ -408,7 +408,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                     const portId = getPort(magnet);
                     if (!portId) return;
                     const sourceBw = getPortBandwidth(elementView.model, portId);
-                    currentLinkBandwidthRef.current = Math.ceil(Math.log2(sourceBw)) || 1;
+                    currentLinkBandwidthRef.current = (sourceBw === 1) ? 1 : 3;
                     isLinkingRef.current = true;
                     const sourceElemId = elementView.model.id;
                     highlightAllInputPorts(graph, sourceBw, sourceElemId);
@@ -437,8 +437,18 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                 }
                 if (targetElement && targetPortId) {
                     targetElement.portProp(targetPortId, 'attrs/circle', { display: 'none' });
-
-                    targetElement.portProp(targetPortId, 'attrs/portCircle/cx', 3);
+                    if (targetPortId === 'select') {
+                        targetElement.portProp(targetPortId, 'attrs/portCircle/cy', 0);
+                    }
+                    else if (targetPortId === 'rst') {
+                        targetElement.portProp(targetPortId, 'attrs/portCircle/cy', 0);
+                    }
+                    else if (targetPortId === 'clk' && targetElement.attributes.elType === 'ram') {
+                        targetElement.portProp(targetPortId, 'attrs/portCircle/cy', 0);
+                    }
+                    else {
+                        targetElement.portProp(targetPortId, 'attrs/portCircle/cx', 3);
+                    }
                     targetElement.portProp(targetPortId, 'attrs/portCircle', { display: 'none'});
                     targetElement.portProp(targetPortId, 'attrs/portLine', { display: 'none' });
                 }
@@ -449,8 +459,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
             // Обработка добавления связей
             graph.on('add', (cell) => {
                 if (cell.isLink()) {
-                    console.log('Связь добавлена:', cell);
-                    // Здесь можно обработать сохранение связи или другие действия
+                    console.log('Cell created:', cell);
                 }
             });
 
@@ -464,7 +473,6 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                     const targetElement = graph.getCell(link.get('target').id) as dia.Element;
 
                     if (sourceElement && sourcePortId) {
-                        // Вернём атрибуты порта к исходным
                         sourceElement.portProp(sourcePortId, 'attrs/circle', { display: '' });
 
                         sourceElement.portProp(sourcePortId, 'attrs/portCircle/cx', 20);
@@ -475,8 +483,18 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
 
                     if (targetElement && targetPortId) {
                         targetElement.portProp(targetPortId, 'attrs/circle', { display: '' });
-
-                        targetElement.portProp(targetPortId, 'attrs/portCircle/cx', -20);
+                        if (targetPortId === 'select') {
+                            targetElement.portProp(targetPortId, 'attrs/portCircle/cy', 0);
+                        }
+                        else if (targetPortId === 'rst') {
+                            targetElement.portProp(targetPortId, 'attrs/portCircle/cy', 0);
+                        }
+                        else if (targetPortId === 'clk' && targetElement.attributes.elType === 'ram') {
+                            targetElement.portProp(targetPortId, 'attrs/portCircle/cy', 0);
+                        }
+                        else {
+                            targetElement.portProp(targetPortId, 'attrs/portCircle/cx', -20);
+                        }
                         targetElement.portProp(targetPortId, 'attrs/portCircle', { display: '' });
                         targetElement.portProp(targetPortId, 'attrs/portLine', { display: '' });
                     }

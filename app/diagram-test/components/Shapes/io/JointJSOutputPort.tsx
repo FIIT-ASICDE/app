@@ -35,7 +35,7 @@ export const JointJSOutputPort = (output: Port) => {
                 fontWeight: 'bold',
                 fill: '#333',
                 x: dimension / 2,
-                y: dimension/3 + 10,
+                y: dimension/3 + 20,
             },
         },
         ports: {

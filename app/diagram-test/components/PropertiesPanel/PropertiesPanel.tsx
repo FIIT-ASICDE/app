@@ -1559,20 +1559,20 @@ const PropertiesPanel = () => {
                         {(['bitSelect'].includes(selectedElement.attributes.elType)) && (
                             <>
                                 <label>
-                                    Start Bit:
-                                    <input
-                                        type="number"
-                                        name="startBit"
-                                        value={newPortData.startBit}
-                                        onChange={handleNewPortDataChange}
-                                    />
-                                </label>
-                                <label>
                                     End Bit:
                                     <input
                                         type="number"
                                         name="endBit"
                                         value={newPortData.endBit}
+                                        onChange={handleNewPortDataChange}
+                                    />
+                                </label>
+                                <label>
+                                    Start Bit:
+                                    <input
+                                        type="number"
+                                        name="startBit"
+                                        value={newPortData.startBit}
                                         onChange={handleNewPortDataChange}
                                     />
                                 </label>
