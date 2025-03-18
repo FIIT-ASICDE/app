@@ -67,7 +67,6 @@ export const editUserProcedureSchema = z.object({
         .transform((value) => (value ? value.trim() : undefined)),
     image: z
         .string()
-        .url("Invalid URL format")
         .optional()
         .transform((value) => (value ? value.trim() : undefined)),
 });

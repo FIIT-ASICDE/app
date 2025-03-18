@@ -33,7 +33,7 @@ export const UserCard = ({
                 className,
             )}
         >
-            <CardContent className="flex flex-row items-center justify-between p-4 gap-x-3">
+            <CardContent className="flex flex-row items-center justify-between gap-x-3 p-4">
                 <div className="flex min-w-0 flex-row items-center gap-x-3">
                     <AvatarDisplay
                         displayType={"card"}

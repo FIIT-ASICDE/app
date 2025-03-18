@@ -119,12 +119,17 @@ export const EditProfileDialog = ({ profile }: EditProfileDialogProps) => {
         const newProfile = await editMutation.mutateAsync(transformedData);
         router.replace(`/${newProfile.username}`);
         setOpen(false);
+        router.refresh();
     };
 
     const onChangeImage = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            form.setValue("image", { type: "local", file });
+            form.setValue(
+                "image",
+                { type: "local", file },
+                { shouldDirty: true },
+            );
             const previewUrl = URL.createObjectURL(file);
             return () => URL.revokeObjectURL(previewUrl);
         }

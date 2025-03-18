@@ -1,9 +1,9 @@
-import { Skeleton } from "@/components/ui/skeleton"
-import { RepoOrgSubmenuSkeleton } from "@/components/skeletons/repo-org-submenu-skeleton";
 import { FolderPlus } from "lucide-react";
 
-import { RepoOrgCardSkeleton } from "@/components/skeletons/repo-org-card-skeleton";
 import GithubIcon from "@/components/icons/github";
+import { RepoOrgCardSkeleton } from "@/components/skeletons/repo-org-card-skeleton";
+import { RepoOrgSubmenuSkeleton } from "@/components/skeletons/repo-org-submenu-skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {
     return (

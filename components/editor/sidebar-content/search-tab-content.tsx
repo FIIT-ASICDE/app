@@ -1,8 +1,9 @@
-import { SearchIcon } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
 import { Repository } from "@/lib/types/repository";
+import { SearchIcon } from "lucide-react";
+import { useState } from "react";
+
 import { CloseButton } from "@/components/editor/navigation/close-button";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SearchTabContentProps {
@@ -14,11 +15,12 @@ export const SearchTabContent = ({
     repository,
     handleCloseSidebar,
 }: SearchTabContentProps) => {
-    const [repositorySearchTerm, setRepositorySearchTerm] = useState<string>("");
+    const [repositorySearchTerm, setRepositorySearchTerm] =
+        useState<string>("");
 
     return (
-        <ScrollArea className="h-full w-full relative">
-            <div className="p-4 text-nowrap">
+        <ScrollArea className="relative h-full w-full">
+            <div className="text-nowrap p-4">
                 <header className="flex flex-row items-center justify-between pb-4">
                     <span className="text-xl font-medium">Search</span>
                     <CloseButton onClick={handleCloseSidebar} />

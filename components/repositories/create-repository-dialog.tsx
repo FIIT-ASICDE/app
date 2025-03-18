@@ -111,6 +111,31 @@ export const CreateRepositoryDialog = ({
         );
     };
 
+    const showSubmitButtonContent = () => {
+        if (createRepoMutation.isPending) {
+            return (
+                <>
+                    <Loader2 className="animate-spin" />
+                    Creating repository...
+                </>
+            );
+        }
+        if (createRepoMutation.isSuccess) {
+            return (
+                <>
+                    <Loader2 className="animate-spin text-muted-foreground" />
+                    Redirecting...
+                </>
+            );
+        }
+        return (
+            <>
+                <FolderPlus />
+                Create
+            </>
+        );
+    };
+
     return (
         <Dialog>
             <Tooltip>
@@ -391,12 +416,7 @@ export const CreateRepositoryDialog = ({
                                         ).length === 0
                                     }
                                 >
-                                    <FolderPlus />
-                                    {createRepoMutation.isPending ? (
-                                        <Loader2 className="animate-spin" />
-                                    ) : (
-                                        "Create"
-                                    )}
+                                    {showSubmitButtonContent()}
                                 </Button>
                             </DialogTrigger>
                         </DialogFooter>

@@ -2,6 +2,7 @@
 
 import type { RepositoryItem } from "@/lib/types/repository";
 import { FileX } from "lucide-react";
+import { useState } from "react";
 
 import { FileTreeItem } from "@/components/editor/file/file-tree-item";
 import { NoData } from "@/components/generic/no-data";
@@ -12,6 +13,10 @@ interface FileTreeProps {
 }
 
 export const FileTree = ({ tree, onItemClick }: FileTreeProps) => {
+    const [selected, setSelected] = useState<RepositoryItem | undefined>(
+        undefined,
+    );
+
     if (!tree || tree.length === 0) {
         return (
             <NoData icon={FileX} message={"No files or directories found"} />
@@ -34,13 +39,27 @@ export const FileTree = ({ tree, onItemClick }: FileTreeProps) => {
         },
     );
 
+    const compareRepositoryItems = (repositoryItem: RepositoryItem) => {
+        return (
+            selected !== undefined &&
+            repositoryItem.type === selected.type &&
+            repositoryItem.name === selected.name
+        );
+    };
+
     return (
         <div className="space-y-1">
             {sortedTree.map((item: RepositoryItem, index: number) => (
                 <FileTreeItem
                     key={index + item.lastActivity.toLocaleString()}
                     item={item}
-                    onItemClick={onItemClick}
+                    onItemClick={() => {
+                        setSelected(item);
+                        if (onItemClick) {
+                            onItemClick(item);
+                        }
+                    }}
+                    isSelected={compareRepositoryItems(item)}
                 />
             ))}
         </div>

@@ -119,6 +119,31 @@ export const ImportRepositoryDialog = () => {
         return organisation?.name;
     };
 
+    const showSubmitButtonContent = () => {
+        if (cloneGithubRepoMutation.isPending) {
+            return (
+                <>
+                    <Loader2 className="animate-spin" />
+                    Cloning repository...
+                </>
+            );
+        }
+        if (cloneGithubRepoMutation.isSuccess) {
+            return (
+                <>
+                    <Loader2 className="animate-spin text-muted-foreground" />
+                    Redirecting...
+                </>
+            );
+        }
+        return (
+            <>
+                <GithubIcon />
+                Import
+            </>
+        );
+    };
+
     return (
         <Dialog>
             <Tooltip>
@@ -460,22 +485,7 @@ export const ImportRepositoryDialog = () => {
                                 onClick={handleImportRepository}
                                 disabled={cloneGithubRepoMutation.isPending}
                             >
-                                {cloneGithubRepoMutation.isPending ? (
-                                    <>
-                                        <Loader2 className="animate-spin" />
-                                        Cloning repository...
-                                    </>
-                                ) : cloneGithubRepoMutation.isSuccess ? (
-                                    <>
-                                        <Loader2 className="animate-spin" />
-                                        Redirecting...
-                                    </>
-                                ) : (
-                                    <>
-                                        <GithubIcon />
-                                        Import
-                                    </>
-                                )}
+                                {showSubmitButtonContent()}
                             </Button>
                         </DialogFooter>
                     </div>

@@ -2,10 +2,11 @@
 
 import { imgSrc } from "@/lib/client-file-utils";
 import { api } from "@/lib/trpc/react";
+import { InvitationType } from "@/lib/types/invitation";
 import { InviteUserTab, OrganisationDisplay } from "@/lib/types/organisation";
 import { RepositoryDisplay } from "@/lib/types/repository";
 import { UserDisplay } from "@/lib/types/user";
-import { Building, Folder, Loader2, Mail } from "lucide-react";
+import { Building, FolderPlus, Loader2, Mail } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -129,6 +130,27 @@ export const InviteUserDialog = ({
         );
     }
 
+    const showSubmitButtonContent = (invitationType: InvitationType) => {
+        if (inviteOrgMutation.isPending || inviteRepoMutation.isPending) {
+            return (
+                <>
+                    <Loader2 className="animate-spin" />
+                    Sending an invite...
+                </>
+            );
+        }
+        return (
+            <>
+                {invitationType === "repository" ? (
+                    <FolderPlus />
+                ) : (
+                    <Building />
+                )}
+                Invite
+            </>
+        );
+    };
+
     return (
         <Dialog
             open={open}
@@ -251,14 +273,7 @@ export const InviteUserDialog = ({
                                     selectedOrganisation === undefined
                                 }
                             >
-                                {inviteOrgMutation.isPending ? (
-                                    <Loader2 />
-                                ) : (
-                                    <>
-                                        <Building />
-                                        Invite
-                                    </>
-                                )}
+                                {showSubmitButtonContent("organisation")}
                             </Button>
                         </DialogTrigger>
                     </>
@@ -341,14 +356,7 @@ export const InviteUserDialog = ({
                                     selectedRepository === undefined
                                 }
                             >
-                                {inviteRepoMutation.isPending ? (
-                                    <Loader2 />
-                                ) : (
-                                    <>
-                                        <Folder />
-                                        Invite
-                                    </>
-                                )}
+                                {showSubmitButtonContent("repository")}
                             </Button>
                         </DialogTrigger>
                     </>
