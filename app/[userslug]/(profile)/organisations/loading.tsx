@@ -11,7 +11,7 @@ export default function Loading() {
                 searchText="Search organisations..."
                 createButton={{
                     icon: UserRoundPlus,
-                    title: "Create organisation"
+                    title: "Create organisation",
                 }}
             />
             <main>

@@ -1,21 +1,21 @@
-import { Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Minus } from "lucide-react";
 
 interface CloseButtonProps {
     onClick?: () => void;
     className?: string;
 }
 
-export const CloseButton = ({
-    onClick,
-    className,
-}: CloseButtonProps) => {
+export const CloseButton = ({ onClick, className }: CloseButtonProps) => {
     return (
         <button
-            className={cn("border border-transparent hover:border-accent p-[4px] rounded", className)}
+            className={cn(
+                "rounded border border-transparent p-[4px] hover:border-accent",
+                className,
+            )}
             onClick={onClick}
         >
-            <Minus className="min-w-4 min-h-4 max-w-4 max-h-4" />
+            <Minus className="max-h-4 min-h-4 min-w-4 max-w-4" />
         </button>
     );
 };

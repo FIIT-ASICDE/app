@@ -1,7 +1,11 @@
 import { BadgeType, CardType, FilterType } from "@/lib/types/generic";
 import { Invitation } from "@/lib/types/invitation";
-import { FavoriteRepositoriesFilter, PinnedRepositoriesFilter, PublicRepositoriesFilter } from "@/lib/types/repository";
 import { RoleOrganisationFilter } from "@/lib/types/organisation";
+import {
+    FavoriteRepositoriesFilter,
+    PinnedRepositoriesFilter,
+    PublicRepositoriesFilter,
+} from "@/lib/types/repository";
 
 export const getTimeDeltaString = (lastActivity: Date): string => {
     const now = new Date();

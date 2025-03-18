@@ -14,7 +14,6 @@ export const createOrgProcedureSchema = z.object({
         .transform((value) => (value ? value.trim() : undefined)),
     image: z
         .string()
-        .url()
         .optional()
         .nullable()
         .transform((value) => (value ? value.trim() : null)),

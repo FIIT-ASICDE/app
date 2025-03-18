@@ -49,6 +49,31 @@ export function OnboardingForm() {
         router.refresh();
     }
 
+    const showSubmitButtonContent = () => {
+        if (completeOnboardingMutation.isPending) {
+            return (
+                <>
+                    <Loader2 className="animate-spin" />
+                    Saving...
+                </>
+            );
+        }
+        if (completeOnboardingMutation.isSuccess) {
+            return (
+                <>
+                    <Loader2 className="animate-spin text-muted-foreground" />
+                    Redirecting...
+                </>
+            );
+        }
+        return (
+            <>
+                <Save />
+                Complete account
+            </>
+        );
+    };
+
     return (
         <fieldset disabled={completeOnboardingMutation.isPending}>
             <Form {...form}>
@@ -136,17 +161,7 @@ export function OnboardingForm() {
                             !form.formState.isDirty
                         }
                     >
-                        {completeOnboardingMutation.isPending ? (
-                            <>
-                                <Loader2 className="animate-spin" />
-                                Saving...
-                            </>
-                        ) : (
-                            <>
-                                <Save />
-                                Complete account
-                            </>
-                        )}
+                        {showSubmitButtonContent()}
                     </Button>
                 </form>
             </Form>

@@ -1,7 +1,9 @@
 "use client";
 
 import { imgSrc } from "@/lib/client-file-utils";
+import type { AvatarDisplayType } from "@/lib/types/generic";
 import { OnboardedUser } from "@/lib/types/user";
+import { cn } from "@/lib/utils";
 import {
     Building,
     Folders,
@@ -27,8 +29,6 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import type { AvatarDisplayType } from "@/lib/types/generic";
-import { cn } from "@/lib/utils";
 
 interface HeaderDropdownProps {
     user: OnboardedUser;
@@ -50,7 +50,7 @@ export const HeaderDropdown = ({
                     displayType={avatarDisplayType ?? "card"}
                     image={imgSrc(image)}
                     name={name + " " + surname}
-                    className= "bg-header-button-hover text-header-foreground"
+                    className="bg-header-button-hover text-header-foreground"
                 />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="min-w-44">

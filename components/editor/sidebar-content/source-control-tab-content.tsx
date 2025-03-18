@@ -1,7 +1,8 @@
-import { commitSchema } from "@/lib/schemas/git-schemas";
+import { useState } from "react";
 import type { RepositoryItemChange } from "@/lib/types/repository";
 import { FileText, GitCommitHorizontal } from "lucide-react";
-import { useState } from "react";
+import { commitSchema } from "@/lib/schemas/git-schemas";
+
 import { z } from "zod";
 
 import { RepositoryItemChangeDisplay } from "@/components/editor/changes/repository-item-change-display";
@@ -65,33 +66,39 @@ export const SourceControlTabContent = ({
                     <CloseButton onClick={handleCloseSidebar} />
                 </header>
                 <div className="space-y-3">
-                    <div className="flex cursor-pointer flex-row items-center gap-x-3 rounded border border-transparent p-1 px-2 hover:border-accent">
-                        <Checkbox
-                            id="all-changes"
-                            checked={allChangesSelected}
-                            onCheckedChange={handleSelectAllChanges}
-                            className="checked:bg-primary"
-                        />
-                        <Label
-                            htmlFor="all-changes"
-                            className="flex flex-1 cursor-pointer flex-row items-baseline justify-between gap-x-2 text-sm"
-                        >
-                            <span>All changes</span>
-                            <Tooltip>
-                                <TooltipTrigger
-                                    asChild
-                                    className="text-muted-foreground"
-                                >
-                                    <div className="min-w-4 text-center">
-                                        {changes.length}
-                                    </div>
-                                </TooltipTrigger>
-                                <TooltipContent side="right">
-                                    {changes.length} total changes
-                                </TooltipContent>
-                            </Tooltip>
+                    {changes.length > 0 ? (
+                        <div className="flex cursor-pointer flex-row items-center gap-x-3 rounded border border-transparent p-1 px-2 hover:border-accent">
+                            <Checkbox
+                                id="all-changes"
+                                checked={allChangesSelected}
+                                onCheckedChange={handleSelectAllChanges}
+                                className="checked:bg-primary"
+                            />
+                            <Label
+                                htmlFor="all-changes"
+                                className="flex flex-1 cursor-pointer flex-row items-baseline justify-between gap-x-2 text-sm"
+                            >
+                                <span>All changes</span>
+                                <Tooltip>
+                                    <TooltipTrigger
+                                        asChild
+                                        className="text-muted-foreground"
+                                    >
+                                        <div className="min-w-4 text-center">
+                                            {changes.length}
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="right">
+                                        {changes.length} total changes
+                                    </TooltipContent>
+                                </Tooltip>
+                            </Label>
+                        </div>
+                    ) : (
+                        <Label className="text-sm text-muted-foreground">
+                            No changes yet
                         </Label>
-                    </div>
+                    )}
 
                     <div className="flex flex-col gap-y-1">
                         {changes.map(
@@ -134,9 +141,11 @@ export const SourceControlTabContent = ({
                                 </div>
                             </TooltipTrigger>
                             <TooltipContent>
-                                {changesSelected.length === 0
-                                    ? "Select changes to commit first"
-                                    : "Commit message cannot be empty"}
+                                {changes.length === 0
+                                    ? "No changes yet"
+                                    : changesSelected.length === 0
+                                      ? "Select changes to commit first"
+                                      : "Commit message cannot be empty"}
                             </TooltipContent>
                         </Tooltip>
                     ) : (
