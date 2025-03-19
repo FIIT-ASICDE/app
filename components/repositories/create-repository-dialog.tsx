@@ -101,7 +101,7 @@ export const CreateRepositoryDialog = ({
         ) : (
             <div
                 role="note"
-                className="my-5 text-center text-sm font-normal text-muted-foreground"
+                className="my-5 text-center text-sm font-normal text-muted-foreground w-[375px] overflow-hidden"
             >
                 You are creating a{" "}
                 <span className="font-bold">{form.watch("visibility")}</span>{" "}
@@ -156,10 +156,10 @@ export const CreateRepositoryDialog = ({
                     Create repository
                 </TooltipContent>
             </Tooltip>
-            <DialogContent className="max-h-[90vh] max-w-[425px] overflow-clip p-0">
-                <ScrollArea className="h-full max-h-[90vh]">
+            <DialogContent className="max-h-[90vh] w-[425px] p-0">
+                <ScrollArea className="h-full max-h-[90vh] w-[425px]">
                     <div className="p-6">
-                        <DialogHeader>
+                        <DialogHeader className="w-[413px]">
                             <DialogTitle className="text-center text-xl">
                                 Create a new repository
                             </DialogTitle>
@@ -173,13 +173,13 @@ export const CreateRepositoryDialog = ({
                             <form>
                                 <fieldset
                                     disabled={createRepoMutation.isPending}
-                                    className="space-y-3 pt-3"
+                                    className="space-y-3 pt-3 w-[375px]"
                                 >
                                     <FormField
                                         control={form.control}
                                         name="ownerId"
                                         render={({ field }) => (
-                                            <FormItem className="w-full">
+                                            <FormItem className="w-[375px]">
                                                 <FormLabel className="text-muted-foreground">
                                                     Owner
                                                 </FormLabel>
@@ -279,7 +279,7 @@ export const CreateRepositoryDialog = ({
                                         control={form.control}
                                         name="name"
                                         render={({ field }) => (
-                                            <FormItem className="w-full">
+                                            <FormItem className="w-[375px]">
                                                 <FormLabel className="text-muted-foreground">
                                                     Name
                                                 </FormLabel>
@@ -301,7 +301,7 @@ export const CreateRepositoryDialog = ({
                                         control={form.control}
                                         name="description"
                                         render={({ field }) => (
-                                            <FormItem>
+                                            <FormItem className="w-[375px]">
                                                 <FormLabel className="text-muted-foreground">
                                                     Description
                                                 </FormLabel>
@@ -323,7 +323,7 @@ export const CreateRepositoryDialog = ({
                                         control={form.control}
                                         name="visibility"
                                         render={({ field }) => (
-                                            <FormItem>
+                                            <FormItem className="w-[375px]">
                                                 <FormLabel className="text-muted-foreground">
                                                     Visibility
                                                 </FormLabel>
@@ -401,7 +401,7 @@ export const CreateRepositoryDialog = ({
                                 </fieldset>
                             </form>
                         </Form>
-                        <DialogFooter className="mt-5">
+                        <DialogFooter className="mt-5 w-[375px]">
                             <DialogTrigger asChild>
                                 <Button
                                     type="submit"

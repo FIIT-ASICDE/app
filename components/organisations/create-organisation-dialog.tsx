@@ -108,7 +108,7 @@ export const CreateOrganisationDialog = () => {
         ) : (
             <div
                 role="note"
-                className="my-5 text-center text-sm font-normal text-muted-foreground"
+                className="my-5 text-center text-sm font-normal text-muted-foreground w-[375px] overflow-hidden"
             >
                 You are creating an organisation called{" "}
                 <span className="font-bold">{form.watch("name")}</span>
@@ -166,10 +166,10 @@ export const CreateOrganisationDialog = () => {
                     Create organisation
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-h-[90vh] max-w-[425px] overflow-clip p-0">
-                <ScrollArea className="h-full max-h-[90vh]">
+            <DialogContent className="max-h-[90vh] w-[425px] p-0">
+                <ScrollArea className="h-full max-h-[90vh] w-[425px]">
                     <div className="p-6">
-                        <DialogHeader>
+                        <DialogHeader className="w-[413px]">
                             <DialogTitle className="text-center text-xl">
                                 Create a new organisation
                             </DialogTitle>
@@ -183,13 +183,13 @@ export const CreateOrganisationDialog = () => {
                             <form>
                                 <fieldset
                                     disabled={createOrgMutation.isPending}
-                                    className="space-y-3 pt-3"
+                                    className="space-y-3 pt-3 w-[375px]"
                                 >
                                     <FormField
                                         control={form.control}
                                         name="name"
                                         render={({ field }) => (
-                                            <FormItem className="w-full">
+                                            <FormItem className="w-[375px]">
                                                 <FormLabel className="text-muted-foreground">
                                                     Name
                                                 </FormLabel>
@@ -211,7 +211,7 @@ export const CreateOrganisationDialog = () => {
                                         control={form.control}
                                         name="description"
                                         render={({ field }) => (
-                                            <FormItem>
+                                            <FormItem className="w-[375px]">
                                                 <FormLabel className="text-muted-foreground">
                                                     Description
                                                 </FormLabel>
@@ -235,7 +235,7 @@ export const CreateOrganisationDialog = () => {
                                         render={({
                                             field: { value, ...fieldProps },
                                         }) => (
-                                            <FormItem className="flex flex-col">
+                                            <FormItem className="flex flex-col w-[375px]">
                                                 <div className="flex flex-row items-center gap-5">
                                                     <div className="flex flex-col justify-center">
                                                         <FormLabel className="mb-3 text-muted-foreground">
@@ -273,7 +273,7 @@ export const CreateOrganisationDialog = () => {
                                         control={form.control}
                                         name="initialMembers"
                                         render={({ field }) => (
-                                            <FormItem className="w-full">
+                                            <FormItem className="w-[375px]">
                                                 <FormLabel className="text-muted-foreground">
                                                     Initial members
                                                 </FormLabel>
@@ -310,7 +310,7 @@ export const CreateOrganisationDialog = () => {
                                 </fieldset>
                             </form>
                         </Form>
-                        <DialogFooter className="mt-5">
+                        <DialogFooter className="mt-5 w-[375px]">
                             <Button
                                 type="submit"
                                 variant="default"

@@ -42,7 +42,7 @@ export const FileTreeItem = ({
                 className={cn(
                     "flex cursor-default flex-row items-center justify-between rounded px-2 py-1 text-sm",
                     `pl-${depth * 12 + 8}px`,
-                    isSelected && "bg-secondary font-medium",
+                    isSelected && "bg-accent font-medium",
                     "hover:bg-accent",
                 )}
             >

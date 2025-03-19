@@ -23,6 +23,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useUser } from "@/components/context/user-context";
 
 interface InviteContributorDialogProps {
     repositoryName: string;
@@ -31,6 +32,8 @@ interface InviteContributorDialogProps {
 export const InviteContributorDialog = ({
     repositoryName,
 }: InviteContributorDialogProps) => {
+    const { user } = useUser();
+
     const [query, setQuery] = useState<string>("");
     const [selectedUser, setSelectedUser] = useState<UserDisplay | undefined>(
         undefined,
@@ -137,26 +140,27 @@ export const InviteContributorDialog = ({
                         {isFetching ? (
                             <p className="text-center">Loading...</p>
                         ) : users.length > 0 ? (
-                            users.map((member) => (
-                                <CommandItem
-                                    key={member.id}
-                                    value={member.username}
-                                    className="cursor-pointer"
-                                    onSelect={() => {
-                                        setCommandOpen(false);
-                                        setSelectedUser(member);
-                                    }}
-                                >
-                                    <div className="flex flex-row items-center gap-x-3">
-                                        <AvatarDisplay
-                                            displayType="select"
-                                            name={member.username}
-                                            image={member.image}
-                                        />
-                                        {member.username}
-                                    </div>
-                                </CommandItem>
-                            ))
+                            users.filter((member) => member.id !== user.id).map((member) => {
+                                return (
+                                    <CommandItem
+                                        key={member.id}
+                                        value={member.username}
+                                        className="cursor-pointer"
+                                        onSelect={() => {
+                                            setCommandOpen(false);
+                                            setSelectedUser(member);
+                                        }}
+                                    >
+                                        <div className="flex flex-row items-center gap-x-3">
+                                            <AvatarDisplay
+                                                displayType="select"
+                                                name={member.username}
+                                                image={member.image}
+                                            />
+                                            {member.username}
+                                        </div>
+                                    </CommandItem>
+                            )})
                         ) : (
                             <CommandEmpty>No users found.</CommandEmpty>
                         )}

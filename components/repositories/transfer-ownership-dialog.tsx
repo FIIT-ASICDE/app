@@ -71,6 +71,14 @@ export const TransferOwnershipDialog = ({
     const transferMutation = api.repo.transfer.useMutation({
         onSuccess: () => {
             toast.success("Repository ownership transferred successfully");
+            const newOwnerData:
+                | {
+                name: string;
+                image: string | undefined;
+                type: "user" | "org";
+            }
+                | undefined = getNewOwnerData();
+            router.push("/" + newOwnerData.name + "/" + repository.name);
         },
         onError: (error) => {
             toast.error(error.message);
@@ -92,7 +100,6 @@ export const TransferOwnershipDialog = ({
                 newOwnerType: newOwnerData.type,
                 newOwnerId: newOwnerId,
             });
-            router.push("/" + newOwnerData.name + "/" + repository.name);
         }
     };
 
