@@ -1,5 +1,4 @@
 // src/components/Shapes/JointJSAnd.tsx
-import { BaseSvgElement } from '../base/BaseSvgElement';
 import { Xor } from '../classes/xor';
 import { shapes } from "@joint/core"; // Ваш класс для хранения данных and
 

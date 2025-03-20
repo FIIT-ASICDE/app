@@ -1,5 +1,5 @@
 // pages/diagram-test/components/PropertiesPanel/PropertiesPanel.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import { useHotkeys } from '../../hooks/useHotkeys';
 import { useDiagramContext } from '../../context/useDiagramContext';
 import styles from './PropertiesPanel.module.css';
@@ -31,10 +31,8 @@ import {BitSelect} from "../Shapes/classes/bitSelect";
 import {JointJSInputPort} from "../Shapes/io/JointJSInputPort";
 import {JointJSOutputPort} from "../Shapes/io/JointJSOutputPort";
 import {Port} from "../Shapes/classes/port";
-import {JointJSAdder} from "../Shapes/complexLogic/JointJSAdder";
-import {Adder} from "../Shapes/classes/adder";
-import {JointJSSubtractor} from "../Shapes/complexLogic/JointJSSubtractor";
-import {Subtractor} from "../Shapes/classes/subtractor";
+import {JointJSAlu} from "../Shapes/complexLogic/JointJSAlu";
+import {Alu} from "../Shapes/classes/alu";
 import {JointJSComparator} from "../Shapes/complexLogic/JointJSComparator";
 import {Comparator} from "../Shapes/classes/comparator";
 import {JointJSDecoder} from "../Shapes/complexLogic/JointJSDecoder";
@@ -50,6 +48,7 @@ interface Properties {
     stroke?: string;
     strokeWidth?: number;
     comparatorType?: string;
+    aluType?: string;
     bandwidth?: number;
     addressBandwidth?: number;
     inputPorts?: number;
@@ -76,6 +75,7 @@ const PropertiesPanel = () => {
         stroke: '#000',
         strokeWidth: 2,
         comparatorType: '',
+        aluType: '',
         createdInPorts: [],
         createdOutPorts: [],
         resetPort: false,
@@ -98,6 +98,7 @@ const PropertiesPanel = () => {
     const [panelWidth, setPanelWidth] = useState(300);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [clipboardCell, setClipboardCell] = useState<dia.Cell | null>(null);
+    const panelRef = useRef<HTMLDivElement | null>(null);
 
     const handleWidthChange = (newWidth: number) => {
         setPanelWidth(newWidth);
@@ -113,6 +114,7 @@ const PropertiesPanel = () => {
                 createdOutPorts: selectedElement.attributes.moduleOutPorts || selectedElement.attributes.selectOutPorts || [],
                 instance: selectedElement.attributes.instance || '',
                 comparatorType: selectedElement.attributes.comparatorType || '',
+                aluType: selectedElement.attributes.aluType || '',
                 addressBandwidth: selectedElement.attributes.addressBandwidth || 8,
                 resetPort: selectedElement.attributes.resetPort ?? false,
                 enablePort: selectedElement.attributes.enablePort ?? false,
@@ -147,6 +149,7 @@ const PropertiesPanel = () => {
                 stroke: '#000',
                 strokeWidth: 2,
                 comparatorType: '',
+                aluType: '',
                 createdInPorts: [],
                 createdOutPorts: [],
                 resetPort: false,
@@ -546,8 +549,7 @@ const PropertiesPanel = () => {
         if (!selectedElement) return;
 
         const complexLogicTypes = {
-            'adder': { class: Adder, create: JointJSAdder },
-            'subtractor': { class: Subtractor, create: JointJSSubtractor },
+            'alu': { class: Alu, create: JointJSAlu },
             'comparator': { class: Comparator, create: JointJSComparator },
         };
 
@@ -562,6 +564,9 @@ const PropertiesPanel = () => {
             if (elType === 'comparator') {
 
                 complexElementData.type = properties.comparatorType || '>';
+            }
+            else {
+                complexElementData.type = properties.aluType || '+';
             }
             complexElementData.position = { x, y };
 
@@ -655,11 +660,7 @@ const PropertiesPanel = () => {
             handleBitSelectPortChange()
             return;
         }
-        else if (selectedElement.attributes.elType === 'adder') {
-            handleComplexLogicChange();
-            return;
-        }
-        else if (selectedElement.attributes.elType === 'subtractor') {
+        else if (selectedElement.attributes.elType === 'alu') {
             handleComplexLogicChange();
             return;
         }
@@ -706,11 +707,23 @@ const PropertiesPanel = () => {
         updateElement(selectedElement);
         setShowSaveNotification(true);
     };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
+                handleSave();
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [handleSave]);
+
     function handleCopy() {
         if (!selectedElement) return;
-        // Клонируем элемент
         const clone = selectedElement.clone();
-        // Сохраняем в state, чтобы потом вставить
         setClipboardCell(clone);
         console.log("Copied element:", clone);
     }
@@ -786,6 +799,7 @@ const PropertiesPanel = () => {
 
     return (
         <ResizablePanel
+            ref={panelRef}
             className={styles.propertiesPanel}
             defaultWidth={300}
             direction="left"
@@ -1105,7 +1119,7 @@ const PropertiesPanel = () => {
 
             )}
 
-            {(['adder', 'subtractor', 'comparator'].includes(selectedElement.attributes.elType)) && (
+            {(['alu', 'comparator'].includes(selectedElement.attributes.elType)) && (
                 <>
                     <label>
                         {selectedElement.attributes.elType.toUpperCase()} name:
@@ -1138,6 +1152,19 @@ const PropertiesPanel = () => {
                             </div>
                         )}
                     </label>
+                    {selectedElement.attributes.elType === 'alu' && (
+                        <label>
+                            ALU Type:
+                            <select
+                                name="aluType"
+                                value={properties.aluType}
+                                onChange={handleChange}
+                            >
+                                <option value="+">{'+'}</option>
+                                <option value="-">{'-'}</option>
+                            </select>
+                        </label>
+                    )}
                     {selectedElement.attributes.elType === 'comparator' && (
                         <label>
                             Comparator Type:

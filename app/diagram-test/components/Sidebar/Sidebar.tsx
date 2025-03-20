@@ -1,6 +1,6 @@
 // pages/diagram-test/components/Sidebar/Sidebar.tsx
 import Image from 'next/image';
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import {
     FaSearchPlus,
     FaSearchMinus,
@@ -8,9 +8,7 @@ import {
     FaSave,
     FaFolderOpen,
     FaCode,
-    FaHandPaper,
     FaBars,
-    FaPlug,
     FaTools,
     FaRegFileCode
 } from 'react-icons/fa';
@@ -23,16 +21,10 @@ import ResizablePanel from '../common/ResizablePanel';
 import styles from './Sidebar.module.css';
 
 const Sidebar = () => {
-    const { zoomIn, zoomOut, fitToView, graph, isPanning, togglePanning } = useDiagramContext();
-    const [isLogicCollapsed, setIsLogicCollapsed] = useState(true);
-    const [isIOCollapsed, setIsIOCollapsed] = useState(true);
-    const [isModulesCollapsed, setIsModulesCollapsed] = useState(true);
-    const [isToolsCollapsed, setIsToolsCollapsed] = useState(true);
+    const { zoomIn, zoomOut, fitToView, graph } = useDiagramContext();
+    const [isElementsCollapsed, setIsElementsCollapsed] = useState(true);
     const [isSaveLoadCollapsed, setIsSaveLoadCollapsed] = useState(true);
     const [isActionsCollapsed, setIsActionsCollapsed] = useState(true);
-    const [isComplexLogicCollapsed, setIsComplexLogicCollapsed] = useState(true);
-    const [isMemoryCollapsed, setIsMemoryCollapsed] = useState(true);
-    const [isBitOperationsCollapsed, setIsBitOperationsCollapsed] = useState(true);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [gridColumns, setGridColumns] = useState(3);
 
@@ -114,9 +106,6 @@ const Sidebar = () => {
         }
     };
 
-    const handlePanToggle = () => {
-        togglePanning();
-    };
 
     return (
         <ResizablePanel
@@ -126,12 +115,12 @@ const Sidebar = () => {
         >
             {/* Logic Elements Group */}
             <div>
-                <div className={styles.groupHeader} onClick={() => setIsLogicCollapsed(!isLogicCollapsed)}>
-                    <FaPlug className={styles.collapseIcon} />
-                    <h3>Logic</h3>
+                <div className={styles.groupHeader} onClick={() => setIsElementsCollapsed(!isElementsCollapsed)}>
+                    <FaTools className={styles.collapseIcon} />
+                    <h3>Elements</h3>
                     <FaBars className={styles.toggleIcon} />
                 </div>
-                {!isLogicCollapsed && (
+                {!isElementsCollapsed && (
                     <div style={iconListStyle}>
                         <Tippy content="AND Gate" placement="right" delay={[500, 0]}>
                             <div
@@ -238,18 +227,7 @@ const Sidebar = () => {
                                 />
                             </div>
                         </Tippy>
-                    </div>
-                )}
-            </div>
-            {/* Complex Logic Elements Group */}
-            <div>
-                <div className={styles.groupHeader} onClick={() => setIsComplexLogicCollapsed(!isComplexLogicCollapsed)}>
-                    <FaPlug className={styles.collapseIcon} />
-                    <h3>Complex Logic</h3>
-                    <FaBars className={styles.toggleIcon} />
-                </div>
-                {!isComplexLogicCollapsed && (
-                    <div style={iconListStyle}>
+                        {/* Complex Logic Elements Group */}
                         <Tippy content="Multiplexer" placement="right" delay={[500, 0]}>
                             <div
                                 className={styles.iconItem}
@@ -295,30 +273,15 @@ const Sidebar = () => {
                                 />
                             </div>
                         </Tippy>
-                        <Tippy content="Adder" placement="right" delay={[500, 0]}>
+                        <Tippy content="Alu" placement="right" delay={[500, 0]}>
                             <div
                                 className={styles.iconItem}
                                 draggable
-                                onDragStart={(e) => handleDragStart(e, 'adder')}
+                                onDragStart={(e) => handleDragStart(e, 'alu')}
                             >
                                 <Image
                                     src="/images/svg/adderIcon.svg"
-                                    alt="Adder"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
-                        <Tippy content="Subtractor" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'sub')}
-                            >
-                                <Image
-                                    src="/images/svg/subtractorIcon.svg"
-                                    alt="Subtractor"
+                                    alt="Alu"
                                     className={styles.svgIcon}
                                     width={40}
                                     height={40}
@@ -340,18 +303,7 @@ const Sidebar = () => {
                                 />
                             </div>
                         </Tippy>
-                    </div>
-                )}
-            </div>
-            {/* I/O Elements Group */}
-            <div>
-                <div className={styles.groupHeader} onClick={() => setIsIOCollapsed(!isIOCollapsed)}>
-                    <FaPlug className={styles.collapseIcon} />
-                    <h3>I / O</h3>
-                    <FaBars className={styles.toggleIcon} />
-                </div>
-                {!isIOCollapsed && (
-                    <div style={iconListStyle}>
+                        {/* I/O Elements Group */}
                         <Tippy content="Input Port" placement="right" delay={[500, 0]}>
                             <div
                                 className={styles.iconItem}
@@ -383,18 +335,7 @@ const Sidebar = () => {
                                 />
                             </div>
                         </Tippy>
-                    </div>
-                )}
-            </div>
-            {/* Module Group */}
-            <div>
-                <div className={styles.groupHeader} onClick={() => setIsModulesCollapsed(!isModulesCollapsed)}>
-                    <FaPlug className={styles.collapseIcon} />
-                    <h3>Module / Component</h3>
-                    <FaBars className={styles.toggleIcon} />
-                </div>
-                {!isModulesCollapsed && (
-                    <div style={iconListStyle}>
+                        {/* Module Group */}
                         <Tippy content="New Module" placement="right" delay={[500, 0]}>
                             <div
                                 className={styles.iconItem}
@@ -425,18 +366,7 @@ const Sidebar = () => {
                                 />
                             </div>
                         </Tippy>
-
-                    </div>
-                )}
-            </div>
-            <div>
-                <div className={styles.groupHeader} onClick={() => setIsMemoryCollapsed(!isMemoryCollapsed)}>
-                    <FaPlug className={styles.collapseIcon} />
-                    <h3>Memory</h3>
-                    <FaBars className={styles.toggleIcon} />
-                </div>
-                {!isMemoryCollapsed && (
-                    <div style={iconListStyle}>
+                        {/* Memory Group */}
                         <Tippy content="SRAM" placement="right" delay={[500, 0]}>
                             <div
                                 className={styles.iconItem}
@@ -467,18 +397,7 @@ const Sidebar = () => {
                                 />
                             </div>
                         </Tippy>
-
-                    </div>
-                )}
-            </div>
-            <div>
-                <div className={styles.groupHeader} onClick={() => setIsBitOperationsCollapsed(!isBitOperationsCollapsed)}>
-                    <FaPlug className={styles.collapseIcon} />
-                    <h3>Bit Operations</h3>
-                    <FaBars className={styles.toggleIcon} />
-                </div>
-                {!isBitOperationsCollapsed && (
-                    <div style={iconListStyle}>
+                        {/* Bit Operations Group */}
                         <Tippy content="Bit Select" placement="right" delay={[500, 0]}>
                             <div
                                 className={styles.iconItem}
@@ -507,28 +426,6 @@ const Sidebar = () => {
                                     width={40}
                                     height={40}
                                 />
-                            </div>
-                        </Tippy>
-
-                    </div>
-                )}
-            </div>
-
-            {/* Tools Group */}
-            <div>
-                <div className={styles.groupHeader} onClick={() => setIsToolsCollapsed(!isToolsCollapsed)}>
-                    <FaTools className={styles.collapseIcon} />
-                    <h3>Tools</h3>
-                    <FaBars className={styles.toggleIcon} />
-                </div>
-                {!isToolsCollapsed && (
-                    <div style={iconListStyle}>
-                        <Tippy content={isPanning ? "Disable Panning" : "Enable Panning"} placement="right" delay={[500, 0]}>
-                            <div
-                                className={`${styles.iconItem} ${isPanning ? styles.active : ''}`}
-                                onClick={handlePanToggle}
-                            >
-                                <FaHandPaper size={24} />
                             </div>
                         </Tippy>
                     </div>

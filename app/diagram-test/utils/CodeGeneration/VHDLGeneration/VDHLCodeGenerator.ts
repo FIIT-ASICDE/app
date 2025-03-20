@@ -11,8 +11,7 @@ const operatorMapVHDL: { [key: string]: string } = {
     not: 'NOT'
 };
 const complexLogicMapVHDL: { [key: string]: string } = {
-    adder: '+',
-    subtractor: '-',
+    alu: '+',
     comparator: ''
 };
 
@@ -203,8 +202,9 @@ export function generateVHDLCode(graph: dia.Graph): string {
         });
         let expr = '';
 
-        if (type === 'adder' || type === 'subtractor') {
-            expr = inputSignals.join(` ${complexLogicMapVHDL[type]} ` || "'0'");
+        if (type === 'alu') {
+            const aluType = cell.attributes.aluType || "+";
+            expr = `${inputSignals.join(` ${aluType} `) || "'0'"}`;
             code += `    ${netName} <= ${expr};\n`;
         }
         else if (type === 'comparator') {

@@ -12,8 +12,7 @@ const operatorMap: { [key: string]: string } = {
     not: '~'
 };
 const complexLogicMap: { [key: string]: string } = {
-    adder: '+',
-    subtractor: '-',
+    alu: '+',
     comparator: '<'
 };
 
@@ -44,7 +43,7 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
     const sramCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'ram');
     const registerCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'register');
     const links = cells.filter(cell => cell.isLink());
-    const bitSelectTable: { name: string, connectedTo: string, startBit: number, endBit: number }[] = [];
+    const bitSelectTable: { name: string, connectedTo: string, connectedFrom: string, startBit: number, endBit: number }[] = [];
 
 
     const excludedNames = new Set([
@@ -61,7 +60,7 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
             entry.name === signal && entry.connectedTo === netName
         );
         if (bitSelectEntry) {
-            return `${bitSelectEntry.name}[${bitSelectEntry.endBit}:${bitSelectEntry.startBit}]`;
+            return `${bitSelectEntry.connectedFrom}[${bitSelectEntry.endBit}:${bitSelectEntry.startBit}]`;
         }
         return signal;
     }
@@ -181,9 +180,6 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
             const inputKey = `${cell.id}:${inputPort?.id}`;
             const inputSignal = connectionMap[inputKey] ? connectionMap[inputKey][0] : '/* unconnected */';
 
-            code += `assign ${netName} = ${inputSignal};\n`;
-
-
             cellPorts.filter(p => p.group === 'output').forEach(outputPort => {
                 const outputKey = `${cell.id}:${outputPort.id}`;
                 const outputSignal = outputConnectionMap[outputKey] ? outputConnectionMap[outputKey][0] : '/* unconnected */';
@@ -192,11 +188,11 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
                 bitSelectTable.push({
                     name: netName,
                     connectedTo: outputSignal,
+                    connectedFrom: inputSignal,
                     startBit: bitStart,
                     endBit: bitEnd
                 });
             });
-            console.log(bitSelectTable);
 
             code += `\n`;
         }
@@ -255,7 +251,10 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
             return connectionMap[key] ? getBitSelectedSignal(connectionMap[key][0], netName) : '/* unconnected */';
         });
 
-        let expr = inputSignals.join(` ${complexLogicMap[type]} `) || '/* unconnected */';
+        let expr;
+        if (type === 'alu') {
+            expr = `${inputSignals.join(` ${cell.attributes.aluType} `) || '/* unconnected */'}`;
+        }
         if (type === 'comparator') {
             expr = `(${inputSignals.join(` ${cell.attributes.comparatorType} `) || '/* unconnected */'})`;
         }
@@ -389,12 +388,14 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         const enKey = `${cell.id}:en`;
         const dKey = `${cell.id}:d`;
         const qKey = `${cell.id}:q`;
+        const qInvertedKey = `${cell.id}:qInverted`;
 
         const clkSignal = connectionMap[clkKey] ? getBitSelectedSignal(connectionMap[clkKey][0], regName) : '/* unconnected */';
         const rstSignal = connectionMap[rstKey] ? getBitSelectedSignal(connectionMap[rstKey][0], regName)  : '/* unconnected */';
         const enSignal = connectionMap[enKey] ? getBitSelectedSignal(connectionMap[enKey][0], regName) : '1\'b1';
         const dSignal = connectionMap[dKey] ? getBitSelectedSignal(connectionMap[dKey][0], regName) : '/* unconnected */';
         const qSignal = outputConnectionMap[qKey] ? getBitSelectedSignal(outputConnectionMap[qKey][0], regName) : regName;
+        const qInvertedSignal = outputConnectionMap[qInvertedKey] ? getBitSelectedSignal(outputConnectionMap[qInvertedKey][0], regName) : regName;
 
         // clk
         const clkEdge = cell.attributes.clkEdge === 'falling' ? 'negedge' : 'posedge';
@@ -431,8 +432,11 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         }
 
         // qInverted
-        const dAssignment = cell.attributes.qInverted ? `~${dSignal}` : dSignal;
-        code += `        ${qSignal} <= ${dAssignment};\n`;
+        if (cell.attributes.qInverted) {
+            code += `        ${qInvertedSignal} <= ~${dSignal};\n`;
+        }
+
+        code += `        ${qSignal} <= ${dSignal};\n`;
 
         code += `end\n\n`;
     });

@@ -1,7 +1,7 @@
-import {Adder} from '../classes/adder';
+import {Alu} from '../classes/alu';
 import { shapes } from "@joint/core";
 
-export const JointJSAdder = (adder: Adder) => {
+export const JointJSAlu = (alu: Alu) => {
 
     const dimension = 100;
     const portItems = [];
@@ -9,7 +9,7 @@ export const JointJSAdder = (adder: Adder) => {
     portItems.push({
         id: 'input1',
         group: 'input',
-        bandwidth: adder.dataBandwidth,
+        bandwidth: alu.dataBandwidth,
         args: {
             x: 0,
             y: 25
@@ -19,7 +19,7 @@ export const JointJSAdder = (adder: Adder) => {
     portItems.push({
         id: 'input2',
         group: 'input',
-        bandwidth: adder.dataBandwidth,
+        bandwidth: alu.dataBandwidth,
         args: {
             x: 0,
             y: dimension - 25
@@ -29,7 +29,7 @@ export const JointJSAdder = (adder: Adder) => {
     portItems.push({
         id: 'output1',
         group: 'output',
-        bandwidth: adder.dataBandwidth + 1,
+        bandwidth: alu.dataBandwidth + 1,
         args: {
             x: dimension / 2,
             y: dimension / 2
@@ -38,10 +38,11 @@ export const JointJSAdder = (adder: Adder) => {
 
 
     return new shapes.standard.Path({
-        elType: 'adder',
-        name: adder.name,
-        bandwidth: adder.dataBandwidth,
-        position: { x: adder.position?.x || 100, y: adder.position?.y || 100 },
+        elType: 'alu',
+        name: alu.name,
+        aluType: alu.type,
+        bandwidth: alu.dataBandwidth,
+        position: { x: alu.position?.x || 100, y: alu.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {
             body: {
@@ -51,7 +52,7 @@ export const JointJSAdder = (adder: Adder) => {
                 strokeWidth: 2,
             },
             label: {
-                text: `+\n\n\n\n${adder.name}`,
+                text: `${alu.type}\n\n\n\n${alu.name}`,
                 fontSize: 14,
                 fontFamily: 'Arial',
                 fontWeight: 'bold',

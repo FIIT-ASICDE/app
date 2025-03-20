@@ -1,9 +1,8 @@
-// useDiagramEvents.ts
 import { useEffect } from 'react';
 import { dia } from '@joint/core';
 
 interface UseDiagramEventsProps {
-    paper: dia.Paper | null;          // paperRef.current
+    paper: dia.Paper | null;
     paperElement: HTMLDivElement | null;
 }
 
@@ -11,42 +10,36 @@ export function useDiagramEvents({ paper, paperElement }: UseDiagramEventsProps)
     useEffect(() => {
         if (!paper || !paperElement) return;
 
-        // 1. Логика колеса (wheel)
+        const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+
         const handleWheel = (event: WheelEvent) => {
             event.preventDefault();
-            const currentScale = paper.scale().sx;
-            const zoomSpeed = 0.05;
-            let newScale = currentScale + (event.deltaY < 0 ? zoomSpeed : -zoomSpeed);
-            if (newScale < 0.1) newScale = 0.1;
-            paper.scale(newScale, newScale);
+
+            const deltaX = event.deltaX;
+            const deltaY = event.deltaY;
+            const scaleFactor = event.deltaMode === 0 ? 1 : 20;
+
+            if ((isMac && event.metaKey) || (!isMac && event.ctrlKey)) {
+                const currentScale = paper.scale().sx;
+                const zoomSpeed = 0.05;
+                let newScale = currentScale + (deltaY < 0 ? zoomSpeed : -zoomSpeed);
+                if (newScale < 0.1) newScale = 0.1;
+                if (newScale > 5) newScale = 5;
+                paper.scale(newScale, newScale);
+            } else if ((isMac && event.altKey) || (!isMac && event.shiftKey)) {
+                const { tx, ty } = paper.translate();
+                paper.translate(tx - deltaY * scaleFactor * 0.5, ty);
+            } else {
+                const { tx, ty } = paper.translate();
+                paper.translate(tx - deltaX * scaleFactor * 0.5, ty - deltaY * scaleFactor * 0.5);
+            }
         };
 
         paperElement.addEventListener('wheel', handleWheel, { passive: false });
 
-        // 2. Логика клавиш
-        const handleKeyDown = (event: KeyboardEvent) => {
-            let dx = 0;
-            let dy = 0;
-            const moveStep = 20;
 
-            switch (event.key) {
-            case 'ArrowUp':    dy = moveStep;   break;
-            case 'ArrowDown':  dy = -moveStep;  break;
-            case 'ArrowLeft':  dx = moveStep;   break;
-            case 'ArrowRight': dx = -moveStep;  break;
-            default: return;
-            }
-
-            const { tx, ty } = paper.translate();
-            paper.translate(tx + dx, ty + dy);
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-
-        // Отписка
         return () => {
             paperElement.removeEventListener('wheel', handleWheel);
-            window.removeEventListener('keydown', handleKeyDown);
         };
     }, [paper, paperElement]);
 }

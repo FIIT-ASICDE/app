@@ -28,10 +28,8 @@ import {JointJSDecoder} from '../Shapes/complexLogic/JointJSDecoder';
 import { Decoder } from '../Shapes/classes/decoder';
 import {JointJSEncoder} from '../Shapes/complexLogic/JointJSEncoder';
 import { Encoder } from '../Shapes/classes/encoder';
-import {JointJSAdder} from '../Shapes/complexLogic/JointJSAdder';
-import { Adder } from '../Shapes/classes/adder';
-import {JointJSSubtractor} from '../Shapes/complexLogic/JointJSSubtractor';
-import { Subtractor } from '../Shapes/classes/subtractor';
+import {JointJSAlu} from '../Shapes/complexLogic/JointJSAlu';
+import { Alu } from '../Shapes/classes/alu';
 import { JointJSComparator } from '../Shapes/complexLogic/JointJSComparator';
 import { Comparator } from '../Shapes/classes/comparator';
 import { JointJSNewModule } from '../Shapes/modules/JointJSNewModule';
@@ -50,7 +48,7 @@ import {useDiagramEvents} from "@/app/diagram-test/hooks/useDiagramEvents";
 
 const DiagramArea = () => {
     const paperElement = useRef<HTMLDivElement>(null);
-    const { graph, isPanning } = useDiagramContext();
+    const { graph, isPanning} = useDiagramContext();
     const paper = useJointJS(paperElement);
     const [isModalOpen, setIsModalOpen] = useState(false);
     useDiagramEvents({
@@ -72,8 +70,7 @@ const DiagramArea = () => {
         case 'multiplexer':return 'multiplexer';
         case 'decoder':    return 'decoder';
         case 'encoder':    return 'encoder';
-        case 'adder':      return 'adder';
-        case 'sub':        return 'subtractor';
+        case 'alu':        return 'alu';
         case 'comp':       return 'comparator';
         case 'newModule':  return 'newModule';
         case 'ram':        return 'ram';
@@ -196,19 +193,13 @@ const DiagramArea = () => {
             encoder.position = {x, y};
             element = JointJSEncoder(encoder);
             break;
-        case 'adder':
-            const adder = new Adder();
-            adder.name = elementName;
-            adder.dataBandwidth = 1;
-            adder.position = {x, y};
-            element = JointJSAdder(adder);
-            break;
-        case 'sub':
-            const subtractor = new Subtractor();
-            subtractor.name = elementName;
-            subtractor.dataBandwidth = 1;
-            subtractor.position = {x, y};
-            element = JointJSSubtractor(subtractor);
+        case 'alu':
+            const alu = new Alu();
+            alu.name = elementName;
+            alu.dataBandwidth = 1;
+            alu.position = {x, y};
+            alu.type = '+';
+            element = JointJSAlu(alu);
             break;
         case 'comp':
             const comparator = new Comparator();

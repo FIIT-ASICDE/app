@@ -6,6 +6,7 @@ export const JointJSRegister = (register: Register) => {
     const dimension = 200;
     const portItems = [];
     const inLeftCount = 3;
+    const inRightCount = 2;
 
     let registerRefD = register.resetPort
         ? (register.clkEdge === 'rising'
@@ -25,6 +26,7 @@ export const JointJSRegister = (register: Register) => {
         : registerRefD;
 
     const portLeftY = (idx: number) => (dimension / (inLeftCount + 1)) * (idx + 1);
+    const portRightY = (idx: number) => (dimension / (inLeftCount + 1)) * (idx + 1);
 
     portItems.push({
         id: 'd',
@@ -102,12 +104,26 @@ export const JointJSRegister = (register: Register) => {
         group: 'output',
         args: {
             x: dimension / 2,
-            y: dimension / 2
+            y: portRightY(0)
         },
         attrs: {
             portLabel: { text: 'Q' }
         }
     });
+    if (register.qInverted) {
+        portItems.push({
+            id: 'qInverted',
+            bandwidth: register.dataBandwidth,
+            group: 'output',
+            args: {
+                x: dimension / 2,
+                y: portRightY(1)
+            },
+            attrs: {
+                portLabel: { text: 'Q' }
+            }
+        });
+    }
 
     return new shapes.standard.Path({
         elType: 'register',

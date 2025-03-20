@@ -84,7 +84,7 @@ function getPort(magnet: Element | null): string | null {
 
 
 const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
-    const { graph, setSelectedElement, setPaper, isPanning, removeElement, hasFormErrors } = useDiagramContext();
+    const { graph, setSelectedElement, setPaper, removeElement, hasFormErrors } = useDiagramContext();
     console.log(hasFormErrors);
     const paperRef = useRef<dia.Paper | null>(null);
     const selectedCellViewRef = useRef<dia.CellView | null>(null);
@@ -511,66 +511,6 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
         }
     }, [paperElement, graph, setSelectedElement, setPaper]);
 
-
-    useEffect(() => {
-        if (paperRef.current) {
-            const paper = paperRef.current;
-
-            const handleBlankPointerDown = (event: MouseEvent, x: number, y: number) => {
-                if (isPanning) {
-                    isDragging.current = true;
-                    lastClientX.current = event.clientX;
-                    lastClientY.current = event.clientY;
-                    paperElement.current!.classList.add('grabbing');
-                }
-            };
-
-            const handlePointerMove = (event: MouseEvent) => {
-                if (isPanning && isDragging.current) {
-                    const dx = event.clientX - lastClientX.current;
-                    const dy = event.clientY - lastClientY.current;
-                    lastClientX.current = event.clientX;
-                    lastClientY.current = event.clientY;
-
-                    translation.current.x += dx;
-                    translation.current.y += dy;
-
-                    paper.translate(translation.current.x, translation.current.y);
-                }
-            };
-            const handlePointerUp = () => {
-                if (isPanning && isDragging.current) {
-                    isDragging.current = false;
-                    paperElement.current!.classList.remove('grabbing');
-                }
-            };
-
-            // Связываем события
-            paper.on('blank:pointerdown', handleBlankPointerDown as any);
-            window.addEventListener('mousemove', handlePointerMove);
-            window.addEventListener('mouseup', handlePointerUp);
-
-            return () => {
-                paper.off('blank:pointerdown', handleBlankPointerDown);
-                window.removeEventListener('mousemove', handlePointerMove);
-                window.removeEventListener('mouseup', handlePointerUp);
-            };
-        }
-    }, [isPanning]);
-
-    useEffect(() => {
-        if (paperRef.current) {
-            const paper = paperRef.current;
-            const elements = graph.getElements();
-            elements.forEach(element => {
-                if (isPanning) {
-                    element.prop('interactive', false);
-                } else {
-                    element.prop('interactive', true);
-                }
-            });
-        }
-    }, [isPanning, graph]);
 
     return paperRef.current;
 };

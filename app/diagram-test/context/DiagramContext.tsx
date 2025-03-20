@@ -14,8 +14,6 @@ interface DiagramContextProps {
     zoomIn: () => void;
     zoomOut: () => void;
     fitToView: () => void;
-    isPanning: boolean;
-    togglePanning: () => void;
     removeElement: () => void;
     hasFormErrors: boolean;
     setHasFormErrors: (val: boolean) => void;
@@ -33,7 +31,6 @@ export const DiagramProvider = ({ children }: DiagramProviderProps) => {
     );
     const [paper, setPaper] = useState<dia.Paper | null>(null);
     const [selectedElement, setSelectedElement] = useState<dia.Cell | null>(null);
-    const [isPanning, setIsPanning] = useState(false);
     const [hasFormErrors, setHasFormErrors] = useState<boolean>(false);
 
     const updateElement = (cell: dia.Cell) => {
@@ -65,9 +62,6 @@ export const DiagramProvider = ({ children }: DiagramProviderProps) => {
         }
     };
 
-    const togglePanning = () => {
-        setIsPanning(prev => !prev);
-    };
 
     const removeElement = () => {
         if (selectedElement) {
@@ -88,9 +82,7 @@ export const DiagramProvider = ({ children }: DiagramProviderProps) => {
                 zoomIn,
                 zoomOut,
                 fitToView,
-                isPanning,
                 removeElement,
-                togglePanning,
                 hasFormErrors,
                 setHasFormErrors,
 
