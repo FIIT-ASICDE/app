@@ -4,9 +4,9 @@ import { commitSchema } from "@/lib/schemas/git-schemas";
 import { api } from "@/lib/trpc/react";
 import type {
     BottomPanelContentTab,
-    SidebarContentTab,
+    SidebarContentTab, SimulationType
 } from "@/lib/types/editor";
-import type { Repository, RepositoryItemChange } from "@/lib/types/repository";
+import type { Repository, RepositoryItem } from "@/lib/types/repository";
 import dynamic from "next/dynamic";
 import { type ElementRef, useRef, useState } from "react";
 import { z } from "zod";
@@ -19,6 +19,7 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { toast } from "sonner";
 
 interface EditorPageProps {
     repository: Repository;
@@ -48,54 +49,26 @@ export default function EditorPage({ repository }: EditorPageProps) {
     const [lastOpenedBottomPanelSize, setLastOpenedBottomPanelSize] =
         useState<number>(20);
 
-    /*const changes = api.git.changes.useQuery(
+    const changes = api.git.changes.useQuery(
         { repoId: repository.id },
         {
             enabled: repository.isGitRepo,
             refetchInterval: 5_000,
         },
-    );*/
+    );
 
-    const changes: Array<RepositoryItemChange> = [
-        {
-            itemPath: "files/file1.txt",
-            change: {
-                type: "added",
-            },
-        } satisfies RepositoryItemChange,
-        {
-            itemPath: "files/file2.txt",
-            change: {
-                type: "modified",
-            },
-        } satisfies RepositoryItemChange,
-        {
-            itemPath: "files/file3.txt",
-            change: {
-                type: "deleted",
-            },
-        } satisfies RepositoryItemChange,
-        {
-            itemPath: "files/file4.txt",
-            change: {
-                type: "renamed",
-                oldName: "files/old-name.txt",
-            },
-        } satisfies RepositoryItemChange,
-        {
-            itemPath: "files/file5.txt",
-            change: {
-                type: "moved",
-                oldPath: "old-location/file5.txt",
-            },
-        } satisfies RepositoryItemChange,
-    ] satisfies Array<RepositoryItemChange>;
-
-    const commitMutation = api.git.commit.useMutation();
+    const commitMutation = api.git.commit.useMutation({
+        onSuccess: () => {
+            toast.success("Successfully commited " + changes.data?.changes.length);
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
 
     const handleOnCommit = async (data: z.infer<typeof commitSchema>) => {
         await commitMutation.mutateAsync(data);
-        //await changes.refetch();
+        await changes.refetch();
     };
 
     const handleCloseSidebar = () => {
@@ -116,6 +89,11 @@ export default function EditorPage({ repository }: EditorPageProps) {
         }
     };
 
+    const onStartSimulation = (selectedType: SimulationType, selectedFile: RepositoryItem) => {
+        // TODO: adam start simulation
+        console.log("Starting simulation with type: " + selectedType + " and file: " + selectedFile?.name);
+    };
+
     return (
         <div className="flex h-screen flex-row">
             <EditorNavigation
@@ -134,6 +112,8 @@ export default function EditorPage({ repository }: EditorPageProps) {
                 lastOpenedSidebarSize={lastOpenedSidebarSize}
                 setLastOpenedSidebarSize={setLastOpenedSidebarSize}
                 isGitRepo={repository.isGitRepo}
+                repository={repository}
+                onStartSimulation={onStartSimulation}
             />
 
             <ResizablePanelGroup
@@ -165,7 +145,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
                             <SidebarTabContent
                                 activeSidebarContent={activeSidebarContent}
                                 repository={repository}
-                                changes={/*changes.data?.changes ?? []*/ changes}
+                                changes={changes.data?.changes ?? []}
                                 handleCloseSidebar={handleCloseSidebar}
                                 onCommitAction={handleOnCommit}
                             />

@@ -1,6 +1,6 @@
 import type {
     BottomPanelContentTab,
-    SidebarContentTab,
+    SidebarContentTab, SimulationType
 } from "@/lib/types/editor";
 import {
     Cog,
@@ -21,6 +21,8 @@ import { SidebarNavigationButton } from "@/components/editor/navigation/sidebar-
 import { HeaderDropdown } from "@/components/header/header-dropdown";
 import LogoIcon from "@/components/icons/logo";
 import { Separator } from "@/components/ui/separator";
+import { SimulationDialog } from "@/components/editor/simulation-dialog";
+import { Repository, RepositoryItem } from "@/lib/types/repository";
 
 interface EditorNavigationProps {
     activeSidebarContent: SidebarContentTab;
@@ -40,6 +42,8 @@ interface EditorNavigationProps {
     lastOpenedSidebarSize: number;
     setLastOpenedSidebarSize: Dispatch<SetStateAction<number>>;
     isGitRepo?: boolean;
+    repository: Repository;
+    onStartSimulation: (selectedType: SimulationType, selectedFile: RepositoryItem) => void;
 }
 
 export const EditorNavigation = ({
@@ -58,10 +62,13 @@ export const EditorNavigation = ({
     lastOpenedSidebarSize,
     setLastOpenedSidebarSize,
     isGitRepo,
+    repository,
+    onStartSimulation,
 }: EditorNavigationProps) => {
     const { user } = useUser();
 
     const [commandOpen, setCommandOpen] = useState<boolean>(false);
+    const [simulationOpen, setSimulationOpen] = useState<boolean>(false);
 
     const toggleVerticalCollapse = (
         bottomPanelContentTab: BottomPanelContentTab,
@@ -175,10 +182,7 @@ export const EditorNavigation = ({
                     <NavigationButton
                         icon={Play}
                         tooltip="Simulation"
-                        onClick={() => {
-                            toggleVerticalCollapse("simulation");
-                            setActiveBottomPanelContent("simulation");
-                        }}
+                        onClick={() => setSimulationOpen(!simulationOpen)}
                     />
                     <NavigationButton
                         icon={Cog}
@@ -195,6 +199,23 @@ export const EditorNavigation = ({
                     />
                 </div>
             </div>
+
+            <SimulationDialog
+                repository={repository}
+                onStartSimulation={(selectedType: SimulationType, selectedFile: RepositoryItem) => {
+                    if (verticalGroupRef.current) {
+                        verticalGroupRef.current.setLayout([
+                            100 - lastOpenedBottomPanelSize,
+                            lastOpenedBottomPanelSize,
+                        ]);
+                        setVerticalCollapsed(false);
+                        setActiveBottomPanelContent("simulation");
+                    }
+                    onStartSimulation(selectedType, selectedFile);
+                }}
+                simulationOpen={simulationOpen}
+                setSimulationOpen={setSimulationOpen}
+            />
 
             <CommandBarDialog
                 user={user}
