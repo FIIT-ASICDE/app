@@ -280,7 +280,7 @@ const Sidebar = () => {
                                 onDragStart={(e) => handleDragStart(e, 'alu')}
                             >
                                 <Image
-                                    src="/images/svg/adderIcon.svg"
+                                    src="/images/svg/alu.svg"
                                     alt="Alu"
                                     className={styles.svgIcon}
                                     width={40}

@@ -166,8 +166,22 @@ const PropertiesPanel = () => {
 
     function validateField(fieldName: string, fieldValue: any): string {
         if (typeof fieldValue === 'string') {
-            if (!fieldValue.trim()) {
+            const trimmedValue = fieldValue.trim();
+            if (!trimmedValue) {
                 return "The field can't be empty";
+            }
+            const nameRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+            if (fieldName === 'label' && !nameRegex.test(trimmedValue)) {
+                return "Invalid name. Use only letters, digits and underscores. Must start with a letter or underscore.";
+            }
+            if (fieldName === 'label') {
+                const allElements = graph.getElements();
+                const duplicate = allElements.find(cell =>
+                    cell.id !== selectedElement?.id && cell.attributes.name === trimmedValue
+                );
+                if (duplicate) {
+                    return "Name must be unique. This name is already used.";
+                }
             }
         }
 

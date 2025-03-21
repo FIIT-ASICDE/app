@@ -1,6 +1,5 @@
-// src/components/Shapes/JointJSAnd.tsx
 import { Xor } from '../classes/xor';
-import { shapes } from "@joint/core"; // Ваш класс для хранения данных and
+import { shapes } from "@joint/core";
 
 export const JointJSXor = (xor: Xor) => {
 
