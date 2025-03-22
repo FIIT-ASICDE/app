@@ -34,7 +34,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
     const [activeSidebarContent, setActiveSidebarContent] =
         useState<SidebarContentTab>("fileExplorer");
     const [activeBottomPanelContent, setActiveBottomPanelContent] =
-        useState<BottomPanelContentTab>("terminal");
+        useState<BottomPanelContentTab>("simulation");
 
     const verticalGroupRef =
         useRef<ElementRef<typeof ResizablePanelGroup>>(null);

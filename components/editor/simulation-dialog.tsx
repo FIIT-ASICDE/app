@@ -157,6 +157,7 @@ export const SimulationDialog = ({
                             onValueChange={(value: SimulationType) => {
                                 setHoveredType(undefined);
                                 setSelectedType(value);
+                                setSelectedFile(undefined);
                             }}>
                             <SelectTrigger ref={selectTriggerRef}>
                                 <SelectValue placeholder="Select simulation type" />
