@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useUser } from "@/components/context/user-context";
+import { imgSrc } from "@/lib/client-file-utils";
 
 interface InviteContributorDialogProps {
     repositoryName: string;
@@ -117,7 +118,7 @@ export const InviteContributorDialog = ({
                             <AvatarDisplay
                                 displayType="select"
                                 name={selectedUser.username}
-                                image={selectedUser.image}
+                                image={imgSrc(selectedUser.image)}
                             />
                             {selectedUser.username}
                         </div>
@@ -155,7 +156,7 @@ export const InviteContributorDialog = ({
                                             <AvatarDisplay
                                                 displayType="select"
                                                 name={member.username}
-                                                image={member.image}
+                                                image={imgSrc(member.image)}
                                             />
                                             {member.username}
                                         </div>

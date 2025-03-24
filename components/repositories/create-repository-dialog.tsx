@@ -56,13 +56,16 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { imgSrc } from "@/lib/client-file-utils";
 
 interface CreateRepositoryDialogProps {
     usersOrganisations: Array<Omit<OrganisationDisplay, "memberCount">>;
+    fromOrg: boolean;
 }
 
 export const CreateRepositoryDialog = ({
     usersOrganisations,
+    fromOrg,
 }: CreateRepositoryDialogProps) => {
     const { user } = useUser();
     const router = useRouter();
@@ -187,7 +190,7 @@ export const CreateRepositoryDialog = ({
                                                     onValueChange={
                                                         field.onChange
                                                     }
-                                                    defaultValue={field.value}
+                                                    defaultValue={fromOrg ? usersOrganisations[0].id : field.value}
                                                 >
                                                     <FormControl>
                                                         <SelectTrigger>
@@ -210,7 +213,7 @@ export const CreateRepositoryDialog = ({
                                                                             "select"
                                                                         }
                                                                         image={
-                                                                            user.image
+                                                                            imgSrc(user.image)
                                                                         }
                                                                         name={
                                                                             user.name +
@@ -252,7 +255,7 @@ export const CreateRepositoryDialog = ({
                                                                                         "select"
                                                                                     }
                                                                                     image={
-                                                                                        organisation.image
+                                                                                        imgSrc(organisation.image)
                                                                                     }
                                                                                     name={
                                                                                         organisation.name

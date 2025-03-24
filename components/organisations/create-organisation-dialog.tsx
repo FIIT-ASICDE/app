@@ -8,11 +8,12 @@ import {
 import { api } from "@/lib/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+    Building,
     FileText,
     Image as ImageIcon,
     Loader2,
     UserRound,
-    UserRoundPlus,
+    UserRoundPlus
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useState } from "react";
@@ -153,6 +154,31 @@ export const CreateOrganisationDialog = () => {
         } else if (img.type === "local") {
             return URL.createObjectURL(img.file);
         }
+    };
+
+    const showSubmitButtonContent = () => {
+        if (createOrgMutation.isPending) {
+            return (
+                <>
+                    <Loader2 className="animate-spin" />
+                    Creating repository...
+                </>
+            );
+        }
+        if (createOrgMutation.isSuccess) {
+            return (
+                <>
+                    <Loader2 className="animate-spin text-muted-foreground" />
+                    Redirecting...
+                </>
+            );
+        }
+        return (
+            <>
+                <Building />
+                Create
+            </>
+        );
     };
 
     return (
@@ -320,14 +346,7 @@ export const CreateOrganisationDialog = () => {
                                 )}
                                 disabled={!form.formState.isDirty}
                             >
-                                {createOrgMutation.isPending ? (
-                                    <Loader2 className="animate-spin" />
-                                ) : (
-                                    <>
-                                        <UserRoundPlus />
-                                        Create
-                                    </>
-                                )}
+                                {showSubmitButtonContent()}
                             </Button>
                         </DialogFooter>
                     </div>

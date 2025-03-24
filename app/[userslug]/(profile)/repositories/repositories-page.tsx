@@ -61,6 +61,7 @@ export default async function RepositoriesPage({
                             <ImportRepositoryDialog />
                             <CreateRepositoryDialog
                                 usersOrganisations={userOrgs ?? []}
+                                fromOrg={false}
                             />
                         </div>
                     )}

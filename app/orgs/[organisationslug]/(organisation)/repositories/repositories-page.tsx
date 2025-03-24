@@ -47,7 +47,10 @@ export default function RepositoriesPage({
                         }}
                     />
                     {org.userRole === "ADMIN" && (
-                        <CreateRepositoryDialog usersOrganisations={[org]} />
+                        <CreateRepositoryDialog
+                            usersOrganisations={[org]}
+                            fromOrg={true}
+                        />
                     )}
                 </div>
             </div>

@@ -35,6 +35,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useUser } from "@/components/context/user-context";
 
 interface InviteUserDialogProps {
     selectedUser: UserDisplay;
@@ -47,6 +48,8 @@ export const InviteUserDialog = ({
     usersOrganisations,
     usersRepositories,
 }: InviteUserDialogProps) => {
+    const { user } = useUser();
+
     const [open, setOpen] = useState<boolean>(false);
 
     const userIsAdminInAnyOrg: boolean = usersOrganisations.length > 0;
@@ -111,6 +114,10 @@ export const InviteUserDialog = ({
             repositoryName: selectedRepository.name,
         });
     };
+
+    if (user.id === selectedUser.id) {
+        return <div className="text-sm text-muted-foreground w-7">You</div>
+    }
 
     if (!userIsAdminInAnyOrg && !userHasRepos) {
         return (

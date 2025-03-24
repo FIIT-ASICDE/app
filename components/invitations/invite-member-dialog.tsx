@@ -25,6 +25,8 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useUser } from "@/components/context/user-context";
+import { imgSrc } from "@/lib/client-file-utils";
 
 interface InviteMemberDialogProps {
     organisationName: string;
@@ -33,6 +35,8 @@ interface InviteMemberDialogProps {
 export const InviteMemberDialog = ({
     organisationName,
 }: InviteMemberDialogProps) => {
+    const { user } = useUser();
+
     const [query, setQuery] = useState<string>("");
     const [selectedUser, setSelectedUser] = useState<UserDisplay | undefined>(
         undefined,
@@ -116,7 +120,7 @@ export const InviteMemberDialog = ({
                             <AvatarDisplay
                                 displayType="select"
                                 name={selectedUser.username}
-                                image={selectedUser.image}
+                                image={imgSrc(selectedUser.image)}
                             />
                             {selectedUser.username}
                         </div>
@@ -139,7 +143,7 @@ export const InviteMemberDialog = ({
                         {isFetching ? (
                             <p className="text-center">Loading...</p>
                         ) : users.length > 0 ? (
-                            users.map((member) => (
+                            users.filter((contributor) => contributor.id !== user.id).map((member) => (
                                 <CommandItem
                                     key={member.id}
                                     value={member.username}
@@ -153,7 +157,7 @@ export const InviteMemberDialog = ({
                                         <AvatarDisplay
                                             displayType="select"
                                             name={member.username}
-                                            image={member.image}
+                                            image={imgSrc(member.image)}
                                         />
                                         {member.username}
                                     </div>

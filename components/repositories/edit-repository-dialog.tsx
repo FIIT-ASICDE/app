@@ -84,6 +84,23 @@ export const EditRepositoryDialog = ({
         });
     };
 
+    const showSubmitButtonContent = () => {
+        if (editMutation.isPending) {
+            return (
+                <>
+                    <Loader2 className="animate-spin" />
+                    Saving...
+                </>
+            );
+        }
+        return (
+            <>
+                <Save />
+                Save changes
+            </>
+        );
+    };
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <Tooltip>
@@ -172,14 +189,7 @@ export const EditRepositoryDialog = ({
                                     )}
                                     disabled={!form.formState.isDirty}
                                 >
-                                    {editMutation.isPending ? (
-                                        <Loader2 className="animate-spin" />
-                                    ) : (
-                                        <>
-                                            <Save />
-                                            Save changes
-                                        </>
-                                    )}
+                                    {showSubmitButtonContent()}
                                 </Button>
                             </DialogTrigger>
                         </DialogFooter>
