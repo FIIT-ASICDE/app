@@ -36,7 +36,7 @@ describe("search repository", async () => {
 
         otherUser = await initializeUser(prisma, {
             name: "other-user",
-            email: "other@example.com",
+            email: "repo-search@example.com",
         });
 
         otherTrpc = await testingTRPC(prisma, otherUser.session);

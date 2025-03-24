@@ -159,7 +159,7 @@ describe("create repository", async () => {
         try {
             const otherUser = await initializeUser(prisma, {
                 name: "other-user",
-                email: "other@example.com",
+                email: "create-repo@example.com",
             });
 
             const otherTrpc = await testingTRPC(prisma, otherUser.session);
