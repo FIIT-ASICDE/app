@@ -33,24 +33,9 @@ export const SimulationDialog = ({
     const [fileSelectOpen, setFileSelectOpen] = useState<boolean>(false);
     const [hoveredType, setHoveredType] = useState<SimulationType>();
 
-    /*const files: Array<FileDisplayItem | FileItem> | undefined =
+    const files: Array<FileDisplayItem | FileItem> =
         repository.tree?.filter((repositoryItem: RepositoryItem) =>
-            repositoryItem.type === "file" || repositoryItem.type === "file-display");*/
-
-    const files: Array<FileDisplayItem | FileItem> | undefined = [
-        {
-            type: "file-display",
-            name: "cpp-file.cpp",
-            lastActivity: new Date(),
-            language: "cpp",
-        } satisfies FileDisplayItem,
-        {
-            type: "file-display",
-            name: "sv-file.sv",
-            lastActivity: new Date(),
-            language: "systemVerilog",
-        } satisfies FileDisplayItem,
-    ];
+            repositoryItem.type === "file" || repositoryItem.type === "file-display") ?? [];
 
     const selectTriggerRef = useRef<HTMLButtonElement | null>(null);
     const [tooltipPosition, setTooltipPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
