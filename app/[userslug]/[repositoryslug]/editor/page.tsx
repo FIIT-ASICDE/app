@@ -17,6 +17,7 @@ export default async function RepositoryEditorPage({
     const repo: Repository = await api.repo.search({
         ownerSlug: userslug,
         repositorySlug: repositoryslug,
+        depth: -1,
     });
 
     return <EditorPage repository={repo} />;
