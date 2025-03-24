@@ -16,8 +16,11 @@ interface SidebarTabContentProps {
     repository: Repository;
     changes: Array<RepositoryItemChange>;
     handleCloseSidebar: () => void;
-    onCommitAction?: (data: z.infer<typeof commitSchema>) => Promise<void>;
     onFileClick?: (item: RepositoryItem) => void;
+    onCommit: {
+        action: (data: z.infer<typeof commitSchema>) => Promise<void>;
+        isLoading: boolean;
+    };
 }
 
 export const SidebarTabContent = ({
@@ -25,8 +28,8 @@ export const SidebarTabContent = ({
     repository,
     changes,
     handleCloseSidebar,
-    onCommitAction,
     onFileClick,
+    onCommit,
 }: SidebarTabContentProps) => {
     return (
         <div className="flex h-full">
@@ -48,7 +51,8 @@ export const SidebarTabContent = ({
                     repoId={repository.id}
                     changes={changes}
                     handleCloseSidebar={handleCloseSidebar}
-                    onCommitAction={onCommitAction}
+                    onCommitAction={onCommit.action}
+                    isLoading={onCommit.isLoading}
                 />
             )}
         </div>

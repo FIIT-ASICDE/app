@@ -1,7 +1,11 @@
 import { readGithubRepoBranches, readUsersGithubRepos } from "@/lib/github";
 import { paginationSchema } from "@/lib/schemas/common-schemas";
 import { cloneRepoSchema, commitSchema } from "@/lib/schemas/git-schemas";
-import { hasUserRole, resolveRepoPath } from "@/lib/server/api/routers/repos";
+import {
+    absoluteRepoPath,
+    hasUserRole,
+    resolveRepoPathOrThrow,
+} from "@/lib/server/api/routers/repos";
 import { createTRPCRouter, protectedProcedure } from "@/lib/server/api/trpc";
 import { RepositoryItemChange } from "@/lib/types/repository";
 import { ReturnTypeOf } from "@octokit/core/dist-types/types";
@@ -116,10 +120,7 @@ function clone() {
                 });
             }
 
-            const ownerReposRoot = path.join(
-                process.env.REPOSITORIES_STORAGE_ROOT!,
-                ownerName,
-            );
+            const ownerReposRoot = absoluteRepoPath(ownerName);
             await mkdir(ownerReposRoot, { recursive: true });
             const [, repoName] = input.githubFullName.split("/");
             const targetDirName = input.name || repoName;
@@ -245,17 +246,10 @@ function gitChanges() {
                     ["OWNER", "ADMIN", "CONTRIBUTOR"],
                 );
 
-                const repoPath = await resolveRepoPath(
+                const repoPath = await resolveRepoPathOrThrow(
                     ctx.prisma,
                     input.repoId,
                 );
-
-                if (!repoPath) {
-                    throw new TRPCError({
-                        code: "NOT_FOUND",
-                        message: "Repository not found",
-                    });
-                }
 
                 const gitDirPath = path.join(repoPath, ".git");
                 try {
@@ -371,14 +365,10 @@ function gitCommit() {
                 "ADMIN",
                 "CONTRIBUTOR",
             ]);
-            const repoPath = await resolveRepoPath(ctx.prisma, input.repoId);
-
-            if (!repoPath) {
-                throw new TRPCError({
-                    code: "NOT_FOUND",
-                    message: "Repository path could not be resolved",
-                });
-            }
+            const repoPath = await resolveRepoPathOrThrow(
+                ctx.prisma,
+                input.repoId,
+            );
 
             try {
                 // set git configuration for the commit

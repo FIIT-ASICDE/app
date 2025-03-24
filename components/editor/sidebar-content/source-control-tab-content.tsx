@@ -1,8 +1,7 @@
-import { useState } from "react";
-import type { RepositoryItemChange } from "@/lib/types/repository";
-import { FileText, GitCommitHorizontal } from "lucide-react";
 import { commitSchema } from "@/lib/schemas/git-schemas";
-
+import type { RepositoryItemChange } from "@/lib/types/repository";
+import { FileText, GitCommitHorizontal, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { z } from "zod";
 
 import { RepositoryItemChangeDisplay } from "@/components/editor/changes/repository-item-change-display";
@@ -23,6 +22,7 @@ interface SourceControlTabContentProps {
     changes: Array<RepositoryItemChange>;
     handleCloseSidebar: () => void;
     onCommitAction?: (data: z.infer<typeof commitSchema>) => Promise<void>;
+    isLoading?: boolean;
 }
 
 export const SourceControlTabContent = ({
@@ -30,6 +30,7 @@ export const SourceControlTabContent = ({
     changes,
     handleCloseSidebar,
     onCommitAction,
+    isLoading,
 }: SourceControlTabContentProps) => {
     const [changesSelected, setChangesSelected] = useState<
         Array<RepositoryItemChange>
@@ -154,8 +155,14 @@ export const SourceControlTabContent = ({
                             className="w-full"
                             onClick={handleCommitChanges}
                         >
-                            <GitCommitHorizontal />
-                            Commit
+                            {isLoading ? (
+                                <Loader2 className="animate-spin" />
+                            ) : (
+                                <>
+                                    <GitCommitHorizontal />
+                                    Commit
+                                </>
+                            )}
                         </Button>
                     )}
                 </div>

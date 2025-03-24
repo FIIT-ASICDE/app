@@ -24,10 +24,15 @@ import { UserDisplay } from "@/lib/types/user";
 import { PrismaType } from "@/prisma";
 import { $Enums } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import { exec } from "child_process";
 import { access, mkdir, rename, rm } from "fs/promises";
+import { writeFile } from "fs/promises";
 import { Session } from "next-auth";
 import path from "path";
+import util from "util";
 import { z } from "zod";
+
+const execPromise = util.promisify(exec);
 
 export const repoRouter = createTRPCRouter({
     create: create(),
@@ -50,7 +55,7 @@ export const repoRouter = createTRPCRouter({
 function create() {
     return protectedProcedure
         .input(createRepositoryFormSchema)
-        .mutation(async ({ ctx, input }) => {
+        .mutation(async ({ ctx, input }): Promise<Repository> => {
             const { prisma, session } = ctx;
             const { ownerId, name, description, visibility } = input;
 
@@ -117,11 +122,7 @@ function create() {
                 ownerImage = user.image;
                 userRole = $Enums.RepoRole.OWNER;
             }
-            const repoPath = path.join(
-                process.env.REPOSITORIES_STORAGE_ROOT!,
-                ownerName,
-                name,
-            );
+            const repoPath = absoluteRepoPath(ownerName, name);
             return prisma.$transaction(async (tx) => {
                 const repo = await tx.repo.create({
                     data: {
@@ -133,6 +134,7 @@ function create() {
 
                 const userMetadata = await tx.userMetadata.findUniqueOrThrow({
                     where: { userId: session.user.id },
+                    include: { user: true },
                 });
 
                 await tx.repoUserOrganization.create({
@@ -147,6 +149,19 @@ function create() {
 
                 try {
                     await mkdir(repoPath, { recursive: true });
+                    try {
+                        await initializeGit(
+                            name,
+                            repoPath,
+                            userMetadata.user.email,
+                            userMetadata.user.name!,
+                        );
+                    } catch (gitError) {
+                        console.error(
+                            "Error initializing git repository:",
+                            gitError,
+                        );
+                    }
                 } catch (error) {
                     throw new TRPCError({
                         code: "INTERNAL_SERVER_ERROR",
@@ -206,11 +221,7 @@ function searchByOwnerAndRepoSlug() {
             }
 
             const userRepoRelation = repo.userOrganizationRepo.at(0);
-            const repoPath = path.join(
-                process.env.REPOSITORIES_STORAGE_ROOT!,
-                owner.name!,
-                repo.name,
-            );
+            const repoPath = absoluteRepoPath(owner.name!, repo.name);
             const contentsTree = loadRepoItems(repoPath, 0, false);
             const isGitRepo =
                 contentsTree.findIndex(
@@ -267,11 +278,7 @@ function repositoryOverview() {
                 });
             }
             const userRepoRelation = repo.userOrganizationRepo.at(0);
-            const repoPath = path.join(
-                process.env.REPOSITORIES_STORAGE_ROOT!,
-                owner.name!,
-                repo.name,
-            );
+            const repoPath = absoluteRepoPath(owner.name!, repo.name);
             const readme = findReadmeFile(repoPath);
             const stats = await calculateLanguageStatistics(repoPath);
 
@@ -317,9 +324,7 @@ function loadRepoItem() {
             }
 
             const itemPath = path.join(
-                process.env.REPOSITORIES_STORAGE_ROOT!,
-                owner.name!,
-                repo.name,
+                absoluteRepoPath(owner.name!, repo.name),
                 input.path,
             );
 
@@ -1001,13 +1006,10 @@ function transfer() {
                 });
             }
 
-            const oldRepoPath = await resolveRepoPath(ctx.prisma, input.repoId);
-            if (!oldRepoPath) {
-                throw new TRPCError({
-                    code: "NOT_FOUND",
-                    message: "Repository not found",
-                });
-            }
+            const oldRepoPath = await resolveRepoPathOrThrow(
+                ctx.prisma,
+                input.repoId,
+            );
             const isOwnerByOrg = currentUserRole.organizationId !== null;
 
             let newOwner: { ownerName: string; repoName: string };
@@ -1027,16 +1029,12 @@ function transfer() {
                 );
             }
 
-            const newRepoPath = path.join(
-                process.env.REPOSITORIES_STORAGE_ROOT!,
+            const newRepoPath = absoluteRepoPath(
                 newOwner.ownerName,
                 newOwner.repoName,
             );
 
-            const newOwnerDir = path.join(
-                process.env.REPOSITORIES_STORAGE_ROOT!,
-                newOwner.ownerName,
-            );
+            const newOwnerDir = absoluteRepoPath(newOwner.ownerName);
 
             try {
                 await mkdir(newOwnerDir, { recursive: true });
@@ -1108,14 +1106,11 @@ function edit() {
             }
 
             if (currentRepo.name !== input.name) {
-                const currentRepoPath = path.join(
-                    process.env.REPOSITORIES_STORAGE_ROOT!,
+                const currentRepoPath = absoluteRepoPath(
                     repoOwnerInfo.ownerName,
                     currentRepo.name,
                 );
-
-                const newRepoPath = path.join(
-                    process.env.REPOSITORIES_STORAGE_ROOT!,
+                const newRepoPath = absoluteRepoPath(
                     repoOwnerInfo.ownerName,
                     input.name,
                 );
@@ -1838,6 +1833,20 @@ async function repoContributors(
     });
 }
 
+export async function resolveRepoPathOrThrow(
+    prisma: PrismaType,
+    repoId: string,
+): Promise<string> {
+    const repoPath = await resolveRepoPath(prisma, repoId);
+    if (!repoPath) {
+        throw new TRPCError({
+            code: "NOT_FOUND",
+            message: `Repository not found for repoId: ${repoId}`,
+        });
+    }
+    return repoPath;
+}
+
 export async function resolveRepoPath(
     prisma: PrismaType,
     repoId: string,
@@ -1845,11 +1854,7 @@ export async function resolveRepoPath(
     const repoNames = await resolveRepoOwnerAndName(prisma, repoId);
     if (!repoNames) return null;
 
-    return path.join(
-        process.env.REPOSITORIES_STORAGE_ROOT!,
-        repoNames.ownerName,
-        repoNames.repoName,
-    );
+    return absoluteRepoPath(repoNames.ownerName, repoNames.repoName);
 }
 
 async function resolveRepoOwnerAndName(
@@ -1943,4 +1948,42 @@ export async function hasUserRole(
             message: "You need at least contributor role to view git changes",
         });
     }
+}
+
+export function absoluteRepoPath(ownerName: string, repoName?: string) {
+    if (
+        !process.env.REPOSITORIES_STORAGE_ROOT ||
+        process.env.REPOSITORIES_STORAGE_ROOT === ""
+    ) {
+        throw new Error(
+            "REPOSITORIES_STORAGE_ROOT environment variable is not set or empty.",
+        );
+    }
+    return path.join(
+        process.env.REPOSITORIES_STORAGE_ROOT,
+        ownerName,
+        repoName ?? "",
+    );
+}
+
+export async function initializeGit(
+    repoName: string,
+    repoPath: string,
+    userEmail: string,
+    userName: string,
+) {
+    await execPromise(`git init "${repoPath}"`);
+
+    await execPromise(`git -C "${repoPath}" config user.email "${userEmail}"`);
+    await execPromise(`git -C "${repoPath}" config user.name "${userName}"`);
+
+    const readmePath = path.join(repoPath, "README.md");
+    const readmeContent = `# ${repoName}`;
+    await writeFile(readmePath, readmeContent);
+
+    await execPromise(`git -C "${repoPath}" add .`);
+    await execPromise(`git -C "${repoPath}" commit -m "Initial commit"`);
+
+    await execPromise(`git -C "${repoPath}" config --unset user.email`);
+    await execPromise(`git -C "${repoPath}" config --unset user.name`);
 }

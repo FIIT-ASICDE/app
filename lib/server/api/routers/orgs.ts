@@ -467,7 +467,7 @@ function fetchUserOrgs() {
                     image: orgUser.organization.image || undefined,
                     bio: orgUser.organization.bio || undefined,
                     memberCount: orgUser.organization._count.users,
-                    userRole: orgUser.role.toLowerCase() as OrganizationRole,
+                    userRole: orgUser.role,
                 })),
                 pagination: {
                     total: totalCount,

@@ -6,7 +6,11 @@ import type {
     BottomPanelContentTab,
     SidebarContentTab, SimulationType
 } from "@/lib/types/editor";
-import type { FileDisplayItem, Repository, RepositoryItem } from "@/lib/types/repository";
+import type {
+    FileDisplayItem,
+    Repository,
+    RepositoryItem,
+} from "@/lib/types/repository";
 import { X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { type ElementRef, useEffect, useRef, useState } from "react";
@@ -116,17 +120,22 @@ export default function EditorPage({ repository }: EditorPageProps) {
     const saveSession = api.editor.saveSession.useMutation();
 
     const handleCloseTab = (fileToClose: FileDisplayItem) => {
-        const filteredFiles = openFiles.filter(file => file.name !== fileToClose.name);
+        const filteredFiles = openFiles.filter(
+            (file) => file.name !== fileToClose.name,
+        );
         setOpenFiles(filteredFiles);
 
         if (activeFile?.name === fileToClose.name) {
             setActiveFile(filteredFiles.length > 0 ? filteredFiles[0] : null);
         }
-    
+
         saveSession.mutate({
             repoId: repository.id,
             openFiles: filteredFiles,
-            activeFile: filteredFiles.length > 0 ? (filteredFiles[0] as FileDisplayItem) : null,
+            activeFile:
+                filteredFiles.length > 0
+                    ? (filteredFiles[0] as FileDisplayItem)
+                    : null,
         });
     };
 
@@ -136,7 +145,6 @@ export default function EditorPage({ repository }: EditorPageProps) {
             setActiveFile(session.activeFile);
         }
     }, [session]);
-    
 
     useEffect(() => {
         if (openFiles.length > 0) {
@@ -145,7 +153,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
                 type: file.type,
                 lastActivity: new Date(file.lastActivity),
                 language: file.language,
-                absolutePath: file.absolutePath
+                absolutePath: file.absolutePath,
             }));
 
             const transformedActiveFile = activeFile
@@ -154,7 +162,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
                       type: activeFile.type,
                       lastActivity: new Date(activeFile.lastActivity),
                       language: activeFile.language,
-                      absolutePath: activeFile.absolutePath
+                      absolutePath: activeFile.absolutePath,
                   }
                 : null;
 
@@ -219,8 +227,11 @@ export default function EditorPage({ repository }: EditorPageProps) {
                                 repository={repository}
                                 changes={changes.data?.changes ?? []}
                                 handleCloseSidebar={handleCloseSidebar}
-                                onCommitAction={handleOnCommit}
                                 onFileClick={handleFileClick}
+                                onCommit={{
+                                    action: handleOnCommit,
+                                    isLoading: commitMutation.isPending,
+                                }}
                             />
                         </ResizablePanel>
 
@@ -255,7 +266,13 @@ export default function EditorPage({ repository }: EditorPageProps) {
                                 ))}
                             </div>
                             {activeFile ? (
-                                <DynamicEditor filePath={activeFile.absolutePath + "/" + activeFile.name} />
+                                <DynamicEditor
+                                    filePath={
+                                        activeFile.absolutePath +
+                                        "/" +
+                                        activeFile.name
+                                    }
+                                />
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center text-gray-400">
                                     No file open
