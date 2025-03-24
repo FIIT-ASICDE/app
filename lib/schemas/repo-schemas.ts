@@ -17,7 +17,7 @@ export const repoBySlugsSchema = z.object({
             "Repository slug must contain only letters, numbers, underscores, and hyphens",
         )
         .transform((value) => value.trim()),
-    depth: z.number().min(-1).optional().default(0),
+    loadItemsDisplaysDepth: z.number().min(-1).optional().default(0),
 });
 
 export const repoItemSchema = repoBySlugsSchema.extend({

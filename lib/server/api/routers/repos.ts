@@ -222,7 +222,7 @@ function searchByOwnerAndRepoSlug() {
 
             const userRepoRelation = repo.userOrganizationRepo.at(0);
             const repoPath = absoluteRepoPath(owner.name!, repo.name);
-            const contentsTree = loadRepoItems(repoPath, input.depth, false);
+            const contentsTree = loadRepoItems(repoPath, input.loadItemsDisplaysDepth, false);
 
             const isGitRepo =
                 contentsTree.findIndex(
@@ -329,7 +329,7 @@ function loadRepoItem() {
                 input.path,
             );
 
-            return loadRepoDirOrFile(itemPath, input.depth, false);
+            return loadRepoDirOrFile(itemPath, input.loadItemsDisplaysDepth, false);
         });
 }
 
