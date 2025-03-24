@@ -4,8 +4,9 @@ import { DefaultArgs } from "@prisma/client/runtime/library";
 import { Pool } from "pg";
 
 // https://www.prisma.io/docs/orm/more/help-and-troubleshooting/help-articles/nextjs-prisma-client-dev-practices
-const prismaClientSingleton = () => {
-    const connectionString = `${process.env.DATABASE_URL}`;
+export const prismaClientSingleton = (
+    connectionString = `${process.env.DATABASE_URL}`,
+) => {
     const pool = new Pool({ connectionString });
     const adapter = new PrismaPg(pool);
     return new PrismaClient({ adapter });

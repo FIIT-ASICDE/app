@@ -61,7 +61,7 @@ export function loadRepoItems(
 
             const isReadme = entry.name.toLowerCase().startsWith("readme");
             const shouldLoadContent = loadContents || isReadme;
-            const extension = path.extname(entry.name).slice(1);
+            const language = getLanguageByExtension(path.extname(entry.name));
 
             if (shouldLoadContent) {
                 try {
@@ -78,8 +78,8 @@ export function loadRepoItems(
                 type: "file-display",
                 name: entry.name,
                 lastActivity,
-                language: extension,
-                absolutePath: currentPath
+                language,
+                absolutePath: currentPath,
             };
         });
     }
@@ -129,13 +129,13 @@ export function loadRepoFile(filePath: string): FileItem {
     const stats = fs.statSync(filePath);
     const lastActivity = stats.mtime;
     const fileName = path.basename(filePath);
-    const extension = path.extname(fileName).slice(1);
+    const language = getLanguageByExtension(path.extname(fileName));
 
     return {
         type: "file",
         name: fileName,
         lastActivity,
-        language: extension,
+        language,
         absolutePath: filePath,
         content: fs.readFileSync(filePath, "utf-8"),
     };
@@ -188,36 +188,115 @@ const IGNORED_DIRS = new Set([
 ]);
 
 const TRACKED_EXTENSIONS: Record<string, string> = {
-    v: "verilog",
-    vhd: "vhdl",
-    sv: "system verilog",
-    ts: "typescript",
-    tsx: "typescript",
-    js: "javascript",
-    jsx: "javascript",
-    py: "python",
-    html: "html",
-    htm: "html",
-    css: "css",
-    scss: "css",
-    sass: "css",
-    less: "css",
-    json: "json",
-    md: "markdown",
-    markdown: "markdown",
-    java: "java",
+    txt: "plaintext",
+    abap: "abap",
+    cls: "apex",
+    azcli: "azcli",
+    aes: "aes",
+    bat: "bat",
+    bicep: "bicep",
+    mligo: "cameligo",
+    clj: "clojure",
+    coffee: "coffeescript",
     c: "c",
     cpp: "c++",
+    cs: "c#",
+    csp: "csp",
+    css: "css",
+    cypher: "cypher",
+    dart: "dart",
+    Dockerfile: "dockerfile",
+    ecl: "ecl",
+    ex: "elixir",
+    exs: "elixir",
+    flow9: "flow9",
+    fs: "fsharp",
+    ftl: "freemarker2",
+    g4: "g4",
+    go: "go",
+    graphql: "graphql",
+    gz: "gz",
+    hbs: "handlebars",
+    hcl: "hcl",
+    html: "html",
+    ini: "ini",
+    interp: "interp",
+    java: "java",
+    js: "javascript",
+    jsx: "javascript",
+    json: "json",
+    jl: "julia",
+    kt: "kotlin",
+    less: "css",
+    lexon: "lexon",
+    lua: "lua",
+    liquid: "liquid",
+    m3: "m3",
+    md: "markdown",
+    mdx: "mdx",
+    mips: "mips",
+    msdax: "msdax",
+    mysql: "mysql",
+    m: "objectiveC",
+    pas: "pascal",
+    ligo: "pascaligo",
+    pl: "perl",
+    pgsql: "pgsql",
+    php: "php",
+    pla: "pla",
+    png: "png",
+    postiats: "postiats",
+    pq: "powerquery",
+    ps1: "powershell",
+    properties: "properties",
+    proto: "proto",
+    pug: "pug",
+    py: "python",
+    qs: "qsharp",
+    r: "r",
+    cshtml: "razor",
+    redis: "redis",
+    redshift: "redshift",
+    rst: "restructuredtext",
+    rb: "ruby",
+    rs: "rust",
+    sb: "sb",
+    scala: "scala",
+    scm: "scheme",
+    scss: "css",
+    sh: "shell",
+    sol: "sol",
+    rq: "sparql",
+    sql: "sql",
+    st: "st",
+    swift: "swift",
+    sv: "system verilog",
+    tcl: "tcl",
+    tokens: "tokens",
+    twig: "twig",
+    ts: "typescript",
+    tsx: "typescript",
+    tspec: "typespec",
+    vb: "vb",
+    v: "verilog",
+    vhd: "vhdl",
+    wgsl: "wgsl",
+    xml: "xml",
+    yaml: "yaml",
+    yml: "yml",
     h: "c",
     hpp: "c++",
-    cs: "c#",
-    go: "go",
-    rb: "ruby",
-    php: "php",
-    swift: "swift",
-    kt: "kotlin",
-    rs: "rust",
+    sass: "css",
+    htm: "html",
+    markdown: "markdown",
+    other: "other",
+    default: "default",
 };
+
+export function getLanguageByExtension(ext: string): string {
+    const key = ext.startsWith(".") ? ext.slice(1) : ext;
+    return TRACKED_EXTENSIONS[key] || TRACKED_EXTENSIONS["default"];
+}
 
 /**
  * Calculates language statistics for a repository

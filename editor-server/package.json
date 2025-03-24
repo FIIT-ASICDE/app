@@ -3,7 +3,7 @@
     "module": "server.ts",
     "type": "module",
     "scripts": {
-        "dev": "bun --env-file=../.env --watch server.ts"
+        "dev": "bun --env-file=../.env.local --watch server.ts"
     },
     "devDependencies": {
         "@types/bun": "^1.2.2"
