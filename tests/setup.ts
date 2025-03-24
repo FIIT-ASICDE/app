@@ -49,6 +49,9 @@ export async function testingPrisma() {
             await postgresContainer.stop();
         };
     }
+    await prisma.$executeRawUnsafe(
+        "drop schema if exists public cascade; create schema public;",
+    );
 
     await execAsync("bunx prisma migrate deploy", {
         env: { ...process.env, DATABASE_URL: connectionUri },
