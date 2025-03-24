@@ -19,7 +19,6 @@ export const useResizable = ({
     const [width, setWidth] = useState(defaultWidth);
     const [isResizing, setIsResizing] = useState(false);
 
-    // Обработчик начала перетаскивания
     const startResizing = (mouseDownEvent: React.MouseEvent) => {
         mouseDownEvent.preventDefault();
 

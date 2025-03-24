@@ -243,7 +243,7 @@ export function generateVHDLCode(graph: dia.Graph): string {
         });
 
         if (inPorts === 2) {
-            code += `    ${netName} <= ${inSignals[0]} WHEN ${selectSignal} = '0' ELSE ${inSignals[1]};\n\n`;
+            code += `    ${netName} <= ${inSignals[1]} WHEN ${selectSignal} = '1' ELSE ${inSignals[0]};\n\n`;
         } else {
             code += `    PROCESS (${selectSignal}, ${inSignals.join(", ")})\n`;
             code += `    BEGIN\n`;
@@ -385,7 +385,7 @@ export function generateVHDLCode(graph: dia.Graph): string {
 
         const clkSignal = connectionMap[clkKey] ? connectionMap[clkKey][0] : '/* unconnected */';
         const rstSignal = connectionMap[rstKey] ? connectionMap[rstKey][0] : '/* unconnected */';
-        const enSignal = connectionMap[enKey] ? connectionMap[enKey][0] : '1\'b1'; // Если нет en, подразумеваем, что всегда включено
+        const enSignal = connectionMap[enKey] ? connectionMap[enKey][0] : '1\'b1';
         const dSignal = connectionMap[dKey] ? connectionMap[dKey][0] : '/* unconnected */';
         const qSignal = outputConnectionMap[qKey] ? outputConnectionMap[qKey][0] : regName;
 
@@ -446,19 +446,15 @@ export function generateVHDLCode(graph: dia.Graph): string {
         const weSignal = connectionMap[weKey] ? connectionMap[weKey][0] : '/* unconnected */';
         const dataOutSignal = outputConnectionMap[dataOutKey] ? outputConnectionMap[dataOutKey][0] : ramName;
 
-        // Определяем edge для clk
         const clkEdge = cell.attributes.clkEdge === 'falling' ? 'negedge' : 'posedge';
 
-        // Объявляем память
         code += `logic [${dataWidth - 1}:0] ${ramName} [0:${depth - 1}];\n\n`;
 
-        // always_ff блок для записи
         code += `always_ff @(${clkEdge} ${clkSignal}) begin\n`;
         code += `    if (${weSignal})\n`;
         code += `        ${ramName}[${addrSignal}] <= ${dataInSignal};\n`;
         code += `end\n\n`;
 
-        // assign для чтения
         code += `assign ${dataOutSignal} = ${ramName}[${addrSignal}];\n\n`;
     });
 

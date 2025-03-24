@@ -43,10 +43,9 @@ import { MdErrorOutline } from "react-icons/md";
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { dia } from "@joint/core";
 import { prop } from "types-ramda/es";
+import path from "path";
 interface Properties {
     label?: string;
-    stroke?: string;
-    strokeWidth?: number;
     comparatorType?: string;
     aluType?: string;
     bandwidth?: number;
@@ -72,8 +71,6 @@ const PropertiesPanel = () => {
         bandwidth: 1,
         addressBandwidth: 8,
         inputPorts: 2,
-        stroke: '#000',
-        strokeWidth: 2,
         comparatorType: '',
         aluType: '',
         createdInPorts: [],
@@ -124,10 +121,6 @@ const PropertiesPanel = () => {
                 rstType: selectedElement.attributes.rstType || 'async',
 
             };
-            if (selectedElement.isLink()) {
-                props.stroke = selectedElement.attributes.line?.stroke || '#000';
-                props.strokeWidth = selectedElement.attributes.line?.strokeWidth || 2;
-            }
 
             if (props.bandwidth === 1) {
                 setPortWidthMode('bit');
@@ -146,8 +139,6 @@ const PropertiesPanel = () => {
                 bandwidth: 1,
                 addressBandwidth: 8,
                 inputPorts: 2,
-                stroke: '#000',
-                strokeWidth: 2,
                 comparatorType: '',
                 aluType: '',
                 createdInPorts: [],
@@ -223,7 +214,7 @@ const PropertiesPanel = () => {
         setProperties(prev => ({
             ...prev,
             [name]: type === 'checkbox' ? checked :
-                (name === 'strokeWidth' || name === 'bandwidth' || name === 'inputPorts' || name === 'addressBandwidth'
+                (name === 'bandwidth' || name === 'inputPorts' || name === 'addressBandwidth'
                     ? Number(value) : value)
         }));
     };
@@ -254,7 +245,6 @@ const PropertiesPanel = () => {
         setEditPortIndex(null);
     };
 
-    // Обработчик изменения данных нового порта
     const handleNewPortDataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setNewPortData(prev => ({
@@ -277,7 +267,6 @@ const PropertiesPanel = () => {
             return;
         }
 
-        // Если мы РЕДАКТИРУЕМ порт
         if (isEditingPort && editPortIndex !== null) {
             if (editPortType === 'input') {
                 const updated = [...properties.createdInPorts];
@@ -306,7 +295,6 @@ const PropertiesPanel = () => {
             }
         }
         else {
-            // Иначе мы ДОБАВЛЯЕМ новый порт
             if (newPortType === 'input') {
                 setProperties(prev => ({
                     ...prev,
@@ -336,10 +324,8 @@ const PropertiesPanel = () => {
             }
         }
 
-        // Закрываем диалог
         setShowAddPortDialog(false);
 
-        // Сбрасываем флаги
         setIsEditingPort(false);
         setEditPortIndex(null);
     };
@@ -444,12 +430,10 @@ const PropertiesPanel = () => {
         setEditPortType(portType);
         setErrorMessage('');
 
-        // Находим текущий порт
         const currentPort = portType === 'input'
             ? properties.createdInPorts[index]
             : properties.createdOutPorts[index];
 
-        // Заполняем форму (modal) данными порта
         setNewPortData({
             name: currentPort.name,
             bandwidth: currentPort.bandwidth,
@@ -462,7 +446,7 @@ const PropertiesPanel = () => {
     const handleDeletePort = (portType: 'input' | 'output', index: number) => {
         if (portType === 'input') {
             const updatedInPorts = [...properties.createdInPorts];
-            updatedInPorts.splice(index, 1); // удаляем порт
+            updatedInPorts.splice(index, 1);
             setProperties(prev => ({ ...prev, createdInPorts: updatedInPorts }));
         } else {
             const updatedOutPorts = [...properties.createdOutPorts];
@@ -621,20 +605,15 @@ const PropertiesPanel = () => {
 
         const hasAnyErrors = Object.values(errors).some((msg) => msg);
         if (hasAnyErrors) {
-            // Можно вывести всплывающее уведомление:
             alert("Cannot save! Check if the fields are filled in correctly");
             return;
         }
 
         const attrsToUpdate: any = {};
 
-        if (selectedElement.isLink()) {
-            attrsToUpdate.line = {
-                stroke: properties.stroke || '#000',
-                strokeWidth: properties.strokeWidth || 2,
-            };
-        }
-        else if (selectedElement.attributes.elType === 'multiplexer') {
+        setShowSaveNotification(true);
+
+        if (selectedElement.attributes.elType === 'multiplexer') {
             handleMultiplexerPortChange();
             return;
         }
@@ -710,8 +689,6 @@ const PropertiesPanel = () => {
             handlePortElementChange();
             return;
         }
-
-
         else {
             attrsToUpdate.label = { text: properties.label };
         }
@@ -719,7 +696,7 @@ const PropertiesPanel = () => {
 
         selectedElement.attr(attrsToUpdate);
         updateElement(selectedElement);
-        setShowSaveNotification(true);
+
     };
 
     useEffect(() => {
@@ -766,12 +743,10 @@ const PropertiesPanel = () => {
         onPaste: handlePaste,
     });
 
-    // Вызывается при переключении радио-кнопок
     const handleBandwidthRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newMode = e.target.value as 'bit' | 'vector' | 'struct';
         setPortWidthMode(newMode);
 
-        // Обновляем свойства, например, bandwidth:
         if (newMode === 'bit') {
             setProperties(prev => ({ ...prev, bandwidth: 1 }));
         } else if (newMode === 'vector') {
@@ -780,12 +755,10 @@ const PropertiesPanel = () => {
             setProperties(prev => ({ ...prev, bandwidth: 0 }));
         }
     };
-    // Вызывается при переключении радио-кнопок
     const handleLogicRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newMode = e.target.value as 'bit' | 'vector';
         setLogicWidthMode(newMode);
 
-        // Обновляем свойства, например, bandwidth:
         if (newMode === 'bit') {
             setProperties(prev => ({ ...prev, bandwidth: 1 }));
         } else {
@@ -797,7 +770,7 @@ const PropertiesPanel = () => {
     }
 
 
-    if (!selectedElement) {
+    if (!selectedElement || selectedElement.isLink()) {
         return (
             <ResizablePanel
                 className={styles.propertiesPanel}
@@ -897,15 +870,15 @@ const PropertiesPanel = () => {
                         <label>
                             Choose package file:
                             <select
-                                name="packageFile"
+                                value='packageFile'
                             >
-                                {/*<option value=">">{'>'}</option>*/}
+                                <option value="">--Select--</option>
                             </select>
                             Choose user defined type:
                             <select
-                                name="packageFile"
+                                value='packageType'
                             >
-                                {/*<option value=">">{'>'}</option>*/}
+                                <option value="">--Select--</option>
                             </select>
                         </label>
                     )}
@@ -1077,7 +1050,7 @@ const PropertiesPanel = () => {
                             </select>
                             Choose user defined type:
                             <select
-                                name="packageFile"
+                                name="packageType"
                             >
                                 {/*<option value=">">{'>'}</option>*/}
                             </select>
@@ -1445,7 +1418,7 @@ const PropertiesPanel = () => {
                             </select>
                             Choose user defined type:
                             <select
-                                name="packageFile"
+                                name="packageType"
                             >
                                 {/*<option value=">">{'>'}</option>*/}
                             </select>
@@ -1522,33 +1495,6 @@ const PropertiesPanel = () => {
 
                 </>
 
-            )}
-
-
-            {/* Если это связь — показываем настройки stroke, strokeWidth */}
-            {selectedElement.isLink() && (
-                <>
-                    <label>
-                        Line color:
-                        <input
-                            type="color"
-                            name="stroke"
-                            value={properties.stroke || '#000000'}
-                            onChange={handleChange}
-                        />
-                    </label>
-                    <label>
-                        Line width:
-                        <input
-                            type="number"
-                            name="strokeWidth"
-                            value={properties.strokeWidth || 2}
-                            onChange={handleChange}
-                            min="1"
-                            max="10"
-                        />
-                    </label>
-                </>
             )}
 
             <div className={styles.buttonContainer}>

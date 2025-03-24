@@ -457,19 +457,15 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         const weSignal = connectionMap[weKey] ? getBitSelectedSignal(connectionMap[weKey][0], ramName) : '/* unconnected */';
         const dataOutSignal = outputConnectionMap[dataOutKey] ? getBitSelectedSignal(outputConnectionMap[dataOutKey][0], ramName) : ramName;
 
-        // Определяем edge для clk
         const clkEdge = cell.attributes.clkEdge === 'falling' ? 'negedge' : 'posedge';
 
-        // Объявляем память
         code += `logic [${dataWidth - 1}:0] ${ramName} [0:${depth - 1}];\n\n`;
 
-        // always_ff блок для записи
         code += `always_ff @(${clkEdge} ${clkSignal}) begin\n`;
         code += `    if (${weSignal})\n`;
         code += `        ${ramName}[${addrSignal}] <= ${dataInSignal};\n`;
         code += `end\n\n`;
 
-        // assign для чтения
         code += `assign ${dataOutSignal} = ${ramName}[${addrSignal}];\n\n`;
     });
 

@@ -1,5 +1,3 @@
-// pages/diagram-test/hooks/useJointJS.ts
-
 import { useEffect, useRef } from 'react';
 import { dia, shapes, linkTools, elementTools } from "@joint/core";
 import { useDiagramContext } from '../context/useDiagramContext';
@@ -22,7 +20,6 @@ function highlightAllInputPorts(
 ) {
     const elements = graph.getElements();
     elements.forEach((elem) => {
-        // Если это тот же элемент, что и выходной порт, пропускаем
         if (elem.id === sourceElemId) return;
 
         const ports = elem.get('ports')?.items || [];
@@ -57,8 +54,7 @@ function getPortBandwidth(cell: dia.Cell, portId: string): number {
 }
 
 function resetAllPortsColor(graph: dia.Graph) {
-    // Сбрасываем порты к "стандартным" цветам
-    // (предполагаю, что input был #fff, output — #e3d12d, но подстраивайте под свой код)
+
     const elements = graph.getElements();
     elements.forEach((elem) => {
         const ports = elem.get('ports')?.items || [];
@@ -66,7 +62,6 @@ function resetAllPortsColor(graph: dia.Graph) {
             if (p.group === 'input') {
                 elem.portProp(p.id, 'attrs/portCircle/fill', '#fff');
             } else {
-                // output — можно вернуть желтый (если у вас так было)
                 elem.portProp(p.id, 'attrs/portCircle/fill', '#e3d12d');
             }
         });
@@ -128,25 +123,18 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                 background: { color: '#f9f9f9' },
                 interactive: function(cellView) {
                     if (cellView.model.isLink()) {
-                        // Разрешаем взаимодействие с вершинами соединения
                         return {
-                            vertexAdd: true,     // добавление новых вершин
-                            vertexMove: true,    // перемещение вершин
-                            vertexRemove: true,  // удаление вершин
-                            arrowheadMove: false, // перемещение стрелок
-                            labelMove: false      // перемещение меток
+                            vertexAdd: true,
+                            vertexMove: true,
+                            vertexRemove: true,
+                            arrowheadMove: false,
+                            labelMove: false
                         };
                     }
-                    return true; // Для остальных элементов
+                    return true;
                 },
-                cellViewNamespace: { standard: shapes.standard }, // Используем кастомные формы
+                cellViewNamespace: { standard: shapes.standard },
                 defaultLink: () => new shapes.standard.Link({
-                    // router: {
-                    //     name: 'manhattan',  // или 'metro' / 'orthogonal' / 'manhattan' / etc.
-                    //     args: { jumpSize: 10 } // Размер «переброса» через другую линию
-                    //
-                    // }, // Линии пойдут с изломами, как угловые пути
-                    // connector: { name: 'normal' },   // Можно также использовать 'rounded', 'smooth' или другой тип
                     interactive: {
                         vertexAdd: true,
                         vertexMove: true,
@@ -205,7 +193,6 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                     linkView: dia.LinkView
                 ): boolean {
 
-                    // Если пытаемся соединить порты одного и того же элемента, запрещаем
                     if (sourceView.model.id === targetView.model.id) {
                         return false;
                     }
@@ -231,7 +218,6 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                     const targetPortId = getPort(targetMagnet);
                     const targetPortGroup = getPortGroup(targetMagnet);
 
-                    // Если хотя бы один из портов не определён, запрещаем соединение
                     if (!sourcePortId || !targetPortId) {
                         return false;
                     }
@@ -241,9 +227,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
 
                     if (targetView.model.attributes.elType === 'bitSelect') {
                         const ports = targetView.model.get('ports')?.items ?? [];
-                        // Фильтруем output-порты
                         const outputPorts = ports.filter((p: any) => p.group === 'output');
-                        // Находим максимальное значение bandwidth среди output-портов
                         const maxEndBit = outputPorts.reduce((max: number, p: any) => {
                             const bw = p.endBit ?? 0;
                             return bw > max ? bw : max;
@@ -262,12 +246,10 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                         return false;
                     }
 
-                    // Разрешаем соединять только output -> input
                     if (sourcePortGroup !== 'output' || targetPortGroup !== 'input') {
                         return false;
                     }
 
-                    // Проверяем, нет ли уже связи, ведущей в тот же target-порт
                     const links = graph.getLinks();
                     const targetElementId = targetView.model.id;
                     for (const link of links) {
@@ -277,7 +259,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                                 linkTarget.id === targetElementId &&
                                 linkTarget.port === targetPortId
                             ) {
-                                return false; // Этот порт уже занят
+                                return false;
                             }
                         }
                     }
@@ -400,7 +382,6 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
             });
 
 
-            // Начало соединения
             paper.on('element:magnet:pointerdown', (elementView, evt, magnet, x, y) => {
                 if (!magnet) return;
                 const sourcePortGroup = magnet.getAttribute('port-group');
@@ -415,7 +396,6 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                 }
             });
 
-            // Обработка окончания соединения (успешного или отменённого)
             paper.on('link:connect link:disconnect', () => {
                 resetAllPortsColor(graph);
                 isLinkingRef.current = false;
@@ -455,8 +435,6 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
             });
 
 
-
-            // Обработка добавления связей
             graph.on('add', (cell) => {
                 if (cell.isLink()) {
                     console.log('Cell created:', cell);
@@ -506,7 +484,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
 
             return () => {
                 paper.remove();
-                setPaper(null); // Очистка Paper из контекста
+                setPaper(null);
             };
         }
     }, [paperElement, graph, setSelectedElement, setPaper]);

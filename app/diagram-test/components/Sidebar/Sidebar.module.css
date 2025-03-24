@@ -1,7 +1,7 @@
 /* pages/diagram-test/components/Sidebar/Sidebar.module.css */
 .sidebar {
-    background-color: #f6f6f6; /* Тёмный фон для контраста */
-    color: #333; /* Светлый текст */
+    background-color: #f6f6f6;
+    color: #333;
     padding: 10px;
     box-sizing: border-box;
     display: flex;
@@ -24,8 +24,8 @@
         background-color: #999;
     }
 
-    scrollbar-width: thin;             /* тонкий вариант */
-    scrollbar-color: #ccc #f8f8f8;     /* ползунок / трек */
+    scrollbar-width: thin;
+    scrollbar-color: #ccc #f8f8f8;
 }
 
 .groupHeader {
@@ -38,7 +38,7 @@
     margin-bottom: 8px;
     transition: background-color 0.3s;
     justify-content: space-between;
-    border: 1px solid #c9e4ff;/* Разделение заголовка и иконки коллапса */
+    border: 1px solid #c9e4ff;
 }
 
 .groupHeader:hover {
@@ -51,7 +51,7 @@
 }
 
 .toggleIcon {
-    margin-left: auto; /* Переместить иконку коллапса вправо */
+    margin-left: auto;
 
 }
 
@@ -73,7 +73,7 @@
     border-radius: 4px;
     cursor: grab;
     transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
-    min-width: unset; /* Минимальная ширина для удобства использования */
+    min-width: unset;
     min-height: 60px;
 }
 
@@ -95,10 +95,9 @@
 }
 
 .active {
-    background-color: #bae7ff !important; /* Цвет для активных инструментов */
+    background-color: #bae7ff !important;
 }
 
-/* Визуальное разделение кнопок группировки */
 .groupHeader {
     border: 1px solid #bdbdbd;
 }
@@ -111,27 +110,27 @@
 
 @media (max-width: 768px) {
     .sidebar {
-        width: 80px; /* Сокращение ширины на малых экранах */
+        width: 80px;
     }
 
     .groupHeader h3 {
-        display: none; /* Скрыть текст заголовков на малых экранах */
+        display: none;
     }
 
     .iconItem span {
-        display: none; /* Скрыть подписи к иконкам */
+        display: none;
     }
 
     .groupHeader {
-        justify-content: center; /* Центрирование иконок заголовков */
+        justify-content: center;
     }
 
     .toggleIcon {
-        display: none; /* Скрыть иконку коллапса на малых экранах */
+        display: none;
     }
 
     .iconList {
-        grid-template-columns: repeat(2, 1fr); /* Сохраняем 2 колонки */
+        grid-template-columns: repeat(2, 1fr);
         gap: 4px;
         padding: 2px;
     }

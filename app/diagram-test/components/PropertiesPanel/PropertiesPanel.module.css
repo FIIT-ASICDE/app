@@ -115,7 +115,6 @@
     background-color: #34495e;
 }
 
-/* Стили для цветового инпута */
 .propertiesPanel input[type="color"] {
     padding: 2px;
     background-color: #ffffff;
@@ -128,7 +127,6 @@
     box-shadow: 0 0 0 2px rgba(144, 202, 255, 0.2);
 }
 
-/* Стили для числового инпута */
 .propertiesPanel input[type="number"] {
     width: 100%;
     padding: 8px;
@@ -138,7 +136,6 @@
     margin: 10px 0;
     display: flex;
     flex-direction: column;
-    /* Расстояние между группами */
     gap: 6px;
 }
 
@@ -158,29 +155,28 @@
     margin: 0;
 }
 
-/* Стили самих input[type="radio"] */
+
 .radioOption input[type="radio"] {
-    accent-color: #1abc9c; /* цвет индикатора (поддерживают Chrome, Edge, Opera) */
+    accent-color: #1abc9c;
     width: 16px;
     height: 16px;
     cursor: pointer;
     margin-right: 4px;
 }
 
-/* Текстовое описание радио */
+
 .radioOption label {
     color: #333;
 }
 
 
-/* Модальное окно и затемнённый фон */
 .modalOverlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7); /* затемнение фона */
+    background-color: rgba(0, 0, 0, 0.7);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -253,7 +249,6 @@
     border-bottom: 1px solid #ddd;
 }
 
-/* Список портов */
 .portItem {
     padding: 5px 0;
     border-bottom: 1px solid #eee;
@@ -278,7 +273,6 @@
     color: #333;
 }
 
-/* Кнопка для добавления порта */
 .addPortButton {
     display: inline-block;
     margin-top: 10px;

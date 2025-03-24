@@ -12,7 +12,6 @@
     position: relative;
 }
 
-/* Стили для полноэкранного режима */
 :fullscreen .appContainer {
     height: 100%;
 }
