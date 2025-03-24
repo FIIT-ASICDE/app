@@ -418,13 +418,13 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                 if (targetElement && targetPortId) {
                     targetElement.portProp(targetPortId, 'attrs/circle', { display: 'none' });
                     if (targetPortId === 'select') {
-                        targetElement.portProp(targetPortId, 'attrs/portCircle/cy', 0);
+                        targetElement.portProp(targetPortId, 'args/y', 23);
                     }
                     else if (targetPortId === 'rst') {
-                        targetElement.portProp(targetPortId, 'attrs/portCircle/cy', 0);
+                        targetElement.portProp(targetPortId, 'args/y', 10);
                     }
                     else if (targetPortId === 'clk' && targetElement.attributes.elType === 'ram') {
-                        targetElement.portProp(targetPortId, 'attrs/portCircle/cy', 0);
+                        targetElement.portProp(targetPortId, 'args/y', 10);
                     }
                     else {
                         targetElement.portProp(targetPortId, 'attrs/portCircle/cx', 3);
@@ -462,13 +462,13 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                     if (targetElement && targetPortId) {
                         targetElement.portProp(targetPortId, 'attrs/circle', { display: '' });
                         if (targetPortId === 'select') {
-                            targetElement.portProp(targetPortId, 'attrs/portCircle/cy', 0);
+                            targetElement.portProp(targetPortId, 'args/y', 0);
                         }
                         else if (targetPortId === 'rst') {
-                            targetElement.portProp(targetPortId, 'attrs/portCircle/cy', 0);
+                            targetElement.portProp(targetPortId, 'args/y', -15);
                         }
                         else if (targetPortId === 'clk' && targetElement.attributes.elType === 'ram') {
-                            targetElement.portProp(targetPortId, 'attrs/portCircle/cy', 0);
+                            targetElement.portProp(targetPortId, 'args/y', -15);
                         }
                         else {
                             targetElement.portProp(targetPortId, 'attrs/portCircle/cx', -20);
