@@ -1,5 +1,5 @@
 import { imgSrc } from "@/lib/client-file-utils";
-import { Repository } from "@/lib/types/repository";
+import { Repository, RepositoryItem } from "@/lib/types/repository";
 import { CopyMinus, FileX } from "lucide-react";
 
 import { CreateDirectoryDialog } from "@/components/editor/file/create-directory-dialog";
@@ -15,11 +15,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 interface FileExplorerTabContentProps {
     repository: Repository;
     handleCloseSidebar: () => void;
+    onFileClick?: (item: RepositoryItem) => void;
 }
 
 export const FileExplorerTabContent = ({
     repository,
     handleCloseSidebar,
+    onFileClick,
 }: FileExplorerTabContentProps) => {
     return (
         <ScrollArea className="relative h-full w-full">
@@ -54,7 +56,7 @@ export const FileExplorerTabContent = ({
                 {repository.tree && repository.tree.length ? (
                     <FileTree
                         tree={repository.tree}
-                        onItemClick={() => console.log("clicked")}
+                        onItemClick={onFileClick}
                     />
                 ) : (
                     <NoData

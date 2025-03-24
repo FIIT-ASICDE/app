@@ -17,15 +17,32 @@ export default function Editor({
     language = "systemverilog",
     theme = "vs-dark",
 }: EditorProps) {
-    const editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+    const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
     const monacoEl = useRef<HTMLElement | null>(null);
+    const providerRef = useRef<WebsocketProvider | null>(null);
+    const ydocRef = useRef<Y.Doc | null>(null);
 
     useEffect(() => {
-        if (!monacoEl.current || editor.current) {
-            return;
+        if (!monacoEl.current) return;
+
+        if (editorRef.current) {
+            editorRef.current.dispose();
+            editorRef.current = null;
         }
 
-        editor.current = monaco.editor.create(monacoEl.current, {
+        if (providerRef.current) {
+            providerRef.current.destroy();
+            providerRef.current = null;
+        }
+
+        if (ydocRef.current) {
+            ydocRef.current.destroy();
+            ydocRef.current = null;
+        }
+
+        const model = monaco.editor.createModel("", language);
+        editorRef.current = monaco.editor.create(monacoEl.current, {
+            model,
             language,
             theme,
             automaticLayout: true,
@@ -33,6 +50,8 @@ export default function Editor({
 
         if (process.env.NODE_ENV === "production") {
             const ydoc = new Y.Doc();
+            ydocRef.current = ydoc;
+
             const provider = new WebsocketProvider(
                 process.env.NEXT_PUBLIC_EDITOR_SERVER_URL ??
                     "wss://ide.drasic.com/ws",
@@ -40,16 +59,34 @@ export default function Editor({
                 ydoc,
                 { params: { filePath } },
             );
+            providerRef.current = provider;
 
-            const type = ydoc.getText("monaco");
-            new MonacoBinding(
-                type,
-                editor.current.getModel()!,
-                new Set([editor.current]),
-                provider.awareness,
-            );
+            if (editorRef.current) {
+                const type = ydoc.getText("monaco");
+                new MonacoBinding(
+                    type,
+                    editorRef.current.getModel()!,
+                    new Set([editorRef.current]),
+                    provider.awareness,
+                );
+            }
         }
-    });
+
+        return () => {
+            if (editorRef.current) {
+                editorRef.current.dispose();
+                editorRef.current = null;
+            }
+            if (providerRef.current) {
+                providerRef.current.destroy();
+                providerRef.current = null;
+            }
+            if (ydocRef.current) {
+                ydocRef.current.destroy();
+                ydocRef.current = null;
+            }
+        };
+    }, [filePath, language, theme]);
 
     return <main className="h-full w-full" ref={monacoEl}></main>;
 }

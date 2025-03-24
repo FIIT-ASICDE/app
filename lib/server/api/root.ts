@@ -1,3 +1,4 @@
+import { editorRouter } from "@/lib/server/api/routers/editor";
 import { gitRouter } from "@/lib/server/api/routers/git";
 import { orgRouter } from "@/lib/server/api/routers/orgs";
 import { repoRouter } from "@/lib/server/api/routers/repos";
@@ -14,6 +15,7 @@ export const appRouter = createTRPCRouter({
     org: orgRouter,
     repo: repoRouter,
     git: gitRouter,
+    editor: editorRouter,
 });
 
 // export type definition of API
