@@ -42,6 +42,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { imgSrc } from "@/lib/client-file-utils";
 
 export const ImportRepositoryDialog = () => {
     const { user } = useUser();
@@ -293,7 +294,7 @@ export const ImportRepositoryDialog = () => {
                                                 <div className="flex flex-row items-center space-x-3">
                                                     <AvatarDisplay
                                                         displayType="select"
-                                                        image={user.image}
+                                                        image={imgSrc(user.image)}
                                                         name={
                                                             user.name +
                                                             " " +
@@ -325,7 +326,7 @@ export const ImportRepositoryDialog = () => {
                                                                 <AvatarDisplay
                                                                     displayType="select"
                                                                     image={
-                                                                        organisation.image
+                                                                        imgSrc(organisation.image)
                                                                     }
                                                                     name={
                                                                         organisation.name

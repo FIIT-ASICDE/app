@@ -50,8 +50,8 @@ export const RepositoryItemChangeDisplay = ({
             return (
                 <span>
                     Renamed from{" "}
-                    <span className="text-foreground">{oldName}</span> to{" "}
-                    <span className="text-foreground">
+                    <span className="text-muted-foreground">{oldName}</span> to{" "}
+                    <span className="text-muted-foreground">
                         {itemChange.itemPath}
                     </span>
                 </span>
@@ -60,11 +60,11 @@ export const RepositoryItemChangeDisplay = ({
             return (
                 <span>
                     Moved from{" "}
-                    <span className="text-foreground">
+                    <span className="text-muted-foreground">
                         {itemChange.change.oldPath}
                     </span>{" "}
                     to{" "}
-                    <span className="text-foreground">
+                    <span className="text-muted-foreground">
                         {itemChange.itemPath}
                     </span>
                 </span>
@@ -80,7 +80,7 @@ export const RepositoryItemChangeDisplay = ({
                         <RepositoryItemChangeIcon itemChange={itemChange} />
                     </div>
                 </TooltipTrigger>
-                <TooltipContent side="right" className="text-muted-foreground">
+                <TooltipContent side="right">
                     {getChangeTooltipContent(itemChange)}
                 </TooltipContent>
             </Tooltip>

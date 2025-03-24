@@ -12,9 +12,9 @@ import {
     FileText,
     Image as ImageIcon,
     Loader2,
-    Pen,
+    Pen, Save,
     UserRound,
-    UserRoundPen,
+    UserRoundPen
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
@@ -148,6 +148,23 @@ export const EditProfileDialog = ({ profile }: EditProfileDialogProps) => {
     if (!isItMe) {
         return undefined;
     }
+
+    const showSubmitButtonContent = () => {
+        if (editMutation.isPending) {
+            return (
+                <>
+                    <Loader2 className="animate-spin" />
+                    Saving...
+                </>
+            );
+        }
+        return (
+            <>
+                <Save />
+                Save changes
+            </>
+        );
+    };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -321,11 +338,7 @@ export const EditProfileDialog = ({ profile }: EditProfileDialogProps) => {
                                     )}
                                     disabled={!form.formState.isDirty}
                                 >
-                                    {editMutation.isPending ? (
-                                        <Loader2 className="animate-spin" />
-                                    ) : (
-                                        "Save changes"
-                                    )}
+                                    {showSubmitButtonContent()}
                                 </Button>
                             </DialogTrigger>
                         </DialogFooter>

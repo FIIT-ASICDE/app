@@ -28,7 +28,7 @@ export const createRepositoryFormSchema = z.object({
     name: z
         .string()
         .min(1, "Repository name is required")
-        .max(100, "Repository name cannot exceed 100 characters")
+        .max(50, "Repository name cannot exceed 50 characters")
         .regex(
             REPO_NAME_PATTERN,
             "Repository name can only contain letters, numbers, periods, underscores, and hyphens",

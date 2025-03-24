@@ -140,6 +140,23 @@ export const EditOrganisationDialog = ({
         return undefined;
     }
 
+    const showSubmitButtonContent = () => {
+        if (editMutation.isPending) {
+            return (
+                <>
+                    <Loader2 className="animate-spin" />
+                    Saving...
+                </>
+            );
+        }
+        return (
+            <>
+                <Save />
+                Save changes
+            </>
+        );
+    };
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <Tooltip>
@@ -149,7 +166,7 @@ export const EditOrganisationDialog = ({
                     </DialogTrigger>
                 </TooltipTrigger>
                 <TooltipContent>
-                    <p>Edit organisation</p>
+                    Edit organisation
                 </TooltipContent>
             </Tooltip>
             <DialogContent className="max-h-[90vh] max-w-[425px] overflow-clip p-0">
@@ -268,14 +285,7 @@ export const EditOrganisationDialog = ({
                                     )}
                                     disabled={!form.formState.isDirty}
                                 >
-                                    {editMutation.isPending ? (
-                                        <Loader2 className="animate-spin" />
-                                    ) : (
-                                        <>
-                                            <Save />
-                                            Save changes
-                                        </>
-                                    )}
+                                    {showSubmitButtonContent()}
                                 </Button>
                             </DialogTrigger>
                         </DialogFooter>

@@ -51,30 +51,28 @@ export const OrganisationCardDisplay = ({
                         {organisation.userRole && (
                             <RoleBadge role={organisation.userRole} />
                         )}
-                        {organisation.memberCount && (
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <div className="flex flex-row items-center gap-x-1 text-muted-foreground">
-                                        <UsersRound className="h-5 w-5" />
-                                        {organisation.memberCount}
-                                    </div>
-                                </TooltipTrigger>
-                                <TooltipContent className="text-muted-foreground">
-                                    There
-                                    {organisation.memberCount > 1
-                                        ? " are "
-                                        : " is "}
-                                    <span className="text-foreground">
-                                        {organisation.memberCount}
-                                    </span>{" "}
-                                    member at{" "}
-                                    <span className="text-foreground">
-                                        {organisation.name}
-                                    </span>
-                                    .
-                                </TooltipContent>
-                            </Tooltip>
-                        )}
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <div className="flex flex-row items-center gap-x-1 text-muted-foreground">
+                                    <UsersRound className="h-5 w-5" />
+                                    {organisation.memberCount}
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent className="text-muted-foreground">
+                                There
+                                {organisation.memberCount === 1
+                                    ? " is "
+                                    : " are "}
+                                <span className="text-foreground">
+                                    {organisation.memberCount}
+                                </span>{" "}
+                                member{organisation.memberCount !== 1 && "s"} at{" "}
+                                <span className="text-foreground">
+                                    {organisation.name}
+                                </span>
+                                .
+                            </TooltipContent>
+                        </Tooltip>
                     </div>
                 </div>
             </CardHeader>

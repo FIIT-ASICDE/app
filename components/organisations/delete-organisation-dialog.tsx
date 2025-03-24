@@ -18,6 +18,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 interface DeleteOrganisationDialogProps {
     organisation: OrganisationDisplay;
@@ -33,11 +34,44 @@ export const DeleteOrganisationDialog = ({
 
     const deleteConfirmationPhrase: string = organisation.name;
 
-    const deleteOrgMutation = api.org.delete.useMutation();
+    const deleteOrgMutation = api.org.delete.useMutation({
+        onSuccess: () => {
+            toast.success("Organisation deleted successfully");
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
+
     const handleDeleteOrganisation = () => {
         deleteOrgMutation
             .mutateAsync({ organizationId: organisation.id })
             .then(() => router.replace("/" + user.username));
+    };
+
+    const showSubmitButtonContent = () => {
+        if (deleteOrgMutation.isPending) {
+            return (
+                <>
+                    <Loader2 className="animate-spin" />
+                    Deleting...
+                </>
+            );
+        }
+        if (deleteOrgMutation.isSuccess) {
+            return (
+                <>
+                    <Loader2 className="animate-spin" />
+                    Redirecting...
+                </>
+            );
+        }
+        return (
+            <>
+                <CircleX />
+                Delete
+            </>
+        );
     };
 
     return (
@@ -101,14 +135,7 @@ export const DeleteOrganisationDialog = ({
                                     deleteOrgMutation.isError
                                 }
                             >
-                                {deleteOrgMutation.isPending ? (
-                                    <Loader2 className="animate-spin" />
-                                ) : (
-                                    <>
-                                        <CircleX />
-                                        Delete
-                                    </>
-                                )}
+                                {showSubmitButtonContent()}
                             </Button>
                         )}
                     </DialogTrigger>

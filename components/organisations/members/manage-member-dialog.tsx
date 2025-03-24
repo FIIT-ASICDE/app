@@ -20,6 +20,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { toast } from "sonner";
 
 interface ManageMemberDialogProps {
     organisationId: string;
@@ -34,9 +35,18 @@ export const ManageMemberDialog = ({
     const [activeManageMemberTab, setActiveManageMemberTab] =
         useState<ManageMemberTab>("promote");
 
-    const promoteMutataion = api.org.promoteToAdmin.useMutation();
+    const promoteMutation = api.org.promoteToAdmin.useMutation({
+        onSuccess: () => {
+            toast.success("Promoted successfully", {
+                description: organisationMember.username + " has been promoted to an admin."
+            });
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
     const handlePromote = () => {
-        promoteMutataion
+        promoteMutation
             .mutateAsync({
                 userId: organisationMember.id,
                 orgId: organisationId,
@@ -44,14 +54,41 @@ export const ManageMemberDialog = ({
             .then(router.refresh);
     };
 
-    const expelMutataion = api.org.expelMember.useMutation();
+    const expelMutation = api.org.expelMember.useMutation({
+        onSuccess: () => {
+            toast.success("Expelled successfully", {
+                description: organisationMember.username + " has been expelled from your organisation."
+            });
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
+
     const handleExpel = () => {
-        expelMutataion
+        expelMutation
             .mutateAsync({
                 userId: organisationMember.id,
                 orgId: organisationId,
             })
             .then(router.refresh);
+    };
+
+    const showSubmitButtonContent = (type: "promote" | "expel") => {
+        if (promoteMutation.isPending || expelMutation.isPending) {
+            return (
+                <>
+                    <Loader2 className="animate-spin" />
+                    {type === "promote" ? "Promoting..." : "Expelling..."}
+                </>
+            );
+        }
+        return (
+            <>
+                {type === "promote" ? <CircleFadingArrowUp /> : <CircleX />}
+                {type === "promote" ? "Promote" : "Expel"}
+            </>
+        );
     };
 
     return (
@@ -124,19 +161,11 @@ export const ManageMemberDialog = ({
                                 className="w-full hover:bg-primary-button-hover"
                                 variant="default"
                                 disabled={
-                                    promoteMutataion.isPending ||
-                                    expelMutataion.isPending
+                                    promoteMutation.isPending ||
+                                    expelMutation.isPending
                                 }
                             >
-                                {promoteMutataion.isPending ||
-                                expelMutataion.isPending ? (
-                                    <Loader2 className="animate-spin" />
-                                ) : (
-                                    <>
-                                        <CircleFadingArrowUp />
-                                        Promote
-                                    </>
-                                )}
+                                {showSubmitButtonContent("promote")}
                             </Button>
                         </DialogTrigger>
                     </>
@@ -157,8 +186,7 @@ export const ManageMemberDialog = ({
                                 className="w-full hover:bg-destructive-hover"
                                 variant="destructive"
                             >
-                                <CircleX />
-                                Expel
+                                {showSubmitButtonContent("expel")}
                             </Button>
                         </DialogTrigger>
                     </>

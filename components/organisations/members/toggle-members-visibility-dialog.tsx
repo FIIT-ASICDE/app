@@ -47,6 +47,23 @@ export const ToggleMembersVisibilityDialog = ({
             .then(afterToggleAction);
     };
 
+    const showSubmitButtonContent = () => {
+        if (memberVisibilityMutation.isPending) {
+            return (
+                <>
+                    <Loader2 className="animate-spin" />
+                    Processing...
+                </>
+            );
+        }
+        return (
+            <>
+                {organisation.showMembers ? <EyeOff /> : <Eye />}
+                {organisation.showMembers ? "Hide members" : "Show members"}
+            </>
+        );
+    };
+
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -54,23 +71,7 @@ export const ToggleMembersVisibilityDialog = ({
                     variant="default"
                     className="w-60 hover:bg-primary-button-hover"
                 >
-                    {memberVisibilityMutation.isPending ? (
-                        <Loader2 className="animate-spin" />
-                    ) : (
-                        <>
-                            {organisation.showMembers ? (
-                                <>
-                                    <EyeOff />
-                                    Hide members
-                                </>
-                            ) : (
-                                <>
-                                    <Eye />
-                                    Show members
-                                </>
-                            )}
-                        </>
-                    )}
+                    {showSubmitButtonContent()}
                 </Button>
             </DialogTrigger>
             <DialogContent>
@@ -91,17 +92,7 @@ export const ToggleMembersVisibilityDialog = ({
                             className="w-full hover:bg-primary-button-hover"
                             variant="default"
                         >
-                            {organisation.showMembers ? (
-                                <>
-                                    <EyeOff />
-                                    Hide members
-                                </>
-                            ) : (
-                                <>
-                                    <Eye />
-                                    Show members
-                                </>
-                            )}
+                            {showSubmitButtonContent()}
                         </Button>
                     </DialogTrigger>
                 </DialogFooter>

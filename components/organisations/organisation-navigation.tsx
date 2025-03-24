@@ -6,6 +6,14 @@ import { usePathname } from "next/navigation";
 
 import { getCurrentPage } from "@/components/generic/generic";
 import { NavigationButton } from "@/components/generic/navigation-button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { LeaveOrganisationDialog } from "@/components/organisations/leave-organisation-dialog";
 
 interface OrganisationNavigationProps {
     organisation: OrganisationDisplay;
@@ -24,7 +32,8 @@ export const OrganisationNavigation = ({
 
     const settingsAccess = () => {
         if (organisation.userRole === "ADMIN") return "interactive";
-        return "nonInteractive";
+        else if (organisation.userRole === "MEMBER") return "nonInteractive";
+        return "none";
     };
 
     return (
@@ -52,13 +61,32 @@ export const OrganisationNavigation = ({
                 link={"/orgs/" + organisation.name + "/members"}
                 access={membersAccess()}
             />
-            <NavigationButton
-                title="settings"
-                icon={Settings}
-                variant={currentPage === "/settings" ? "secondary" : "outline"}
-                link={"/orgs/" + organisation.name + "/settings"}
-                access={settingsAccess()}
-            />
+            {settingsAccess() === "interactive" ? (
+                <NavigationButton
+                    title="settings"
+                    icon={Settings}
+                    variant={currentPage === "/settings" ? "secondary" : "outline"}
+                    link={"/orgs/" + organisation.name + "/settings"}
+                    access="interactive"
+                />
+            ) : settingsAccess() === "nonInteractive" ? (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="icon">
+                            <Settings />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem asChild>
+                            <LeaveOrganisationDialog
+                                organisation={organisation}
+                            />
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            ) : (
+                <></>
+            )}
         </div>
     );
 };

@@ -4,7 +4,7 @@ import { commitSchema } from "@/lib/schemas/git-schemas";
 import { api } from "@/lib/trpc/react";
 import type {
     BottomPanelContentTab,
-    SidebarContentTab,
+    SidebarContentTab, SimulationType
 } from "@/lib/types/editor";
 import type { FileDisplayItem, Repository, RepositoryItem } from "@/lib/types/repository";
 import { X } from "lucide-react";
@@ -20,6 +20,7 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { toast } from "sonner";
 
 interface EditorPageProps {
     repository: Repository;
@@ -34,7 +35,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
     const [activeSidebarContent, setActiveSidebarContent] =
         useState<SidebarContentTab>("fileExplorer");
     const [activeBottomPanelContent, setActiveBottomPanelContent] =
-        useState<BottomPanelContentTab>("terminal");
+        useState<BottomPanelContentTab>("simulation");
 
     const verticalGroupRef =
         useRef<ElementRef<typeof ResizablePanelGroup>>(null);
@@ -59,7 +60,14 @@ export default function EditorPage({ repository }: EditorPageProps) {
         },
     );
 
-    const commitMutation = api.git.commit.useMutation();
+    const commitMutation = api.git.commit.useMutation({
+        onSuccess: () => {
+            toast.success("Successfully commited " + changes.data?.changes.length);
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
 
     const handleOnCommit = async (data: z.infer<typeof commitSchema>) => {
         await commitMutation.mutateAsync(data);
@@ -82,6 +90,11 @@ export default function EditorPage({ repository }: EditorPageProps) {
             verticalGroupRef.current.setLayout([100, 0]);
             setVerticalCollapsed(true);
         }
+    };
+
+    const onStartSimulation = (selectedType: SimulationType, selectedFile: RepositoryItem) => {
+        // TODO: adam start simulation
+        console.log("Starting simulation with type: " + selectedType + " and file: " + selectedFile?.name);
     };
 
     const handleFileClick = (item: RepositoryItem) => {
@@ -151,7 +164,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
                 repoId: repository.id,
             });
         }
-    }, [openFiles, activeFile, repository.id]);
+    }, [openFiles, activeFile, repository.id, saveSession]);
 
     return (
         <div className="flex h-screen flex-row">
@@ -171,6 +184,8 @@ export default function EditorPage({ repository }: EditorPageProps) {
                 lastOpenedSidebarSize={lastOpenedSidebarSize}
                 setLastOpenedSidebarSize={setLastOpenedSidebarSize}
                 isGitRepo={repository.isGitRepo}
+                repository={repository}
+                onStartSimulation={onStartSimulation}
             />
 
             <ResizablePanelGroup

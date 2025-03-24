@@ -88,7 +88,7 @@ export const SourceControlTabContent = ({
                                             {changes.length}
                                         </div>
                                     </TooltipTrigger>
-                                    <TooltipContent side="right">
+                                    <TooltipContent side="right" className="font-normal">
                                         {changes.length} total changes
                                     </TooltipContent>
                                 </Tooltip>

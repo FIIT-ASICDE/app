@@ -1,6 +1,6 @@
 import { RepositoryItemChange } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
-import { CircleDot, MoveUpRight, Pen, Plus, X } from "lucide-react";
+import { CircleDot, CirclePlus, CircleX, MoveUpRight, Pen } from "lucide-react";
 
 interface ItemChangeIconProps {
     itemChange: RepositoryItemChange;
@@ -15,14 +15,14 @@ export const RepositoryItemChangeIcon = ({
 
     switch (itemChange.change.type) {
         case "added":
-            return <Plus className={fullClassName} />;
+            return <CirclePlus className={cn(fullClassName, "text-green-900")} />;
         case "modified":
-            return <CircleDot className={fullClassName} />;
+            return <CircleDot className={cn(fullClassName, "text-blue-500")} />;
         case "deleted":
-            return <X className={fullClassName} />;
+            return <CircleX className={cn(fullClassName, "text-destructive")} />;
         case "renamed":
-            return <Pen className={fullClassName} />;
+            return <Pen className={cn(fullClassName, "text-yellow-500")} />;
         case "moved":
-            return <MoveUpRight className={fullClassName} />;
+            return <MoveUpRight className={cn(fullClassName, "text-badge-admin")} />;
     }
 };

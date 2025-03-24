@@ -3,6 +3,7 @@ import { GithubRepoDisplay } from "@/lib/types/repository";
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { SelectItem } from "@/components/ui/select";
+import { imgSrc } from "@/lib/client-file-utils";
 
 interface SelectRepositoryItemProps {
     repository: GithubRepoDisplay;
@@ -19,7 +20,7 @@ export const SelectRepositoryItem = ({
             <div className="flex w-[315px] min-w-0 flex-row items-center space-x-3">
                 <AvatarDisplay
                     displayType="select"
-                    image={repository.ownerImage}
+                    image={imgSrc(repository.ownerImage)}
                     name={repository.ownerName}
                 />
                 <DynamicTitle

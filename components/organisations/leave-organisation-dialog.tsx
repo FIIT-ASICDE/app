@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { imgSrc } from "@/lib/client-file-utils";
 
 interface LeaveOrganisationDialogProps {
     organisation: OrganisationDisplay;
@@ -59,6 +60,38 @@ export const LeaveOrganisationDialog = ({
                 newAdminUserId: selectedUser?.id,
             })
             .then(() => router.replace("/" + user.username));
+    };
+
+    const disableSubmitButton = (): boolean => {
+        if (leaveOrganisationInput !== leaveOrganisationPhrase) {
+            return true;
+        }
+        return !!(isUserOnlyAdmin && selectedUser === undefined);
+    };
+
+    const showSubmitButtonContent = () => {
+        if (leaveOrgMutation.isPending) {
+            return (
+                <>
+                    <Loader2 className="animate-spin" />
+                    Leaving...
+                </>
+            );
+        }
+        if (leaveOrgMutation.isSuccess) {
+            return (
+                <>
+                    <Loader2 className="animate-spin text-muted-foreground" />
+                    Redirecting...
+                </>
+            );
+        }
+        return (
+            <>
+                <UserRoundMinus />
+                Leave
+            </>
+        );
     };
 
     return (
@@ -105,7 +138,7 @@ export const LeaveOrganisationDialog = ({
                                     <AvatarDisplay
                                         displayType="select"
                                         name={selectedUser.username}
-                                        image={selectedUser.image}
+                                        image={imgSrc(selectedUser.image)}
                                     />
                                     {selectedUser.username}
                                 </div>
@@ -137,7 +170,7 @@ export const LeaveOrganisationDialog = ({
                                             <AvatarDisplay
                                                 displayType="select"
                                                 name={member.username}
-                                                image={member.image}
+                                                image={imgSrc(member.image)}
                                             />
                                             {member.username}
                                         </div>
@@ -165,14 +198,9 @@ export const LeaveOrganisationDialog = ({
                             onClick={() => handleLeaveOrganisation()}
                             className="w-full hover:bg-destructive-hover"
                             variant="destructive"
-                            disabled={
-                                leaveOrganisationInput !==
-                                    leaveOrganisationPhrase ||
-                                selectedUser === undefined
-                            }
+                            disabled={disableSubmitButton()}
                         >
-                            <UserRoundMinus />
-                            Leave
+                            {showSubmitButtonContent()}
                         </Button>
                     </DialogTrigger>
                 </DialogFooter>
