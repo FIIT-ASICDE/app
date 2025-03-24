@@ -1,6 +1,10 @@
 import { commitSchema } from "@/lib/schemas/git-schemas";
 import type { SidebarContentTab } from "@/lib/types/editor";
-import type { Repository, RepositoryItemChange } from "@/lib/types/repository";
+import type {
+    Repository,
+    RepositoryItem,
+    RepositoryItemChange,
+} from "@/lib/types/repository";
 import { z } from "zod";
 
 import { FileExplorerTabContent } from "@/components/editor/sidebar-content/file-explorer-tab-content";
@@ -13,6 +17,7 @@ interface SidebarTabContentProps {
     changes: Array<RepositoryItemChange>;
     handleCloseSidebar: () => void;
     onCommitAction?: (data: z.infer<typeof commitSchema>) => Promise<void>;
+    onFileClick?: (item: RepositoryItem) => void;
 }
 
 export const SidebarTabContent = ({
@@ -21,6 +26,7 @@ export const SidebarTabContent = ({
     changes,
     handleCloseSidebar,
     onCommitAction,
+    onFileClick,
 }: SidebarTabContentProps) => {
     return (
         <div className="flex h-full">
@@ -28,6 +34,7 @@ export const SidebarTabContent = ({
                 <FileExplorerTabContent
                     repository={repository}
                     handleCloseSidebar={handleCloseSidebar}
+                    onFileClick={onFileClick}
                 />
             )}
             {activeSidebarContent === "search" && (

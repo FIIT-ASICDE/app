@@ -48,6 +48,7 @@ interface FileDisplayItem {
     name: string;
     lastActivity: Date;
     language: string;
+    absolutePath: string;
 }
 
 export type FileItem = Omit<FileDisplayItem, "type"> & {

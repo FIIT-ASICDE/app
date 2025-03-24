@@ -5,6 +5,7 @@ model Repo {
   public               Boolean
   userOrganizationRepo RepoUserOrganization[]
   RepoUserInvitation   RepoUserInvitation[]
+  EditorSessions       EditorSession[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

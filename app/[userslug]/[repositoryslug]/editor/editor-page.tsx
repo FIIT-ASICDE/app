@@ -6,9 +6,10 @@ import type {
     BottomPanelContentTab,
     SidebarContentTab, SimulationType
 } from "@/lib/types/editor";
-import type { Repository, RepositoryItem } from "@/lib/types/repository";
+import type { FileDisplayItem, Repository, RepositoryItem } from "@/lib/types/repository";
+import { X } from "lucide-react";
 import dynamic from "next/dynamic";
-import { type ElementRef, useRef, useState } from "react";
+import { type ElementRef, useEffect, useRef, useState } from "react";
 import { z } from "zod";
 
 import { BottomPanelTabContent } from "@/components/editor/bottom-panel-content/bottom-panel-tab-content";
@@ -48,6 +49,8 @@ export default function EditorPage({ repository }: EditorPageProps) {
         useState<number>(20);
     const [lastOpenedBottomPanelSize, setLastOpenedBottomPanelSize] =
         useState<number>(20);
+    const [activeFile, setActiveFile] = useState<FileDisplayItem | null>(null);
+    const [openFiles, setOpenFiles] = useState<FileDisplayItem[]>([]);
 
     const changes = api.git.changes.useQuery(
         { repoId: repository.id },
@@ -93,6 +96,75 @@ export default function EditorPage({ repository }: EditorPageProps) {
         // TODO: adam start simulation
         console.log("Starting simulation with type: " + selectedType + " and file: " + selectedFile?.name);
     };
+
+    const handleFileClick = (item: RepositoryItem) => {
+        if (item.type === "file-display") {
+            if (!openFiles.some((file) => file.name === item.name)) {
+                setOpenFiles((prevFiles) => [...prevFiles, item]);
+            }
+            setActiveFile(item);
+        }
+    };
+
+    const handleTabSwitch = (item: FileDisplayItem) => {
+        setActiveFile(item);
+    };
+
+    const { data: session } = api.editor.getSession.useQuery({
+        repoId: repository.id,
+    });
+    const saveSession = api.editor.saveSession.useMutation();
+
+    const handleCloseTab = (fileToClose: FileDisplayItem) => {
+        const filteredFiles = openFiles.filter(file => file.name !== fileToClose.name);
+        setOpenFiles(filteredFiles);
+
+        if (activeFile?.name === fileToClose.name) {
+            setActiveFile(filteredFiles.length > 0 ? filteredFiles[0] : null);
+        }
+    
+        saveSession.mutate({
+            repoId: repository.id,
+            openFiles: filteredFiles,
+            activeFile: filteredFiles.length > 0 ? (filteredFiles[0] as FileDisplayItem) : null,
+        });
+    };
+
+    useEffect(() => {
+        if (session) {
+            setOpenFiles(session.openFiles || []);
+            setActiveFile(session.activeFile);
+        }
+    }, [session]);
+    
+
+    useEffect(() => {
+        if (openFiles.length > 0) {
+            const transformedOpenFiles = openFiles.map((file) => ({
+                name: file.name,
+                type: file.type,
+                lastActivity: new Date(file.lastActivity),
+                language: file.language,
+                absolutePath: file.absolutePath
+            }));
+
+            const transformedActiveFile = activeFile
+                ? {
+                      name: activeFile.name,
+                      type: activeFile.type,
+                      lastActivity: new Date(activeFile.lastActivity),
+                      language: activeFile.language,
+                      absolutePath: activeFile.absolutePath
+                  }
+                : null;
+
+            saveSession.mutate({
+                activeFile: transformedActiveFile,
+                openFiles: transformedOpenFiles,
+                repoId: repository.id,
+            });
+        }
+    }, [openFiles, activeFile, repository.id, saveSession]);
 
     return (
         <div className="flex h-screen flex-row">
@@ -148,13 +220,47 @@ export default function EditorPage({ repository }: EditorPageProps) {
                                 changes={changes.data?.changes ?? []}
                                 handleCloseSidebar={handleCloseSidebar}
                                 onCommitAction={handleOnCommit}
+                                onFileClick={handleFileClick}
                             />
                         </ResizablePanel>
 
                         <ResizableHandle />
 
                         <ResizablePanel defaultSize={80}>
-                            <DynamicEditor filePath="/testing-collab" />
+                            <div className="flex bg-background text-white">
+                                {openFiles.map((file) => (
+                                    <div key={file.name}>
+                                        <span
+                                            className={`flex cursor-pointer items-center justify-center px-2 py-2 text-sm font-semibold ${
+                                                activeFile?.name === file.name
+                                                    ? "bg-[#1e1e1e] text-white"
+                                                    : "text-gray-400 hover:bg-[#444444]"
+                                            }`}
+                                            onClick={() =>
+                                                handleTabSwitch(file)
+                                            }
+                                        >
+                                            {file.name}
+                                            <button
+                                                className="ml-2 hover:text-white"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleCloseTab(file);
+                                                }}
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </button>
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                            {activeFile ? (
+                                <DynamicEditor filePath={activeFile.absolutePath + "/" + activeFile.name} />
+                            ) : (
+                                <div className="flex h-full w-full items-center justify-center text-gray-400">
+                                    No file open
+                                </div>
+                            )}
                         </ResizablePanel>
                     </ResizablePanelGroup>
                 </ResizablePanel>

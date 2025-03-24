@@ -79,6 +79,7 @@ export function loadRepoItems(
                 name: entry.name,
                 lastActivity,
                 language: extension,
+                absolutePath: currentPath
             };
         });
     }
@@ -135,6 +136,7 @@ export function loadRepoFile(filePath: string): FileItem {
         name: fileName,
         lastActivity,
         language: extension,
+        absolutePath: filePath,
         content: fs.readFileSync(filePath, "utf-8"),
     };
 }

@@ -45,14 +45,11 @@ const server = Bun.serve<EditorSocketData>({
         }
 
         // url looks like http://localhost:3001/connect?filePath=placeholder
-        const relateiveFilePath = req.url
-            .split("?")
-            .at(1)
-            ?.split("=")
-            .at(1)
-            ?.replaceAll("%2F", "/");
+        let filePath = req.url.split("?").at(1)?.split("=").at(1);
 
-        if (!relateiveFilePath) {
+        if (filePath) {
+            filePath = decodeURIComponent(filePath).replaceAll("\\", "/");
+        } else {
             logger.warn(
                 { event: "request", reason: "missing file path", url: req.url },
                 "Missing relative file path in URL",
@@ -63,8 +60,6 @@ const server = Bun.serve<EditorSocketData>({
             );
         }
 
-        const filePath =
-            process.env.REPOSITORIES_STORAGE_ROOT + relateiveFilePath;
         if (!repoExists(filePath)) {
             logger.warn(
                 { event: "request", reason: "nonexistent file path", filePath },
