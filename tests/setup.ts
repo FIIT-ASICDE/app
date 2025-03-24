@@ -90,6 +90,17 @@ export async function initializeUser(
         surname?: string;
     },
 ) {
+    if (userData?.email) {
+        const existingUser = await prisma.user.findUnique({
+            where: { email: userData.email },
+        });
+        if (existingUser) {
+            await prisma.user.delete({
+                where: { id: existingUser.id },
+            });
+        }
+    }
+
     const user = await prisma.user.create({
         data: {
             id: userData?.id ?? randomUUIDv7(),
