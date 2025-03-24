@@ -14,7 +14,7 @@ bun install --frozen-lockfile --omit=dev
 echo -e "${GREEN}Dependencies installed successfully.${RESET}"
 
 echo -e "${YELLOW}Generating Prisma client...${RESET}"
-npx prisma generate
+bunx prisma generate
 echo -e "${GREEN}Prisma client generated successfully.${RESET}"
 
 echo -e "${YELLOW}Starting the application...${RESET}"
