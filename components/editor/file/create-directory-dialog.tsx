@@ -1,6 +1,8 @@
+import { api } from "@/lib/trpc/react";
 import { DirectoryDisplayItem, RepositoryItem } from "@/lib/types/repository";
 import { Folder, FolderPlus } from "lucide-react";
 import { Dispatch, FormEvent, SetStateAction, useState } from "react";
+import { toast } from "sonner";
 
 import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer-control-button";
 import {
@@ -11,8 +13,6 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { api } from "@/lib/trpc/react";
-import { toast } from "sonner";
 
 interface CreateDirectoryDialogProps {
     repositoryId: string;
@@ -42,15 +42,14 @@ export const CreateDirectoryDialog = ({
 
             const newDirectory: DirectoryDisplayItem = {
                 type: "directory-display",
-                name: repositoryItem ? repositoryItem.name + "/" + trimmedDirectoryName : trimmedDirectoryName,
+                name: repositoryItem
+                    ? repositoryItem.name + "/" + trimmedDirectoryName
+                    : trimmedDirectoryName,
                 lastActivity: new Date(),
             } satisfies DirectoryDisplayItem;
 
             if (repositoryItem === undefined) {
-                setTree([
-                    ...tree,
-                    newDirectory,
-                ]);
+                setTree([...tree, newDirectory]);
                 console.log("Create directory in root: " + newDirectory.name);
             } else {
                 console.log("Create directory on path: " + newDirectory.name);
@@ -64,7 +63,7 @@ export const CreateDirectoryDialog = ({
         },
         onError: (error) => {
             toast.error(error.message);
-        }
+        },
     });
 
     const handleSubmit = (e: FormEvent) => {
@@ -76,7 +75,7 @@ export const CreateDirectoryDialog = ({
                 name: directoryName.trim(),
                 repoId: repositoryId,
                 path: repositoryItem?.name,
-            })
+            });
         }
     };
 

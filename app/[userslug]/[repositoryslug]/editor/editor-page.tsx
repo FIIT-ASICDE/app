@@ -16,8 +16,8 @@ import type {
 import { X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { type ElementRef, useEffect, useRef, useState } from "react";
-import { useDebouncedCallback } from "use-debounce";
 import { toast } from "sonner";
+import { useDebouncedCallback } from "use-debounce";
 import { z } from "zod";
 
 import { BottomPanelTabContent } from "@/components/editor/bottom-panel-content/bottom-panel-tab-content";
@@ -63,7 +63,9 @@ export default function EditorPage({ repository }: EditorPageProps) {
         SimulationConfiguration | undefined
     >(undefined);
 
-    const [tree, setTree] = useState<Array<RepositoryItem>>(repository.tree ?? []);
+    const [tree, setTree] = useState<Array<RepositoryItem>>(
+        repository.tree ?? [],
+    );
 
     const changes = api.git.changes.useQuery(
         { repoId: repository.id },

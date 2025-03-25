@@ -4,12 +4,15 @@ import { FileIcon, FilePlus } from "lucide-react";
 import { Dispatch, FormEvent, SetStateAction, useState } from "react";
 import { toast } from "sonner";
 
-
-
 import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer-control-button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-
 
 interface CreateFileDialogProps {
     repositoryId: string;
@@ -42,7 +45,9 @@ export const CreateFileDialog = ({
                 name: fileName.trim(),
                 lastActivity: new Date(),
                 language: trimmedFileName.split(".").pop() ?? "",
-                absolutePath: repositoryItem ? repositoryItem?.name + "/" + trimmedFileName : trimmedFileName,
+                absolutePath: repositoryItem
+                    ? repositoryItem?.name + "/" + trimmedFileName
+                    : trimmedFileName,
             } satisfies FileDisplayItem;
 
             if (repositoryItem === undefined) {
@@ -60,7 +65,7 @@ export const CreateFileDialog = ({
         },
         onError: (error) => {
             toast.error(error.message);
-        }
+        },
     });
 
     const handleSubmit = (e: FormEvent) => {

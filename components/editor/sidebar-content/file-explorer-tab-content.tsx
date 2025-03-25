@@ -3,6 +3,7 @@
 import { imgSrc } from "@/lib/client-file-utils";
 import { Repository, RepositoryItem } from "@/lib/types/repository";
 import { CopyMinus } from "lucide-react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 import { CreateDirectoryDialog } from "@/components/editor/file/create-directory-dialog";
 import { CreateFileDialog } from "@/components/editor/file/create-file-dialog";
@@ -11,9 +12,8 @@ import { CloseButton } from "@/components/editor/navigation/close-button";
 import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer-control-button";
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dispatch, SetStateAction, useState } from "react";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface FileExplorerTabContentProps {
     repository: Repository;
@@ -30,8 +30,12 @@ export const FileExplorerTabContent = ({
     handleCloseSidebarAction,
     onFileClick,
 }: FileExplorerTabContentProps) => {
-    const [selectedItem, setSelectedItem] = useState<RepositoryItem | undefined>(undefined);
-    const [expandedItems, setExpandedItems] = useState<Array<RepositoryItem>>([]);
+    const [selectedItem, setSelectedItem] = useState<
+        RepositoryItem | undefined
+    >(undefined);
+    const [expandedItems, setExpandedItems] = useState<Array<RepositoryItem>>(
+        [],
+    );
 
     // adding dummy cpp file to test simulation dialog
     if (

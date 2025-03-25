@@ -35,13 +35,19 @@ export const FileTreeItem = ({
 
     const handleToggle = () => {
         if (item.type === "directory" || item.type === "directory-display") {
-            if (!expandedItems.find((expandedItem: RepositoryItem) => expandedItem.name === item.name)) {
-                setExpandedItemsAction([
-                    ...expandedItems,
-                    item,
-                ]);
+            if (
+                !expandedItems.find(
+                    (expandedItem: RepositoryItem) =>
+                        expandedItem.name === item.name,
+                )
+            ) {
+                setExpandedItemsAction([...expandedItems, item]);
             } else {
-                const filteredExpandedItems: Array<RepositoryItem> = expandedItems.filter((expandedItem: RepositoryItem) => expandedItem.name !== item.name);
+                const filteredExpandedItems: Array<RepositoryItem> =
+                    expandedItems.filter(
+                        (expandedItem: RepositoryItem) =>
+                            expandedItem.name !== item.name,
+                    );
                 setExpandedItemsAction(filteredExpandedItems);
             }
         }
@@ -71,7 +77,10 @@ export const FileTreeItem = ({
                     item.type === "directory-display" ? (
                         <>
                             <span className="mr-2">
-                                {expandedItems.find((expandedItem: RepositoryItem) => expandedItem.name === item.name) ? (
+                                {expandedItems.find(
+                                    (expandedItem: RepositoryItem) =>
+                                        expandedItem.name === item.name,
+                                ) ? (
                                     <ChevronDown className="max-h-4 min-h-4 min-w-4 max-w-4" />
                                 ) : (
                                     <ChevronRight className="max-h-4 min-h-4 min-w-4 max-w-4" />
