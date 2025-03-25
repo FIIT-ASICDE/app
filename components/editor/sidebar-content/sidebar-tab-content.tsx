@@ -44,8 +44,8 @@ export const SidebarTabContent = ({
                 <FileExplorerTabContent
                     repository={repository}
                     tree={tree}
-                    setTree={setTree}
-                    handleCloseSidebar={handleCloseSidebar}
+                    setTreeAction={setTree}
+                    handleCloseSidebarAction={handleCloseSidebar}
                     onFileClick={onFileClick}
                 />
             )}
