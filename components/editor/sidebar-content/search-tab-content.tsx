@@ -23,7 +23,10 @@ export const SearchTabContent = ({
             <div className="text-nowrap p-4">
                 <header className="flex flex-row items-center justify-between pb-4">
                     <span className="text-xl font-medium">Search</span>
-                    <CloseButton onClick={handleCloseSidebar} />
+                    <CloseButton
+                        onClick={handleCloseSidebar}
+                        tooltip="Close sidebar"
+                    />
                 </header>
                 <div className="space-y-3">
                     <div className="relative w-full">

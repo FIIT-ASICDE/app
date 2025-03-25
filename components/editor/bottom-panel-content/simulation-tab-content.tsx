@@ -14,7 +14,10 @@ export const SimulationTabContent = ({
         <div className="relative w-full text-nowrap p-4 pt-14">
             <header className="absolute left-4 right-4 top-4 flex flex-row items-center justify-between">
                 <span className="text-xl font-medium">Simulation</span>
-                <CloseButton onClick={handleCloseBottomPanel} />
+                <CloseButton
+                    onClick={handleCloseBottomPanel}
+                    tooltip="Close panel"
+                />
             </header>
             <ScrollArea className="h-full w-full">
                 <div className="space-y-0">

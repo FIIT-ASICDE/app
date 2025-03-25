@@ -1,6 +1,6 @@
 import { RepositoryItem } from "@/lib/types/repository";
 import { X } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { Dispatch, FormEvent, SetStateAction, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,22 +12,60 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { api } from "@/lib/trpc/react";
+import { toast } from "sonner";
 
 interface DeleteItemDialogProps {
+    repositoryId: string;
     repositoryItem: RepositoryItem;
+    tree: Array<RepositoryItem>;
+    setTree: Dispatch<SetStateAction<Array<RepositoryItem>>>;
+    onAction?: () => void;
 }
 
-export const DeleteItemDialog = ({ repositoryItem }: DeleteItemDialogProps) => {
+export const DeleteItemDialog = ({
+    repositoryId,
+    repositoryItem,
+    tree,
+    setTree,
+    onAction,
+}: DeleteItemDialogProps) => {
     const [open, setOpen] = useState<boolean>(false);
 
     const itemName: string =
         repositoryItem.name.split("/").pop() ?? repositoryItem.name;
 
+    const itemDisplayType: string = repositoryItem.type === "file" || repositoryItem.type === "file-display" ? "File" : "Directory";
+
+    const deleteItemMutation = api.editor.deleteItem.useMutation({
+        onSuccess: () => {
+            toast.success(itemDisplayType + " deleted successfully");
+
+            const itemToDelete: RepositoryItem | undefined = tree.find((item) => item.name === repositoryItem.name);
+
+            if (itemToDelete) {
+                const filteredTree: Array<RepositoryItem> = tree.filter((item) => item.name !== repositoryItem.name);
+                setTree(filteredTree);
+            }
+
+            if (onAction) {
+                onAction();
+            }
+
+            setOpen(false);
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
+
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        // TODO: handle delete item
-        console.log("Delete item " + repositoryItem.name);
-        setOpen(false);
+
+        deleteItemMutation.mutate({
+            repoId: repositoryId,
+            path: repositoryItem.name,
+        });
     };
 
     return (

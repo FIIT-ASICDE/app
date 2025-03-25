@@ -30,12 +30,9 @@ export const FileExplorerTabContent = ({
     handleCloseSidebarAction,
     onFileClick,
 }: FileExplorerTabContentProps) => {
-    const [selectedItem, setSelectedItem] = useState<
-        RepositoryItem | undefined
-    >(undefined);
-    const [expandedItems, setExpandedItems] = useState<Array<RepositoryItem>>(
-        [],
-    );
+    const [selectedItem, setSelectedItem] = useState<RepositoryItem | undefined>(undefined);
+    const [expandedItems, setExpandedItems] = useState<Array<RepositoryItem>>([]);
+    const [hoveredItem, setHoveredItem] = useState<RepositoryItem | undefined>(undefined);
 
     // adding dummy cpp file to test simulation dialog
     if (
@@ -53,8 +50,8 @@ export const FileExplorerTabContent = ({
 
     return (
         <ScrollArea className="relative h-full w-full">
-            <div className="min-w-0 text-nowrap p-4">
-                <header className="flex flex-col gap-y-3 pb-2">
+            <div className="flex flex-col flex-auto text-nowrap">
+                <header className="flex flex-col gap-y-3 p-4 pb-2">
                     <div className="flex flex-row items-center justify-between gap-x-3">
                         <div className="flex min-w-0 flex-row gap-x-2 text-xl font-medium">
                             <AvatarDisplay
@@ -70,7 +67,10 @@ export const FileExplorerTabContent = ({
                                 tooltipVisible
                             />
                         </div>
-                        <CloseButton onClick={handleCloseSidebarAction} />
+                        <CloseButton
+                            onClick={handleCloseSidebarAction}
+                            tooltip="Close sidebar"
+                        />
                     </div>
                     <div className="flex flex-row gap-x-1">
                         <CreateDirectoryDialog
@@ -104,6 +104,8 @@ export const FileExplorerTabContent = ({
                         setSelectedItemAction={setSelectedItem}
                         expandedItems={expandedItems}
                         setExpandedItemsAction={setExpandedItems}
+                        hoveredItem={hoveredItem}
+                        setHoveredItemAction={setHoveredItem}
                     />
                 ) : (
                     <Label className="text-sm text-muted-foreground">

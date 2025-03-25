@@ -84,7 +84,7 @@ export const RepositoryItemActions = ({
         <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
             <DropdownMenuTrigger asChild>
                 <button className="rounded border border-transparent p-[1px] hover:border-transparent hover:text-foreground">
-                    <Ellipsis className="max-h-4 min-h-4 min-w-4 max-w-4 text-muted-foreground" />
+                    <Ellipsis className="max-h-4 min-h-4 min-w-4 max-w-4" />
                 </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="min-w-40">
@@ -140,9 +140,21 @@ export const RepositoryItemActions = ({
 
                 <DropdownMenuSeparator />
 
-                <RenameItemDialog repositoryItem={repositoryItem} />
+                <RenameItemDialog
+                    repositoryId={repositoryId}
+                    repositoryItem={repositoryItem}
+                    tree={tree}
+                    setTree={setTree}
+                    onAction={onAction}
+                />
 
-                <DeleteItemDialog repositoryItem={repositoryItem} />
+                <DeleteItemDialog
+                    repositoryId={repositoryId}
+                    repositoryItem={repositoryItem}
+                    tree={tree}
+                    setTree={setTree}
+                    onAction={onAction}
+                />
             </DropdownMenuContent>
         </DropdownMenu>
     );

@@ -4,7 +4,7 @@ import { RoleOrganisationFilter } from "@/lib/types/organisation";
 import {
     FavoriteRepositoriesFilter,
     PinnedRepositoriesFilter,
-    PublicRepositoriesFilter,
+    PublicRepositoriesFilter, type RepositoryItem
 } from "@/lib/types/repository";
 
 export const getTimeDeltaString = (lastActivity: Date): string => {
@@ -264,4 +264,23 @@ export const languageColors: Record<string, string> = {
     yml: "#FCA5A5",
     other: "#F0F0F0",
     default: "#8884d8",
+};
+
+export const compareRepositoryItems = (
+    repositoryItem: RepositoryItem,
+    selectedItem: RepositoryItem | undefined,
+) => {
+    return (
+        selectedItem !== undefined &&
+        repositoryItem.type === selectedItem.type &&
+        repositoryItem.name === selectedItem.name
+    );
+};
+
+export const sortTree = (tree: Array<RepositoryItem>) => {
+    return tree.sort((a: RepositoryItem, b: RepositoryItem) => {
+        if ((a.type === "directory" || a.type === "directory-display") && (b.type === "file" || b.type === "file-display")) return -1;
+        if ((a.type === "file" || a.type === "file-display") && (b.type === "directory" || b.type === "directory-display")) return 1;
+        return a.name.localeCompare(b.name);
+    });
 };

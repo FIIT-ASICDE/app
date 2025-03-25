@@ -42,7 +42,7 @@ export const CreateFileDialog = ({
 
             const newFile: FileDisplayItem = {
                 type: "file-display",
-                name: fileName.trim(),
+                name: trimmedFileName,
                 lastActivity: new Date(),
                 language: trimmedFileName.split(".").pop() ?? "",
                 absolutePath: repositoryItem

@@ -3,20 +3,26 @@
 import type { RepositoryItem } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight, FileIcon, Folder } from "lucide-react";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, DragEvent, SetStateAction, useRef, useState } from "react";
 
 import { RepositoryItemActions } from "@/components/editor/sidebar-content/repository-item-actions";
+import { sortTree } from "@/components/generic/generic";
 
 interface FileTreeItemProps {
     repositoryId: string;
     item: RepositoryItem;
     tree: Array<RepositoryItem>;
     setTreeAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
-    isSelected: boolean;
+    selectedItem: RepositoryItem | undefined;
+    setSelectedItemAction: Dispatch<SetStateAction<RepositoryItem | undefined>>;
     depth?: number;
     onItemClick?: (item: RepositoryItem) => void;
     expandedItems: Array<RepositoryItem>;
     setExpandedItemsAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
+    hoveredItem: RepositoryItem | undefined;
+    setHoveredItemAction: Dispatch<SetStateAction<RepositoryItem | undefined>>;
+    onMoveItem?: (sourceItem: RepositoryItem, targetItem: RepositoryItem) => void;
+    onDragOverItem?: () => void;
 }
 
 export const FileTreeItem = ({
@@ -24,14 +30,20 @@ export const FileTreeItem = ({
     item,
     tree,
     setTreeAction,
-    isSelected,
+    selectedItem,
+    setSelectedItemAction,
     depth = 0,
     onItemClick,
     expandedItems,
     setExpandedItemsAction,
+    hoveredItem,
+    setHoveredItemAction,
+    onMoveItem,
+    onDragOverItem,
 }: FileTreeItemProps) => {
-    const [isHovered, setIsHovered] = useState<boolean>(false);
     const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+    const [isDragOver, setIsDragOver] = useState<boolean>(false);
+    const itemRef = useRef<HTMLDivElement>(null);
 
     const handleToggle = () => {
         if (item.type === "directory" || item.type === "directory-display") {
@@ -56,22 +68,89 @@ export const FileTreeItem = ({
         }
     };
 
+    const handleDragStart = (event: DragEvent<HTMLDivElement>) => {
+        event.dataTransfer.setData("text/plain", item.name);
+        event.dataTransfer.effectAllowed = "move";
+    };
+
+    const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+        event.dataTransfer.dropEffect = "move";
+        setIsDragOver(true);
+
+        if (onDragOverItem) {
+            onDragOverItem();
+        }
+    };
+
+    const handleDragEnter = (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (onDragOverItem) {
+            onDragOverItem();
+        }
+    };
+
+    const handleDragLeave = () => {
+        setIsDragOver(false);
+    };
+
+    const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setIsDragOver(false);
+
+        try {
+            if (event.dataTransfer) {
+                const sourcePath: string = event.dataTransfer.getData("text/plain");
+                const sourceItem: RepositoryItem | undefined = tree.find(treeItem => treeItem.name === sourcePath);
+
+                if (!sourceItem) return;
+                if (sourceItem.name === item.name) return;
+                if (item.type !== "directory" && item.type !== "directory-display") return;
+                if (item.name.startsWith(sourceItem.name + "/")) return;
+
+                if (onMoveItem) {
+                    onMoveItem(sourceItem, item);
+                }
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     return (
         <div
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            onMouseEnter={() => setHoveredItemAction(item)}
+            onMouseLeave={() => setHoveredItemAction(undefined)}
+            ref={itemRef}
         >
             <div
                 className={cn(
-                    "flex cursor-default flex-row items-center justify-between rounded px-2 py-1 text-sm",
-                    `pl-${depth * 12 + 8}px`,
-                    isSelected && "bg-accent font-medium",
+                    "border border-transparent flex cursor-default flex-row items-center justify-between rounded px-2 py-1.5 text-sm",
+                    (selectedItem?.name === item.name) && "bg-accent font-medium border-primary",
+                    isDragOver && "bg-accent border-primary",
                     "hover:bg-accent",
                 )}
+                style={{ paddingLeft: `${depth * 24 + 8}px` }}
+                draggable
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={() => {
+                    if (!(selectedItem?.name === item.name)) {
+                        setSelectedItemAction(item);
+                    } else {
+                        setSelectedItemAction(undefined);
+                    }
+                }}
             >
                 <div
                     className="flex flex-1 flex-row items-center rounded text-sm hover:bg-accent"
-                    onClick={handleToggle}
                 >
                     {item.type === "directory" ||
                     item.type === "directory-display" ? (
@@ -81,9 +160,13 @@ export const FileTreeItem = ({
                                     (expandedItem: RepositoryItem) =>
                                         expandedItem.name === item.name,
                                 ) ? (
-                                    <ChevronDown className="max-h-4 min-h-4 min-w-4 max-w-4" />
+                                    <div onClick={handleToggle}>
+                                        <ChevronDown className="cursor-pointer max-h-4 min-h-4 min-w-4 max-w-4" />
+                                    </div>
                                 ) : (
-                                    <ChevronRight className="max-h-4 min-h-4 min-w-4 max-w-4" />
+                                    <div onClick={handleToggle}>
+                                        <ChevronRight className="cursor-pointer max-h-4 min-h-4 min-w-4 max-w-4" />
+                                    </div>
                                 )}
                             </span>
                             <Folder
@@ -96,7 +179,7 @@ export const FileTreeItem = ({
                     )}
                     <span className="truncate">{item.name}</span>
                 </div>
-                {(isHovered || dropdownOpen) && (
+                {((hoveredItem?.name === item.name) || dropdownOpen) && (
                     <RepositoryItemActions
                         repositoryId={repositoryId}
                         repositoryItem={item}
@@ -105,33 +188,42 @@ export const FileTreeItem = ({
                         dropdownOpen={dropdownOpen}
                         setDropdownOpen={setDropdownOpen}
                         onAction={() => {
-                            setIsHovered(false);
+                            setHoveredItemAction(undefined);
                             setDropdownOpen(false);
                         }}
                     />
                 )}
             </div>
 
-            {/*(expandedItems.find((expandedItem: RepositoryItem) => expandedItem.name === item.name) && item.type === "directory") ||
-                (item.type === "directory-display" && (
-                    <div>
-                        item.children
-                        .sort((a: RepositoryItem, b: RepositoryItem) => {
-                            if ((a.type === "directory" || a.type === "directory-display") && (b.type === "file" || b.type === "file-display")) return -1;
-                            if ((a.type === "file" || a.type === "file-display") && (b.type === "directory" || b.type === "directory-display")) return 1;
-                            return a.name.localeCompare(b.name);
-                        })
-                        .map((child: RepositoryItem) => (
-                            <FileTreeItem
-                                key={item.lastActivity.toLocaleString()}
-                                item={child}
-                                depth={depth + 1}
-                                onItemClick={onItemClick}
-                                selectedPath={selectedPath}
-                            />
-                        ))
-                    </div>
-                ))*/}
+            {(expandedItems.find((expandedItem: RepositoryItem) => expandedItem.name === item.name) && item.type === "directory" && (
+                <div>
+                    {sortTree(item.children)
+                    .map((child: RepositoryItem, index: number) => (
+                        <FileTreeItem
+                            key={index + child.lastActivity.toLocaleString()}
+                            repositoryId={repositoryId}
+                            item={child}
+                            tree={tree}
+                            setTreeAction={setTreeAction}
+                            onItemClick={() => {
+                                setSelectedItemAction(child);
+                                if (onItemClick) {
+                                    onItemClick(child);
+                                }
+                            }}
+                            selectedItem={selectedItem}
+                            setSelectedItemAction={setSelectedItemAction}
+                            depth={depth + 1}
+                            expandedItems={expandedItems}
+                            setExpandedItemsAction={setExpandedItemsAction}
+                            hoveredItem={hoveredItem}
+                            setHoveredItemAction={setHoveredItemAction}
+                            onMoveItem={onMoveItem}
+                            onDragOverItem={onDragOverItem}
+                        />
+                    ))}
+                </div>
+            ))}
         </div>
     );
 };

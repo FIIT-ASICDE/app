@@ -1,9 +1,14 @@
 "use client";
 
 import type { RepositoryItem } from "@/lib/types/repository";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, DragEvent, SetStateAction, useState } from "react";
 
 import { FileTreeItem } from "@/components/editor/file/file-tree-item";
+import { toast } from "sonner";
+import { MoveItemDialog } from "@/components/editor/file/move-item-dialog";
+import { cn } from "@/lib/utils";
+import { api } from "@/lib/trpc/react";
+import { sortTree } from "@/components/generic/generic";
 
 interface FileTreeProps {
     repositoryId: string;
@@ -14,6 +19,8 @@ interface FileTreeProps {
     setSelectedItemAction: Dispatch<SetStateAction<RepositoryItem | undefined>>;
     expandedItems: Array<RepositoryItem>;
     setExpandedItemsAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
+    hoveredItem: RepositoryItem | undefined;
+    setHoveredItemAction: Dispatch<SetStateAction<RepositoryItem | undefined>>;
 }
 
 export const FileTree = ({
@@ -25,33 +32,122 @@ export const FileTree = ({
     setSelectedItemAction,
     expandedItems,
     setExpandedItemsAction,
+    hoveredItem,
+    setHoveredItemAction,
 }: FileTreeProps) => {
-    const sortedTree: Array<RepositoryItem> = [...tree].sort(
-        (a: RepositoryItem, b: RepositoryItem) => {
-            if (
-                (a.type === "directory" || a.type === "directory-display") &&
-                (b.type === "file" || b.type === "file-display")
-            )
-                return -1;
-            if (
-                (a.type === "file" || a.type === "file-display") &&
-                (b.type === "directory" || b.type === "directory-display")
-            )
-                return 1;
-            return a.name.localeCompare(b.name);
-        },
-    );
+    const [moveDialogOpen, setMoveDialogOpen] = useState<boolean>(false);
+    const [sourceItem, setSourceItem] = useState<RepositoryItem | undefined>(undefined);
+    const [targetItem, setTargetItem] = useState<RepositoryItem | undefined>(undefined);
+    const [isDragOverRoot, setIsDragOverRoot] = useState<boolean>(false);
 
-    const compareRepositoryItems = (repositoryItem: RepositoryItem) => {
-        return (
-            selectedItem !== undefined &&
-            repositoryItem.type === selectedItem.type &&
-            repositoryItem.name === selectedItem.name
-        );
+    const moveItemMutation = api.editor.renameItem.useMutation({
+        onSuccess: () => {
+            if (!sourceItem || !targetItem) return;
+
+            const sourceItemName: string = sourceItem.name.split("/").pop() || sourceItem.name;
+            const newPath = targetItem.name === "" ? sourceItemName
+                : targetItem.name + "/" + sourceItemName;
+
+            const updatedItem: RepositoryItem = {
+                ...sourceItem,
+                name: newPath,
+            };
+
+            setTreeAction(previousTree => {
+                const newTree = previousTree.filter((item: RepositoryItem)=> item.name !== sourceItem.name);
+                return [...newTree, updatedItem];
+            });
+
+            setMoveDialogOpen(false);
+            setSourceItem(undefined);
+            setTargetItem(undefined);
+
+            toast.success((sourceItem.type === "directory" || sourceItem.type === "directory-display" ? "Directory" : "File") + " moved successfully");
+        }
+    });
+
+    const rootDirectoryItem: RepositoryItem = {
+        type: "directory-display",
+        name: "",
+        lastActivity: new Date(),
+    };
+
+    const sortedTree: Array<RepositoryItem> = sortTree([...tree]);
+
+    const handleMoveItem = (source: RepositoryItem, target: RepositoryItem) => {
+        if (source && target) {
+            setSourceItem(source);
+            setTargetItem(target);
+            setMoveDialogOpen(true);
+        } else {
+            console.error("Cannot open move dialog: source or target is undefined");
+        }
+    };
+
+    const confirmMoveItem = async () => {
+        if (!sourceItem || !targetItem) return;
+
+        const sourceItemName: string = sourceItem.name.split("/").pop() || sourceItem.name;
+        const newPath = targetItem.name === ""
+            ? sourceItemName
+            : `${targetItem.name}/${sourceItemName}`;
+
+        moveItemMutation.mutate({
+            repoId: repositoryId,
+            originalPath: sourceItem.name,
+            newPath: newPath,
+        });
+    };
+
+    const cancelMoveItem = () => {
+        setMoveDialogOpen(false);
+        setSourceItem(undefined);
+        setTargetItem(undefined);
+    };
+
+    const handleRootDragOver = (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+        setIsDragOverRoot(true);
+    };
+
+    const handleRootDragLeave = () => {
+        setIsDragOverRoot(false);
+    };
+
+    const handleRootDrop = (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        setIsDragOverRoot(false);
+
+        try {
+            const sourcePath: string = event.dataTransfer.getData("text/plain");
+            const sourceItem: RepositoryItem | undefined = tree.find((treeItem: RepositoryItem) => treeItem.name === sourcePath);
+
+            if (!sourceItem) return;
+
+            const isAlreadyInRoot = !sourceItem.name.includes("/");
+
+            if (isAlreadyInRoot) {
+                toast.info("Item is already in the root directory");
+                return;
+            }
+
+            console.log("Handling move to root");
+            handleMoveItem(sourceItem, rootDirectoryItem);
+        } catch (error) {
+            console.log("Error handling drop:", error);
+        }
     };
 
     return (
-        <div className="space-y-1">
+        <div
+            className={cn("p-4 pt-2 rounded border border-transparent flex flex-col flex-grow flex-1 min-h-full",
+                isDragOverRoot && "border-primary bg-accent"
+            )}
+            onDragOver={handleRootDragOver}
+            onDragLeave={handleRootDragLeave}
+            onDrop={handleRootDrop}
+        >
             {sortedTree.map((item: RepositoryItem, index: number) => (
                 <FileTreeItem
                     key={index + item.lastActivity.toLocaleString()}
@@ -65,11 +161,28 @@ export const FileTree = ({
                             onItemClick(item);
                         }
                     }}
-                    isSelected={compareRepositoryItems(item)}
+                    selectedItem={selectedItem}
+                    setSelectedItemAction={setSelectedItemAction}
+                    depth={0}
                     expandedItems={expandedItems}
                     setExpandedItemsAction={setExpandedItemsAction}
+                    hoveredItem={hoveredItem}
+                    setHoveredItemAction={setHoveredItemAction}
+                    onMoveItem={handleMoveItem}
+                    onDragOverItem={() => setIsDragOverRoot(false)}
                 />
             ))}
+
+            {sourceItem && targetItem && (
+                <MoveItemDialog
+                    isOpen={moveDialogOpen}
+                    setIsOpen={setMoveDialogOpen}
+                    sourceItem={sourceItem}
+                    targetItem={targetItem}
+                    onConfirm={confirmMoveItem}
+                    onCancel={cancelMoveItem}
+                />
+            )}
         </div>
     );
 };
