@@ -1,3 +1,5 @@
+"use client";
+
 import { imgSrc } from "@/lib/client-file-utils";
 import { Repository, RepositoryItem } from "@/lib/types/repository";
 import { CopyMinus, FileX } from "lucide-react";
@@ -11,18 +13,26 @@ import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { NoData } from "@/components/generic/no-data";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dispatch, SetStateAction, useState } from "react";
 
 interface FileExplorerTabContentProps {
     repository: Repository;
-    handleCloseSidebar: () => void;
+    tree: Array<RepositoryItem>;
+    setTreeAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
+    handleCloseSidebarAction: () => void;
     onFileClick?: (item: RepositoryItem) => void;
 }
 
 export const FileExplorerTabContent = ({
     repository,
-    handleCloseSidebar,
+    tree,
+    setTreeAction,
+    handleCloseSidebarAction,
     onFileClick,
 }: FileExplorerTabContentProps) => {
+    const [selectedItem, setSelectedItem] = useState<RepositoryItem | undefined>(undefined);
+    const [expandedItems, setExpandedItems] = useState<Array<RepositoryItem>>([]);
+
     // adding dummy cpp file to test simulation dialog
     if (
         repository.tree &&
@@ -56,21 +66,37 @@ export const FileExplorerTabContent = ({
                                 tooltipVisible
                             />
                         </div>
-                        <CloseButton onClick={handleCloseSidebar} />
+                        <CloseButton onClick={handleCloseSidebarAction} />
                     </div>
                     <div className="flex flex-row gap-x-1">
-                        <CreateDirectoryDialog buttonSize="icon" />
-                        <CreateFileDialog buttonSize="icon" />
+                        <CreateDirectoryDialog
+                            buttonSize="icon"
+                            tree={tree}
+                            setTree={setTreeAction}
+                        />
+                        <CreateFileDialog
+                            buttonSize="icon"
+                            tree={tree}
+                            setTree={setTreeAction}
+                        />
                         <FileExplorerControlButton
                             icon={CopyMinus}
                             tooltipContent="Collapse all"
+                            onClick={() => {
+                                setExpandedItems([]);
+                            }}
                         />
                     </div>
                 </header>
-                {repository.tree && repository.tree.length ? (
+                {tree.length > 0 ? (
                     <FileTree
-                        tree={repository.tree}
+                        tree={tree}
+                        setTreeAction={setTreeAction}
                         onItemClick={onFileClick}
+                        selectedItem={selectedItem}
+                        setSelectedItemAction={setSelectedItem}
+                        expandedItems={expandedItems}
+                        setExpandedItemsAction={setExpandedItems}
                     />
                 ) : (
                     <NoData

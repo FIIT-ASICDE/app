@@ -17,14 +17,20 @@ import {
 
 interface RepositoryItemActionsProps {
     repositoryItem: RepositoryItem;
+    tree: Array<RepositoryItem>;
+    setTree: Dispatch<SetStateAction<Array<RepositoryItem>>>;
     dropdownOpen: boolean;
     setDropdownOpen: Dispatch<SetStateAction<boolean>>;
+    onAction: () => void;
 }
 
 export const RepositoryItemActions = ({
     repositoryItem,
+    tree,
+    setTree,
     dropdownOpen,
     setDropdownOpen,
+    onAction,
 }: RepositoryItemActionsProps) => {
     const itemName: string =
         repositoryItem.name.split("/").pop() ?? repositoryItem.name;
@@ -86,10 +92,16 @@ export const RepositoryItemActions = ({
                         <CreateFileDialog
                             repositoryItem={repositoryItem}
                             buttonSize="full"
+                            tree={tree}
+                            setTree={setTree}
+                            onAction={onAction}
                         />
                         <CreateDirectoryDialog
                             repositoryItem={repositoryItem}
                             buttonSize="full"
+                            tree={tree}
+                            setTree={setTree}
+                            onAction={onAction}
                         />
                         <DropdownMenuSeparator />
                     </>

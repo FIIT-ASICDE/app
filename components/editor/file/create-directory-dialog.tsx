@@ -1,6 +1,6 @@
-import { RepositoryItem } from "@/lib/types/repository";
+import { DirectoryDisplayItem, RepositoryItem } from "@/lib/types/repository";
 import { Folder, FolderPlus } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { Dispatch, FormEvent, SetStateAction, useState } from "react";
 
 import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer-control-button";
 import {
@@ -15,25 +15,45 @@ import { Input } from "@/components/ui/input";
 interface CreateDirectoryDialogProps {
     repositoryItem?: RepositoryItem;
     buttonSize: "icon" | "full";
+    tree: Array<RepositoryItem>;
+    setTree: Dispatch<SetStateAction<Array<RepositoryItem>>>;
+    onAction?: () => void;
 }
 
 export const CreateDirectoryDialog = ({
     repositoryItem,
     buttonSize,
+    tree,
+    setTree,
+    onAction,
 }: CreateDirectoryDialogProps) => {
     const [open, setOpen] = useState<boolean>(false);
     const [directoryName, setDirectoryName] = useState<string>("");
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        if (directoryName.trim()) {
-            // TODO: handle create directory
-            console.log(
-                "Create directory on path: " +
-                    (repositoryItem !== undefined ? repositoryItem.name : "") +
-                    "/" +
-                    directoryName,
-            );
+        const trimmedDirectoryName: string = directoryName.trim();
+
+        if (trimmedDirectoryName) {
+            const newDirectory: DirectoryDisplayItem = {
+                type: "directory-display",
+                name: repositoryItem ? repositoryItem.name + "/" + trimmedDirectoryName : trimmedDirectoryName,
+                lastActivity: new Date(),
+            } satisfies DirectoryDisplayItem;
+
+            if (repositoryItem === undefined) {
+                setTree([
+                    ...tree,
+                    newDirectory,
+                ]);
+                console.log("Create directory in root: " + newDirectory.name);
+            } else {
+                console.log("Create directory on path: " + newDirectory.name);
+            }
+
+            if (onAction) {
+                onAction();
+            }
             setDirectoryName("");
             setOpen(false);
         }

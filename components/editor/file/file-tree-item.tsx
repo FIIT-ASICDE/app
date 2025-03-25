@@ -3,30 +3,45 @@
 import type { RepositoryItem } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight, FileIcon, Folder } from "lucide-react";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 import { RepositoryItemActions } from "@/components/editor/sidebar-content/repository-item-actions";
 
 interface FileTreeItemProps {
     item: RepositoryItem;
+    tree: Array<RepositoryItem>;
+    setTreeAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
     isSelected: boolean;
     depth?: number;
     onItemClick?: (item: RepositoryItem) => void;
+    expandedItems: Array<RepositoryItem>;
+    setExpandedItemsAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
 }
 
 export const FileTreeItem = ({
     item,
+    tree,
+    setTreeAction,
     isSelected,
     depth = 0,
     onItemClick,
+    expandedItems,
+    setExpandedItemsAction,
 }: FileTreeItemProps) => {
-    const [expanded, setExpanded] = useState<boolean>(false);
     const [isHovered, setIsHovered] = useState<boolean>(false);
     const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
 
     const handleToggle = () => {
         if (item.type === "directory" || item.type === "directory-display") {
-            setExpanded(!expanded);
+            if (!expandedItems.find((expandedItem: RepositoryItem) => expandedItem.name === item.name)) {
+                setExpandedItemsAction([
+                    ...expandedItems,
+                    item,
+                ]);
+            } else {
+                const filteredExpandedItems: Array<RepositoryItem> = expandedItems.filter((expandedItem: RepositoryItem) => expandedItem.name !== item.name);
+                setExpandedItemsAction(filteredExpandedItems);
+            }
         }
         if (onItemClick) {
             onItemClick(item);
@@ -54,7 +69,7 @@ export const FileTreeItem = ({
                     item.type === "directory-display" ? (
                         <>
                             <span className="mr-2">
-                                {expanded ? (
+                                {expandedItems.find((expandedItem: RepositoryItem) => expandedItem.name === item.name) ? (
                                     <ChevronDown className="max-h-4 min-h-4 min-w-4 max-w-4" />
                                 ) : (
                                     <ChevronRight className="max-h-4 min-h-4 min-w-4 max-w-4" />
@@ -73,13 +88,19 @@ export const FileTreeItem = ({
                 {(isHovered || dropdownOpen) && (
                     <RepositoryItemActions
                         repositoryItem={item}
+                        tree={tree}
+                        setTree={setTreeAction}
                         dropdownOpen={dropdownOpen}
                         setDropdownOpen={setDropdownOpen}
+                        onAction={() => {
+                            setIsHovered(false);
+                            setDropdownOpen(false);
+                        }}
                     />
                 )}
             </div>
 
-            {(expanded && item.type === "directory") ||
+            {(expandedItems.find((expandedItem: RepositoryItem) => expandedItem.name === item.name) && item.type === "directory") ||
                 (item.type === "directory-display" && (
                     <div>
                         {/*item.children

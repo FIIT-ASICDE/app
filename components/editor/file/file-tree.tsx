@@ -1,28 +1,29 @@
 "use client";
 
 import type { RepositoryItem } from "@/lib/types/repository";
-import { FileX } from "lucide-react";
-import { useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 
 import { FileTreeItem } from "@/components/editor/file/file-tree-item";
-import { NoData } from "@/components/generic/no-data";
 
 interface FileTreeProps {
     tree: Array<RepositoryItem>;
+    setTreeAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
     onItemClick?: (item: RepositoryItem) => void;
+    selectedItem: RepositoryItem | undefined;
+    setSelectedItemAction: Dispatch<SetStateAction<RepositoryItem | undefined>>;
+    expandedItems: Array<RepositoryItem>;
+    setExpandedItemsAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
 }
 
-export const FileTree = ({ tree, onItemClick }: FileTreeProps) => {
-    const [selected, setSelected] = useState<RepositoryItem | undefined>(
-        undefined,
-    );
-
-    if (!tree || tree.length === 0) {
-        return (
-            <NoData icon={FileX} message={"No files or directories found"} />
-        );
-    }
-
+export const FileTree = ({
+    tree,
+    setTreeAction,
+    onItemClick,
+    selectedItem,
+    setSelectedItemAction,
+    expandedItems,
+    setExpandedItemsAction,
+}: FileTreeProps) => {
     const sortedTree: Array<RepositoryItem> = [...tree].sort(
         (a: RepositoryItem, b: RepositoryItem) => {
             if (
@@ -41,9 +42,9 @@ export const FileTree = ({ tree, onItemClick }: FileTreeProps) => {
 
     const compareRepositoryItems = (repositoryItem: RepositoryItem) => {
         return (
-            selected !== undefined &&
-            repositoryItem.type === selected.type &&
-            repositoryItem.name === selected.name
+            selectedItem !== undefined &&
+            repositoryItem.type === selectedItem.type &&
+            repositoryItem.name === selectedItem.name
         );
     };
 
@@ -53,13 +54,17 @@ export const FileTree = ({ tree, onItemClick }: FileTreeProps) => {
                 <FileTreeItem
                     key={index + item.lastActivity.toLocaleString()}
                     item={item}
+                    tree={tree}
+                    setTreeAction={setTreeAction}
                     onItemClick={() => {
-                        setSelected(item);
+                        setSelectedItemAction(item);
                         if (onItemClick) {
                             onItemClick(item);
                         }
                     }}
                     isSelected={compareRepositoryItems(item)}
+                    expandedItems={expandedItems}
+                    setExpandedItemsAction={setExpandedItemsAction}
                 />
             ))}
         </div>

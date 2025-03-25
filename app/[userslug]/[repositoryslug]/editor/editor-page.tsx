@@ -63,6 +63,8 @@ export default function EditorPage({ repository }: EditorPageProps) {
         SimulationConfiguration | undefined
     >(undefined);
 
+    const [tree, setTree] = useState<Array<RepositoryItem>>(repository.tree ?? []);
+
     const changes = api.git.changes.useQuery(
         { repoId: repository.id },
         {
@@ -243,6 +245,8 @@ export default function EditorPage({ repository }: EditorPageProps) {
                             <SidebarTabContent
                                 activeSidebarContent={activeSidebarContent}
                                 repository={repository}
+                                tree={tree}
+                                setTree={setTree}
                                 changes={changes.data?.changes ?? []}
                                 handleCloseSidebar={handleCloseSidebar}
                                 onFileClick={handleFileClick}

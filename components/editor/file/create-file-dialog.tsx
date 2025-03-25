@@ -1,6 +1,6 @@
-import { RepositoryItem } from "@/lib/types/repository";
+import { FileDisplayItem, RepositoryItem } from "@/lib/types/repository";
 import { FileIcon, FilePlus } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { Dispatch, FormEvent, SetStateAction, useState } from "react";
 
 import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer-control-button";
 import {
@@ -15,25 +15,47 @@ import { Input } from "@/components/ui/input";
 interface CreateFileDialogProps {
     repositoryItem?: RepositoryItem;
     buttonSize?: "icon" | "full";
+    tree: Array<RepositoryItem>;
+    setTree: Dispatch<SetStateAction<Array<RepositoryItem>>>;
+    onAction?: () => void;
 }
 
 export const CreateFileDialog = ({
     repositoryItem,
     buttonSize,
+    tree,
+    setTree,
+    onAction,
 }: CreateFileDialogProps) => {
     const [open, setOpen] = useState<boolean>(false);
     const [fileName, setFileName] = useState<string>("");
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        if (fileName.trim()) {
-            // TODO: handle create file
-            console.log(
-                "Create file on path: " +
-                    (repositoryItem !== undefined ? repositoryItem.name : "") +
-                    "/" +
-                    fileName,
-            );
+        const trimmedFileName: string = fileName.trim();
+
+        if (trimmedFileName) {
+            const newFile: FileDisplayItem = {
+                type: "file-display",
+                name: fileName.trim(),
+                lastActivity: new Date(),
+                language: fileName.trim().split(".").pop() ?? "",
+                absolutePath: repositoryItem ? repositoryItem?.name + "/" + fileName : fileName,
+            } satisfies FileDisplayItem;
+
+            if (repositoryItem === undefined) {
+                setTree([
+                    ...tree,
+                    newFile,
+                ]);
+                console.log("Create file in root: " + newFile.absolutePath);
+            } else {
+                console.log("Create file on path: " + newFile.absolutePath);
+            }
+
+            if (onAction) {
+                onAction();
+            }
             setFileName("");
             setOpen(false);
         }

@@ -1,3 +1,5 @@
+"use client";
+
 import { commitSchema } from "@/lib/schemas/git-schemas";
 import type { SidebarContentTab } from "@/lib/types/editor";
 import type {
@@ -10,10 +12,13 @@ import { z } from "zod";
 import { FileExplorerTabContent } from "@/components/editor/sidebar-content/file-explorer-tab-content";
 import { SearchTabContent } from "@/components/editor/sidebar-content/search-tab-content";
 import { SourceControlTabContent } from "@/components/editor/sidebar-content/source-control-tab-content";
+import { Dispatch, SetStateAction } from "react";
 
 interface SidebarTabContentProps {
     activeSidebarContent: SidebarContentTab;
     repository: Repository;
+    tree: Array<RepositoryItem>;
+    setTree: Dispatch<SetStateAction<Array<RepositoryItem>>>;
     changes: Array<RepositoryItemChange>;
     handleCloseSidebar: () => void;
     onFileClick?: (item: RepositoryItem) => void;
@@ -26,6 +31,8 @@ interface SidebarTabContentProps {
 export const SidebarTabContent = ({
     activeSidebarContent,
     repository,
+    tree,
+    setTree,
     changes,
     handleCloseSidebar,
     onFileClick,
@@ -36,6 +43,8 @@ export const SidebarTabContent = ({
             {activeSidebarContent === "fileExplorer" && (
                 <FileExplorerTabContent
                     repository={repository}
+                    tree={tree}
+                    setTree={setTree}
                     handleCloseSidebar={handleCloseSidebar}
                     onFileClick={onFileClick}
                 />
