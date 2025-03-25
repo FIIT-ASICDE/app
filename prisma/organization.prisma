@@ -1,0 +1,59 @@
+model Organization {
+  id                         String                       @id @default(uuid()) @db.Uuid
+  name                       String                       @unique
+  image                      String?
+  bio                        String?
+  users                      OrganizationUser[]
+  userOrganizationRepo       RepoUserOrganization[]
+  OrganizationUserInvitation OrganizationUserInvitation[]
+  hideMembers                Boolean?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name(ops: raw("gin_trgm_ops"))], map: "organization_name_trgm_idx", type: Gin)
+}
+
+model OrganizationUser {
+  userMetadataId String           @db.Uuid
+  userMetadata   UserMetadata     @relation(fields: [userMetadataId], references: [id])
+  organizationId String           @db.Uuid
+  organization   Organization     @relation(fields: [organizationId], references: [id])
+  role           OrganizationRole
+
+  // user can have one role per organization
+  @@id([userMetadataId, organizationId])
+  @@index([userMetadataId])
+  @@index([organizationId])
+}
+
+model OrganizationUserInvitation {
+  userMetadataId String       @db.Uuid
+  userMetadata   UserMetadata @relation("UserOrgInvitations", fields: [userMetadataId], references: [id], map: "fk_invitation_user_org")
+
+  senderMetadataId String       @db.Uuid
+  senderMetadata   UserMetadata @relation("SenderOrgInvitations", fields: [senderMetadataId], references: [id], map: "fk_invitation_sender_org")
+
+  organizationId String       @db.Uuid
+  organization   Organization @relation(fields: [organizationId], references: [id], map: "fk_invitation_organization")
+
+  status       InvitationStatus @default(PENDING)
+  role         OrganizationRole @default(MEMBER)
+  createdAt    DateTime         @default(now())
+  resolvedAt   DateTime?
+
+  @@id([userMetadataId, organizationId])
+  @@index([senderMetadataId])
+  @@index([organizationId])
+}
+
+enum OrganizationRole {
+  MEMBER
+  ADMIN
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}

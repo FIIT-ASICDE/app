@@ -15,6 +15,7 @@ const config: Config = {
                 card: {
                     DEFAULT: "var(--card)",
                     foreground: "var(--card-foreground)",
+                    hover: "var(--card-hover)",
                 },
                 popover: {
                     DEFAULT: "var(--popover)",
@@ -43,6 +44,7 @@ const config: Config = {
                 destructive: {
                     DEFAULT: "var(--destructive)",
                     foreground: "var(--destructive-foreground)",
+                    hover: "var(--destructive-hover)",
                 },
                 border: "var(--border)",
                 input: "var(--input)",
@@ -62,6 +64,58 @@ const config: Config = {
                         hover: "var(--header-button-hover)",
                     },
                 },
+                sidebar: {
+                    DEFAULT: "hsl(var(--sidebar-background))",
+                    foreground: "hsl(var(--sidebar-foreground))",
+                    primary: "hsl(var(--sidebar-primary))",
+                    "primary-foreground":
+                        "hsl(var(--sidebar-primary-foreground))",
+                    accent: "hsl(var(--sidebar-accent))",
+                    "accent-foreground":
+                        "hsl(var(--sidebar-accent-foreground))",
+                    border: "hsl(var(--sidebar-border))",
+                    ring: "hsl(var(--sidebar-ring))",
+                },
+                tertiary: {
+                    DEFAULT: "var(--tertiary)",
+                    button: {
+                        DEFAULT: "var(--tertiary-button)",
+                        foreground: "var(--tertiary-button-foreground)",
+                        hover: "var(--tertiary-button-hover)",
+                    },
+                },
+                badge: {
+                    public: {
+                        DEFAULT: "var(--badge-public)",
+                        foreground: "var(--badge-public-foreground)",
+                        hover: "var(--badge-public-hover)",
+                    },
+                    private: {
+                        DEFAULT: "var(--badge-private)",
+                        foreground: "var(--badge-private-foreground)",
+                        hover: "var(--badge-private-hover)",
+                    },
+                    admin: {
+                        DEFAULT: "var(--badge-admin)",
+                        foreground: "var(--badge-admin-foreground)",
+                        hover: "var(--badge-admin-hover)",
+                    },
+                    member: {
+                        DEFAULT: "var(--badge-member)",
+                        foreground: "var(--badge-member-foreground)",
+                        hover: "var(--badge-member-hover)",
+                    },
+                    repository: {
+                        DEFAULT: "var(--badge-repository)",
+                        foreground: "var(--badge-repository-foreground)",
+                        hover: "var(--badge-repository-hover)",
+                    },
+                    organisation: {
+                        DEFAULT: "var(--badge-organisation)",
+                        foreground: "var(--badge-organisation-foreground)",
+                        hover: "var(--badge-organisation-hover)",
+                    },
+                },
             },
             borderRadius: {
                 lg: "var(--radius)",
@@ -70,6 +124,5 @@ const config: Config = {
             },
         },
     },
-    plugins: [require("tailwindcss-animate")],
 };
 export default config;

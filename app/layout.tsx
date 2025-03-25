@@ -1,26 +1,40 @@
-import type { Metadata } from "next";
+import "@/app/globals.css";
+import { TRPCReactProvider } from "@/lib/trpc/react";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
+import React, { Suspense } from "react";
 
-import "./globals.css";
+import DevControls from "@/components/dev/dev-controls";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
-import Footer from "@/components/footer/footer";
-import Header from "@/components/header/header";
-
-export const metadata: Metadata = {
-    title: "ASICDE",
-    description: "Web based HDL IDE",
+const ThemeProvider = ({
+    children,
+    ...props
+}: React.ComponentProps<typeof NextThemesProvider>) => {
+    return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
 };
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
             <body>
-                <Header type="logged-in" isInOrganisation={true} />
-                {children}
-                <Footer />
+                <ThemeProvider attribute="class" disableTransitionOnChange>
+                    <Suspense fallback={<div>TODO: LOADING</div>}>
+                        <TooltipProvider delayDuration={0}>
+                            <TRPCReactProvider>
+                                {children}
+                                <Toaster closeButton />
+                            </TRPCReactProvider>
+                            {process.env.NODE_ENV === "development" && (
+                                <DevControls />
+                            )}
+                        </TooltipProvider>
+                    </Suspense>
+                </ThemeProvider>
             </body>
         </html>
     );

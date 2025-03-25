@@ -1,30 +1,62 @@
 model Repo {
-  id                   String @db.Uuid                 @id @default(uuid())
+  id                   String                 @id @default(uuid()) @db.Uuid
   name                 String
   description          String?
-  favorite             Boolean
   public               Boolean
   userOrganizationRepo RepoUserOrganization[]
+  RepoUserInvitation   RepoUserInvitation[]
+  EditorSessions       EditorSession[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([name])
 }
 
 model RepoUserOrganization {
-  userId         String @db.Uuid
-  user           User         @relation(fields: [userId], references: [id])
-  organizationId String @db.Uuid
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  repoId         String @db.Uuid
-  repo           Repo         @relation(fields: [repoId], references: [id])
-  repoRole       RepoRole     @default(VIEWER)
+  favorite       Boolean
+  pinned         Boolean?
+  userMetadataId String        @db.Uuid
+  userMetadata   UserMetadata  @relation(fields: [userMetadataId], references: [id])
+  organizationId String?       @db.Uuid
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  repoId         String        @db.Uuid
+  repo           Repo          @relation(fields: [repoId], references: [id])
+  repoRole       RepoRole      @default(OWNER)
+  lastVisitedAt  DateTime      @default(now())
 
-  @@unique([userId, organizationId, repoId]) // Ensures a user can have one role per organization-repo pair
+  // user can have one role per repo, but it doesn't make sense to create
+  // and PK from the unique columns, because searching through this table
+  // will is done by joining either from user, org, or repo, not all
+  @@unique([userMetadataId, repoId])
+  @@index([userMetadataId])
+  @@index([organizationId])
+  @@index([repoId])
+}
+
+model RepoUserInvitation {
+  userMetadataId String       @db.Uuid
+  userMetadata   UserMetadata @relation("UserRepoInvitations", fields: [userMetadataId], references: [id], map: "fk_invitation_user_repo")
+
+  senderMetadataId String       @db.Uuid
+  senderMetadata   UserMetadata @relation("SenderRepoInvitations", fields: [senderMetadataId], references: [id], map: "fk_invitation_sender_repo")
+
+  repoId String @db.Uuid
+  repo   Repo   @relation(fields: [repoId], references: [id], map: "fk_invitation_repo")
+
+  status       InvitationStatus @default(PENDING)
+  role         RepoRole         @default(CONTRIBUTOR)
+  createdAt    DateTime         @default(now())
+  resolvedAt   DateTime?
+
+  @@id([userMetadataId, repoId])
+  @@index([senderMetadataId])
+  @@index([repoId])
 }
 
 enum RepoRole {
   ADMIN
-  MAINTAINER
   CONTRIBUTOR
   VIEWER
+  OWNER
 }

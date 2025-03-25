@@ -1,136 +1,38 @@
-import { ChevronRight, UserRound } from "lucide-react";
+import { auth } from "@/auth";
+import { api } from "@/lib/trpc/server";
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { CommandBar } from "@/components/header/header-command";
+import { NavigationLoggedIn } from "@/components/header/navigation/navigation-logged-in";
+import LogoIcon from "@/components/icons/logo";
 
-interface HeaderProps {
-    type: "logged-in" | "not-logged-in";
-    isInOrganisation: boolean;
-}
+export default async function Header() {
+    const session = await auth();
 
-export default function Header({ type, isInOrganisation }: HeaderProps) {
+    const user = session ? await api.user.byId(session.user.id) : undefined;
+    if (!user || user?.type === "non-onboarded") {
+        return <></>;
+    }
+
     return (
-        <header className="bg-header text-header-foreground">
-            <div className="container flex items-center justify-between">
-                {!isInOrganisation ? (
-                    <div className="flex items-center">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-header-foreground text-xl font-bold text-header">
-                            A
-                        </div>
-                        <p className="text-xl font-bold">ASICDE</p>
-                    </div>
-                ) : (
-                    <div className="flex items-center space-x-2 p-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-header-foreground text-xl font-bold text-header">
-                            A
-                        </div>
-                        <p className="text-xl font-bold">ASICDE</p>
-                        <ChevronRight className="ml-3 h-4 w-4" />
-                        <Link href={"/organisation"}>
-                            <Button
-                                variant="default"
-                                className="bg-header-button px-6 text-base font-normal hover:bg-header-button-hover"
+        <div>
+            {session && (
+                <header className="bg-header text-header-foreground">
+                    <div className="relative flex h-14 items-center justify-between">
+                        <div className="absolute left-0 ml-2 items-center">
+                            <Link
+                                href={"/"}
+                                className="flex h-[40px] items-center space-x-2 rounded-md px-2 hover:bg-header-button-hover"
                             >
-                                Organisation
-                            </Button>
-                        </Link>
+                                <LogoIcon />
+                                <p className="text-xl font-bold">ASICDE</p>
+                            </Link>
+                        </div>
+                        <CommandBar user={user} />
+                        <NavigationLoggedIn user={user} />
                     </div>
-                )}
-                {type === "not-logged-in" ? (
-                    <nav>
-                        <ul className="flex space-x-1">
-                            <li className="p-1">
-                                <Link href={"/"}>
-                                    <Button
-                                        variant="default"
-                                        className="bg-header-button px-6 text-base font-normal hover:bg-header-button-hover"
-                                    >
-                                        Home
-                                    </Button>
-                                </Link>
-                            </li>
-                            <li className="p-1">
-                                <Link href={"/about"}>
-                                    <Button
-                                        variant="default"
-                                        className="bg-header-button px-6 text-base font-normal hover:bg-header-button-hover"
-                                    >
-                                        About Us
-                                    </Button>
-                                </Link>
-                            </li>
-                            <li className="p-1">
-                                <Link href={"/features"}>
-                                    <Button
-                                        variant="default"
-                                        className="bg-header-button px-6 text-base font-normal hover:bg-header-button-hover"
-                                    >
-                                        Features
-                                    </Button>
-                                </Link>
-                            </li>
-                            <li className="p-1">
-                                <Link href={"/pricing"}>
-                                    <Button
-                                        variant="default"
-                                        className="bg-header-button px-6 text-base font-normal hover:bg-header-button-hover"
-                                    >
-                                        Pricing
-                                    </Button>
-                                </Link>
-                            </li>
-                        </ul>
-                    </nav>
-                ) : (
-                    <nav>
-                        <ul className="flex space-x-1">
-                            <li className="p-1">
-                                <Link href={"/repositories"}>
-                                    <Button
-                                        variant="default"
-                                        className="bg-header-button px-6 text-base font-normal hover:bg-header-button-hover"
-                                    >
-                                        Repositories
-                                    </Button>
-                                </Link>
-                            </li>
-                            <li className="p-1.5 px-6">
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <button className="rounded-full bg-header p-1.5 hover:bg-header-button-hover">
-                                            <UserRound size={24} />
-                                        </button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-auto">
-                                        <DropdownMenuLabel>
-                                            Name Surname
-                                        </DropdownMenuLabel>
-                                        <DropdownMenuSeparator />
-                                        <div>
-                                            <button className="flex w-full space-x-5 rounded-full py-2 pl-3 pr-5 text-sm hover:bg-gray-100">
-                                                Profile
-                                            </button>
-                                            <button className="flex w-full space-x-5 rounded-full py-2 pl-3 pr-5 text-sm hover:bg-gray-100">
-                                                Notifications
-                                            </button>
-                                            <button className="flex w-full space-x-5 rounded-full py-2 pl-3 pr-5 text-sm hover:bg-gray-100">
-                                                Sign out
-                                            </button>
-                                        </div>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </li>
-                        </ul>
-                    </nav>
-                )}
-            </div>
-        </header>
+                </header>
+            )}
+        </div>
     );
 }
