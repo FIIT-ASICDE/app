@@ -92,6 +92,7 @@ export const FileExplorerTabContent = ({
                 </header>
                 {tree.length > 0 ? (
                     <FileTree
+                        repositoryId={repository.id}
                         tree={tree}
                         setTreeAction={setTreeAction}
                         onItemClick={onFileClick}

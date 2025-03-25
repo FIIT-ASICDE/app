@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface RepositoryItemActionsProps {
+    repositoryId: string;
     repositoryItem: RepositoryItem;
     tree: Array<RepositoryItem>;
     setTree: Dispatch<SetStateAction<Array<RepositoryItem>>>;
@@ -25,6 +26,7 @@ interface RepositoryItemActionsProps {
 }
 
 export const RepositoryItemActions = ({
+    repositoryId,
     repositoryItem,
     tree,
     setTree,
@@ -90,6 +92,7 @@ export const RepositoryItemActions = ({
                 repositoryItem.type === "directory-display" ? (
                     <>
                         <CreateFileDialog
+                            repositoryId={repositoryId}
                             repositoryItem={repositoryItem}
                             buttonSize="full"
                             tree={tree}
@@ -97,6 +100,7 @@ export const RepositoryItemActions = ({
                             onAction={onAction}
                         />
                         <CreateDirectoryDialog
+                            repositoryId={repositoryId}
                             repositoryItem={repositoryItem}
                             buttonSize="full"
                             tree={tree}

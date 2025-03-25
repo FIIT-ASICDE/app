@@ -6,6 +6,7 @@ import { Dispatch, SetStateAction } from "react";
 import { FileTreeItem } from "@/components/editor/file/file-tree-item";
 
 interface FileTreeProps {
+    repositoryId: string;
     tree: Array<RepositoryItem>;
     setTreeAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
     onItemClick?: (item: RepositoryItem) => void;
@@ -16,6 +17,7 @@ interface FileTreeProps {
 }
 
 export const FileTree = ({
+    repositoryId,
     tree,
     setTreeAction,
     onItemClick,
@@ -53,6 +55,7 @@ export const FileTree = ({
             {sortedTree.map((item: RepositoryItem, index: number) => (
                 <FileTreeItem
                     key={index + item.lastActivity.toLocaleString()}
+                    repositoryId={repositoryId}
                     item={item}
                     tree={tree}
                     setTreeAction={setTreeAction}

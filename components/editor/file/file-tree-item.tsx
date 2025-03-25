@@ -8,6 +8,7 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { RepositoryItemActions } from "@/components/editor/sidebar-content/repository-item-actions";
 
 interface FileTreeItemProps {
+    repositoryId: string;
     item: RepositoryItem;
     tree: Array<RepositoryItem>;
     setTreeAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
@@ -19,6 +20,7 @@ interface FileTreeItemProps {
 }
 
 export const FileTreeItem = ({
+    repositoryId,
     item,
     tree,
     setTreeAction,
@@ -87,6 +89,7 @@ export const FileTreeItem = ({
                 </div>
                 {(isHovered || dropdownOpen) && (
                     <RepositoryItemActions
+                        repositoryId={repositoryId}
                         repositoryItem={item}
                         tree={tree}
                         setTree={setTreeAction}
