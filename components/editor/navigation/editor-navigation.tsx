@@ -2,8 +2,9 @@ import type {
     BottomPanelContentTab,
     SidebarContentTab,
     SimulationConfiguration,
-    SimulationType
+    SimulationType,
 } from "@/lib/types/editor";
+import { Repository, RepositoryItem } from "@/lib/types/repository";
 import {
     Cog,
     Command,
@@ -19,12 +20,11 @@ import { CommandBarDialog } from "@/components/command/command-bar-dialog";
 import { useUser } from "@/components/context/user-context";
 import { NavigationButton } from "@/components/editor/navigation/navigation-button";
 import { SidebarNavigationButton } from "@/components/editor/navigation/sidebar-navigation-button";
+import { SimulationButton } from "@/components/editor/navigation/simulation-button";
+import { SimulationDialog } from "@/components/editor/simulation-dialog";
 import { HeaderDropdown } from "@/components/header/header-dropdown";
 import LogoIcon from "@/components/icons/logo";
 import { Separator } from "@/components/ui/separator";
-import { SimulationDialog } from "@/components/editor/simulation-dialog";
-import { Repository, RepositoryItem } from "@/lib/types/repository";
-import { SimulationButton } from "@/components/editor/navigation/simulation-button";
 
 interface EditorNavigationProps {
     sidebarProps: {
@@ -41,14 +41,21 @@ interface EditorNavigationProps {
         verticalCollapsed: boolean;
         setVerticalCollapsed: Dispatch<SetStateAction<boolean>>;
         activeBottomPanelContent: BottomPanelContentTab;
-        setActiveBottomPanelContent: Dispatch<SetStateAction<BottomPanelContentTab>>;
+        setActiveBottomPanelContent: Dispatch<
+            SetStateAction<BottomPanelContentTab>
+        >;
         lastOpenedBottomPanelSize: number;
         setLastOpenedBottomPanelSize: Dispatch<SetStateAction<number>>;
     };
     simulationProps: {
-        onStartSimulation: (selectedType: SimulationType, selectedFile: RepositoryItem) => void;
+        onStartSimulation: (
+            selectedType: SimulationType,
+            selectedFile: RepositoryItem,
+        ) => void;
         simulationConfiguration: SimulationConfiguration | undefined;
-        setSimulationConfiguration: Dispatch<SetStateAction<SimulationConfiguration | undefined>>;
+        setSimulationConfiguration: Dispatch<
+            SetStateAction<SimulationConfiguration | undefined>
+        >;
     };
     isGitRepo?: boolean;
     repository: Repository;
@@ -197,7 +204,10 @@ export const EditorNavigation = ({
                 <div className="flex flex-col items-center gap-2 p-2">
                     <SimulationButton
                         setSimulationOpen={setSimulationOpen}
-                        onStartSimulation={(selectedType: SimulationType, selectedFile: RepositoryItem) => {
+                        onStartSimulation={(
+                            selectedType: SimulationType,
+                            selectedFile: RepositoryItem,
+                        ) => {
                             if (verticalGroupRef.current) {
                                 verticalGroupRef.current.setLayout([
                                     100 - lastOpenedBottomPanelSize,
@@ -228,7 +238,10 @@ export const EditorNavigation = ({
 
             <SimulationDialog
                 repository={repository}
-                onStartSimulation={(selectedType: SimulationType, selectedFile: RepositoryItem) => {
+                onStartSimulation={(
+                    selectedType: SimulationType,
+                    selectedFile: RepositoryItem,
+                ) => {
                     if (verticalGroupRef.current) {
                         verticalGroupRef.current.setLayout([
                             100 - lastOpenedBottomPanelSize,

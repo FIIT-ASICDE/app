@@ -6,14 +6,14 @@ import { usePathname } from "next/navigation";
 
 import { getCurrentPage } from "@/components/generic/generic";
 import { NavigationButton } from "@/components/generic/navigation-button";
+import { LeaveOrganisationDialog } from "@/components/organisations/leave-organisation-dialog";
+import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuTrigger
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { LeaveOrganisationDialog } from "@/components/organisations/leave-organisation-dialog";
 
 interface OrganisationNavigationProps {
     organisation: OrganisationDisplay;
@@ -65,7 +65,9 @@ export const OrganisationNavigation = ({
                 <NavigationButton
                     title="settings"
                     icon={Settings}
-                    variant={currentPage === "/settings" ? "secondary" : "outline"}
+                    variant={
+                        currentPage === "/settings" ? "secondary" : "outline"
+                    }
                     link={"/orgs/" + organisation.name + "/settings"}
                     access="interactive"
                 />

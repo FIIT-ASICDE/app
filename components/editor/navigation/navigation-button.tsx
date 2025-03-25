@@ -35,9 +35,7 @@ export const NavigationButton = ({
                 </button>
             </TooltipTrigger>
             <TooltipContent side={tooltipSide || "right"}>
-                {tooltip === "Simulation" ? (
-                    <></>
-                ) : tooltip}
+                {tooltip === "Simulation" ? <></> : tooltip}
             </TooltipContent>
         </Tooltip>
     );

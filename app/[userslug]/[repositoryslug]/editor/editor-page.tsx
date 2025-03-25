@@ -4,8 +4,9 @@ import { commitSchema } from "@/lib/schemas/git-schemas";
 import { api } from "@/lib/trpc/react";
 import type {
     BottomPanelContentTab,
-    SidebarContentTab, SimulationConfiguration,
-    SimulationType
+    SidebarContentTab,
+    SimulationConfiguration,
+    SimulationType,
 } from "@/lib/types/editor";
 import type {
     FileDisplayItem,
@@ -15,6 +16,7 @@ import type {
 import { X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { type ElementRef, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { BottomPanelTabContent } from "@/components/editor/bottom-panel-content/bottom-panel-tab-content";
@@ -25,7 +27,6 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { toast } from "sonner";
 
 interface EditorPageProps {
     repository: Repository;
@@ -57,7 +58,9 @@ export default function EditorPage({ repository }: EditorPageProps) {
     const [activeFile, setActiveFile] = useState<FileDisplayItem | null>(null);
     const [openFiles, setOpenFiles] = useState<FileDisplayItem[]>([]);
 
-    const [simulationConfiguration, setSimulationConfiguration] = useState<SimulationConfiguration | undefined>(undefined);
+    const [simulationConfiguration, setSimulationConfiguration] = useState<
+        SimulationConfiguration | undefined
+    >(undefined);
 
     const changes = api.git.changes.useQuery(
         { repoId: repository.id },
@@ -69,11 +72,13 @@ export default function EditorPage({ repository }: EditorPageProps) {
 
     const commitMutation = api.git.commit.useMutation({
         onSuccess: () => {
-            toast.success("Successfully commited " + changes.data?.changes.length);
+            toast.success(
+                "Successfully commited " + changes.data?.changes.length,
+            );
         },
         onError: (error) => {
             toast.error(error.message);
-        }
+        },
     });
 
     const handleOnCommit = async (data: z.infer<typeof commitSchema>) => {
@@ -99,9 +104,17 @@ export default function EditorPage({ repository }: EditorPageProps) {
         }
     };
 
-    const onStartSimulation = (selectedType: SimulationType, selectedFile: RepositoryItem) => {
+    const onStartSimulation = (
+        selectedType: SimulationType,
+        selectedFile: RepositoryItem,
+    ) => {
         // TODO: adam start simulation
-        console.log("Starting simulation with type: " + selectedType + " and file: " + selectedFile?.name);
+        console.log(
+            "Starting simulation with type: " +
+                selectedType +
+                " and file: " +
+                selectedFile?.name,
+        );
     };
 
     const handleFileClick = (item: RepositoryItem) => {

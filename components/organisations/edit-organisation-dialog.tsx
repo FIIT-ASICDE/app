@@ -165,9 +165,7 @@ export const EditOrganisationDialog = ({
                         <Pen className="h-4 w-4" />
                     </DialogTrigger>
                 </TooltipTrigger>
-                <TooltipContent>
-                    Edit organisation
-                </TooltipContent>
+                <TooltipContent>Edit organisation</TooltipContent>
             </Tooltip>
             <DialogContent className="max-h-[90vh] max-w-[425px] overflow-clip p-0">
                 <ScrollArea className="h-full max-h-[90vh]">

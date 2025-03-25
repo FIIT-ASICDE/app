@@ -1,9 +1,6 @@
 import { FileDisplayItem, FileItem } from "@/lib/types/repository";
 
-export type SidebarContentTab =
-    | "fileExplorer"
-    | "search"
-    | "sourceControl";
+export type SidebarContentTab = "fileExplorer" | "search" | "sourceControl";
 
 export type BottomPanelContentTab =
     | "simulation"

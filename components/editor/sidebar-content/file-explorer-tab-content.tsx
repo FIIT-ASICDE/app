@@ -23,21 +23,23 @@ export const FileExplorerTabContent = ({
     handleCloseSidebar,
     onFileClick,
 }: FileExplorerTabContentProps) => {
-
     // adding dummy cpp file to test simulation dialog
-    if (repository.tree && !repository.tree.find((item) => item.name === "testbench.cpp")) {
+    if (
+        repository.tree &&
+        !repository.tree.find((item) => item.name === "testbench.cpp")
+    ) {
         repository.tree.push({
             type: "file-display",
             name: "testbench.cpp",
             language: "cpp",
             absolutePath: "testbench.cpp",
             lastActivity: new Date(),
-        })
+        });
     }
 
     return (
         <ScrollArea className="relative h-full w-full">
-            <div className="text-nowrap p-4 min-w-0">
+            <div className="min-w-0 text-nowrap p-4">
                 <header className="flex flex-col gap-y-3 pb-2">
                     <div className="flex flex-row items-center justify-between gap-x-3">
                         <div className="flex min-w-0 flex-row gap-x-2 text-xl font-medium">

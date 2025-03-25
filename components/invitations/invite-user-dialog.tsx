@@ -10,6 +10,7 @@ import { Building, FolderPlus, Loader2, Mail } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { useUser } from "@/components/context/user-context";
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { InviteUserDialogTabs } from "@/components/invitations/invite-user-dialog-tabs";
 import { Button } from "@/components/ui/button";
@@ -35,7 +36,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useUser } from "@/components/context/user-context";
 
 interface InviteUserDialogProps {
     selectedUser: UserDisplay;
@@ -116,7 +116,7 @@ export const InviteUserDialog = ({
     };
 
     if (user.id === selectedUser.id) {
-        return <div className="text-sm text-muted-foreground w-7">You</div>
+        return <div className="w-7 text-sm text-muted-foreground">You</div>;
     }
 
     if (!userIsAdminInAnyOrg && !userHasRepos) {
