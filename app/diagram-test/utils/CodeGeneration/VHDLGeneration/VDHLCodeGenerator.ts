@@ -387,7 +387,7 @@ export function generateVHDLCode(graph: dia.Graph): string {
         const qSignal = outputConnectionMap[qKey] ? outputConnectionMap[qKey][0] : regName;
 
         // clk
-        const clkEdge = cell.attributes.clkEdge === 'falling' ? 'negedge' : 'posedge';
+        const clkEdge = cell.attributes.clkEdge === 'falling' ? 'falling_edge' : 'rising_edge';
 
         // rst
         let rstCondition = '';
