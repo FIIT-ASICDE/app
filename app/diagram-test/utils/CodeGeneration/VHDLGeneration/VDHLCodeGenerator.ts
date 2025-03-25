@@ -42,6 +42,7 @@ export function generateVHDLCode(graph: dia.Graph): string {
     const sramCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'ram');
     const registerCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'register');
     const links = cells.filter(cell => cell.isLink());
+    const bitSelectTable: { name: string, connectedTo: string, connectedFrom: string, startBit: number, endBit: number }[] = [];
 
 
     const excludedNames = new Set([
@@ -53,9 +54,40 @@ export function generateVHDLCode(graph: dia.Graph): string {
     function getPortName(cell: dia.Cell): string {
         return cell.attributes.name;
     }
+    function getBitSelectedSignal(signal: string, netName: string): string {
+        const bitSelectEntry = bitSelectTable.find(entry =>
+            entry.name === signal && entry.connectedTo === netName
+        );
+        if (bitSelectEntry) {
+            return `${bitSelectEntry.connectedFrom}(${bitSelectEntry.endBit} downto ${bitSelectEntry.startBit})`;
+        }
+        return signal;
+    }
+
+    const connectionMap: { [key: string]: string[] } = {};
+    const outputConnectionMap: { [key: string]: string[] } = {};
+    links.forEach(link => {
+        const sourceCell = graph.getCell(link.get('source').id);
+        const targetCell = graph.getCell(link.get('target').id);
+
+        if (sourceCell && targetCell) {
+            const sourceName = getPortName(sourceCell);
+            const targetKey = `${link.get('target').id}:${link.get('target').port}`;
+
+            if (!connectionMap[targetKey]) {
+                connectionMap[targetKey] = [];
+            }
+            connectionMap[targetKey].push(sourceName);
+        }
+        const targetName = getPortName(targetCell);
+        const sourceKey = `${link.get('source').id}:${link.get('source').port}`;
+        if (!outputConnectionMap[sourceKey]) {
+            outputConnectionMap[sourceKey] = [];
+        }
+        outputConnectionMap[sourceKey].push(targetName);
+    });
 
     const portDeclarations: string[] = [];
-
     inputCells.forEach(cell => {
         const name = getPortName(cell);
         const bw: number = cell.attributes.bandwidth;
@@ -97,6 +129,16 @@ export function generateVHDLCode(graph: dia.Graph): string {
             code += `    SIGNAL ${netName} : STD_LOGIC;\n`;
         }
     });
+    bitManipulationCells.forEach(cell => {
+        const netName = getPortName(cell);
+        const cellPorts = cell.attributes.ports?.items || [];
+        elementNames[cell.id] = netName;
+
+        if (cell.attributes.elType === 'bitCombine') {
+            const outPort = cellPorts.find(p => p.group === 'output');
+            code += `    SIGNAL ${netName} : STD_LOGIC_VECTOR(${outPort.bandwidth - 1} DOWNTO 0);\n`;
+        }
+    });
     multiplexerCells.forEach(cell => {
         const netName = getPortName(cell);
         const bw: number = cell.attributes.bandwidth;
@@ -130,30 +172,44 @@ export function generateVHDLCode(graph: dia.Graph): string {
     code += `\n\n`;
     code += `BEGIN\n`;
 
-    const connectionMap: { [key: string]: string[] } = {};
-    const outputConnectionMap: { [key: string]: string[] } = {};
-    links.forEach(link => {
-        const sourceCell = graph.getCell(link.get('source').id);
-        const targetCell = graph.getCell(link.get('target').id);
 
-        if (sourceCell && targetCell) {
-            const sourceName = getPortName(sourceCell);
-            const targetKey = `${link.get('target').id}:${link.get('target').port}`;
+    bitManipulationCells.forEach(cell => {
+        const type = cell.attributes.elType;
+        const netName = elementNames[cell.id];
+        const cellPorts = cell.attributes.ports?.items || [];
 
-            if (!connectionMap[targetKey]) {
-                connectionMap[targetKey] = [];
-            }
-            connectionMap[targetKey].push(sourceName);
+        if (type === 'bitSelect') {
+
+            const inputPort = cellPorts.find(p => p.group === 'input');
+            const inputKey = `${cell.id}:${inputPort?.id}`;
+            const inputSignal = connectionMap[inputKey] ? connectionMap[inputKey][0] : '/* unconnected */';
+
+            cellPorts.filter(p => p.group === 'output').forEach(outputPort => {
+                const outputKey = `${cell.id}:${outputPort.id}`;
+                const outputSignal = outputConnectionMap[outputKey] ? outputConnectionMap[outputKey][0] : '/* unconnected */';
+                const bitStart = outputPort.startBit;
+                const bitEnd = outputPort.endBit;
+                bitSelectTable.push({
+                    name: netName,
+                    connectedTo: outputSignal,
+                    connectedFrom: inputSignal,
+                    startBit: bitStart,
+                    endBit: bitEnd
+                });
+            });
+
+            code += `\n`;
         }
-        const targetName = getPortName(targetCell);
-        const sourceKey = `${link.get('source').id}:${link.get('source').port}`;
-        if (!outputConnectionMap[sourceKey]) {
-            outputConnectionMap[sourceKey] = [];
+
+        if (type === 'bitCombine') {
+            const inputPorts = cellPorts.filter(p => p.group === 'input').reverse();
+            const inputSignals = inputPorts.map(p => {
+                const key = `${cell.id}:${p.id}`;
+                return connectionMap[key] ? getBitSelectedSignal(connectionMap[key][0], netName) : '/* unconnected */';
+            });
+            code += `    ${netName} <= ${inputSignals.join(' & ')};\n`;
         }
-        outputConnectionMap[sourceKey].push(targetName);
     });
-
-
 
     logicCells.forEach(cell => {
         const type = cell.attributes.elType;
@@ -179,15 +235,6 @@ export function generateVHDLCode(graph: dia.Graph): string {
 
         code += `    ${netName} <= ${expr};\n`;
 
-        const outputPorts = cellPorts.filter(p => p.group === 'output');
-        outputPorts.forEach(p => {
-            const key = `${cell.id}:${p.id}`;
-            if (connectionMap[key]) {
-                connectionMap[key].forEach(outSignal => {
-                    code += `    ${outSignal} <= ${netName};\n`;
-                });
-            }
-        });
         code += `\n`;
     });
     complexLogicCells.forEach(cell => {
@@ -213,15 +260,6 @@ export function generateVHDLCode(graph: dia.Graph): string {
             code += `    ${netName} <= '1' WHEN ${expr} ELSE '0';\n`;
         }
 
-        const outputPorts = cellPorts.filter(p => p.group === 'output');
-        outputPorts.forEach(p => {
-            const key = `${cell.id}:${p.id}`;
-            if (connectionMap[key]) {
-                connectionMap[key].forEach(outSignal => {
-                    code += `    ${outSignal} <= ${netName};\n`;
-                });
-            }
-        });
         code += `\n`;
     });
 
@@ -304,49 +342,7 @@ export function generateVHDLCode(graph: dia.Graph): string {
             code += `    END PROCESS;\n\n`;
         }
     });
-    bitManipulationCells.forEach(cell => {
-        const type = cell.attributes.elType;
-        const netName = elementNames[cell.id];
-        const cellPorts = cell.attributes.ports?.items || [];
 
-        if (type === 'bitSelect') {
-
-            const inputPort = cellPorts.find(p => p.group === 'input');
-            const inputKey = `${cell.id}:${inputPort?.id}`;
-            const inputSignal = connectionMap[inputKey] ? connectionMap[inputKey][0] : '/* unconnected */';
-
-            let bitStart = 0;
-            code += `logic [${inputPort.bandwidth - 1}:0] ${netName};\n`;
-
-            cellPorts.filter(p => p.group === 'output').forEach(outputPort => {
-                const outputKey = `${cell.id}:${outputPort.id}`;
-                const outputSignal = connectionMap[outputKey] ? connectionMap[outputKey][0] : outputPort.name;
-                const bitEnd = bitStart + outputPort.bandwidth - 1;
-
-                code += `assign ${outputSignal} = ${netName}[${bitEnd}:${bitStart}];\n`;
-                bitStart += outputPort.bandwidth;
-            });
-
-            code += `\n`;
-        }
-
-        if (type === 'bitCombine') {
-
-            const inputPorts = cellPorts.filter(p => p.group === 'input').reverse();
-            const inputSignals = inputPorts.map(p => {
-                const key = `${cell.id}:${p.id}`;
-                return connectionMap[key] ? connectionMap[key][0] : '/* unconnected */';
-            });
-
-            const outputPort = cellPorts.find(p => p.group === 'output');
-            const outputKey = `${cell.id}:${outputPort?.id}`;
-            const outputSignal = connectionMap[outputKey] ? connectionMap[outputKey][0] : netName;
-
-            code += `logic [${outputPort.bandwidth - 1}:0] ${netName};\n`;
-            code += `assign ${netName} = {${inputSignals.join(', ')}};\n`;
-            code += `assign ${outputSignal} = ${netName};\n\n`;
-        }
-    });
     moduleCells.forEach(cell => {
         const moduleName = cell.attributes.name;
         const instanceName = cell.attributes.instance;
@@ -364,11 +360,12 @@ export function generateVHDLCode(graph: dia.Graph): string {
         portMappings = portMappings.concat(outputPorts.map(p => {
             const key = `${cell.id}:${p.id}`;
             const outputConnectedSignal = outputConnectionMap[key] ? outputConnectionMap[key][0] : '/* unconnected */';
-            return `.${p.name}(${outputConnectedSignal})`;
+            return `${p.name} => ${outputConnectedSignal}`;
         }));
 
-        code += `${moduleName} ${instanceName} (\n`;
-        code += `    ${portMappings.join(',\n    ')}\n`;
+        code += `${instanceName} : entity work.${moduleName}\n`;
+        code += `    port map (`;
+        code += `        ${portMappings.join(',\n        ')}\n`;
         code += `);\n\n`;
     });
 
@@ -383,10 +380,10 @@ export function generateVHDLCode(graph: dia.Graph): string {
         const dKey = `${cell.id}:d`;
         const qKey = `${cell.id}:q`;
 
-        const clkSignal = connectionMap[clkKey] ? connectionMap[clkKey][0] : '/* unconnected */';
-        const rstSignal = connectionMap[rstKey] ? connectionMap[rstKey][0] : '/* unconnected */';
-        const enSignal = connectionMap[enKey] ? connectionMap[enKey][0] : '1\'b1';
-        const dSignal = connectionMap[dKey] ? connectionMap[dKey][0] : '/* unconnected */';
+        const clkSignal = connectionMap[clkKey] ? connectionMap[clkKey][0] : "'0'";
+        const rstSignal = connectionMap[rstKey] ? connectionMap[rstKey][0] : "'0'";
+        const enSignal = connectionMap[enKey] ? connectionMap[enKey][0] : "'1'";
+        const dSignal = connectionMap[dKey] ? connectionMap[dKey][0] : "(others => '0')";
         const qSignal = outputConnectionMap[qKey] ? outputConnectionMap[qKey][0] : regName;
 
         // clk

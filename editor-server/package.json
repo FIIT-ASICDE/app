@@ -1,0 +1,22 @@
+{
+    "name": "editor-server",
+    "module": "server.ts",
+    "type": "module",
+    "scripts": {
+        "dev": "bun --env-file=../.env.local --watch server.ts"
+    },
+    "devDependencies": {
+        "@types/bun": "^1.2.2"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "@auth/core": "^0.37.4",
+        "lib0": "^0.2.99",
+        "pino": "^9.6.0",
+        "y-protocols": "^1.0.6",
+        "y-websocket": "^2.1.0",
+        "yjs": "^13.6.23"
+    }
+}
