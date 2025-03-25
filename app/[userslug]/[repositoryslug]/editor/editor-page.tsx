@@ -16,6 +16,7 @@ import type {
 import { X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { type ElementRef, useEffect, useRef, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -144,15 +145,6 @@ export default function EditorPage({ repository }: EditorPageProps) {
         if (activeFile?.name === fileToClose.name) {
             setActiveFile(filteredFiles.length > 0 ? filteredFiles[0] : null);
         }
-
-        saveSession.mutate({
-            repoId: repository.id,
-            openFiles: filteredFiles,
-            activeFile:
-                filteredFiles.length > 0
-                    ? (filteredFiles[0] as FileDisplayItem)
-                    : null,
-        });
     };
 
     useEffect(() => {
@@ -162,33 +154,35 @@ export default function EditorPage({ repository }: EditorPageProps) {
         }
     }, [session]);
 
+    const saveSessionDebounced = useDebouncedCallback(() => {
+        const transformedOpenFiles = openFiles.map((file) => ({
+            name: file.name,
+            type: file.type,
+            lastActivity: new Date(file.lastActivity),
+            language: file.language,
+            absolutePath: file.absolutePath,
+        }));
+
+        const transformedActiveFile = activeFile
+            ? {
+                  name: activeFile.name,
+                  type: activeFile.type,
+                  lastActivity: new Date(activeFile.lastActivity),
+                  language: activeFile.language,
+                  absolutePath: activeFile.absolutePath,
+              }
+            : null;
+
+        saveSession.mutate({
+            activeFile: transformedActiveFile,
+            openFiles: transformedOpenFiles,
+            repoId: repository.id,
+        });
+    }, 3000);
+
     useEffect(() => {
-        if (openFiles.length > 0) {
-            const transformedOpenFiles = openFiles.map((file) => ({
-                name: file.name,
-                type: file.type,
-                lastActivity: new Date(file.lastActivity),
-                language: file.language,
-                absolutePath: file.absolutePath,
-            }));
-
-            const transformedActiveFile = activeFile
-                ? {
-                      name: activeFile.name,
-                      type: activeFile.type,
-                      lastActivity: new Date(activeFile.lastActivity),
-                      language: activeFile.language,
-                      absolutePath: activeFile.absolutePath,
-                  }
-                : null;
-
-            saveSession.mutate({
-                activeFile: transformedActiveFile,
-                openFiles: transformedOpenFiles,
-                repoId: repository.id,
-            });
-        }
-    }, [openFiles, activeFile, repository.id, saveSession]);
+        saveSessionDebounced();
+    }, [openFiles, activeFile, repository.id]);
 
     return (
         <div className="flex h-screen flex-row">

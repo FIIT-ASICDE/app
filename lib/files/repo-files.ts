@@ -43,7 +43,7 @@ export function loadRepoItems(
             const lastActivity = stats.mtime;
 
             if (isDirectory) {
-                if (currentDepth < maxDepth) {
+                if (maxDepth === -1 || currentDepth < maxDepth) {
                     return {
                         type: "directory",
                         name: entry.name,
