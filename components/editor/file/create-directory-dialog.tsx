@@ -11,8 +11,11 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { api } from "@/lib/trpc/react";
+import { toast } from "sonner";
 
 interface CreateDirectoryDialogProps {
+    repositoryId: string;
     repositoryItem?: RepositoryItem;
     buttonSize: "icon" | "full";
     tree: Array<RepositoryItem>;
@@ -21,6 +24,7 @@ interface CreateDirectoryDialogProps {
 }
 
 export const CreateDirectoryDialog = ({
+    repositoryId,
     repositoryItem,
     buttonSize,
     tree,
@@ -30,11 +34,12 @@ export const CreateDirectoryDialog = ({
     const [open, setOpen] = useState<boolean>(false);
     const [directoryName, setDirectoryName] = useState<string>("");
 
-    const handleSubmit = (e: FormEvent) => {
-        e.preventDefault();
-        const trimmedDirectoryName: string = directoryName.trim();
+    const addDirectoryMutation = api.editor.addItem.useMutation({
+        onSuccess: () => {
+            toast.success("Directory created successfully");
 
-        if (trimmedDirectoryName) {
+            const trimmedDirectoryName: string = directoryName.trim();
+
             const newDirectory: DirectoryDisplayItem = {
                 type: "directory-display",
                 name: repositoryItem ? repositoryItem.name + "/" + trimmedDirectoryName : trimmedDirectoryName,
@@ -56,6 +61,22 @@ export const CreateDirectoryDialog = ({
             }
             setDirectoryName("");
             setOpen(false);
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
+
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+
+        if (directoryName.trim()) {
+            addDirectoryMutation.mutate({
+                type: "directory",
+                name: directoryName.trim(),
+                repoId: repositoryId,
+                path: repositoryItem?.name,
+            })
         }
     };
 

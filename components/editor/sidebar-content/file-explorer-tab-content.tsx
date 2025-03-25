@@ -2,7 +2,7 @@
 
 import { imgSrc } from "@/lib/client-file-utils";
 import { Repository, RepositoryItem } from "@/lib/types/repository";
-import { CopyMinus, FileX } from "lucide-react";
+import { CopyMinus } from "lucide-react";
 
 import { CreateDirectoryDialog } from "@/components/editor/file/create-directory-dialog";
 import { CreateFileDialog } from "@/components/editor/file/create-file-dialog";
@@ -11,9 +11,9 @@ import { CloseButton } from "@/components/editor/navigation/close-button";
 import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer-control-button";
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
-import { NoData } from "@/components/generic/no-data";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dispatch, SetStateAction, useState } from "react";
+import { Label } from "@/components/ui/label";
 
 interface FileExplorerTabContentProps {
     repository: Repository;
@@ -70,11 +70,13 @@ export const FileExplorerTabContent = ({
                     </div>
                     <div className="flex flex-row gap-x-1">
                         <CreateDirectoryDialog
+                            repositoryId={repository.id}
                             buttonSize="icon"
                             tree={tree}
                             setTree={setTreeAction}
                         />
                         <CreateFileDialog
+                            repositoryId={repository.id}
                             buttonSize="icon"
                             tree={tree}
                             setTree={setTreeAction}
@@ -99,10 +101,9 @@ export const FileExplorerTabContent = ({
                         setExpandedItemsAction={setExpandedItems}
                     />
                 ) : (
-                    <NoData
-                        icon={FileX}
-                        message={"No files or directories found"}
-                    />
+                    <Label className="text-sm text-muted-foreground">
+                        No changes yet
+                    </Label>
                 )}
             </div>
         </ScrollArea>

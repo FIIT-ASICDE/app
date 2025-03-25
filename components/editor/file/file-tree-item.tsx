@@ -100,26 +100,26 @@ export const FileTreeItem = ({
                 )}
             </div>
 
-            {(expandedItems.find((expandedItem: RepositoryItem) => expandedItem.name === item.name) && item.type === "directory") ||
+            {/*(expandedItems.find((expandedItem: RepositoryItem) => expandedItem.name === item.name) && item.type === "directory") ||
                 (item.type === "directory-display" && (
                     <div>
-                        {/*item.children
+                        item.children
                         .sort((a: RepositoryItem, b: RepositoryItem) => {
                             if ((a.type === "directory" || a.type === "directory-display") && (b.type === "file" || b.type === "file-display")) return -1;
                             if ((a.type === "file" || a.type === "file-display") && (b.type === "directory" || b.type === "directory-display")) return 1;
                             return a.name.localeCompare(b.name);
                         })
-                        .map((child: RepositoryItem, index: number) => (
+                        .map((child: RepositoryItem) => (
                             <FileTreeItem
-                                key={index + item.lastActivity.toLocaleString()}
+                                key={item.lastActivity.toLocaleString()}
                                 item={child}
                                 depth={depth + 1}
                                 onItemClick={onItemClick}
                                 selectedPath={selectedPath}
                             />
-                        ))*/}
+                        ))
                     </div>
-                ))}
+                ))*/}
         </div>
     );
 };
