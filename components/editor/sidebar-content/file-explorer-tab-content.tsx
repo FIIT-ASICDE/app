@@ -30,9 +30,15 @@ export const FileExplorerTabContent = ({
     handleCloseSidebarAction,
     onFileClick,
 }: FileExplorerTabContentProps) => {
-    const [selectedItem, setSelectedItem] = useState<RepositoryItem | undefined>(undefined);
-    const [expandedItems, setExpandedItems] = useState<Array<RepositoryItem>>([]);
-    const [hoveredItem, setHoveredItem] = useState<RepositoryItem | undefined>(undefined);
+    const [selectedItem, setSelectedItem] = useState<
+        RepositoryItem | undefined
+    >(undefined);
+    const [expandedItems, setExpandedItems] = useState<Array<RepositoryItem>>(
+        [],
+    );
+    const [hoveredItem, setHoveredItem] = useState<RepositoryItem | undefined>(
+        undefined,
+    );
 
     // adding dummy cpp file to test simulation dialog
     if (
@@ -50,7 +56,7 @@ export const FileExplorerTabContent = ({
 
     return (
         <ScrollArea className="relative h-full w-full">
-            <div className="flex flex-col flex-auto text-nowrap">
+            <div className="flex flex-auto flex-col text-nowrap">
                 <header className="flex flex-col gap-y-3 p-4 pb-2">
                     <div className="flex flex-row items-center justify-between gap-x-3">
                         <div className="flex min-w-0 flex-row gap-x-2 text-xl font-medium">

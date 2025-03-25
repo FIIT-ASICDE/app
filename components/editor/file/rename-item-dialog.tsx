@@ -1,6 +1,8 @@
+import { api } from "@/lib/trpc/react";
 import { RepositoryItem } from "@/lib/types/repository";
 import { FileIcon, Folder, Pen } from "lucide-react";
 import { Dispatch, FormEvent, SetStateAction, useState } from "react";
+import { toast } from "sonner";
 
 import {
     Dialog,
@@ -10,8 +12,6 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { api } from "@/lib/trpc/react";
-import { toast } from "sonner";
 
 interface RenameItemDialogProps {
     repositoryId: string;
@@ -34,25 +34,32 @@ export const RenameItemDialog = ({
     const itemName: string =
         repositoryItem.name.split("/").pop() ?? repositoryItem.name;
 
-    const itemDisplayType: string = repositoryItem.type === "file" || repositoryItem.type === "file-display" ? "File" : "Directory";
+    const itemDisplayType: string =
+        repositoryItem.type === "file" || repositoryItem.type === "file-display"
+            ? "File"
+            : "Directory";
 
     const renameItemMutation = api.editor.renameItem.useMutation({
         onSuccess: () => {
             toast.success(itemDisplayType + " renamed successfully", {
-                description: newItemName.trim()
+                description: newItemName.trim(),
             });
 
             const trimmedNewItemName = newItemName.trim();
 
-            const itemToRename: RepositoryItem | undefined = tree.find((item) => item.name === repositoryItem.name);
+            const itemToRename: RepositoryItem | undefined = tree.find(
+                (item) => item.name === repositoryItem.name,
+            );
 
             if (itemToRename) {
-                itemToRename.name = repositoryItem.name.replace(/[^/]+$/, trimmedNewItemName);
-                const filteredTree: Array<RepositoryItem> = tree.filter((item) => item.name !== repositoryItem.name);
-                setTree([
-                    ...filteredTree,
-                    itemToRename,
-                ]);
+                itemToRename.name = repositoryItem.name.replace(
+                    /[^/]+$/,
+                    trimmedNewItemName,
+                );
+                const filteredTree: Array<RepositoryItem> = tree.filter(
+                    (item) => item.name !== repositoryItem.name,
+                );
+                setTree([...filteredTree, itemToRename]);
             }
 
             if (onAction) {
@@ -63,7 +70,7 @@ export const RenameItemDialog = ({
         },
         onError: (error) => {
             toast.error(error.message);
-        }
+        },
     });
 
     const handleSubmit = (e: FormEvent) => {
@@ -74,7 +81,10 @@ export const RenameItemDialog = ({
             renameItemMutation.mutate({
                 repoId: repositoryId,
                 originalPath: repositoryItem.name,
-                newPath: repositoryItem.name.replace(/[^/]+$/, trimmedNewItemName),
+                newPath: repositoryItem.name.replace(
+                    /[^/]+$/,
+                    trimmedNewItemName,
+                ),
             });
         }
     };

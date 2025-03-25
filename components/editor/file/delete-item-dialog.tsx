@@ -1,6 +1,8 @@
+import { api } from "@/lib/trpc/react";
 import { RepositoryItem } from "@/lib/types/repository";
 import { X } from "lucide-react";
 import { Dispatch, FormEvent, SetStateAction, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,8 +14,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { api } from "@/lib/trpc/react";
-import { toast } from "sonner";
 
 interface DeleteItemDialogProps {
     repositoryId: string;
@@ -35,16 +35,23 @@ export const DeleteItemDialog = ({
     const itemName: string =
         repositoryItem.name.split("/").pop() ?? repositoryItem.name;
 
-    const itemDisplayType: string = repositoryItem.type === "file" || repositoryItem.type === "file-display" ? "File" : "Directory";
+    const itemDisplayType: string =
+        repositoryItem.type === "file" || repositoryItem.type === "file-display"
+            ? "File"
+            : "Directory";
 
     const deleteItemMutation = api.editor.deleteItem.useMutation({
         onSuccess: () => {
             toast.success(itemDisplayType + " deleted successfully");
 
-            const itemToDelete: RepositoryItem | undefined = tree.find((item) => item.name === repositoryItem.name);
+            const itemToDelete: RepositoryItem | undefined = tree.find(
+                (item) => item.name === repositoryItem.name,
+            );
 
             if (itemToDelete) {
-                const filteredTree: Array<RepositoryItem> = tree.filter((item) => item.name !== repositoryItem.name);
+                const filteredTree: Array<RepositoryItem> = tree.filter(
+                    (item) => item.name !== repositoryItem.name,
+                );
                 setTree(filteredTree);
             }
 
@@ -56,7 +63,7 @@ export const DeleteItemDialog = ({
         },
         onError: (error) => {
             toast.error(error.message);
-        }
+        },
     });
 
     const handleSubmit = (e: FormEvent) => {

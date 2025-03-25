@@ -4,7 +4,8 @@ import { RoleOrganisationFilter } from "@/lib/types/organisation";
 import {
     FavoriteRepositoriesFilter,
     PinnedRepositoriesFilter,
-    PublicRepositoriesFilter, type RepositoryItem
+    PublicRepositoriesFilter,
+    type RepositoryItem,
 } from "@/lib/types/repository";
 
 export const getTimeDeltaString = (lastActivity: Date): string => {
@@ -279,8 +280,16 @@ export const compareRepositoryItems = (
 
 export const sortTree = (tree: Array<RepositoryItem>) => {
     return tree.sort((a: RepositoryItem, b: RepositoryItem) => {
-        if ((a.type === "directory" || a.type === "directory-display") && (b.type === "file" || b.type === "file-display")) return -1;
-        if ((a.type === "file" || a.type === "file-display") && (b.type === "directory" || b.type === "directory-display")) return 1;
+        if (
+            (a.type === "directory" || a.type === "directory-display") &&
+            (b.type === "file" || b.type === "file-display")
+        )
+            return -1;
+        if (
+            (a.type === "file" || a.type === "file-display") &&
+            (b.type === "directory" || b.type === "directory-display")
+        )
+            return 1;
         return a.name.localeCompare(b.name);
     });
 };

@@ -21,7 +21,10 @@ interface FileTreeItemProps {
     setExpandedItemsAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
     hoveredItem: RepositoryItem | undefined;
     setHoveredItemAction: Dispatch<SetStateAction<RepositoryItem | undefined>>;
-    onMoveItem?: (sourceItem: RepositoryItem, targetItem: RepositoryItem) => void;
+    onMoveItem?: (
+        sourceItem: RepositoryItem,
+        targetItem: RepositoryItem,
+    ) => void;
     onDragOverItem?: () => void;
 }
 
@@ -104,12 +107,19 @@ export const FileTreeItem = ({
 
         try {
             if (event.dataTransfer) {
-                const sourcePath: string = event.dataTransfer.getData("text/plain");
-                const sourceItem: RepositoryItem | undefined = tree.find(treeItem => treeItem.name === sourcePath);
+                const sourcePath: string =
+                    event.dataTransfer.getData("text/plain");
+                const sourceItem: RepositoryItem | undefined = tree.find(
+                    (treeItem) => treeItem.name === sourcePath,
+                );
 
                 if (!sourceItem) return;
                 if (sourceItem.name === item.name) return;
-                if (item.type !== "directory" && item.type !== "directory-display") return;
+                if (
+                    item.type !== "directory" &&
+                    item.type !== "directory-display"
+                )
+                    return;
                 if (item.name.startsWith(sourceItem.name + "/")) return;
 
                 if (onMoveItem) {
@@ -129,9 +139,10 @@ export const FileTreeItem = ({
         >
             <div
                 className={cn(
-                    "border border-transparent flex cursor-default flex-row items-center justify-between rounded px-2 py-1.5 text-sm",
-                    (selectedItem?.name === item.name) && "bg-accent font-medium border-primary",
-                    isDragOver && "bg-accent border-primary",
+                    "flex cursor-default flex-row items-center justify-between rounded border border-transparent px-2 py-1.5 text-sm",
+                    selectedItem?.name === item.name &&
+                        "border-primary bg-accent font-medium",
+                    isDragOver && "border-primary bg-accent",
                     "hover:bg-accent",
                 )}
                 style={{ paddingLeft: `${depth * 24 + 8}px` }}
@@ -149,9 +160,7 @@ export const FileTreeItem = ({
                     }
                 }}
             >
-                <div
-                    className="flex flex-1 flex-row items-center rounded text-sm hover:bg-accent"
-                >
+                <div className="flex flex-1 flex-row items-center rounded text-sm hover:bg-accent">
                     {item.type === "directory" ||
                     item.type === "directory-display" ? (
                         <>
@@ -161,11 +170,11 @@ export const FileTreeItem = ({
                                         expandedItem.name === item.name,
                                 ) ? (
                                     <div onClick={handleToggle}>
-                                        <ChevronDown className="cursor-pointer max-h-4 min-h-4 min-w-4 max-w-4" />
+                                        <ChevronDown className="max-h-4 min-h-4 min-w-4 max-w-4 cursor-pointer" />
                                     </div>
                                 ) : (
                                     <div onClick={handleToggle}>
-                                        <ChevronRight className="cursor-pointer max-h-4 min-h-4 min-w-4 max-w-4" />
+                                        <ChevronRight className="max-h-4 min-h-4 min-w-4 max-w-4 cursor-pointer" />
                                     </div>
                                 )}
                             </span>
@@ -179,7 +188,7 @@ export const FileTreeItem = ({
                     )}
                     <span className="truncate">{item.name}</span>
                 </div>
-                {((hoveredItem?.name === item.name) || dropdownOpen) && (
+                {(hoveredItem?.name === item.name || dropdownOpen) && (
                     <RepositoryItemActions
                         repositoryId={repositoryId}
                         repositoryItem={item}
@@ -195,35 +204,47 @@ export const FileTreeItem = ({
                 )}
             </div>
 
-            {(expandedItems.find((expandedItem: RepositoryItem) => expandedItem.name === item.name) && item.type === "directory" && (
-                <div>
-                    {sortTree(item.children)
-                    .map((child: RepositoryItem, index: number) => (
-                        <FileTreeItem
-                            key={index + child.lastActivity.toLocaleString()}
-                            repositoryId={repositoryId}
-                            item={child}
-                            tree={tree}
-                            setTreeAction={setTreeAction}
-                            onItemClick={() => {
-                                setSelectedItemAction(child);
-                                if (onItemClick) {
-                                    onItemClick(child);
-                                }
-                            }}
-                            selectedItem={selectedItem}
-                            setSelectedItemAction={setSelectedItemAction}
-                            depth={depth + 1}
-                            expandedItems={expandedItems}
-                            setExpandedItemsAction={setExpandedItemsAction}
-                            hoveredItem={hoveredItem}
-                            setHoveredItemAction={setHoveredItemAction}
-                            onMoveItem={onMoveItem}
-                            onDragOverItem={onDragOverItem}
-                        />
-                    ))}
-                </div>
-            ))}
+            {expandedItems.find(
+                (expandedItem: RepositoryItem) =>
+                    expandedItem.name === item.name,
+            ) &&
+                item.type === "directory" && (
+                    <div>
+                        {sortTree(item.children).map(
+                            (child: RepositoryItem, index: number) => (
+                                <FileTreeItem
+                                    key={
+                                        index +
+                                        child.lastActivity.toLocaleString()
+                                    }
+                                    repositoryId={repositoryId}
+                                    item={child}
+                                    tree={tree}
+                                    setTreeAction={setTreeAction}
+                                    onItemClick={() => {
+                                        setSelectedItemAction(child);
+                                        if (onItemClick) {
+                                            onItemClick(child);
+                                        }
+                                    }}
+                                    selectedItem={selectedItem}
+                                    setSelectedItemAction={
+                                        setSelectedItemAction
+                                    }
+                                    depth={depth + 1}
+                                    expandedItems={expandedItems}
+                                    setExpandedItemsAction={
+                                        setExpandedItemsAction
+                                    }
+                                    hoveredItem={hoveredItem}
+                                    setHoveredItemAction={setHoveredItemAction}
+                                    onMoveItem={onMoveItem}
+                                    onDragOverItem={onDragOverItem}
+                                />
+                            ),
+                        )}
+                    </div>
+                )}
         </div>
     );
 };

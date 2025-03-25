@@ -1,16 +1,21 @@
+import { RepositoryItem } from "@/lib/types/repository";
+import { FileIcon, Folder } from "lucide-react";
+import { Dispatch, SetStateAction } from "react";
+
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
-    DialogTitle
+    DialogTitle,
 } from "@/components/ui/dialog";
-import { Dispatch, SetStateAction } from "react";
-import { RepositoryItem } from "@/lib/types/repository";
-import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { FileIcon, Folder } from "lucide-react";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface MoveItemDialogProps {
     isOpen: boolean;
@@ -29,32 +34,40 @@ export const MoveItemDialog = ({
     onConfirm,
     onCancel,
 }: MoveItemDialogProps) => {
-    const sourceItemName: string = sourceItem.name.split("/").pop() || sourceItem.name;
-    const targetItemName: string = targetItem.name === "" ? "root directory" : targetItem.name.split("/").pop() || targetItem.name;
+    const sourceItemName: string =
+        sourceItem.name.split("/").pop() || sourceItem.name;
+    const targetItemName: string =
+        targetItem.name === ""
+            ? "root directory"
+            : targetItem.name.split("/").pop() || targetItem.name;
 
-    const itemType = sourceItem.type === "directory" || sourceItem.type === "directory-display"
-        ? "directory"
-        : "file";
+    const itemType =
+        sourceItem.type === "directory" ||
+        sourceItem.type === "directory-display"
+            ? "directory"
+            : "file";
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogContent className="w-4xl">
                 <DialogHeader>
-                    <DialogTitle>
-                        Move {itemType}
-                    </DialogTitle>
+                    <DialogTitle>Move {itemType}</DialogTitle>
                     <DialogDescription>
                         Are you sure you want to move
                     </DialogDescription>
                     <div className="space-y-5">
-                        <div className="flex flex-row gap-x-3 items-center flex-wrap gap-y-2">
+                        <div className="flex flex-row flex-wrap items-center gap-x-3 gap-y-2">
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <span className="border border-accent rounded p-1.5 max-w-48 truncate flex flex-row gap-x-2 items-center">
-                                        {itemType === "file" ?
-                                            <FileIcon className="min-w-4 max-w-4 min-h-4 max-h-4 text-muted-foreground" /> :
-                                            <Folder className="min-w-4 max-w-4 min-h-4 max-h-4 text-muted-foreground" fill="currentColor" />
-                                        }
+                                    <span className="flex max-w-48 flex-row items-center gap-x-2 truncate rounded border border-accent p-1.5">
+                                        {itemType === "file" ? (
+                                            <FileIcon className="max-h-4 min-h-4 min-w-4 max-w-4 text-muted-foreground" />
+                                        ) : (
+                                            <Folder
+                                                className="max-h-4 min-h-4 min-w-4 max-w-4 text-muted-foreground"
+                                                fill="currentColor"
+                                            />
+                                        )}
                                         {sourceItemName}
                                     </span>
                                 </TooltipTrigger>
@@ -62,11 +75,14 @@ export const MoveItemDialog = ({
                                     {sourceItemName}
                                 </TooltipContent>
                             </Tooltip>
-                            <DialogDescription>{" "}to{" "}</DialogDescription>
+                            <DialogDescription> to </DialogDescription>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <span className="border border-accent rounded p-1.5 max-w-48 truncate flex flex-row gap-x-2 items-center">
-                                        <Folder className="min-w-4 max-w-4 min-h-4 max-h-4 text-muted-foreground" fill="currentColor" />
+                                    <span className="flex max-w-48 flex-row items-center gap-x-2 truncate rounded border border-accent p-1.5">
+                                        <Folder
+                                            className="max-h-4 min-h-4 min-w-4 max-w-4 text-muted-foreground"
+                                            fill="currentColor"
+                                        />
                                         {targetItemName}
                                     </span>
                                 </TooltipTrigger>
