@@ -1,4 +1,4 @@
-import { SimulationType } from "@/lib/types/editor";
+import { SimulationConfiguration, SimulationType } from "@/lib/types/editor";
 import { FileDisplayItem, FileItem, Repository, RepositoryItem } from "@/lib/types/repository";
 import { Portal } from "@radix-ui/react-portal";
 import { FileIcon, Info, Play } from "lucide-react";
@@ -19,6 +19,7 @@ interface SimulationDialogProps {
     onStartSimulation: (selectedType: SimulationType, selectedFile: RepositoryItem) => void;
     simulationOpen: boolean;
     setSimulationOpen: Dispatch<SetStateAction<boolean>>;
+    setSimulationConfiguration: Dispatch<SetStateAction<SimulationConfiguration | undefined>>;
 }
 
 export const SimulationDialog = ({
@@ -26,6 +27,7 @@ export const SimulationDialog = ({
     onStartSimulation,
     simulationOpen,
     setSimulationOpen,
+    setSimulationConfiguration,
 }: SimulationDialogProps) => {
     const [selectedType, setSelectedType] = useState<SimulationType>();
     const [selectedFile, setSelectedFile] = useState<FileDisplayItem | FileItem>();
@@ -232,6 +234,11 @@ export const SimulationDialog = ({
                             setSelectedType(undefined);
                             setSelectedFile(undefined);
                             setSimulationOpen(false);
+                            setSimulationConfiguration({
+                                simulationType: selectedType!,
+                                testBenchFile: selectedFile!,
+                            });
+                            console.log("simulation configured");
                             onStartSimulation(selectedType!, selectedFile!);
                         }}
                         disabled={selectedType === undefined || selectedFile === undefined}

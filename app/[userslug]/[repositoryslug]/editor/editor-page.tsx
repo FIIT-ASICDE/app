@@ -4,7 +4,8 @@ import { commitSchema } from "@/lib/schemas/git-schemas";
 import { api } from "@/lib/trpc/react";
 import type {
     BottomPanelContentTab,
-    SidebarContentTab, SimulationType
+    SidebarContentTab, SimulationConfiguration,
+    SimulationType
 } from "@/lib/types/editor";
 import type {
     FileDisplayItem,
@@ -55,6 +56,8 @@ export default function EditorPage({ repository }: EditorPageProps) {
         useState<number>(20);
     const [activeFile, setActiveFile] = useState<FileDisplayItem | null>(null);
     const [openFiles, setOpenFiles] = useState<FileDisplayItem[]>([]);
+
+    const [simulationConfiguration, setSimulationConfiguration] = useState<SimulationConfiguration | undefined>(undefined);
 
     const changes = api.git.changes.useQuery(
         { repoId: repository.id },
@@ -177,23 +180,31 @@ export default function EditorPage({ repository }: EditorPageProps) {
     return (
         <div className="flex h-screen flex-row">
             <EditorNavigation
-                activeSidebarContent={activeSidebarContent}
-                setActiveSidebarContent={setActiveSidebarContent}
-                activeBottomPanelContent={activeBottomPanelContent}
-                setActiveBottomPanelContent={setActiveBottomPanelContent}
-                verticalGroupRef={verticalGroupRef}
-                horizontalGroupRef={horizontalGroupRef}
-                verticalCollapsed={verticalCollapsed}
-                setVerticalCollapsed={setVerticalCollapsed}
-                horizontalCollapsed={horizontalCollapsed}
-                setHorizontalCollapsed={setHorizontalCollapsed}
-                lastOpenedBottomPanelSize={lastOpenedBottomPanelSize}
-                setLastOpenedBottomPanelSize={setLastOpenedBottomPanelSize}
-                lastOpenedSidebarSize={lastOpenedSidebarSize}
-                setLastOpenedSidebarSize={setLastOpenedSidebarSize}
+                sidebarProps={{
+                    horizontalGroupRef,
+                    horizontalCollapsed,
+                    setHorizontalCollapsed,
+                    activeSidebarContent,
+                    setActiveSidebarContent,
+                    lastOpenedSidebarSize,
+                    setLastOpenedSidebarSize,
+                }}
+                bottomPanelProps={{
+                    verticalGroupRef,
+                    verticalCollapsed,
+                    setVerticalCollapsed,
+                    activeBottomPanelContent,
+                    setActiveBottomPanelContent,
+                    lastOpenedBottomPanelSize,
+                    setLastOpenedBottomPanelSize,
+                }}
+                simulationProps={{
+                    onStartSimulation,
+                    simulationConfiguration,
+                    setSimulationConfiguration,
+                }}
                 isGitRepo={repository.isGitRepo}
                 repository={repository}
-                onStartSimulation={onStartSimulation}
             />
 
             <ResizablePanelGroup
