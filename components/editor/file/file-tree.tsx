@@ -19,8 +19,6 @@ interface FileTreeProps {
     setSelectedItemAction: Dispatch<SetStateAction<RepositoryItem | undefined>>;
     expandedItems: Array<RepositoryItem>;
     setExpandedItemsAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
-    hoveredItem: RepositoryItem | undefined;
-    setHoveredItemAction: Dispatch<SetStateAction<RepositoryItem | undefined>>;
 }
 
 export const FileTree = ({
@@ -32,8 +30,6 @@ export const FileTree = ({
     setSelectedItemAction,
     expandedItems,
     setExpandedItemsAction,
-    hoveredItem,
-    setHoveredItemAction,
 }: FileTreeProps) => {
     const [moveDialogOpen, setMoveDialogOpen] = useState<boolean>(false);
     const [sourceItem, setSourceItem] = useState<RepositoryItem | undefined>(
@@ -43,7 +39,9 @@ export const FileTree = ({
         undefined,
     );
     const [isDragOverRoot, setIsDragOverRoot] = useState<boolean>(false);
-
+    const [hoveredItem, setHoveredItem] = useState<RepositoryItem | undefined>(
+        undefined
+    );
     const moveItemMutation = api.editor.renameItem.useMutation({
         onSuccess: () => {
             if (!sourceItem || !targetItem) return;
@@ -177,7 +175,6 @@ export const FileTree = ({
                     tree={tree}
                     setTreeAction={setTreeAction}
                     onItemClick={() => {
-                        setSelectedItemAction(item);
                         if (onItemClick) {
                             onItemClick(item);
                         }
@@ -188,7 +185,7 @@ export const FileTree = ({
                     expandedItems={expandedItems}
                     setExpandedItemsAction={setExpandedItemsAction}
                     hoveredItem={hoveredItem}
-                    setHoveredItemAction={setHoveredItemAction}
+                    setHoveredItemAction={setHoveredItem}
                     onMoveItem={handleMoveItem}
                     onDragOverItem={() => setIsDragOverRoot(false)}
                 />

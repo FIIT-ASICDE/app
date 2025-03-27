@@ -3,7 +3,7 @@
 import type { RepositoryItem } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight, FileIcon, Folder } from "lucide-react";
-import { Dispatch, DragEvent, SetStateAction, useRef, useState } from "react";
+import { Dispatch, DragEvent, RefObject, SetStateAction, useRef, useState } from "react";
 
 import { RepositoryItemActions } from "@/components/editor/sidebar-content/repository-item-actions";
 import { sortTree } from "@/components/generic/generic";
@@ -46,7 +46,9 @@ export const FileTreeItem = ({
 }: FileTreeItemProps) => {
     const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
     const [isDragOver, setIsDragOver] = useState<boolean>(false);
-    const itemRef = useRef<HTMLDivElement>(null);
+    const itemRef: RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
+
+    const isHovered: boolean = hoveredItem?.name === item.name;
 
     const handleToggle = () => {
         if (item.type === "directory" || item.type === "directory-display") {
@@ -65,9 +67,6 @@ export const FileTreeItem = ({
                     );
                 setExpandedItemsAction(filteredExpandedItems);
             }
-        }
-        if (onItemClick) {
-            onItemClick(item);
         }
     };
 
@@ -134,14 +133,18 @@ export const FileTreeItem = ({
     return (
         <div
             onMouseEnter={() => setHoveredItemAction(item)}
-            onMouseLeave={() => setHoveredItemAction(undefined)}
+            onMouseLeave={() => {
+                if (isHovered && !dropdownOpen) {
+                    setHoveredItemAction(undefined);
+                }
+            }}
             ref={itemRef}
         >
             <div
                 className={cn(
                     "flex cursor-default flex-row items-center justify-between rounded border border-transparent px-2 py-1.5 text-sm",
                     selectedItem?.name === item.name &&
-                        "border-primary bg-accent font-medium",
+                    "border-primary bg-accent font-medium",
                     isDragOver && "border-primary bg-accent",
                     "hover:bg-accent",
                 )}
@@ -157,6 +160,11 @@ export const FileTreeItem = ({
                         setSelectedItemAction(item);
                     } else {
                         setSelectedItemAction(undefined);
+                    }
+                }}
+                onDoubleClick={() => {
+                    if (onItemClick) {
+                        onItemClick(item);
                     }
                 }}
             >
@@ -188,7 +196,7 @@ export const FileTreeItem = ({
                     )}
                     <span className="truncate">{item.name}</span>
                 </div>
-                {(hoveredItem?.name === item.name || dropdownOpen) && (
+                {(isHovered || dropdownOpen) && (
                     <RepositoryItemActions
                         repositoryId={repositoryId}
                         repositoryItem={item}
@@ -205,9 +213,9 @@ export const FileTreeItem = ({
             </div>
 
             {expandedItems.find(
-                (expandedItem: RepositoryItem) =>
-                    expandedItem.name === item.name,
-            ) &&
+                    (expandedItem: RepositoryItem) =>
+                        expandedItem.name === item.name,
+                ) &&
                 item.type === "directory" && (
                     <div>
                         {sortTree(item.children).map(
@@ -222,7 +230,6 @@ export const FileTreeItem = ({
                                     tree={tree}
                                     setTreeAction={setTreeAction}
                                     onItemClick={() => {
-                                        setSelectedItemAction(child);
                                         if (onItemClick) {
                                             onItemClick(child);
                                         }

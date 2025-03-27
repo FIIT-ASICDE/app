@@ -36,9 +36,6 @@ export const FileExplorerTabContent = ({
     const [expandedItems, setExpandedItems] = useState<Array<RepositoryItem>>(
         [],
     );
-    const [hoveredItem, setHoveredItem] = useState<RepositoryItem | undefined>(
-        undefined,
-    );
 
     // adding dummy cpp file to test simulation dialog
     if (
@@ -110,8 +107,6 @@ export const FileExplorerTabContent = ({
                         setSelectedItemAction={setSelectedItem}
                         expandedItems={expandedItems}
                         setExpandedItemsAction={setExpandedItems}
-                        hoveredItem={hoveredItem}
-                        setHoveredItemAction={setHoveredItem}
                     />
                 ) : (
                     <Label className="text-sm text-muted-foreground">

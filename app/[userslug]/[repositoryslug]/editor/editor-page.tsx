@@ -248,9 +248,9 @@ export default function EditorPage({ repository }: EditorPageProps) {
                                 activeSidebarContent={activeSidebarContent}
                                 repository={repository}
                                 tree={tree}
-                                setTree={setTree}
+                                setTreeAction={setTree}
                                 changes={changes.data?.changes ?? []}
-                                handleCloseSidebar={handleCloseSidebar}
+                                handleCloseSidebarAction={handleCloseSidebar}
                                 onFileClick={handleFileClick}
                                 onCommit={{
                                     action: handleOnCommit,

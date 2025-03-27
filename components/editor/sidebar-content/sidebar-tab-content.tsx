@@ -18,9 +18,9 @@ interface SidebarTabContentProps {
     activeSidebarContent: SidebarContentTab;
     repository: Repository;
     tree: Array<RepositoryItem>;
-    setTree: Dispatch<SetStateAction<Array<RepositoryItem>>>;
+    setTreeAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
     changes: Array<RepositoryItemChange>;
-    handleCloseSidebar: () => void;
+    handleCloseSidebarAction: () => void;
     onFileClick?: (item: RepositoryItem) => void;
     onCommit: {
         action: (data: z.infer<typeof commitSchema>) => Promise<void>;
@@ -32,9 +32,9 @@ export const SidebarTabContent = ({
     activeSidebarContent,
     repository,
     tree,
-    setTree,
+    setTreeAction,
     changes,
-    handleCloseSidebar,
+    handleCloseSidebarAction,
     onFileClick,
     onCommit,
 }: SidebarTabContentProps) => {
@@ -44,22 +44,22 @@ export const SidebarTabContent = ({
                 <FileExplorerTabContent
                     repository={repository}
                     tree={tree}
-                    setTreeAction={setTree}
-                    handleCloseSidebarAction={handleCloseSidebar}
+                    setTreeAction={setTreeAction}
+                    handleCloseSidebarAction={handleCloseSidebarAction}
                     onFileClick={onFileClick}
                 />
             )}
             {activeSidebarContent === "search" && (
                 <SearchTabContent
                     repository={repository}
-                    handleCloseSidebar={handleCloseSidebar}
+                    handleCloseSidebar={handleCloseSidebarAction}
                 />
             )}
             {activeSidebarContent === "sourceControl" && (
                 <SourceControlTabContent
                     repoId={repository.id}
                     changes={changes}
-                    handleCloseSidebar={handleCloseSidebar}
+                    handleCloseSidebar={handleCloseSidebarAction}
                     onCommitAction={onCommit.action}
                     isLoading={onCommit.isLoading}
                 />
