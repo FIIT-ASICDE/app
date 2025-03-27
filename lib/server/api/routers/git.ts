@@ -672,7 +672,7 @@ function showCommits() {
                                         );
 
                                     pushed = containsOutput.trim() !== "";
-                                } catch (error) {
+                                } catch {
                                     // if the command fails, assume the commit hasn't been pushed
                                     pushed = false;
                                 }

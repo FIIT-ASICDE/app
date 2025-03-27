@@ -4,7 +4,8 @@ import { commitSchema } from "@/lib/schemas/git-schemas";
 import { api } from "@/lib/trpc/react";
 import type {
     BottomPanelContentTab,
-    SidebarContentTab, SimulationType
+    SidebarContentTab,
+    SimulationType,
 } from "@/lib/types/editor";
 import type {
     FileDisplayItem,
@@ -14,6 +15,7 @@ import type {
 import { X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { type ElementRef, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
 import { z } from "zod";
 
@@ -25,7 +27,6 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { toast } from "sonner";
 
 interface EditorPageProps {
     repository: Repository;
@@ -67,11 +68,13 @@ export default function EditorPage({ repository }: EditorPageProps) {
 
     const commitMutation = api.git.commit.useMutation({
         onSuccess: () => {
-            toast.success("Successfully commited " + changes.data?.changes.length);
+            toast.success(
+                "Successfully commited " + changes.data?.changes.length,
+            );
         },
         onError: (error) => {
             toast.error(error.message);
-        }
+        },
     });
 
     const handleOnCommit = async (data: z.infer<typeof commitSchema>) => {
@@ -97,9 +100,17 @@ export default function EditorPage({ repository }: EditorPageProps) {
         }
     };
 
-    const onStartSimulation = (selectedType: SimulationType, selectedFile: RepositoryItem) => {
+    const onStartSimulation = (
+        selectedType: SimulationType,
+        selectedFile: RepositoryItem,
+    ) => {
         // TODO: adam start simulation
-        console.log("Starting simulation with type: " + selectedType + " and file: " + selectedFile?.name);
+        console.log(
+            "Starting simulation with type: " +
+                selectedType +
+                " and file: " +
+                selectedFile?.name,
+        );
     };
 
     const handleFileClick = (item: RepositoryItem) => {
@@ -166,7 +177,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
 
     useEffect(() => {
         saveSessionDebounced();
-    }, [openFiles, activeFile, repository.id]);
+    }, [openFiles, activeFile, repository.id, saveSessionDebounced]);
 
     return (
         <div className="flex h-screen flex-row">
