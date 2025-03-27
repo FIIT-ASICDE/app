@@ -259,7 +259,13 @@ describe("git commit history", async () => {
         );
 
         // push to the remote
-        execSync(`git -C "${singleCommitRepo.path}" push origin main`);
+        const branchName =
+            execSync(`git -C "${singleCommitRepo.path}" branch --show-current`)
+                .toString()
+                .trim() || "master";
+        execSync(
+            `git -C "${singleCommitRepo.path}" push -u origin ${branchName}`,
+        );
 
         // get commits after pushing
         const result = await trpc.git.commits({
@@ -276,8 +282,12 @@ describe("git commit history", async () => {
         execSync(
             `git -C "${singleCommitRepo.path}" config user.email "test@example.com"`,
         );
-        execSync(`git -C "${singleCommitRepo.path}" config user.name "Test User"`);
-        execSync(`git -C "${singleCommitRepo.path}" commit -m "Add unpushed file"`);
+        execSync(
+            `git -C "${singleCommitRepo.path}" config user.name "Test User"`,
+        );
+        execSync(
+            `git -C "${singleCommitRepo.path}" commit -m "Add unpushed file"`,
+        );
 
         execSync(`git -C "${singleCommitRepo.path}" config --unset user.email`);
         execSync(`git -C "${singleCommitRepo.path}" config --unset user.name`);
