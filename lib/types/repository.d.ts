@@ -1,3 +1,4 @@
+import { PaginationResult } from "@/lib/types/generic";
 import { Invitation } from "@/lib/types/invitation";
 import { UserDisplay } from "@/lib/types/user";
 
@@ -124,4 +125,20 @@ export type RepositoryItemChange = {
         | { type: "added" | "modified" | "deleted" }
         | { type: "renamed"; oldName: string }
         | { type: "moved"; oldPath: string };
+};
+
+export type CommitHistory = {
+    commits: GitCommit[];
+    pagination: PaginationResult;
+};
+
+export type GitCommit = {
+    hash: string;
+    authorName: string;
+    authorEmail: string;
+    authorDate: Date;
+    message: string;
+    body: string;
+    changes: RepositoryItemChange[];
+    pushed: boolean;
 };
