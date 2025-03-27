@@ -1,13 +1,21 @@
 import { readGithubRepoBranches, readUsersGithubRepos } from "@/lib/github";
 import { paginationSchema } from "@/lib/schemas/common-schemas";
-import { cloneRepoSchema, commitSchema } from "@/lib/schemas/git-schemas";
+import {
+    cloneRepoSchema,
+    commitSchema,
+    showCommitsSchema,
+} from "@/lib/schemas/git-schemas";
 import {
     absoluteRepoPath,
     hasUserRole,
     resolveRepoPathOrThrow,
 } from "@/lib/server/api/routers/repos";
 import { createTRPCRouter, protectedProcedure } from "@/lib/server/api/trpc";
-import { RepositoryItemChange } from "@/lib/types/repository";
+import {
+    CommitHistory,
+    GitCommit,
+    RepositoryItemChange,
+} from "@/lib/types/repository";
 import { ReturnTypeOf } from "@octokit/core/dist-types/types";
 import { $Enums } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
@@ -25,6 +33,7 @@ export const gitRouter = createTRPCRouter({
     clone: clone(),
     changes: gitChanges(),
     commit: gitCommit(),
+    commits: showCommits(),
 });
 
 function userGithubRepos() {
@@ -470,5 +479,251 @@ function githubRepoBranches() {
                 ownerSlug,
                 repositorySlug,
             );
+        });
+}
+
+function showCommits() {
+    return protectedProcedure
+        .input(showCommitsSchema)
+        .query(async ({ ctx, input }): Promise<CommitHistory> => {
+            await hasUserRole(ctx.prisma, input.repoId, ctx.session.user.id, [
+                "OWNER",
+                "ADMIN",
+                "CONTRIBUTOR",
+                "VIEWER",
+            ]);
+
+            const repoPath = await resolveRepoPathOrThrow(
+                ctx.prisma,
+                input.repoId,
+            );
+
+            try {
+                const skip = input.page * input.pageSize;
+
+                // total commit count for pagination
+                const { stdout: countOutput } = await execPromise(
+                    `git -C "${repoPath}" rev-list --count HEAD`,
+                ).catch(() => ({ stdout: "0" }));
+
+                const totalCommits = parseInt(countOutput.trim()) || 0;
+                // if there are no commits, return early
+                if (totalCommits === 0) {
+                    return {
+                        commits: [],
+                        pagination: {
+                            total: 0,
+                            pageCount: 0,
+                            page: input.page,
+                            pageSize: input.pageSize,
+                        },
+                    };
+                }
+
+                // check if the repository has any remotes
+                const { stdout: remoteOutput } = await execPromise(
+                    `git -C "${repoPath}" remote`,
+                ).catch(() => ({ stdout: "" }));
+                const hasRemotes = remoteOutput.trim() !== "";
+
+                // if there are remotes, get all remote branches
+                let remoteBranches: string[] = [];
+                if (hasRemotes) {
+                    try {
+                        // fetch from all remotes to ensure we have up-to-date information
+                        await execPromise(`git -C "${repoPath}" fetch --all`);
+
+                        const { stdout: branchesOutput } = await execPromise(
+                            `git -C "${repoPath}" branch -r`,
+                        );
+
+                        remoteBranches = branchesOutput
+                            .trim()
+                            .split("\n")
+                            .map((branch) => branch.trim())
+                            .filter(
+                                (branch) => branch && !branch.includes("HEAD"),
+                            );
+                    } catch (error) {
+                        console.error("Error fetching remote branches:", error);
+                        // continue even if we can't get remote branches
+                    }
+                }
+
+                // Define the git log format
+                // %H: commit hash
+                // %an: author name
+                // %ae: author email
+                // %at: author date, UNIX timestamp
+                // %s: subject (commit message first line)
+                // %b: body (commit message after first line)
+                const format = "%H|%an|%ae|%at|%s|%b";
+
+                const { stdout } = await execPromise(
+                    `git -C "${repoPath}" log --format="${format}" --skip=${skip} --max-count=${input.pageSize}`,
+                );
+
+                if (!stdout.trim()) {
+                    return {
+                        commits: [],
+                        pagination: {
+                            total: totalCommits,
+                            pageCount: Math.ceil(totalCommits / input.pageSize),
+                            page: input.page,
+                            pageSize: input.pageSize,
+                        },
+                    };
+                }
+
+                const commits = stdout
+                    .trim()
+                    .split("\n")
+                    .filter((line) => line.trim() !== "")
+                    .map((line) => {
+                        const [
+                            hash,
+                            authorName,
+                            authorEmail,
+                            authorDateUnix,
+                            subject,
+                            body,
+                        ] = line.split("|");
+
+                        const authorDate = new Date(
+                            parseInt(authorDateUnix) * 1000,
+                        );
+
+                        return {
+                            hash,
+                            authorName,
+                            authorEmail,
+                            authorDate,
+                            message: subject,
+                            body: body || undefined,
+                        };
+                    });
+
+                // for each commit, get the files changed and check if it's been pushed
+                const commitsWithDetails = await Promise.all(
+                    commits.map(async (commit) => {
+                        try {
+                            // Get files changed in this commit
+                            const { stdout: filesOutput } = await execPromise(
+                                `git -C "${repoPath}" show --name-status --pretty=format:"" ${commit.hash}`,
+                            );
+
+                            const changes: RepositoryItemChange[] = filesOutput
+                                .trim()
+                                .split("\n")
+                                .filter((line) => line.trim() !== "")
+                                .map((line) => {
+                                    const parts = line.trim().split(/\s+/);
+                                    const status = parts[0];
+
+                                    let change:
+                                        | RepositoryItemChange["change"]
+                                        | undefined;
+                                    let path: string;
+                                    let oldPath: string | undefined;
+
+                                    switch (status.charAt(0)) {
+                                        case "A":
+                                            change = { type: "added" };
+                                            path = parts.slice(1).join(" ");
+                                            break;
+                                        case "M":
+                                            change = { type: "modified" };
+                                            path = parts.slice(1).join(" ");
+                                            break;
+                                        case "D":
+                                            change = { type: "deleted" };
+                                            path = parts.slice(1).join(" ");
+                                            break;
+                                        case "R":
+                                            // for renamed files, git outputs: R<similarity> <old-path> <new-path>
+                                            oldPath = parts[1]; // old path is the second element
+                                            path = parts.slice(2).join(" "); // new path is everything after
+                                            change = {
+                                                type: "renamed",
+                                                oldName: oldPath,
+                                            };
+                                            break;
+                                        default:
+                                            throw new Error(
+                                                `Unknown change type: ${status.charAt(0)}`,
+                                            );
+                                    }
+
+                                    return {
+                                        itemPath: path,
+                                        change: oldPath
+                                            ? { type: "moved", oldPath }
+                                            : change,
+                                    } as RepositoryItemChange;
+                                });
+
+                            // check if the commit has been pushed to any remote branch
+                            let pushed = false;
+                            if (hasRemotes && remoteBranches.length > 0) {
+                                try {
+                                    const { stdout: containsOutput } =
+                                        await execPromise(
+                                            `git -C "${repoPath}" branch -r --contains ${commit.hash}`,
+                                        );
+
+                                    pushed = containsOutput.trim() !== "";
+                                } catch {
+                                    // if the command fails, assume the commit hasn't been pushed
+                                    pushed = false;
+                                }
+                            }
+
+                            return { ...commit, changes, pushed } as GitCommit;
+                        } catch (error) {
+                            console.error(
+                                `Error getting details for commit ${commit.hash}:`,
+                                error,
+                            );
+                            return {
+                                ...commit,
+                                changes: [],
+                                pushed: false,
+                            } as GitCommit;
+                        }
+                    }),
+                );
+
+                const pagination = {
+                    total: totalCommits,
+                    pageCount: Math.ceil(totalCommits / input.pageSize),
+                    page: input.page,
+                    pageSize: input.pageSize,
+                };
+
+                return {
+                    commits: commitsWithDetails,
+                    pagination,
+                };
+            } catch (error) {
+                console.error("Error getting git commits:", error);
+
+                if (
+                    error instanceof Error &&
+                    error.message.includes("not a git repository")
+                ) {
+                    throw new TRPCError({
+                        code: "BAD_REQUEST",
+                        message:
+                            "The specified directory is not a git repository",
+                        cause: error,
+                    });
+                }
+
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to get git commits",
+                    cause: error,
+                });
+            }
         });
 }
