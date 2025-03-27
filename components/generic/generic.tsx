@@ -5,8 +5,10 @@ import {
     FavoriteRepositoriesFilter,
     PinnedRepositoriesFilter,
     PublicRepositoriesFilter,
-    type RepositoryItem,
+    type RepositoryItem, RepositoryItemChange
 } from "@/lib/types/repository";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { RepositoryItemChangeIcon } from "@/components/editor/changes/repository-item-change-icon";
 
 export const getTimeDeltaString = (lastActivity: Date): string => {
     const now = new Date();
@@ -267,17 +269,6 @@ export const languageColors: Record<string, string> = {
     default: "#8884d8",
 };
 
-export const compareRepositoryItems = (
-    repositoryItem: RepositoryItem,
-    selectedItem: RepositoryItem | undefined,
-) => {
-    return (
-        selectedItem !== undefined &&
-        repositoryItem.type === selectedItem.type &&
-        repositoryItem.name === selectedItem.name
-    );
-};
-
 export const sortTree = (tree: Array<RepositoryItem>) => {
     return tree.sort((a: RepositoryItem, b: RepositoryItem) => {
         if (
@@ -292,4 +283,56 @@ export const sortTree = (tree: Array<RepositoryItem>) => {
             return 1;
         return a.name.localeCompare(b.name);
     });
+};
+
+export const getChangeTooltipContent = (itemChange: RepositoryItemChange) => {
+    if (["added", "modified", "deleted"].includes(itemChange.change.type)) {
+        return (
+            <span>
+                    {itemChange.change.type[0].toUpperCase() +
+                        itemChange.change.type.slice(1)}
+                </span>
+        );
+    } else if (itemChange.change.type === "renamed") {
+        const oldName: string | undefined = itemChange.change.oldName
+            .split("/")
+            .pop();
+        return (
+            <span>
+                    Renamed from{" "}
+                <span className="text-muted-foreground">{oldName}</span> to{" "}
+                <span className="text-muted-foreground">
+                        {itemChange.itemPath}
+                    </span>
+                </span>
+        );
+    } else if (itemChange.change.type === "moved") {
+        return (
+            <span>
+                    Moved from{" "}
+                <span className="text-muted-foreground">
+                        {itemChange.change.oldPath}
+                    </span>{" "}
+                to{" "}
+                <span className="text-muted-foreground">
+                        {itemChange.itemPath}
+                    </span>
+                </span>
+        );
+    }
+};
+
+export const getChangeContent = (itemChange: RepositoryItemChange) => {
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild className="text-muted-foreground">
+                <div className="w-4">
+                <RepositoryItemChangeIcon itemChange={itemChange} />
+                </div>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+                {getChangeTooltipContent(itemChange)}
+            </TooltipContent>
+        </Tooltip>
+    );
 };

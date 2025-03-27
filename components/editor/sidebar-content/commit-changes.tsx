@@ -91,7 +91,7 @@ export const CommitChanges = ({
                 </Button>
             )}
 
-            <CommitHistoryDialog />
+            <CommitHistoryDialog repositoryId={repositoryId} />
         </div>
     );
 };

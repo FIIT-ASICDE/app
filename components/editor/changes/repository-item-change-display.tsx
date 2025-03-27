@@ -2,14 +2,9 @@ import { RepositoryItemChange } from "@/lib/types/repository";
 import { FileIcon } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 
-import { RepositoryItemChangeIcon } from "@/components/editor/changes/repository-item-change-icon";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { getChangeContent } from "@/components/generic/generic";
 
 interface ItemChangeDisplayProps {
     itemChange: RepositoryItemChange;
@@ -33,58 +28,6 @@ export const RepositoryItemChangeDisplay = ({
                 changesSelected.filter((change) => change !== itemChange),
             );
         }
-    };
-
-    const getChangeTooltipContent = (itemChange: RepositoryItemChange) => {
-        if (["added", "modified", "deleted"].includes(itemChange.change.type)) {
-            return (
-                <span>
-                    {itemChange.change.type[0].toUpperCase() +
-                        itemChange.change.type.slice(1)}
-                </span>
-            );
-        } else if (itemChange.change.type === "renamed") {
-            const oldName: string | undefined = itemChange.change.oldName
-                .split("/")
-                .pop();
-            return (
-                <span>
-                    Renamed from{" "}
-                    <span className="text-muted-foreground">{oldName}</span> to{" "}
-                    <span className="text-muted-foreground">
-                        {itemChange.itemPath}
-                    </span>
-                </span>
-            );
-        } else if (itemChange.change.type === "moved") {
-            return (
-                <span>
-                    Moved from{" "}
-                    <span className="text-muted-foreground">
-                        {itemChange.change.oldPath}
-                    </span>{" "}
-                    to{" "}
-                    <span className="text-muted-foreground">
-                        {itemChange.itemPath}
-                    </span>
-                </span>
-            );
-        }
-    };
-
-    const getChangeContent = (itemChange: RepositoryItemChange) => {
-        return (
-            <Tooltip>
-                <TooltipTrigger asChild className="text-muted-foreground">
-                    <div className="w-4">
-                        <RepositoryItemChangeIcon itemChange={itemChange} />
-                    </div>
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                    {getChangeTooltipContent(itemChange)}
-                </TooltipContent>
-            </Tooltip>
-        );
     };
 
     const handleOpenDiff = () => {

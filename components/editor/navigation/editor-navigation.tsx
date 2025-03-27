@@ -151,7 +151,7 @@ export const EditorNavigation = ({
         <>
             <div className="flex h-full w-14 flex-col rounded-none border-r bg-header">
                 <div className="flex flex-col items-center gap-2 p-2">
-                    <Link href={"/public"}>
+                    <Link href={"/"}>
                         <NavigationButton icon={LogoIcon} tooltip="Home" />
                     </Link>
                     <NavigationButton

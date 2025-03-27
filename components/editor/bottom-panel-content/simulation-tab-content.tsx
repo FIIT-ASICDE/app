@@ -21,18 +21,10 @@ export const SimulationTabContent = ({
             </header>
             <ScrollArea className="h-full w-full">
                 <div className="space-y-0">
-                    {Array(100)
-                        .fill(1)
-                        .map((n: number) => n + 1)
-                        .map((n: number, index: number) => (
-                            <div
-                                key={index}
-                                className="flex flex-row items-center gap-x-2"
-                            >
-                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                                Line {n}
-                            </div>
-                        ))}
+                    <div className="flex flex-row items-center gap-x-2 text-muted-foreground">
+                        <ChevronRight className="h-4 w-4" />
+                        <span className="text-sm">Simulation output terminal</span>
+                    </div>
                 </div>
             </ScrollArea>
         </div>
