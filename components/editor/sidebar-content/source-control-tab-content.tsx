@@ -7,16 +7,16 @@ import { z } from "zod";
 
 import { RepositoryItemChangeDisplay } from "@/components/editor/changes/repository-item-change-display";
 import { CloseButton } from "@/components/editor/navigation/close-button";
+import { CommitChanges } from "@/components/editor/sidebar-content/commit-changes";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Separator } from "@/components/ui/separator";
-import { CommitChanges } from "@/components/editor/sidebar-content/commit-changes";
 
 interface SourceControlTabContentProps {
     repositoryId: string;
@@ -61,8 +61,7 @@ export const SourceControlTabContent = ({
                     <div className="space-y-1">
                         {changes.length > 0 ? (
                             <>
-                                <div
-                                    className="flex cursor-pointer flex-row items-center gap-x-3 rounded border border-transparent p-1 px-2 hover:border-accent">
+                                <div className="flex cursor-pointer flex-row items-center gap-x-3 rounded border border-transparent p-1 px-2 hover:border-accent">
                                     <Checkbox
                                         id="all-changes"
                                         checked={allChangesSelected}
@@ -87,7 +86,8 @@ export const SourceControlTabContent = ({
                                                 side="right"
                                                 className="font-normal"
                                             >
-                                                {changes.length} total change{changes.length !== 1 && "s"}
+                                                {changes.length} total change
+                                                {changes.length !== 1 && "s"}
                                             </TooltipContent>
                                         </Tooltip>
                                     </Label>
@@ -104,7 +104,7 @@ export const SourceControlTabContent = ({
                             {changes.map(
                                 (
                                     itemChange: RepositoryItemChange,
-                                    index: number
+                                    index: number,
                                 ) => (
                                     <RepositoryItemChangeDisplay
                                         key={index}
@@ -112,7 +112,7 @@ export const SourceControlTabContent = ({
                                         changesSelected={changesSelected}
                                         setChangesSelected={setChangesSelected}
                                     />
-                                )
+                                ),
                             )}
                         </div>
                     </div>

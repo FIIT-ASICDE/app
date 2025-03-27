@@ -5,10 +5,16 @@ import {
     FavoriteRepositoriesFilter,
     PinnedRepositoriesFilter,
     PublicRepositoriesFilter,
-    type RepositoryItem, RepositoryItemChange
+    type RepositoryItem,
+    RepositoryItemChange,
 } from "@/lib/types/repository";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
 import { RepositoryItemChangeIcon } from "@/components/editor/changes/repository-item-change-icon";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export const getTimeDeltaString = (lastActivity: Date): string => {
     const now = new Date();
@@ -289,9 +295,9 @@ export const getChangeTooltipContent = (itemChange: RepositoryItemChange) => {
     if (["added", "modified", "deleted"].includes(itemChange.change.type)) {
         return (
             <span>
-                    {itemChange.change.type[0].toUpperCase() +
-                        itemChange.change.type.slice(1)}
-                </span>
+                {itemChange.change.type[0].toUpperCase() +
+                    itemChange.change.type.slice(1)}
+            </span>
         );
     } else if (itemChange.change.type === "renamed") {
         const oldName: string | undefined = itemChange.change.oldName
@@ -299,25 +305,25 @@ export const getChangeTooltipContent = (itemChange: RepositoryItemChange) => {
             .pop();
         return (
             <span>
-                    Renamed from{" "}
+                Renamed from{" "}
                 <span className="text-muted-foreground">{oldName}</span> to{" "}
                 <span className="text-muted-foreground">
-                        {itemChange.itemPath}
-                    </span>
+                    {itemChange.itemPath}
                 </span>
+            </span>
         );
     } else if (itemChange.change.type === "moved") {
         return (
             <span>
-                    Moved from{" "}
+                Moved from{" "}
                 <span className="text-muted-foreground">
-                        {itemChange.change.oldPath}
-                    </span>{" "}
+                    {itemChange.change.oldPath}
+                </span>{" "}
                 to{" "}
                 <span className="text-muted-foreground">
-                        {itemChange.itemPath}
-                    </span>
+                    {itemChange.itemPath}
                 </span>
+            </span>
         );
     }
 };
@@ -327,7 +333,7 @@ export const getChangeContent = (itemChange: RepositoryItemChange) => {
         <Tooltip>
             <TooltipTrigger asChild className="text-muted-foreground">
                 <div className="w-4">
-                <RepositoryItemChangeIcon itemChange={itemChange} />
+                    <RepositoryItemChangeIcon itemChange={itemChange} />
                 </div>
             </TooltipTrigger>
             <TooltipContent side="right">

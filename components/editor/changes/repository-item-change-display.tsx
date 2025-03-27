@@ -2,9 +2,9 @@ import { RepositoryItemChange } from "@/lib/types/repository";
 import { FileIcon } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 
+import { getChangeContent } from "@/components/generic/generic";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { getChangeContent } from "@/components/generic/generic";
 
 interface ItemChangeDisplayProps {
     itemChange: RepositoryItemChange;

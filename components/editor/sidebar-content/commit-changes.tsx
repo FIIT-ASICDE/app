@@ -1,20 +1,27 @@
 "use client";
 
-import { FileText, GitCommitHorizontal, Loader2 } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
-import { Dispatch, SetStateAction, useState } from "react";
-import { RepositoryItemChange } from "@/lib/types/repository";
-import { z } from "zod";
 import { commitSchema } from "@/lib/schemas/git-schemas";
+import { RepositoryItemChange } from "@/lib/types/repository";
+import { FileText, GitCommitHorizontal, Loader2 } from "lucide-react";
+import { Dispatch, SetStateAction, useState } from "react";
+import { z } from "zod";
+
 import { CommitHistoryDialog } from "@/components/editor/sidebar-content/commit-history-dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface CommitChangesProps {
     repositoryId: string;
     changes: Array<RepositoryItemChange>;
     changesSelected: Array<RepositoryItemChange>;
-    setChangesSelectedAction: Dispatch<SetStateAction<Array<RepositoryItemChange>>>;
+    setChangesSelectedAction: Dispatch<
+        SetStateAction<Array<RepositoryItemChange>>
+    >;
     onCommitAction?: (data: z.infer<typeof commitSchema>) => Promise<void>;
     isLoading?: boolean;
 }
@@ -70,8 +77,8 @@ export const CommitChanges = ({
                         {changes.length === 0
                             ? "No changes yet"
                             : changesSelected.length === 0
-                                ? "Select changes to commit first"
-                                : "Commit message cannot be empty"}
+                              ? "Select changes to commit first"
+                              : "Commit message cannot be empty"}
                     </TooltipContent>
                 </Tooltip>
             ) : (

@@ -1,6 +1,7 @@
+import { ChevronRight } from "lucide-react";
+
 import { CloseButton } from "@/components/editor/navigation/close-button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronRight } from "lucide-react";
 
 interface SynthesisTabContentProps {
     handleCloseBottomPanel: () => void;
@@ -22,7 +23,9 @@ export const SynthesisTabContent = ({
                 <div className="space-y-0">
                     <div className="flex flex-row items-center gap-x-2 text-muted-foreground">
                         <ChevronRight className="h-4 w-4" />
-                        <span className="text-sm">Synthesis output terminal</span>
+                        <span className="text-sm">
+                            Synthesis output terminal
+                        </span>
                     </div>
                 </div>
             </ScrollArea>

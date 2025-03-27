@@ -40,7 +40,7 @@ export const FileTree = ({
     );
     const [isDragOverRoot, setIsDragOverRoot] = useState<boolean>(false);
     const [hoveredItem, setHoveredItem] = useState<RepositoryItem | undefined>(
-        undefined
+        undefined,
     );
     const moveItemMutation = api.editor.renameItem.useMutation({
         onSuccess: () => {
