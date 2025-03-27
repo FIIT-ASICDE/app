@@ -57,9 +57,9 @@ export const SidebarTabContent = ({
             )}
             {activeSidebarContent === "sourceControl" && (
                 <SourceControlTabContent
-                    repoId={repository.id}
+                    repositoryId={repository.id}
                     changes={changes}
-                    handleCloseSidebar={handleCloseSidebarAction}
+                    handleCloseSidebarAction={handleCloseSidebarAction}
                     onCommitAction={onCommit.action}
                     isLoading={onCommit.isLoading}
                 />

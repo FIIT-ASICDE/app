@@ -125,3 +125,19 @@ export type RepositoryItemChange = {
         | { type: "renamed"; oldName: string }
         | { type: "moved"; oldPath: string };
 };
+
+export type CommitHistory = {
+    commits: GitCommit[];
+    pagination: PaginationResult;
+};
+
+export type GitCommit = {
+    hash: string;
+    authorName: string;
+    authorEmail: string;
+    authorDate: Date;
+    message: string;
+    body: string;
+    changes: RepositoryItemChange[];
+    pushed: boolean;
+};
