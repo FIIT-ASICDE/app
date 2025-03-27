@@ -1935,7 +1935,14 @@ export async function hasUserRole(
     currentUserId: string,
     roles: Array<$Enums.RepoRole>,
 ) {
-    const repo = await prisma.repo.findUniqueOrThrow({ where: { id: repoId } });
+    const repo = await prisma.repo.findUnique({ where: { id: repoId } });
+
+    if (!repo) {
+        throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Repo not found",
+        });
+    }
 
     const userMetadata = await prisma.userMetadata.findFirstOrThrow({
         where: { userId: currentUserId },

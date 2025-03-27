@@ -1,3 +1,4 @@
+import { PaginationResult } from "@/lib/types/generic";
 import { Invitation } from "@/lib/types/invitation";
 import { UserDisplay } from "@/lib/types/user";
 

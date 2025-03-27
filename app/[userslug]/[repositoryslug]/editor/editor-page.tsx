@@ -186,7 +186,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
 
     useEffect(() => {
         saveSessionDebounced();
-    }, [openFiles, activeFile, repository.id]);
+    }, [openFiles, activeFile, repository.id, saveSessionDebounced]);
 
     return (
         <div className="flex h-screen flex-row">

@@ -1,3 +1,4 @@
+import { paginationSchema } from "@/lib/schemas/common-schemas";
 import { z } from "zod";
 
 export const cloneRepoSchema = z.object({
@@ -33,4 +34,8 @@ export const commitSchema = z.object({
     repoId: z.string().uuid(),
     files: z.array(repositoryItemChangeSchema),
     message: z.string(),
+});
+
+export const showCommitsSchema = paginationSchema.extend({
+    repoId: z.string().uuid(),
 });
