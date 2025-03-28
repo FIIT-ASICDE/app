@@ -12,7 +12,7 @@ import {
     useState,
 } from "react";
 
-import { RepositoryItemActions } from "@/components/editor/sidebar-content/repository-item-actions";
+import { RepositoryItemActions } from "@/components/editor/sidebar-content/file-explorer/repository-item-actions";
 import { sortTree } from "@/components/generic/generic";
 
 interface FileTreeItemProps {

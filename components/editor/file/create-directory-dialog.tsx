@@ -4,7 +4,7 @@ import { Folder, FolderPlus } from "lucide-react";
 import { Dispatch, FormEvent, SetStateAction, useState } from "react";
 import { toast } from "sonner";
 
-import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer-control-button";
+import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer/file-explorer-control-button";
 import {
     Dialog,
     DialogContent,

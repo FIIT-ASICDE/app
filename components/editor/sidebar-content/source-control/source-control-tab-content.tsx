@@ -7,7 +7,7 @@ import { z } from "zod";
 
 import { RepositoryItemChangeDisplay } from "@/components/editor/changes/repository-item-change-display";
 import { CloseButton } from "@/components/editor/navigation/close-button";
-import { CommitChanges } from "@/components/editor/sidebar-content/commit-changes";
+import { CommitChanges } from "@/components/editor/sidebar-content/source-control/commit-changes";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
