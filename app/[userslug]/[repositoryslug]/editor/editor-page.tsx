@@ -78,7 +78,12 @@ export default function EditorPage({ repository }: EditorPageProps) {
     const commitMutation = api.git.commit.useMutation({
         onSuccess: () => {
             const changesCount: number = changes.data?.changes.length ?? 0;
-            toast.success("Successfully commited " + changesCount + " change" + (changesCount !== 1 && "s"));
+            toast.success(
+                "Successfully commited " +
+                    changesCount +
+                    " change" +
+                    (changesCount !== 1 && "s"),
+            );
         },
         onError: (error) => {
             toast.error(error.message);

@@ -7,14 +7,17 @@ import {
     ChevronDown,
     ChevronLeft,
     ChevronRight,
-    Copy, GitGraph,
+    Copy,
+    GitGraph,
     History,
-    MoveUpRight
+    MoveUpRight,
 } from "lucide-react";
 import { Fragment, useState } from "react";
 import { toast } from "sonner";
 
 import { ChangesTable } from "@/components/editor/sidebar-content/changes-table";
+import { NoData } from "@/components/generic/no-data";
+import { CommitsTableSkeleton } from "@/components/skeletons/commits-table-skeleton";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -38,8 +41,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { NoData } from "@/components/generic/no-data";
-import { CommitsTableSkeleton } from "@/components/skeletons/commits-table-skeleton";
 
 interface CommitHistoryDialogProps {
     repositoryId: string;
@@ -61,8 +62,11 @@ export const CommitHistoryDialog = ({
         pageSize: pageSize,
     });
 
-    const commitsNotPushed: Array<GitCommit> = commitHistory.data ? commitHistory.data.commits
-        .filter((commit: GitCommit) => !commit.pushed) : [];
+    const commitsNotPushed: Array<GitCommit> = commitHistory.data
+        ? commitHistory.data.commits.filter(
+              (commit: GitCommit) => !commit.pushed,
+          )
+        : [];
 
     const toggleRow = (commitHash: string) => {
         if (expandedRowHash === commitHash) {
@@ -121,7 +125,7 @@ export const CommitHistoryDialog = ({
                                             handlePush(
                                                 commitHistory.data
                                                     ? commitHistory.data.commits
-                                                    : []
+                                                    : [],
                                             )
                                         }
                                     >
@@ -152,173 +156,179 @@ export const CommitHistoryDialog = ({
                                 </TableHeader>
                                 <TableBody>
                                     {commitHistory.data ? (
-                                        commitHistory.data.commits.length > 0 ? commitHistory.data.commits.map(
-                                            (commit: GitCommit) => (
-                                                <Fragment key={commit.hash}>
-                                                    <TableRow className="border-t border-accent">
-                                                        <TableCell className="p-0 pl-2">
-                                                            <button
-                                                                className="ml-2 flex items-center justify-center rounded p-2 hover:bg-accent"
-                                                                onClick={() =>
-                                                                    toggleRow(
-                                                                        commit.hash,
-                                                                    )
-                                                                }
-                                                            >
-                                                                {expandedRowHash ===
-                                                                commit.hash ? (
-                                                                    <ChevronDown className="h-4 w-4 transition-transform duration-200" />
-                                                                ) : (
-                                                                    <ChevronRight className="h-4 w-4 transition-transform duration-200" />
-                                                                )}
-                                                            </button>
-                                                        </TableCell>
-
-                                                        <TableCell className="p-2">
-                                                            <div className="flex w-fit items-center space-x-1">
-                                                                <span className="p-1 px-2 font-mono text-sm bg-muted text-muted-foreground rounded">
-                                                                    {commit.hash.substring(
-                                                                        0,
-                                                                        8,
-                                                                    )}
-                                                                </span>
-                                                                <Tooltip>
-                                                                    <TooltipTrigger
-                                                                        asChild
-                                                                    >
-                                                                        <button
-                                                                            className="rounded border border-transparent p-1.5 hover:border-accent"
-                                                                            onClick={() =>
-                                                                                handleCopyCommitHash(
-                                                                                    commit.hash,
-                                                                                )
-                                                                            }
-                                                                        >
-                                                                            <Copy className="h-3.5 w-3.5 text-muted-foreground" />
-                                                                        </button>
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>
-                                                                        Copy
-                                                                    </TooltipContent>
-                                                                </Tooltip>
-                                                            </div>
-                                                        </TableCell>
-
-                                                        <TableCell className="p-3">
-                                                            <div className="flex items-center">
-                                                                <div className="max-w-[100px] truncate sm:max-w-[170px] md:max-w-[300px]">
-                                                                    {
-                                                                        commit.message
+                                        commitHistory.data.commits.length >
+                                        0 ? (
+                                            commitHistory.data.commits.map(
+                                                (commit: GitCommit) => (
+                                                    <Fragment key={commit.hash}>
+                                                        <TableRow className="border-t border-accent">
+                                                            <TableCell className="p-0 pl-2">
+                                                                <button
+                                                                    className="ml-2 flex items-center justify-center rounded p-2 hover:bg-accent"
+                                                                    onClick={() =>
+                                                                        toggleRow(
+                                                                            commit.hash,
+                                                                        )
                                                                     }
+                                                                >
+                                                                    {expandedRowHash ===
+                                                                    commit.hash ? (
+                                                                        <ChevronDown className="h-4 w-4 transition-transform duration-200" />
+                                                                    ) : (
+                                                                        <ChevronRight className="h-4 w-4 transition-transform duration-200" />
+                                                                    )}
+                                                                </button>
+                                                            </TableCell>
+
+                                                            <TableCell className="p-2">
+                                                                <div className="flex w-fit items-center space-x-1">
+                                                                    <span className="rounded bg-muted p-1 px-2 font-mono text-sm text-muted-foreground">
+                                                                        {commit.hash.substring(
+                                                                            0,
+                                                                            8,
+                                                                        )}
+                                                                    </span>
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger
+                                                                            asChild
+                                                                        >
+                                                                            <button
+                                                                                className="rounded border border-transparent p-1.5 hover:border-accent"
+                                                                                onClick={() =>
+                                                                                    handleCopyCommitHash(
+                                                                                        commit.hash,
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                                                                            </button>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>
+                                                                            Copy
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
                                                                 </div>
+                                                            </TableCell>
+
+                                                            <TableCell className="p-3">
+                                                                <div className="flex items-center">
+                                                                    <div className="max-w-[100px] truncate sm:max-w-[170px] md:max-w-[300px]">
+                                                                        {
+                                                                            commit.message
+                                                                        }
+                                                                    </div>
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger className="h-5 cursor-default p-0">
+                                                                            <span className="ml-2 h-4 w-4 text-muted-foreground">
+                                                                                ...
+                                                                            </span>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent className="flex flex-col gap-y-1">
+                                                                            <span>
+                                                                                {
+                                                                                    commit.message
+                                                                                }
+                                                                            </span>
+                                                                            <span className="text-sm text-muted-foreground">
+                                                                                {
+                                                                                    commit.body
+                                                                                }
+                                                                            </span>
+                                                                            <span className="text-xs text-muted-foreground">
+                                                                                {
+                                                                                    commit
+                                                                                        .changes
+                                                                                        .length
+                                                                                }{" "}
+                                                                                change
+                                                                                {commit
+                                                                                    .changes
+                                                                                    .length !==
+                                                                                    1 &&
+                                                                                    "s"}
+                                                                            </span>
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+                                                                </div>
+                                                            </TableCell>
+
+                                                            <TableCell className="p-3">
+                                                                {
+                                                                    commit.authorName
+                                                                }
                                                                 <Tooltip>
-                                                                    <TooltipTrigger className="h-5 cursor-default p-0">
-                                                                        <span className="ml-2 h-4 w-4 text-muted-foreground">
+                                                                    <TooltipTrigger className="h-full cursor-default">
+                                                                        <span className="ml-1 h-4 w-4 text-muted-foreground">
                                                                             ...
                                                                         </span>
                                                                     </TooltipTrigger>
                                                                     <TooltipContent className="flex flex-col gap-y-1">
                                                                         <span>
                                                                             {
-                                                                                commit.message
+                                                                                commit.authorName
                                                                             }
                                                                         </span>
                                                                         <span className="text-sm text-muted-foreground">
                                                                             {
-                                                                                commit.body
+                                                                                commit.authorEmail
                                                                             }
-                                                                        </span>
-                                                                        <span className="text-xs text-muted-foreground">
-                                                                            {
-                                                                                commit
-                                                                                    .changes
-                                                                                    .length
-                                                                            }{" "}
-                                                                            change
-                                                                            {commit
-                                                                                .changes
-                                                                                .length !==
-                                                                                1 &&
-                                                                                "s"}
                                                                         </span>
                                                                     </TooltipContent>
                                                                 </Tooltip>
-                                                            </div>
-                                                        </TableCell>
+                                                            </TableCell>
 
-                                                        <TableCell className="p-3">
-                                                            {commit.authorName}
-                                                            <Tooltip>
-                                                                <TooltipTrigger className="h-full cursor-default">
-                                                                    <span className="ml-1 h-4 w-4 text-muted-foreground">
-                                                                        ...
-                                                                    </span>
-                                                                </TooltipTrigger>
-                                                                <TooltipContent className="flex flex-col gap-y-1">
-                                                                    <span>
-                                                                        {
-                                                                            commit.authorName
-                                                                        }
-                                                                    </span>
-                                                                    <span className="text-sm text-muted-foreground">
-                                                                        {
-                                                                            commit.authorEmail
-                                                                        }
-                                                                    </span>
-                                                                </TooltipContent>
-                                                            </Tooltip>
-                                                        </TableCell>
-
-                                                        <TableCell className="p-3 pr-8 text-center">
-                                                            <div className="flex justify-end">
-                                                                {commit.pushed ? (
-                                                                    <button className="flex cursor-default items-center justify-center rounded p-2">
-                                                                        <Check className="h-4 w-4 text-green-600" />
-                                                                    </button>
-                                                                ) : (
-                                                                    <Tooltip>
-                                                                        <TooltipTrigger
-                                                                            asChild
-                                                                        >
-                                                                            <button
-                                                                                className="flex items-center justify-center rounded border border-primary p-2 hover:bg-primary-button-hover"
-                                                                                onClick={() =>
-                                                                                    handlePush(
-                                                                                        [
-                                                                                            commit,
-                                                                                        ],
-                                                                                    )
-                                                                                }
+                                                            <TableCell className="p-3 pr-8 text-center">
+                                                                <div className="flex justify-end">
+                                                                    {commit.pushed ? (
+                                                                        <button className="flex cursor-default items-center justify-center rounded p-2">
+                                                                            <Check className="h-4 w-4 text-green-600" />
+                                                                        </button>
+                                                                    ) : (
+                                                                        <Tooltip>
+                                                                            <TooltipTrigger
+                                                                                asChild
                                                                             >
-                                                                                <MoveUpRight className="h-3.5 w-3.5" />
-                                                                            </button>
-                                                                        </TooltipTrigger>
-                                                                        <TooltipContent>
-                                                                            Push{" "}
-                                                                            <span className="font-mono text-sm text-muted-foreground">
-                                                                                {commit.hash.substring(
-                                                                                    0,
-                                                                                    8,
-                                                                                )}
-                                                                            </span>
-                                                                        </TooltipContent>
-                                                                    </Tooltip>
-                                                                )}
-                                                            </div>
-                                                        </TableCell>
-                                                    </TableRow>
+                                                                                <button
+                                                                                    className="flex items-center justify-center rounded border border-primary p-2 hover:bg-primary-button-hover"
+                                                                                    onClick={() =>
+                                                                                        handlePush(
+                                                                                            [
+                                                                                                commit,
+                                                                                            ],
+                                                                                        )
+                                                                                    }
+                                                                                >
+                                                                                    <MoveUpRight className="h-3.5 w-3.5" />
+                                                                                </button>
+                                                                            </TooltipTrigger>
+                                                                            <TooltipContent>
+                                                                                Push{" "}
+                                                                                <span className="font-mono text-sm text-muted-foreground">
+                                                                                    {commit.hash.substring(
+                                                                                        0,
+                                                                                        8,
+                                                                                    )}
+                                                                                </span>
+                                                                            </TooltipContent>
+                                                                        </Tooltip>
+                                                                    )}
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
 
-                                                    <ChangesTable
-                                                        expanded={
-                                                            expandedRowHash ===
-                                                            commit.hash
-                                                        }
-                                                        commitChanges={
-                                                            commit.changes
-                                                        }
-                                                    />
-                                                </Fragment>
-                                            )) : (
+                                                        <ChangesTable
+                                                            expanded={
+                                                                expandedRowHash ===
+                                                                commit.hash
+                                                            }
+                                                            commitChanges={
+                                                                commit.changes
+                                                            }
+                                                        />
+                                                    </Fragment>
+                                                ),
+                                            )
+                                        ) : (
                                             <TableRow className="w-full">
                                                 <TableCell
                                                     colSpan={5}
@@ -330,8 +340,9 @@ export const CommitHistoryDialog = ({
                                                     />
                                                 </TableCell>
                                             </TableRow>
-                                        )) : (
-                                            <CommitsTableSkeleton />
+                                        )
+                                    ) : (
+                                        <CommitsTableSkeleton />
                                     )}
 
                                     <TableRow>
