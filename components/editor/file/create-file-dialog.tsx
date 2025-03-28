@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 
 interface CreateFileDialogProps {
     repositoryId: string;
-    repositoryItem?: RepositoryItem;
+    parentItem?: RepositoryItem;
     buttonSize?: "icon" | "full";
     tree: Array<RepositoryItem>;
     setTree: Dispatch<SetStateAction<Array<RepositoryItem>>>;
@@ -25,7 +25,7 @@ interface CreateFileDialogProps {
 
 export const CreateFileDialog = ({
     repositoryId,
-    repositoryItem,
+    parentItem,
     buttonSize,
     tree,
     setTree,
@@ -35,31 +35,26 @@ export const CreateFileDialog = ({
     const [fileName, setFileName] = useState<string>("");
 
     const addFileMutation = api.editor.addItem.useMutation({
-        onSuccess: () => {
+        onSuccess: (item) => {
             toast.success("File created successfully");
 
             const trimmedFileName: string = fileName.trim();
 
             const newFile: FileDisplayItem = {
                 type: "file-display",
-                name: trimmedFileName,
-                lastActivity: new Date(),
+                name: item.name,
+                lastActivity: item.lastActivity,
                 language: trimmedFileName.split(".").pop() ?? "",
-                absolutePath: repositoryItem
-                    ? repositoryItem?.name + "/" + trimmedFileName
-                    : trimmedFileName,
-            } satisfies FileDisplayItem;
+                absolutePath: parentItem
+                    ? parentItem.name + "/" + item.name
+                    : item.name,
+            };
 
-            if (repositoryItem === undefined) {
+            if (!parentItem) {
                 setTree([...tree, newFile]);
-                console.log("Create file in root: " + newFile.absolutePath);
-            } else {
-                console.log("Create file on path: " + newFile.absolutePath);
             }
 
-            if (onAction) {
-                onAction();
-            }
+            onAction?.();
             setFileName("");
             setOpen(false);
         },
@@ -76,7 +71,7 @@ export const CreateFileDialog = ({
                 type: "file",
                 name: fileName.trim(),
                 repoId: repositoryId,
-                path: repositoryItem?.name,
+                path: parentItem?.name,
             });
         }
     };
@@ -99,13 +94,13 @@ export const CreateFileDialog = ({
                 <DialogHeader>
                     <DialogTitle className="text-center">
                         Create a new file
-                        {repositoryItem && (
+                        {parentItem && (
                             <span>
                                 {" "}
                                 in{" "}
                                 <span className="text-muted-foreground">
-                                    {repositoryItem.name.split("/").pop() ??
-                                        repositoryItem.name}
+                                    {parentItem.name.split("/").pop() ??
+                                        parentItem.name}
                                 </span>
                             </span>
                         )}

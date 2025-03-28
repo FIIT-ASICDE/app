@@ -1,3 +1,4 @@
+import { stripServerPath } from "@/lib/server/api/routers/repos";
 import {
     FileItem,
     LanguageStatistics,
@@ -49,6 +50,9 @@ export function loadRepoItems(
                         name: entry.name,
                         lastActivity,
                         children: readDirectory(entryPath, currentDepth + 1),
+                        absolutePath: stripServerPath(
+                            path.join(currentPath, entry.name),
+                        ),
                     };
                 }
 
@@ -56,6 +60,9 @@ export function loadRepoItems(
                     type: "directory-display",
                     name: entry.name,
                     lastActivity,
+                    absolutePath: stripServerPath(
+                        path.join(currentPath, entry.name),
+                    ),
                 };
             }
 
@@ -79,7 +86,7 @@ export function loadRepoItems(
                 name: entry.name,
                 lastActivity,
                 language,
-                absolutePath: currentPath,
+                absolutePath: stripServerPath(currentPath),
             };
         });
     }
@@ -107,6 +114,7 @@ export function loadRepoDirOrFile(
             name: path.basename(pathString),
             lastActivity: stat.mtime,
             children: loadRepoItems(pathString, maxDepth, loadContents),
+            absolutePath: stripServerPath(pathString),
         };
     } else if (stat.isFile()) {
         return loadRepoFile(pathString);
@@ -136,7 +144,7 @@ export function loadRepoFile(filePath: string): FileItem {
         name: fileName,
         lastActivity,
         language,
-        absolutePath: filePath,
+        absolutePath: stripServerPath(filePath),
         content: fs.readFileSync(filePath, "utf-8"),
     };
 }

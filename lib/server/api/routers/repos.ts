@@ -1982,6 +1982,20 @@ export function absoluteRepoPath(ownerName: string, repoName?: string) {
     );
 }
 
+export function stripServerPath(repoPath: string) {
+    if (
+        !process.env.REPOSITORIES_STORAGE_ROOT ||
+        process.env.REPOSITORIES_STORAGE_ROOT === ""
+    ) {
+        throw new Error(
+            "REPOSITORIES_STORAGE_ROOT environment variable is not set or empty.",
+        );
+    }
+    const storageRoot = path.normalize(process.env.REPOSITORIES_STORAGE_ROOT);
+    const normalizedRepoPath = path.normalize(repoPath);
+    return path.relative(storageRoot, normalizedRepoPath);
+}
+
 export async function initializeGit(
     repoName: string,
     repoPath: string,

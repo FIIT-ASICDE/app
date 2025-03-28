@@ -206,7 +206,7 @@ export const FileTreeItem = ({
                 {(isHovered || dropdownOpen) && (
                     <RepositoryItemActions
                         repositoryId={repositoryId}
-                        repositoryItem={item}
+                        parentItem={item}
                         tree={tree}
                         setTree={setTreeAction}
                         dropdownOpen={dropdownOpen}

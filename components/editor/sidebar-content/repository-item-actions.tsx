@@ -17,7 +17,7 @@ import {
 
 interface RepositoryItemActionsProps {
     repositoryId: string;
-    repositoryItem: RepositoryItem;
+    parentItem: RepositoryItem;
     tree: Array<RepositoryItem>;
     setTree: Dispatch<SetStateAction<Array<RepositoryItem>>>;
     dropdownOpen: boolean;
@@ -27,7 +27,7 @@ interface RepositoryItemActionsProps {
 
 export const RepositoryItemActions = ({
     repositoryId,
-    repositoryItem,
+    parentItem,
     tree,
     setTree,
     dropdownOpen,
@@ -35,11 +35,11 @@ export const RepositoryItemActions = ({
     onAction,
 }: RepositoryItemActionsProps) => {
     const itemName: string =
-        repositoryItem.name.split("/").pop() ?? repositoryItem.name;
+        parentItem.name.split("/").pop() ?? parentItem.name;
 
     const openFile = () => {
         // TODO: handle open file in editor
-        console.log("Open file: " + repositoryItem.name);
+        console.log("Open file: " + parentItem.name);
     };
 
     const copyName = () => {
@@ -47,8 +47,8 @@ export const RepositoryItemActions = ({
             .writeText(itemName)
             .then(() => {
                 toast.success(
-                    repositoryItem.type === "directory" ||
-                        repositoryItem.type === "directory-display"
+                    parentItem.type === "directory" ||
+                        parentItem.type === "directory-display"
                         ? "Directory name copied to clipboard"
                         : "File name copied to clipboard",
                     {
@@ -63,15 +63,15 @@ export const RepositoryItemActions = ({
 
     const copyPath = () => {
         navigator.clipboard
-            .writeText(repositoryItem.name)
+            .writeText(parentItem.name)
             .then(() => {
                 toast.success(
-                    repositoryItem.type === "directory" ||
-                        repositoryItem.type === "directory-display"
+                    parentItem.type === "directory" ||
+                        parentItem.type === "directory-display"
                         ? "Directory path copied to clipboard"
                         : "File path copied to clipboard",
                     {
-                        description: repositoryItem.name,
+                        description: parentItem.name,
                     },
                 );
             })
@@ -88,12 +88,12 @@ export const RepositoryItemActions = ({
                 </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="min-w-40">
-                {repositoryItem.type === "directory" ||
-                repositoryItem.type === "directory-display" ? (
+                {parentItem.type === "directory" ||
+                parentItem.type === "directory-display" ? (
                     <>
                         <CreateFileDialog
                             repositoryId={repositoryId}
-                            repositoryItem={repositoryItem}
+                            parentItem={parentItem}
                             buttonSize="full"
                             tree={tree}
                             setTree={setTree}
@@ -101,7 +101,7 @@ export const RepositoryItemActions = ({
                         />
                         <CreateDirectoryDialog
                             repositoryId={repositoryId}
-                            repositoryItem={repositoryItem}
+                            parentItem={parentItem}
                             buttonSize="full"
                             tree={tree}
                             setTree={setTree}
@@ -142,7 +142,7 @@ export const RepositoryItemActions = ({
 
                 <RenameItemDialog
                     repositoryId={repositoryId}
-                    repositoryItem={repositoryItem}
+                    parentItem={parentItem}
                     tree={tree}
                     setTree={setTree}
                     onAction={onAction}
@@ -150,7 +150,7 @@ export const RepositoryItemActions = ({
 
                 <DeleteItemDialog
                     repositoryId={repositoryId}
-                    repositoryItem={repositoryItem}
+                    repositoryItem={parentItem}
                     tree={tree}
                     setTree={setTree}
                     onAction={onAction}
