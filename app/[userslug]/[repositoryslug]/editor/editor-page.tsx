@@ -77,9 +77,8 @@ export default function EditorPage({ repository }: EditorPageProps) {
 
     const commitMutation = api.git.commit.useMutation({
         onSuccess: () => {
-            toast.success(
-                "Successfully commited " + changes.data?.changes.length,
-            );
+            const changesCount: number = changes.data?.changes.length ?? 0;
+            toast.success("Successfully commited " + changesCount + " change" + (changesCount !== 1 && "s"));
         },
         onError: (error) => {
             toast.error(error.message);
@@ -118,7 +117,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
             "Starting simulation with type: " +
                 selectedType +
                 " and file: " +
-                selectedFile?.name,
+                selectedFile!.name,
         );
     };
 

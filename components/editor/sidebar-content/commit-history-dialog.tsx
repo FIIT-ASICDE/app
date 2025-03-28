@@ -7,10 +7,9 @@ import {
     ChevronDown,
     ChevronLeft,
     ChevronRight,
-    Copy,
+    Copy, GitGraph,
     History,
-    Loader2,
-    MoveUpRight,
+    MoveUpRight
 } from "lucide-react";
 import { Fragment, useState } from "react";
 import { toast } from "sonner";
@@ -39,97 +38,8 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-/*const data = {
-    commitHistory: {
-        commits: [
-            {
-                hash: "a1b2c3d4e5f67890abcdef1234567890abcdef12",
-                authorName: "Kili",
-                authorEmail: "xkilian@stuba.sk",
-                authorDate: new Date(),
-                message: "testing commit message 1",
-                body: "fixed everything, everything works 1",
-                changes: [
-                    {
-                        itemPath: "files/added-file.txt",
-                        change: { type: "added" },
-                    } satisfies RepositoryItemChange,
-                ] satisfies Array<RepositoryItemChange>,
-                pushed: true,
-            } satisfies GitCommit,
-            {
-                hash: "a1b2c3d4e5f67890abcdef1234567890abcdef13",
-                authorName: "Nesquiko",
-                authorEmail: "xcastven@stuba.sk",
-                authorDate: new Date(),
-                message: "testing commit message 2",
-                body: "fixed everything, everything works 2",
-                changes: [
-                    {
-                        itemPath: "files/deleted-file.txt",
-                        change: { type: "deleted" },
-                    } satisfies RepositoryItemChange,
-                ] satisfies Array<RepositoryItemChange>,
-                pushed: true,
-            } satisfies GitCommit,
-            {
-                hash: "a1b2c3d4e5f67890abcdef1234567890abcdef14",
-                authorName: "Maxo",
-                authorEmail: "xstrecansky@stuba.sk",
-                authorDate: new Date(),
-                message: "testing commit message 3",
-                body: "fixed everything, everything works 3",
-                changes: [
-                    {
-                        itemPath: "files/modified-file.txt",
-                        change: { type: "modified" },
-                    } satisfies RepositoryItemChange,
-                ] satisfies Array<RepositoryItemChange>,
-                pushed: false,
-            } satisfies GitCommit,
-            {
-                hash: "a1b2c3d4e5f67890abcdef1234567890abcdef15",
-                authorName: "Fero",
-                authorEmail: "xfero@stuba.sk",
-                authorDate: new Date(),
-                message: "testing commit message 4",
-                body: "fixed everything, everything works 4",
-                changes: [
-                    {
-                        itemPath: "files/renamed-file.txt",
-                        change: { type: "renamed", oldName: "old-name.txt" },
-                    } satisfies RepositoryItemChange,
-                ] satisfies Array<RepositoryItemChange>,
-                pushed: false,
-            } satisfies GitCommit,
-            {
-                hash: "a1b2c3d4e5f67890abcdef1234567890abcdef16",
-                authorName: "Jozo",
-                authorEmail: "xjozo@stuba.sk",
-                authorDate: new Date(),
-                message: "testing commit message 5",
-                body: "fixed everything, everything works 5",
-                changes: [
-                    {
-                        itemPath: "files/moved-file.txt",
-                        change: {
-                            type: "moved",
-                            oldPath: "other-place/moved-file.txt",
-                        },
-                    } satisfies RepositoryItemChange,
-                ] satisfies Array<RepositoryItemChange>,
-                pushed: false,
-            } satisfies GitCommit,
-        ] satisfies Array<GitCommit>,
-        pagination: {
-            total: 5,
-            pageCount: 3,
-            page: 1,
-            pageSize: 2,
-        } satisfies PaginationResult,
-    },
-};*/
+import { NoData } from "@/components/generic/no-data";
+import { CommitsTableSkeleton } from "@/components/skeletons/commits-table-skeleton";
 
 interface CommitHistoryDialogProps {
     repositoryId: string;
@@ -150,6 +60,9 @@ export const CommitHistoryDialog = ({
         page: currentPage,
         pageSize: pageSize,
     });
+
+    const commitsNotPushed: Array<GitCommit> = commitHistory.data ? commitHistory.data.commits
+        .filter((commit: GitCommit) => !commit.pushed) : [];
 
     const toggleRow = (commitHash: string) => {
         if (expandedRowHash === commitHash) {
@@ -201,23 +114,21 @@ export const CommitHistoryDialog = ({
                                     Here you can view the detailed history of
                                     your pushed and waiting commits.
                                 </DialogDescription>
-                                <button
-                                    className="flex flex-row items-center justify-center gap-x-2 rounded bg-primary px-4 py-2 text-sm hover:bg-primary-button-hover"
-                                    onClick={() =>
-                                        handlePush(
-                                            commitHistory.data
-                                                ? commitHistory.data.commits
-                                                : [],
-                                        )
-                                    }
-                                    disabled={
-                                        !commitHistory.data ||
-                                        commitHistory.data.commits.length === 0
-                                    }
-                                >
-                                    <MoveUpRight className="h-3.5 w-3.5" />
-                                    Push all
-                                </button>
+                                {commitsNotPushed.length > 0 && (
+                                    <button
+                                        className="flex flex-row items-center justify-center gap-x-2 rounded bg-primary px-4 py-2 text-sm hover:bg-primary-button-hover"
+                                        onClick={() =>
+                                            handlePush(
+                                                commitHistory.data
+                                                    ? commitHistory.data.commits
+                                                    : []
+                                            )
+                                        }
+                                    >
+                                        <MoveUpRight className="h-3.5 w-3.5" />
+                                        Push all
+                                    </button>
+                                )}
                             </div>
                         </DialogHeader>
                         <div className="overflow-hidden rounded border border-accent">
@@ -241,7 +152,7 @@ export const CommitHistoryDialog = ({
                                 </TableHeader>
                                 <TableBody>
                                     {commitHistory.data ? (
-                                        commitHistory.data.commits.map(
+                                        commitHistory.data.commits.length > 0 ? commitHistory.data.commits.map(
                                             (commit: GitCommit) => (
                                                 <Fragment key={commit.hash}>
                                                     <TableRow className="border-t border-accent">
@@ -264,8 +175,8 @@ export const CommitHistoryDialog = ({
                                                         </TableCell>
 
                                                         <TableCell className="p-2">
-                                                            <div className="flex w-fit items-center space-x-1 p-1">
-                                                                <span className="font-mono text-sm">
+                                                            <div className="flex w-fit items-center space-x-1">
+                                                                <span className="p-1 px-2 font-mono text-sm bg-muted text-muted-foreground rounded">
                                                                     {commit.hash.substring(
                                                                         0,
                                                                         8,
@@ -276,7 +187,7 @@ export const CommitHistoryDialog = ({
                                                                         asChild
                                                                     >
                                                                         <button
-                                                                            className="rounded border border-transparent p-0.5 hover:border-accent"
+                                                                            className="rounded border border-transparent p-1.5 hover:border-accent"
                                                                             onClick={() =>
                                                                                 handleCopyCommitHash(
                                                                                     commit.hash,
@@ -407,20 +318,20 @@ export const CommitHistoryDialog = ({
                                                         }
                                                     />
                                                 </Fragment>
-                                            ),
-                                        )
-                                    ) : (
-                                        <TableRow className="w-full">
-                                            <TableCell
-                                                colSpan={5}
-                                                className="text-muted-foreground"
-                                            >
-                                                <div className="flex w-full flex-row items-center justify-center gap-x-2">
-                                                    <Loader2 className="animate-spin" />
-                                                    Loading commits...
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
+                                            )) : (
+                                            <TableRow className="w-full">
+                                                <TableCell
+                                                    colSpan={5}
+                                                    className="text-muted-foreground"
+                                                >
+                                                    <NoData
+                                                        icon={GitGraph}
+                                                        message="No commits yet"
+                                                    />
+                                                </TableCell>
+                                            </TableRow>
+                                        )) : (
+                                            <CommitsTableSkeleton />
                                     )}
 
                                     <TableRow>
