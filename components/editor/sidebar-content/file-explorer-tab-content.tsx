@@ -1,6 +1,9 @@
+"use client";
+
 import { imgSrc } from "@/lib/client-file-utils";
 import { Repository, RepositoryItem } from "@/lib/types/repository";
-import { CopyMinus, FileX } from "lucide-react";
+import { CopyMinus } from "lucide-react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 import { CreateDirectoryDialog } from "@/components/editor/file/create-directory-dialog";
 import { CreateFileDialog } from "@/components/editor/file/create-file-dialog";
@@ -9,24 +12,49 @@ import { CloseButton } from "@/components/editor/navigation/close-button";
 import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer-control-button";
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
-import { NoData } from "@/components/generic/no-data";
+import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface FileExplorerTabContentProps {
     repository: Repository;
-    handleCloseSidebar: () => void;
+    tree: Array<RepositoryItem>;
+    setTreeAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
+    handleCloseSidebarAction: () => void;
     onFileClick?: (item: RepositoryItem) => void;
 }
 
 export const FileExplorerTabContent = ({
     repository,
-    handleCloseSidebar,
+    tree,
+    setTreeAction,
+    handleCloseSidebarAction,
     onFileClick,
 }: FileExplorerTabContentProps) => {
+    const [selectedItem, setSelectedItem] = useState<
+        RepositoryItem | undefined
+    >(undefined);
+    const [expandedItems, setExpandedItems] = useState<Array<RepositoryItem>>(
+        [],
+    );
+
+    // adding dummy cpp file to test simulation dialog
+    if (
+        repository.tree &&
+        !repository.tree.find((item) => item.name === "testbench.cpp")
+    ) {
+        repository.tree.push({
+            type: "file-display",
+            name: "testbench.cpp",
+            language: "cpp",
+            absolutePath: "testbench.cpp",
+            lastActivity: new Date(),
+        });
+    }
+
     return (
         <ScrollArea className="relative h-full w-full">
-            <div className="text-nowrap p-4">
-                <header className="flex flex-col gap-y-3 pb-2">
+            <div className="flex flex-auto flex-col text-nowrap">
+                <header className="flex flex-col gap-y-3 p-4 pb-2">
                     <div className="flex flex-row items-center justify-between gap-x-3">
                         <div className="flex min-w-0 flex-row gap-x-2 text-xl font-medium">
                             <AvatarDisplay
@@ -42,27 +70,48 @@ export const FileExplorerTabContent = ({
                                 tooltipVisible
                             />
                         </div>
-                        <CloseButton onClick={handleCloseSidebar} />
+                        <CloseButton
+                            onClick={handleCloseSidebarAction}
+                            tooltip="Close sidebar"
+                        />
                     </div>
                     <div className="flex flex-row gap-x-1">
-                        <CreateDirectoryDialog buttonSize="icon" />
-                        <CreateFileDialog buttonSize="icon" />
+                        <CreateDirectoryDialog
+                            repositoryId={repository.id}
+                            buttonSize="icon"
+                            tree={tree}
+                            setTree={setTreeAction}
+                        />
+                        <CreateFileDialog
+                            repositoryId={repository.id}
+                            buttonSize="icon"
+                            tree={tree}
+                            setTree={setTreeAction}
+                        />
                         <FileExplorerControlButton
                             icon={CopyMinus}
                             tooltipContent="Collapse all"
+                            onClick={() => {
+                                setExpandedItems([]);
+                            }}
                         />
                     </div>
                 </header>
-                {repository.tree && repository.tree.length ? (
+                {tree.length > 0 ? (
                     <FileTree
-                        tree={repository.tree}
+                        repositoryId={repository.id}
+                        tree={tree}
+                        setTreeAction={setTreeAction}
                         onItemClick={onFileClick}
+                        selectedItem={selectedItem}
+                        setSelectedItemAction={setSelectedItem}
+                        expandedItems={expandedItems}
+                        setExpandedItemsAction={setExpandedItems}
                     />
                 ) : (
-                    <NoData
-                        icon={FileX}
-                        message={"No files or directories found"}
-                    />
+                    <Label className="text-sm text-muted-foreground">
+                        No changes yet
+                    </Label>
                 )}
             </div>
         </ScrollArea>

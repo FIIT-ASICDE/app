@@ -176,6 +176,7 @@ export function addItem() {
                     };
                 } else {
                     await writeFile(fullPath, "");
+
                     const language = getLanguageByExtension(
                         path.extname(fullPath),
                     );

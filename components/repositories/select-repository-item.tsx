@@ -1,9 +1,9 @@
+import { imgSrc } from "@/lib/client-file-utils";
 import { GithubRepoDisplay } from "@/lib/types/repository";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { SelectItem } from "@/components/ui/select";
-import { imgSrc } from "@/lib/client-file-utils";
 
 interface SelectRepositoryItemProps {
     repository: GithubRepoDisplay;

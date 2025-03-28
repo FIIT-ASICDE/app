@@ -16,15 +16,23 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface RepositoryItemActionsProps {
+    repositoryId: string;
     repositoryItem: RepositoryItem;
+    tree: Array<RepositoryItem>;
+    setTree: Dispatch<SetStateAction<Array<RepositoryItem>>>;
     dropdownOpen: boolean;
     setDropdownOpen: Dispatch<SetStateAction<boolean>>;
+    onAction: () => void;
 }
 
 export const RepositoryItemActions = ({
+    repositoryId,
     repositoryItem,
+    tree,
+    setTree,
     dropdownOpen,
     setDropdownOpen,
+    onAction,
 }: RepositoryItemActionsProps) => {
     const itemName: string =
         repositoryItem.name.split("/").pop() ?? repositoryItem.name;
@@ -76,7 +84,7 @@ export const RepositoryItemActions = ({
         <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
             <DropdownMenuTrigger asChild>
                 <button className="rounded border border-transparent p-[1px] hover:border-transparent hover:text-foreground">
-                    <Ellipsis className="max-h-4 min-h-4 min-w-4 max-w-4 text-muted-foreground" />
+                    <Ellipsis className="max-h-4 min-h-4 min-w-4 max-w-4" />
                 </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="min-w-40">
@@ -84,12 +92,20 @@ export const RepositoryItemActions = ({
                 repositoryItem.type === "directory-display" ? (
                     <>
                         <CreateFileDialog
+                            repositoryId={repositoryId}
                             repositoryItem={repositoryItem}
                             buttonSize="full"
+                            tree={tree}
+                            setTree={setTree}
+                            onAction={onAction}
                         />
                         <CreateDirectoryDialog
+                            repositoryId={repositoryId}
                             repositoryItem={repositoryItem}
                             buttonSize="full"
+                            tree={tree}
+                            setTree={setTree}
+                            onAction={onAction}
                         />
                         <DropdownMenuSeparator />
                     </>
@@ -124,9 +140,21 @@ export const RepositoryItemActions = ({
 
                 <DropdownMenuSeparator />
 
-                <RenameItemDialog repositoryItem={repositoryItem} />
+                <RenameItemDialog
+                    repositoryId={repositoryId}
+                    repositoryItem={repositoryItem}
+                    tree={tree}
+                    setTree={setTree}
+                    onAction={onAction}
+                />
 
-                <DeleteItemDialog repositoryItem={repositoryItem} />
+                <DeleteItemDialog
+                    repositoryId={repositoryId}
+                    repositoryItem={repositoryItem}
+                    tree={tree}
+                    setTree={setTree}
+                    onAction={onAction}
+                />
             </DropdownMenuContent>
         </DropdownMenu>
     );

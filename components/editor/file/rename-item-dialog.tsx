@@ -1,6 +1,8 @@
+import { api } from "@/lib/trpc/react";
 import { RepositoryItem } from "@/lib/types/repository";
 import { FileIcon, Folder, Pen } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { Dispatch, FormEvent, SetStateAction, useState } from "react";
+import { toast } from "sonner";
 
 import {
     Dialog,
@@ -12,28 +14,78 @@ import {
 import { Input } from "@/components/ui/input";
 
 interface RenameItemDialogProps {
+    repositoryId: string;
     repositoryItem: RepositoryItem;
+    tree: Array<RepositoryItem>;
+    setTree: Dispatch<SetStateAction<Array<RepositoryItem>>>;
+    onAction?: () => void;
 }
 
-export const RenameItemDialog = ({ repositoryItem }: RenameItemDialogProps) => {
+export const RenameItemDialog = ({
+    repositoryId,
+    repositoryItem,
+    tree,
+    setTree,
+    onAction,
+}: RenameItemDialogProps) => {
     const [open, setOpen] = useState<boolean>(false);
     const [newItemName, setNewItemName] = useState<string>("");
 
     const itemName: string =
         repositoryItem.name.split("/").pop() ?? repositoryItem.name;
 
-    const handleSubmit = (e: FormEvent) => {
-        e.preventDefault();
-        if (newItemName.trim()) {
-            // TODO: handle rename item
-            console.log(
-                "Rename item " +
-                    repositoryItem.name +
-                    " to " +
-                    newItemName.trim(),
+    const itemDisplayType: string =
+        repositoryItem.type === "file" || repositoryItem.type === "file-display"
+            ? "File"
+            : "Directory";
+
+    const renameItemMutation = api.editor.renameItem.useMutation({
+        onSuccess: () => {
+            toast.success(itemDisplayType + " renamed successfully", {
+                description: newItemName.trim(),
+            });
+
+            const trimmedNewItemName = newItemName.trim();
+
+            const itemToRename: RepositoryItem | undefined = tree.find(
+                (item) => item.name === repositoryItem.name,
             );
+
+            if (itemToRename) {
+                itemToRename.name = repositoryItem.name.replace(
+                    /[^/]+$/,
+                    trimmedNewItemName,
+                );
+                const filteredTree: Array<RepositoryItem> = tree.filter(
+                    (item) => item.name !== repositoryItem.name,
+                );
+                setTree([...filteredTree, itemToRename]);
+            }
+
+            if (onAction) {
+                onAction();
+            }
             setNewItemName("");
             setOpen(false);
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        },
+    });
+
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+        const trimmedNewItemName: string = newItemName.trim();
+
+        if (trimmedNewItemName) {
+            renameItemMutation.mutate({
+                repoId: repositoryId,
+                originalPath: repositoryItem.name,
+                newPath: repositoryItem.name.replace(
+                    /[^/]+$/,
+                    trimmedNewItemName,
+                ),
+            });
         }
     };
 

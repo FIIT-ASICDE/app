@@ -5,6 +5,7 @@ import { ManageMemberTab, OrganisationMember } from "@/lib/types/organisation";
 import { CircleFadingArrowUp, CircleX, Loader2, Pen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +21,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { toast } from "sonner";
 
 interface ManageMemberDialogProps {
     organisationId: string;
@@ -38,12 +38,14 @@ export const ManageMemberDialog = ({
     const promoteMutation = api.org.promoteToAdmin.useMutation({
         onSuccess: () => {
             toast.success("Promoted successfully", {
-                description: organisationMember.username + " has been promoted to an admin."
+                description:
+                    organisationMember.username +
+                    " has been promoted to an admin.",
             });
         },
         onError: (error) => {
             toast.error(error.message);
-        }
+        },
     });
     const handlePromote = () => {
         promoteMutation
@@ -57,12 +59,14 @@ export const ManageMemberDialog = ({
     const expelMutation = api.org.expelMember.useMutation({
         onSuccess: () => {
             toast.success("Expelled successfully", {
-                description: organisationMember.username + " has been expelled from your organisation."
+                description:
+                    organisationMember.username +
+                    " has been expelled from your organisation.",
             });
         },
         onError: (error) => {
             toast.error(error.message);
-        }
+        },
     });
 
     const handleExpel = () => {

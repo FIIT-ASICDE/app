@@ -1,5 +1,6 @@
 "use client";
 
+import { imgSrc } from "@/lib/client-file-utils";
 import { createRepositoryFormSchema } from "@/lib/schemas/repo-schemas";
 import { api } from "@/lib/trpc/react";
 import { OrganisationDisplay } from "@/lib/types/organisation";
@@ -56,7 +57,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { imgSrc } from "@/lib/client-file-utils";
 
 interface CreateRepositoryDialogProps {
     usersOrganisations: Array<Omit<OrganisationDisplay, "memberCount">>;
@@ -104,7 +104,7 @@ export const CreateRepositoryDialog = ({
         ) : (
             <div
                 role="note"
-                className="my-5 text-center text-sm font-normal text-muted-foreground w-[375px] overflow-hidden"
+                className="my-5 w-[375px] overflow-hidden text-center text-sm font-normal text-muted-foreground"
             >
                 You are creating a{" "}
                 <span className="font-bold">{form.watch("visibility")}</span>{" "}
@@ -176,7 +176,7 @@ export const CreateRepositoryDialog = ({
                             <form>
                                 <fieldset
                                     disabled={createRepoMutation.isPending}
-                                    className="space-y-3 pt-3 w-[375px]"
+                                    className="w-[375px] space-y-3 pt-3"
                                 >
                                     <FormField
                                         control={form.control}
@@ -190,7 +190,12 @@ export const CreateRepositoryDialog = ({
                                                     onValueChange={
                                                         field.onChange
                                                     }
-                                                    defaultValue={fromOrg ? usersOrganisations[0].id : field.value}
+                                                    defaultValue={
+                                                        fromOrg
+                                                            ? usersOrganisations[0]
+                                                                  .id
+                                                            : field.value
+                                                    }
                                                 >
                                                     <FormControl>
                                                         <SelectTrigger>
@@ -212,9 +217,9 @@ export const CreateRepositoryDialog = ({
                                                                         displayType={
                                                                             "select"
                                                                         }
-                                                                        image={
-                                                                            imgSrc(user.image)
-                                                                        }
+                                                                        image={imgSrc(
+                                                                            user.image,
+                                                                        )}
                                                                         name={
                                                                             user.name +
                                                                             " " +
@@ -254,9 +259,9 @@ export const CreateRepositoryDialog = ({
                                                                                     displayType={
                                                                                         "select"
                                                                                     }
-                                                                                    image={
-                                                                                        imgSrc(organisation.image)
-                                                                                    }
+                                                                                    image={imgSrc(
+                                                                                        organisation.image,
+                                                                                    )}
                                                                                     name={
                                                                                         organisation.name
                                                                                     }

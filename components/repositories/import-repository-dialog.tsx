@@ -1,5 +1,6 @@
 "use client";
 
+import { imgSrc } from "@/lib/client-file-utils";
 import { api } from "@/lib/trpc/react";
 import {
     GithubRepoDisplay,
@@ -42,7 +43,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { imgSrc } from "@/lib/client-file-utils";
 
 export const ImportRepositoryDialog = () => {
     const { user } = useUser();
@@ -294,7 +294,9 @@ export const ImportRepositoryDialog = () => {
                                                 <div className="flex flex-row items-center space-x-3">
                                                     <AvatarDisplay
                                                         displayType="select"
-                                                        image={imgSrc(user.image)}
+                                                        image={imgSrc(
+                                                            user.image,
+                                                        )}
                                                         name={
                                                             user.name +
                                                             " " +
@@ -325,9 +327,9 @@ export const ImportRepositoryDialog = () => {
                                                             <div className="flex flex-row items-center space-x-3">
                                                                 <AvatarDisplay
                                                                     displayType="select"
-                                                                    image={
-                                                                        imgSrc(organisation.image)
-                                                                    }
+                                                                    image={imgSrc(
+                                                                        organisation.image,
+                                                                    )}
                                                                     name={
                                                                         organisation.name
                                                                     }

@@ -5,6 +5,7 @@ import { OrganisationDisplay } from "@/lib/types/organisation";
 import { CircleX, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { useUser } from "@/components/context/user-context";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,6 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
 
 interface DeleteOrganisationDialogProps {
     organisation: OrganisationDisplay;
@@ -40,7 +40,7 @@ export const DeleteOrganisationDialog = ({
         },
         onError: (error) => {
             toast.error(error.message);
-        }
+        },
     });
 
     const handleDeleteOrganisation = () => {

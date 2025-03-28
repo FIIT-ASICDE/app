@@ -1,5 +1,6 @@
 "use client";
 
+import { imgSrc } from "@/lib/client-file-utils";
 import { api } from "@/lib/trpc/react";
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import { UserDisplay } from "@/lib/types/user";
@@ -27,7 +28,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { imgSrc } from "@/lib/client-file-utils";
 
 interface LeaveOrganisationDialogProps {
     organisation: OrganisationDisplay;
