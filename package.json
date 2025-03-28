@@ -5,7 +5,7 @@
     "private": true,
     "scripts": {
         "dev": "dotenv -e .env.local -- prisma migrate dev && next dev",
-        "dev:editor-server": "concurrently --kill-others -n \"next,editor\" \"npm:dev\" \"dotenv -e .env.local -- bun run --prefix editor-server dev\"",
+        "dev:editor-server": "concurrently --kill-others --names \"next,editor\" \"bun dev\" \"dotenv -e .env.local -- bun run --prefix editor-server dev\"",
         "migrate": "prisma migrate dev",
         "build": "prisma generate && next build",
         "start": "prisma migrate deploy && prisma generate && next start",

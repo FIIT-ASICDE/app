@@ -173,6 +173,7 @@ export function addItem() {
                         type: "directory-display",
                         name: input.name,
                         lastActivity: new Date(),
+                        absolutePath: fullPath,
                     };
                 } else {
                     await writeFile(fullPath, "");

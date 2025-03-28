@@ -49,6 +49,7 @@ export function loadRepoItems(
                         name: entry.name,
                         lastActivity,
                         children: readDirectory(entryPath, currentDepth + 1),
+                        absolutePath: path.join(currentPath, entry.name),
                     };
                 }
 
@@ -56,6 +57,7 @@ export function loadRepoItems(
                     type: "directory-display",
                     name: entry.name,
                     lastActivity,
+                    absolutePath: path.join(currentPath, entry.name),
                 };
             }
 
@@ -107,6 +109,7 @@ export function loadRepoDirOrFile(
             name: path.basename(pathString),
             lastActivity: stat.mtime,
             children: loadRepoItems(pathString, maxDepth, loadContents),
+            absolutePath: pathString,
         };
     } else if (stat.isFile()) {
         return loadRepoFile(pathString);

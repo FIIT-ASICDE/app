@@ -48,7 +48,7 @@ export default function Editor({
             automaticLayout: true,
         });
 
-        if (process.env.NODE_ENV === "production") {
+        if (process.env.NODE_ENV !== "production") {
             const ydoc = new Y.Doc();
             ydocRef.current = ydoc;
 
