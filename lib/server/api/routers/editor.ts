@@ -5,9 +5,9 @@ import {
     renameItemSchema,
 } from "@/lib/schemas/editor-schemas";
 import {
+    getRelativePathInRepo,
     hasUserRole,
     resolveRepoPathOrThrow,
-    stripServerPath,
 } from "@/lib/server/api/routers/repos";
 import { createTRPCRouter, protectedProcedure } from "@/lib/server/api/trpc";
 import { FileDisplayItem, RepositoryItem } from "@/lib/types/repository";
@@ -174,7 +174,7 @@ export function addItem() {
                         type: "directory-display",
                         name: input.name,
                         lastActivity: new Date(),
-                        absolutePath: stripServerPath(fullPath),
+                        absolutePath: getRelativePathInRepo(fullPath),
                     };
                 } else {
                     await writeFile(fullPath, "");
@@ -188,7 +188,7 @@ export function addItem() {
                         name: input.name,
                         lastActivity: new Date(),
                         language,
-                        absolutePath: stripServerPath(fullPath),
+                        absolutePath: getRelativePathInRepo(fullPath),
                     };
                 }
             } catch (error) {

@@ -123,12 +123,22 @@ export default function EditorPage({ repository }: EditorPageProps) {
     };
 
     const handleFileClick = (item: RepositoryItem) => {
-        if (item.type === "file-display") {
-            if (!openFiles.some((file) => file.name === item.name)) {
-                setOpenFiles((prevFiles) => [...prevFiles, item]);
-            }
-            setActiveFile(item);
+        if (item.type !== "file-display" && item.type !== "file") {
+            return;
         }
+
+        const fileDisplay: FileDisplayItem = {
+            type: "file-display",
+            name: item.name,
+            absolutePath: item.absolutePath,
+            lastActivity: item.lastActivity,
+            language: item.language,
+        };
+
+        if (!openFiles.some((file) => file.name === item.name)) {
+            setOpenFiles((prevFiles) => [...prevFiles, fileDisplay]);
+        }
+        setActiveFile(fileDisplay);
     };
 
     const handleTabSwitch = (item: FileDisplayItem) => {
@@ -292,9 +302,11 @@ export default function EditorPage({ repository }: EditorPageProps) {
                             {activeFile ? (
                                 <DynamicEditor
                                     filePath={
-                                        activeFile.absolutePath +
+                                        repository.ownerName +
                                         "/" +
-                                        activeFile.name
+                                        repository.name +
+                                        "/" +
+                                        activeFile.absolutePath
                                     }
                                 />
                             ) : (

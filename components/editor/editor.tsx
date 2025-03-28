@@ -52,6 +52,7 @@ export default function Editor({
             const ydoc = new Y.Doc();
             ydocRef.current = ydoc;
 
+			console.log(filePath)
             const provider = new WebsocketProvider(
                 process.env.NEXT_PUBLIC_EDITOR_SERVER_URL ??
                     "wss://ide.drasic.com/ws",

@@ -1,4 +1,4 @@
-import { stripServerPath } from "@/lib/server/api/routers/repos";
+import { getRelativePathInRepo } from "@/lib/server/api/routers/repos";
 import {
     FileItem,
     LanguageStatistics,
@@ -50,9 +50,7 @@ export function loadRepoItems(
                         name: entry.name,
                         lastActivity,
                         children: readDirectory(entryPath, currentDepth + 1),
-                        absolutePath: stripServerPath(
-                            path.join(currentPath, entry.name),
-                        ),
+                        absolutePath: getRelativePathInRepo(entryPath),
                     };
                 }
 
@@ -60,9 +58,7 @@ export function loadRepoItems(
                     type: "directory-display",
                     name: entry.name,
                     lastActivity,
-                    absolutePath: stripServerPath(
-                        path.join(currentPath, entry.name),
-                    ),
+                    absolutePath: getRelativePathInRepo(entryPath),
                 };
             }
 
@@ -86,7 +82,7 @@ export function loadRepoItems(
                 name: entry.name,
                 lastActivity,
                 language,
-                absolutePath: stripServerPath(currentPath),
+                absolutePath: getRelativePathInRepo(entryPath),
             };
         });
     }
@@ -114,7 +110,7 @@ export function loadRepoDirOrFile(
             name: path.basename(pathString),
             lastActivity: stat.mtime,
             children: loadRepoItems(pathString, maxDepth, loadContents),
-            absolutePath: stripServerPath(pathString),
+            absolutePath: getRelativePathInRepo(pathString),
         };
     } else if (stat.isFile()) {
         return loadRepoFile(pathString);
@@ -144,7 +140,7 @@ export function loadRepoFile(filePath: string): FileItem {
         name: fileName,
         lastActivity,
         language,
-        absolutePath: stripServerPath(filePath),
+        absolutePath: getRelativePathInRepo(filePath),
         content: fs.readFileSync(filePath, "utf-8"),
     };
 }

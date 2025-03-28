@@ -4,6 +4,7 @@ import path from "node:path";
 
 import {
     type EditorSocketData,
+    absoluteFilePath,
     files,
     onClose,
     onMessage,
@@ -48,7 +49,9 @@ const server = Bun.serve<EditorSocketData>({
         let filePath = req.url.split("?").at(1)?.split("=").at(1);
 
         if (filePath) {
-            filePath = decodeURIComponent(filePath).replaceAll("\\", "/");
+            filePath = absoluteFilePath(
+                decodeURIComponent(filePath).replaceAll("\\", "/"),
+            );
         } else {
             logger.warn(
                 { event: "request", reason: "missing file path", url: req.url },
