@@ -1,4 +1,4 @@
-import { Not } from '../classes/not';
+import { Not } from "@/app/diagram-test/components/Shapes/classes/not";
 import { shapes } from "@joint/core";
 
 export const JointJSNot = (not: Not) => {

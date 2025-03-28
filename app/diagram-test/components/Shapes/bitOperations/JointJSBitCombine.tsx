@@ -1,4 +1,4 @@
-import { BitCombine } from '../classes/bitCombine';
+import { BitCombine } from "@/app/diagram-test/components/Shapes/classes/bitCombine";
 import { shapes } from "@joint/core";
 
 export const JointJSBitCombine = (bitCombine: BitCombine) => {

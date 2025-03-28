@@ -1,4 +1,4 @@
-import { Module } from '../classes/module';
+import { Module } from "@/app/diagram-test/components/Shapes/classes/module";
 import { shapes } from "@joint/core";
 
 export const JointJSNewModule = (module: Module) => {

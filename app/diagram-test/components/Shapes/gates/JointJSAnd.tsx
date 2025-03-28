@@ -1,4 +1,4 @@
-import { And } from '../classes/and';
+import { And } from "@/app/diagram-test/components/Shapes/classes/and";
 import { shapes } from "@joint/core";
 
 export const JointJSAnd = (and: And) => {

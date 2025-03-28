@@ -1,4 +1,4 @@
-import { Ram } from '../classes/ram';
+import { Ram } from "@/app/diagram-test/components/Shapes/classes/ram";
 import { shapes } from "@joint/core";
 
 export const JointJSSRam = (ram: Ram) => {

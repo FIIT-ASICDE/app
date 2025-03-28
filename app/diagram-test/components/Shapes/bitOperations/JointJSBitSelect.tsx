@@ -1,4 +1,4 @@
-import { BitSelect } from '../classes/bitSelect';
+import { BitSelect } from "@/app/diagram-test/components/Shapes/classes/bitSelect";
 import { shapes } from "@joint/core";
 
 export const JointJSBitSelect = (bitSelect: BitSelect) => {

@@ -1,4 +1,4 @@
-import { Xnor } from '../classes/xnor';
+import { Xnor } from "@/app/diagram-test/components/Shapes/classes/xnor";
 import { shapes } from "@joint/core";
 
 export const JointJSXnor = (xnor: Xnor) => {

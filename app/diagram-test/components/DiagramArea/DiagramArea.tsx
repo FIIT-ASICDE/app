@@ -1,47 +1,47 @@
 // pages/diagram-test/components/DiagramArea/DiagramArea.tsx
 
 import React, {useRef, useState} from 'react';
-import { dia, shapes } from "@joint/core";
-import useJointJS from '../../hooks/useJointJS';
-import { useDiagramContext } from '../../context/useDiagramContext';
+import { dia } from "@joint/core";
+import useJointJS from '@/app/diagram-test/hooks/useJointJS';
+import { useDiagramContext } from '@/app/diagram-test/context/useDiagramContext';
 import styles from './DiagramArea.module.css';
-import { JointJSAnd } from '../Shapes/gates/JointJSAnd';
-import { And } from '../Shapes/classes/and';
-import { JointJSNand } from '../Shapes/gates/JointJSNand';
-import { Nand } from '../Shapes/classes/nand';
-import { JointJSNor } from '../Shapes/gates/JointJSNor';
-import { Nor } from '../Shapes/classes/nor';
-import { JointJSNot } from '../Shapes/gates/JointJSNot';
-import { Not } from '../Shapes/classes/not';
-import { JointJSOr } from '../Shapes/gates/JointJSOr';
-import { Or } from '../Shapes/classes/or';
-import { JointJSXnor } from '../Shapes/gates/JointJSXnor';
-import { Xnor } from '../Shapes/classes/xnor';
-import { JointJSXor } from '../Shapes/gates/JointJSXor';
-import { Xor } from '../Shapes/classes/xor';
-import { JointJSInputPort } from '../Shapes/io/JointJSInputPort';
-import { Port } from '../Shapes/classes/port';
-import { JointJSOutputPort } from '../Shapes/io/JointJSOutputPort';
-import {Multiplexer} from "../Shapes/classes/multiplexer";
-import { JointJSMultiplexer } from '../Shapes/complexLogic/JointJSMultiplexer';
-import {JointJSDecoder} from '../Shapes/complexLogic/JointJSDecoder';
-import { Decoder } from '../Shapes/classes/decoder';
-import {JointJSEncoder} from '../Shapes/complexLogic/JointJSEncoder';
-import { Encoder } from '../Shapes/classes/encoder';
-import {JointJSAlu} from '../Shapes/complexLogic/JointJSAlu';
-import { Alu } from '../Shapes/classes/alu';
-import { JointJSComparator } from '../Shapes/complexLogic/JointJSComparator';
-import { Comparator } from '../Shapes/classes/comparator';
-import { JointJSNewModule } from '../Shapes/modules/JointJSNewModule';
-import { Module } from '../Shapes/classes/module';
-import { JointJSSRam } from '../Shapes/memory/JointJSSRam';
-import { Ram } from '../Shapes/classes/ram';
-import { JointJSRegister } from '../Shapes/memory/JointJSRegister';
-import { Register } from '../Shapes/classes/register';
-import { JointJSBitSelect } from '../Shapes/bitOperations/JointJSBitSelect';
-import { BitSelect } from '../Shapes/classes/bitSelect';
-import { JointJSBitCombine } from '../Shapes/bitOperations/JointJSBitCombine';
-import { BitCombine } from '../Shapes/classes/bitCombine';
+import { JointJSAnd } from "@/app/diagram-test/components/Shapes/gates/JointJSAnd";
+import { And } from "@/app/diagram-test/components/Shapes/classes/and";
+import { JointJSNand } from "@/app/diagram-test/components/Shapes/gates/JointJSNand";
+import { Nand } from "@/app/diagram-test/components/Shapes/classes/nand";
+import { JointJSNor } from "@/app/diagram-test/components/Shapes/gates/JointJSNor";
+import { Nor } from "@/app/diagram-test/components/Shapes/classes/nor";
+import { JointJSNot } from "@/app/diagram-test/components/Shapes/gates/JointJSNot";
+import { Not } from "@/app/diagram-test/components/Shapes/classes/not";
+import { JointJSOr } from "@/app/diagram-test/components/Shapes/gates/JointJSOr";
+import { Or } from "@/app/diagram-test/components/Shapes/classes/or";
+import { JointJSXnor } from "@/app/diagram-test/components/Shapes/gates/JointJSXnor";
+import { Xnor } from "@/app/diagram-test/components/Shapes/classes/xnor";
+import { JointJSXor } from "@/app/diagram-test/components/Shapes/gates/JointJSXor";
+import { Xor } from "@/app/diagram-test/components/Shapes/classes/xor";
+import { JointJSInputPort } from "@/app/diagram-test/components/Shapes/io/JointJSInputPort";
+import { Port } from "@/app/diagram-test/components/Shapes/classes/port";
+import { JointJSOutputPort } from "@/app/diagram-test/components/Shapes/io/JointJSOutputPort";
+import {Multiplexer} from "@/app/diagram-test/components/Shapes/classes/multiplexer";
+import { JointJSMultiplexer } from "@/app/diagram-test/components/Shapes/complexLogic/JointJSMultiplexer";
+import {JointJSDecoder} from "@/app/diagram-test/components/Shapes/complexLogic/JointJSDecoder";
+import { Decoder } from "@/app/diagram-test/components/Shapes/classes/decoder";
+import {JointJSEncoder} from "@/app/diagram-test/components/Shapes/complexLogic/JointJSEncoder";
+import { Encoder } from "@/app/diagram-test/components/Shapes/classes/encoder";
+import {JointJSAlu} from "@/app/diagram-test/components/Shapes/complexLogic/JointJSAlu";
+import { Alu } from "@/app/diagram-test/components/Shapes/classes/alu";
+import { JointJSComparator } from "@/app/diagram-test/components/Shapes/complexLogic/JointJSComparator";
+import { Comparator } from "@/app/diagram-test/components/Shapes/classes/comparator";
+import { JointJSNewModule } from "@/app/diagram-test/components/Shapes/modules/JointJSNewModule";
+import { Module } from "@/app/diagram-test/components/Shapes/classes/module";
+import { JointJSSRam } from "@/app/diagram-test/components/Shapes/memory/JointJSSRam";
+import { Ram } from "@/app/diagram-test/components/Shapes/classes/ram";
+import { JointJSRegister } from "@/app/diagram-test/components/Shapes/memory/JointJSRegister";
+import { Register } from "@/app/diagram-test/components/Shapes/classes/register";
+import { JointJSBitSelect } from "@/app/diagram-test/components/Shapes/bitOperations/JointJSBitSelect";
+import { BitSelect } from "@/app/diagram-test/components/Shapes/classes/bitSelect";
+import { JointJSBitCombine } from "@/app/diagram-test/components/Shapes/bitOperations/JointJSBitCombine";
+import { BitCombine } from "@/app/diagram-test/components/Shapes/classes/bitCombine";
 import {useDiagramEvents} from "@/app/diagram-test/hooks/useDiagramEvents";
 
 
@@ -87,6 +87,7 @@ const DiagramArea = () => {
         return elType + '_' + (sameTypeCount + 1);
     }
 
+    console.log('DiagramArea mounted')
 
     const handleDrop = (event: React.DragEvent) => {
         event.preventDefault();

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { dia, shapes, linkTools, elementTools } from "@joint/core";
-import { useDiagramContext } from '../context/useDiagramContext';
+import { dia, shapes, linkTools, elementTools, Selec, V } from "@joint/core";
+import { useDiagramContext } from "@/app/diagram-test/context/useDiagramContext";
 import './jointjs.css'
 
 const highlightSettings = {
@@ -113,6 +113,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
 
     useEffect(() => {
         if (paperElement.current && !paperRef.current) {
+            console.log(paperElement.current)
             const paper = new dia.Paper({
                 el: paperElement.current,
                 model: graph,
@@ -314,7 +315,15 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                     isLinkingRef.current = false;
                 }
             });
+            let selectedElements: dia.Element[] = [];
 
+            const clearSelection = () => {
+                console.log(selectedElements);
+                selectedElements.forEach((el) => {
+                    paper.findViewByModel(el)?.unhighlight();
+                });
+                selectedElements = [];
+            };
 
 
             paper.on('element:pointerclick', (elementView) => {
@@ -372,6 +381,9 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                     selectedCellViewRef.current.unhighlight('image', { highlighter: highlightSettings });
                     selectedCellViewRef.current = null;
                 }
+
+                console.log(selectedElements);
+                clearSelection();
 
                 setSelectedElement(null);
 
@@ -477,6 +489,99 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                         targetElement.portProp(targetPortId, 'attrs/portLine', { display: '' });
                     }
                 }
+            });
+
+            let selectionRect: SVGRectElement | null = null;
+            let origin = { x: 0, y: 0 };
+
+            paper.on('blank:pointerdown', (evt: dia.Event, x: number, y: number) => {
+                origin = { x, y };
+                selectionRect = V('rect', {
+                    x,
+                    y,
+                    width: 1,
+                    height: 1,
+                    fill: 'rgba(0, 153, 255, 0.2)',
+                    stroke: '#3399ff',
+                    'stroke-dasharray': '5,5',
+                }).node as SVGRectElement;
+
+                paper.svg.appendChild(selectionRect);
+            });
+            paper.on('blank:pointermove', (evt: dia.Event, x: number, y: number) => {
+                if (!selectionRect) return;
+
+                const rect = {
+                    x: Math.min(x, origin.x),
+                    y: Math.min(y, origin.y),
+                    width: Math.abs(x - origin.x),
+                    height: Math.abs(y - origin.y),
+                };
+
+                V(selectionRect).attr(rect);
+            });
+
+
+
+            paper.on('blank:pointerup', () => {
+
+                if (!selectionRect) return;
+
+                const bbox = V(selectionRect).bbox();
+                paper.svg.removeChild(selectionRect);
+                selectionRect = null;
+
+                selectedElements = graph.getElements().filter((el) => {
+                    return el.getBBox().intersect(bbox);
+                });
+
+                console.log(selectedElements);
+
+                selectedElements.forEach((el) => {
+                    paper.findViewByModel(el)?.highlight();
+                });
+            });
+            let dragStartPoint: { x: number; y: number } | null = null;
+            let isDraggingSelection = false;
+
+            paper.on('element:pointerdown', (elementView, evt, x, y) => {
+                const model = elementView.model;
+
+                const alreadySelected = selectedElements.includes(model);
+                const isMulti = evt.ctrlKey || evt.metaKey;
+
+                console.log(selectedElements);
+
+                if (!alreadySelected && !isMulti) {
+                    clearSelection();
+                }
+
+                if (!alreadySelected) {
+                    selectedElements.push(model);
+                    elementView.highlight();
+                }
+
+                dragStartPoint = { x, y };
+                isDraggingSelection = true;
+            });
+
+            paper.on('element:pointermove', (elementView, evt, x, y) => {
+                if (!isDraggingSelection || !dragStartPoint) return;
+
+                const dx = x - dragStartPoint.x;
+                const dy = y - dragStartPoint.y;
+
+                selectedElements.forEach((el) => {
+                    const pos = el.position();
+                    el.position(pos.x + dx, pos.y + dy);
+                });
+
+                dragStartPoint = { x, y };
+            });
+
+            paper.on('element:pointerup', () => {
+                dragStartPoint = null;
+                isDraggingSelection = false;
             });
 
 

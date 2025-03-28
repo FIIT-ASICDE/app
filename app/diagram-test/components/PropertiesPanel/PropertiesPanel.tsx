@@ -1,49 +1,47 @@
 // pages/diagram-test/components/PropertiesPanel/PropertiesPanel.tsx
 import React, { useState, useEffect, useRef } from "react";
-import { useHotkeys } from '../../hooks/useHotkeys';
-import { useDiagramContext } from '../../context/useDiagramContext';
+import { useHotkeys } from "@/app/diagram-test/hooks/useHotkeys";
+import { useDiagramContext } from "@/app/diagram-test/context/useDiagramContext";
 import styles from './PropertiesPanel.module.css';
 import ResizablePanel from '../common/ResizablePanel';
-import {Multiplexer} from "../Shapes/classes/multiplexer";
-import {JointJSMultiplexer} from "../Shapes/complexLogic/JointJSMultiplexer";
-import {JointJSAnd} from "../Shapes/gates/JointJSAnd";
-import {And} from "../Shapes/classes/and";
-import {JointJSOr} from "../Shapes/gates/JointJSOr";
-import {Or} from "../Shapes/classes/or";
-import {JointJSXor} from "../Shapes/gates/JointJSXor";
-import {Xor} from "../Shapes/classes/xor";
-import {JointJSXnor} from "../Shapes/gates/JointJSXnor";
-import {Xnor} from "../Shapes/classes/xnor";
-import {JointJSNand} from "../Shapes/gates/JointJSNand";
-import {Nand} from "../Shapes/classes/nand";
-import {JointJSNor} from "../Shapes/gates/JointJSNor";
-import {Nor} from "../Shapes/classes/nor";
-import {JointJSNewModule} from "../Shapes/modules/JointJSNewModule";
-import {Module} from "../Shapes/classes/module";
-import {JointJSRegister} from "../Shapes/memory/JointJSRegister";
-import {Register} from "../Shapes/classes/register";
-import {JointJSSRam} from "../Shapes/memory/JointJSSRam";
-import {Ram} from "../Shapes/classes/ram";
-import {JointJSBitCombine} from "../Shapes/bitOperations/JointJSBitCombine";
-import {BitCombine} from "../Shapes/classes/bitCombine";
-import {JointJSBitSelect} from "../Shapes/bitOperations/JointJSBitSelect";
-import {BitSelect} from "../Shapes/classes/bitSelect";
-import {JointJSInputPort} from "../Shapes/io/JointJSInputPort";
-import {JointJSOutputPort} from "../Shapes/io/JointJSOutputPort";
-import {Port} from "../Shapes/classes/port";
-import {JointJSAlu} from "../Shapes/complexLogic/JointJSAlu";
-import {Alu} from "../Shapes/classes/alu";
-import {JointJSComparator} from "../Shapes/complexLogic/JointJSComparator";
-import {Comparator} from "../Shapes/classes/comparator";
-import {JointJSDecoder} from "../Shapes/complexLogic/JointJSDecoder";
-import {Decoder} from "../Shapes/classes/decoder";
-import {JointJSEncoder} from "../Shapes/complexLogic/JointJSEncoder";
-import {Encoder} from "../Shapes/classes/encoder";
-import { MdErrorOutline } from "react-icons/md";
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import {Multiplexer} from "@/app/diagram-test/components/Shapes/classes/multiplexer";
+import {JointJSMultiplexer} from "@/app/diagram-test/components/Shapes/complexLogic/JointJSMultiplexer";
+import {JointJSAnd} from "@/app/diagram-test/components/Shapes/gates/JointJSAnd";
+import {And} from "@/app/diagram-test/components/Shapes/classes/and";
+import {JointJSOr} from "@/app/diagram-test/components/Shapes/gates/JointJSOr";
+import {Or} from "@/app/diagram-test/components/Shapes/classes/or";
+import {JointJSXor} from "@/app/diagram-test/components/Shapes/gates/JointJSXor";
+import {Xor} from "@/app/diagram-test/components/Shapes/classes/xor";
+import {JointJSXnor} from "@/app/diagram-test/components/Shapes/gates/JointJSXnor";
+import {Xnor} from "@/app/diagram-test/components/Shapes/classes/xnor";
+import {JointJSNand} from "@/app/diagram-test/components/Shapes/gates/JointJSNand";
+import {Nand} from "@/app/diagram-test/components/Shapes/classes/nand";
+import {JointJSNor} from "@/app/diagram-test/components/Shapes/gates/JointJSNor";
+import {Nor} from "@/app/diagram-test/components/Shapes/classes/nor";
+import {JointJSNewModule} from "@/app/diagram-test/components/Shapes/modules/JointJSNewModule";
+import {Module} from "@/app/diagram-test/components/Shapes/classes/module";
+import {JointJSRegister} from "@/app/diagram-test/components/Shapes/memory/JointJSRegister";
+import {Register} from "@/app/diagram-test/components/Shapes/classes/register";
+import {JointJSSRam} from "@/app/diagram-test/components/Shapes/memory/JointJSSRam";
+import {Ram} from "@/app/diagram-test/components/Shapes/classes/ram";
+import {JointJSBitCombine} from "@/app/diagram-test/components/Shapes/bitOperations/JointJSBitCombine";
+import {BitCombine} from "@/app/diagram-test/components/Shapes/classes/bitCombine";
+import {JointJSBitSelect} from "@/app/diagram-test/components/Shapes/bitOperations/JointJSBitSelect";
+import {BitSelect} from "@/app/diagram-test/components/Shapes/classes/bitSelect";
+import {JointJSInputPort} from "@/app/diagram-test/components/Shapes/io/JointJSInputPort";
+import {JointJSOutputPort} from "@/app/diagram-test/components/Shapes/io/JointJSOutputPort";
+import {Port} from "@/app/diagram-test/components/Shapes/classes/port";
+import {JointJSAlu} from "@/app/diagram-test/components/Shapes/complexLogic/JointJSAlu";
+import {Alu} from "@/app/diagram-test/components/Shapes/classes/alu";
+import {JointJSComparator} from "@/app/diagram-test/components/Shapes/complexLogic/JointJSComparator";
+import {Comparator} from "@/app/diagram-test/components/Shapes/classes/comparator";
+import {JointJSDecoder} from "@/app/diagram-test/components/Shapes/complexLogic/JointJSDecoder";
+import {Decoder} from "@/app/diagram-test/components/Shapes/classes/decoder";
+import {JointJSEncoder} from "@/app/diagram-test/components/Shapes/complexLogic/JointJSEncoder";
+import {Encoder} from "@/app/diagram-test/components/Shapes/classes/encoder";
+import { Pencil, Trash2, CircleAlert } from 'lucide-react';
 import { dia } from "@joint/core";
-import { prop } from "types-ramda/es";
-import path from "path";
+
 interface Properties {
     label?: string;
     comparatorType?: string;
@@ -792,7 +790,9 @@ const PropertiesPanel = () => {
             direction="left"
             onWidthChange={handleWidthChange}
         >
-            <h3>Properties</h3>
+            <h3>{selectedElement.attributes.elType.toUpperCase()} Properties</h3>
+
+
             {/* Пример для I/O портов */}
             {(['output', 'input'].includes(selectedElement.attributes.elType)) && (
                 <>
@@ -807,7 +807,7 @@ const PropertiesPanel = () => {
                         />
                         {errors.label && (
                             <div className={styles.errorMessage}>
-                                <MdErrorOutline className={styles.errorIcon} />
+                                <CircleAlert className={styles.errorIcon} />
                                 {errors.label}
                             </div>
                         )}
@@ -860,7 +860,7 @@ const PropertiesPanel = () => {
                             />
                             {errors.bandwidth && (
                                 <div className={styles.errorMessage}>
-                                    <MdErrorOutline className={styles.errorIcon} />
+                                    <CircleAlert className={styles.errorIcon} />
                                     {errors.bandwidth}
                                 </div>
                             )}
@@ -898,7 +898,7 @@ const PropertiesPanel = () => {
                         />
                         {errors.label && (
                             <div className={styles.errorMessage}>
-                                <MdErrorOutline className={styles.errorIcon} />
+                                <CircleAlert className={styles.errorIcon} />
                                 {errors.label}
                             </div>
                         )}
@@ -940,7 +940,7 @@ const PropertiesPanel = () => {
                             />
                             {errors.inputPorts && (
                                 <div className={styles.errorMessage}>
-                                    <MdErrorOutline className={styles.errorIcon} />
+                                    <CircleAlert className={styles.errorIcon} />
                                     {errors.inputPorts}
                                 </div>
                             )}
@@ -958,7 +958,7 @@ const PropertiesPanel = () => {
                             />
                             {errors.bandwidth && (
                                 <div className={styles.errorMessage}>
-                                    <MdErrorOutline className={styles.errorIcon} />
+                                    <CircleAlert className={styles.errorIcon} />
                                     {errors.bandwidth}
                                 </div>
                             )}
@@ -981,7 +981,7 @@ const PropertiesPanel = () => {
                         />
                         {errors.label && (
                             <div className={styles.errorMessage}>
-                                <MdErrorOutline className={styles.errorIcon} />
+                                <CircleAlert className={styles.errorIcon} />
                                 {errors.label}
                             </div>
                         )}
@@ -1034,7 +1034,7 @@ const PropertiesPanel = () => {
                             />
                             {errors.bandwidth && (
                                 <div className={styles.errorMessage}>
-                                    <MdErrorOutline className={styles.errorIcon} />
+                                    <CircleAlert className={styles.errorIcon} />
                                     {errors.bandwidth}
                                 </div>
                             )}
@@ -1081,7 +1081,7 @@ const PropertiesPanel = () => {
                         />
                         {errors.label && (
                             <div className={styles.errorMessage}>
-                                <MdErrorOutline className={styles.errorIcon} />
+                                <CircleAlert className={styles.errorIcon} />
                                 {errors.label}
                             </div>
                         )}
@@ -1096,7 +1096,7 @@ const PropertiesPanel = () => {
                         />
                         {errors.bandwidth && (
                             <div className={styles.errorMessage}>
-                                <MdErrorOutline className={styles.errorIcon} />
+                                <CircleAlert className={styles.errorIcon} />
                                 {errors.bandwidth}
                             </div>
                         )}
@@ -1119,7 +1119,7 @@ const PropertiesPanel = () => {
                         />
                         {errors.label && (
                             <div className={styles.errorMessage}>
-                                <MdErrorOutline className={styles.errorIcon} />
+                                <CircleAlert className={styles.errorIcon} />
                                 {errors.label}
                             </div>
                         )}
@@ -1134,7 +1134,7 @@ const PropertiesPanel = () => {
                         />
                         {errors.bandwidth && (
                             <div className={styles.errorMessage}>
-                                <MdErrorOutline className={styles.errorIcon} />
+                                <CircleAlert className={styles.errorIcon} />
                                 {errors.bandwidth}
                             </div>
                         )}
@@ -1149,6 +1149,9 @@ const PropertiesPanel = () => {
                             >
                                 <option value="+">{'+'}</option>
                                 <option value="-">{'-'}</option>
+                                <option value="*">{'*'}</option>
+                                <option value="/">{'/'}</option>
+                                <option value="%">{'%'}</option>
                             </select>
                         </label>
                     )}
@@ -1185,7 +1188,7 @@ const PropertiesPanel = () => {
                         />
                         {errors.label && (
                             <div className={styles.errorMessage}>
-                                <MdErrorOutline className={styles.errorIcon} />
+                                <CircleAlert className={styles.errorIcon} />
                                 {errors.label}
                             </div>
                         )}
@@ -1201,7 +1204,7 @@ const PropertiesPanel = () => {
                         />
                         {errors.instance && (
                             <div className={styles.errorMessage}>
-                                <MdErrorOutline className={styles.errorIcon} />
+                                <CircleAlert className={styles.errorIcon} />
                                 {errors.instance}
                             </div>
                         )}
@@ -1213,12 +1216,12 @@ const PropertiesPanel = () => {
                             <div key={idx} className={styles.portItem}>
                                 <span>{p.name} (bw={p.bandwidth})</span>
 
-                                <FaEdit
+                                <Pencil
                                     className={styles.portIcon}
                                     onClick={() => handleEditPort('input', idx)}
                                 />
 
-                                <FaTrash
+                                <Trash2
                                     className={styles.portIcon}
                                     onClick={() => handleDeletePort('input', idx)}
                                 />
@@ -1234,12 +1237,12 @@ const PropertiesPanel = () => {
                             <div key={idx} className={styles.portItem}>
                                 <span>{p.name} (bw={p.bandwidth})</span>
 
-                                <FaEdit
+                                <Pencil
                                     className={styles.portIcon}
                                     onClick={() => handleEditPort('output', idx)}
                                 />
 
-                                <FaTrash
+                                <Trash2
                                     className={styles.portIcon}
                                     onClick={() => handleDeletePort('output', idx)}
                                 />
@@ -1264,7 +1267,7 @@ const PropertiesPanel = () => {
                         />
                         {errors.label && (
                             <div className={styles.errorMessage}>
-                                <MdErrorOutline className={styles.errorIcon} />
+                                <CircleAlert className={styles.errorIcon} />
                                 {errors.label}
                             </div>
                         )}
@@ -1281,7 +1284,7 @@ const PropertiesPanel = () => {
                             />
                             {errors.addressBandwidth && (
                                 <div className={styles.errorMessage}>
-                                    <MdErrorOutline className={styles.errorIcon} />
+                                    <CircleAlert className={styles.errorIcon} />
                                     {errors.addressBandwidth}
                                 </div>
                             )}
@@ -1402,7 +1405,7 @@ const PropertiesPanel = () => {
                             />
                             {errors.bandwidth && (
                                 <div className={styles.errorMessage}>
-                                    <MdErrorOutline className={styles.errorIcon} />
+                                    <CircleAlert className={styles.errorIcon} />
                                     {errors.bandwidth}
                                 </div>
                             )}
@@ -1439,7 +1442,7 @@ const PropertiesPanel = () => {
                         />
                         {errors.label && (
                             <div className={styles.errorMessage}>
-                                <MdErrorOutline className={styles.errorIcon} />
+                                <CircleAlert className={styles.errorIcon} />
                                 {errors.label}
                             </div>
                         )}
@@ -1451,12 +1454,12 @@ const PropertiesPanel = () => {
                                 <div key={idx} className={styles.portItem}>
                                     <span>{p.name} (bw={p.bandwidth})</span>
 
-                                    <FaEdit
+                                    <Pencil
                                         className={styles.portIcon}
                                         onClick={() => handleEditPort('input', idx)}
                                     />
 
-                                    <FaTrash
+                                    <Trash2
                                         className={styles.portIcon}
                                         onClick={() => handleDeletePort('input', idx)}
                                     />
@@ -1474,12 +1477,12 @@ const PropertiesPanel = () => {
                                 <div key={idx} className={styles.portItem}>
                                     <span>{p.name} ({p.startBit} - {p.endBit})</span>
 
-                                    <FaEdit
+                                    <Pencil
                                         className={styles.portIcon}
                                         onClick={() => handleEditPort('output', idx)}
                                     />
 
-                                    <FaTrash
+                                    <Trash2
                                         className={styles.portIcon}
                                         onClick={() => handleDeletePort('output', idx)}
                                     />
@@ -1512,7 +1515,7 @@ const PropertiesPanel = () => {
                         <h3>Add {newPortType === 'input' ? 'Input' : 'Output'} Port</h3>
                         {errorMessage && (
                             <div className={styles.errorMessage}>
-                                <MdErrorOutline className={styles.errorIcon} />
+                                <CircleAlert className={styles.errorIcon} />
                                 <span>{errorMessage}</span>
                             </div>
                         )}
@@ -1526,7 +1529,7 @@ const PropertiesPanel = () => {
                             />
                             {errors.label && (
                                 <div className={styles.errorMessage}>
-                                    <MdErrorOutline className={styles.errorIcon} />
+                                    <CircleAlert className={styles.errorIcon} />
                                     {errors.label}
                                 </div>
                             )}

@@ -1,4 +1,4 @@
-import { Nor } from '../classes/nor';
+import { Nor } from "@/app/diagram-test/components/Shapes/classes/nor";
 import { shapes } from "@joint/core";
 
 export const JointJSNor = (nor: Nor) => {

@@ -1,6 +1,6 @@
 // components/common/ResizablePanel.tsx
 import React from 'react';
-import { useResizable } from '../../hooks/useResizable';
+import { useResizable } from "@/app/diagram-test/hooks/useResizable";
 import styles from './ResizablePanel.module.css';
 
 interface ResizablePanelProps {

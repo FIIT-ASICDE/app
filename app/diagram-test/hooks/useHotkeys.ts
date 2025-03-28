@@ -1,9 +1,6 @@
 import { useEffect } from 'react';
 
-/**
- * Пример хука, который обрабатывает горячие клавиши (Ctrl+S, Delete)
- * и вызывает переданные колбэки при срабатывании.
- */
+
 interface UseHotkeysOptions {
     onSave?: () => void;
     onDelete?: () => void;

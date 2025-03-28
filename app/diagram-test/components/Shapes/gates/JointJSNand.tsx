@@ -1,4 +1,4 @@
-import { Nand } from '../classes/nand';
+import { Nand } from "@/app/diagram-test/components/Shapes/classes/nand";
 import { shapes } from "@joint/core";
 
 export const JointJSNand = (nand: Nand) => {

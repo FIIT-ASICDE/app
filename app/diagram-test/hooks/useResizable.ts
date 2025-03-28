@@ -1,5 +1,5 @@
 // hooks/useResizable.ts
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface ResizableOptions {
     defaultWidth?: number;

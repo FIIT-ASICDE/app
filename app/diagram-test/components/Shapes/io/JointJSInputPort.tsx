@@ -1,4 +1,4 @@
-import { Port } from '../classes/port';
+import { Port } from "@/app/diagram-test/components/Shapes/classes/port";
 import { shapes } from "@joint/core";
 
 export const JointJSInputPort = (input: Port) => {

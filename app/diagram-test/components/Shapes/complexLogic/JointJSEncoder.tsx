@@ -1,4 +1,4 @@
-import { Encoder } from '../classes/encoder';
+import { Encoder } from "@/app/diagram-test/components/Shapes/classes/encoder";
 import { shapes } from "@joint/core";
 
 export const JointJSEncoder = (encoder: Encoder) => {

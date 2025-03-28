@@ -26,6 +26,7 @@ import {
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { toast } from "sonner";
+import DiagramPage from "@/app/diagram-test/page";
 
 interface EditorPageProps {
     repository: Repository;
@@ -164,6 +165,11 @@ export default function EditorPage({ repository }: EditorPageProps) {
         });
     }, 3000);
 
+    const isDiagramFile = (file: FileDisplayItem) => {
+        const fileName = file.name.toLowerCase();
+        return fileName.endsWith('.bd');
+    };
+
     useEffect(() => {
         saveSessionDebounced();
     }, [openFiles, activeFile, repository.id]);
@@ -260,13 +266,17 @@ export default function EditorPage({ repository }: EditorPageProps) {
                                 ))}
                             </div>
                             {activeFile ? (
-                                <DynamicEditor
-                                    filePath={
-                                        activeFile.absolutePath +
-                                        "/" +
-                                        activeFile.name
-                                    }
-                                />
+                                isDiagramFile(activeFile) ? (
+                                    <DiagramPage />
+                                    ) : (
+                                        <DynamicEditor
+                                            filePath={
+                                                activeFile.absolutePath +
+                                                "/" +
+                                                activeFile.name
+                                            }
+                                        />
+                                    )
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center text-gray-400">
                                     No file open

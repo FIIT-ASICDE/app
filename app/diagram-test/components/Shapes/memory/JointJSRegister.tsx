@@ -1,4 +1,4 @@
-import { Register } from '../classes/register';
+import { Register } from "@/app/diagram-test/components/Shapes/classes/register";
 import { shapes } from "@joint/core";
 
 export const JointJSRegister = (register: Register) => {

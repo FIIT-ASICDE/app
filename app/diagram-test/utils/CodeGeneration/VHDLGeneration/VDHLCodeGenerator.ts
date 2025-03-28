@@ -4,10 +4,10 @@ import { dia } from "@joint/core";
 const operatorMapVHDL: { [key: string]: string } = {
     and: 'AND',
     or: 'OR',
-    nand: 'AND',
-    nor: 'OR',
+    nand: 'NAND',
+    nor: 'NOR',
     xor: 'XOR',
-    xnor: 'XOR',
+    xnor: 'XNOR',
     not: 'NOT'
 };
 const complexLogicMapVHDL: { [key: string]: string } = {
@@ -169,8 +169,18 @@ export function generateVHDLCode(graph: dia.Graph): string {
             code += `    SIGNAL ${netName} : STD_LOGIC_VECTOR(${Math.ceil(Math.log2(bw)) - 1} DOWNTO 0);\n`; // log2(bandwidth)
         }
     });
+    sramCells.forEach(cell => {
+        const netName = getPortName(cell);
+        const bw: number = cell.attributes.bandwidth;
+        const depth = 1 << cell.attributes.addressBandwidth;
+        elementNames[cell.id] = netName;
+        code += `    type ${netName}_type is array (0 to ${depth - 1}) of std_logic_vector(${bw - 1} downto 0);\n`;
+        code += `    signal ${netName} : ${netName}_type;\n\n`;
+    });
+
     code += `\n\n`;
     code += `BEGIN\n`;
+
 
 
     bitManipulationCells.forEach(cell => {
@@ -223,12 +233,8 @@ export function generateVHDLCode(graph: dia.Graph): string {
         });
         console.log(inputSignals);
 
-
         let expr = inputSignals.join(` ${operatorMapVHDL[type]} `) || "'0'";
-        console.log(expr);
-        if (type === 'nand' || type === 'nor' || type === 'xnor') {
-            expr = `NOT (${expr})`;
-        }
+
         if (type === 'not') {
             expr = `NOT ${inputSignals[0] || "'0'"}`;
         }
@@ -250,12 +256,12 @@ export function generateVHDLCode(graph: dia.Graph): string {
         let expr = '';
 
         if (type === 'alu') {
-            const aluType = cell.attributes.aluType || "+";
+            const aluType = cell.attributes.aluType === '%' ? 'mod' : cell.attributes.aluType ;
             expr = `${inputSignals.join(` ${aluType} `) || "'0'"}`;
             code += `    ${netName} <= ${expr};\n`;
         }
         else if (type === 'comparator') {
-            const comparatorType = cell.attributes.comparatorType || "=";
+            const comparatorType = cell.attributes.comparatorType === '!=' ? '/=' : cell.attributes.comparatorType;
             expr = `${inputSignals.join(` ${comparatorType} `) || "'0'"}`;
             code += `    ${netName} <= '1' WHEN ${expr} ELSE '0';\n`;
         }
@@ -302,7 +308,6 @@ export function generateVHDLCode(graph: dia.Graph): string {
         const netName = elementNames[cell.id];
         const cellPorts = cell.attributes.ports?.items || [];
 
-
         const inputPorts = cellPorts.filter(p => p.group === 'input');
         const inputKey = `${cell.id}:${inputPorts[0]?.id}`;
         const inputSignal = connectionMap[inputKey] ? connectionMap[inputKey][0] : "'0'";
@@ -310,7 +315,6 @@ export function generateVHDLCode(graph: dia.Graph): string {
         if (type === 'decoder') {
             const bw = cell.attributes.bandwidth;
             const outputSize = 1 << bw;  // 2^bandwidth
-            const defaultValue = `${'0'.repeat(outputSize)}`;
             code += `    PROCESS (${inputSignal})\n`;
             code += `    BEGIN\n`;
             code += `        CASE ${inputSignal} IS\n`;
@@ -327,7 +331,6 @@ export function generateVHDLCode(graph: dia.Graph): string {
         if (type === 'encoder') {
             const bw = cell.attributes.bandwidth;
             const outBits = Math.ceil(Math.log2(bw));
-            const defaultValue = `'b${'0'.repeat(outBits)}`;
 
             code += `    PROCESS (${inputSignal})\n`;
             code += `    BEGIN\n`;
@@ -372,64 +375,112 @@ export function generateVHDLCode(graph: dia.Graph): string {
 
     registerCells.forEach(cell => {
         const regName = getPortName(cell);
-        const bw = cell.attributes.bandwidth;
 
         const clkKey = `${cell.id}:clk`;
         const rstKey = `${cell.id}:rst`;
         const enKey = `${cell.id}:en`;
         const dKey = `${cell.id}:d`;
         const qKey = `${cell.id}:q`;
+        const qInvertedKey = `${cell.id}:qInverted`;
 
         const clkSignal = connectionMap[clkKey] ? connectionMap[clkKey][0] : "'0'";
         const rstSignal = connectionMap[rstKey] ? connectionMap[rstKey][0] : "'0'";
         const enSignal = connectionMap[enKey] ? connectionMap[enKey][0] : "'1'";
         const dSignal = connectionMap[dKey] ? connectionMap[dKey][0] : "(others => '0')";
         const qSignal = outputConnectionMap[qKey] ? outputConnectionMap[qKey][0] : regName;
+        const qInvertedSignal = outputConnectionMap[qInvertedKey] ? outputConnectionMap[qInvertedKey][0] : regName;
 
         // clk
         const clkEdge = cell.attributes.clkEdge === 'falling' ? 'falling_edge' : 'rising_edge';
+        const rstEdge = cell.attributes.rstEdge === 'falling' ? '0' : '1';
 
         // rst
-        let rstCondition = '';
+
+        let processCondition = '';
         if (cell.attributes.resetPort) {
-            const rstEdge = cell.attributes.rstEdge === 'falling' ? 'negedge' : 'posedge';
-            if (cell.attributes.rstType === 'async') {
-                rstCondition = ` or ${rstEdge} ${rstSignal}`;
-            }
+            processCondition = `${clkSignal}, ${rstSignal}`;
+        }
+        else {
+            processCondition = `${clkSignal}`;
         }
 
-        // always_ff
-        code += `always_ff @(${clkEdge} ${clkSignal}${rstCondition}) begin\n`;
+        // PROCESS
+        code += `    PROCESS(${processCondition})\n`;
+        code += `        BEGIN\n`;
 
-        // resetPort
-        if (cell.attributes.resetPort) {
-            code += `    if (${rstSignal})\n`;
-            code += `        ${qSignal} <= '0;\n`;
-        }
+        if (cell.attributes.resetPort && (cell.attributes.rstType === 'async')) {
+            code += `            IF ${rstSignal} = '${rstEdge}' THEN\n`;
+            code += `                ${qSignal} <= (others => '0');\n`;
+            code += `            ELSIF ${clkEdge}(${clkSignal}) THEN\n`;
+            if (cell.attributes.enablePort) {
+                code += `                IF ${enSignal} = '1' THEN\n`;
+                code += `                    ${qSignal} <= ${dSignal};\n`;
+                if (cell.attributes.qInverted) {
+                    code += `                    ${qInvertedSignal} <= NOT ${dSignal};\n`;
 
-        // enablePort
-        if (cell.attributes.enablePort) {
-            if (cell.attributes.resetPort){
-                code += `    else if (${enSignal})\n`;
+                }
+                code += `                END IF;\n`;
+                code += `            END IF;\n`;
             }
             else {
-                code += `    if (${enSignal})\n`;
-            }
+                code += `                ${qSignal} <= ${dSignal};\n`;
+                if (cell.attributes.qInverted) {
+                    code += `                ${qInvertedSignal} <= NOT ${dSignal};\n`;
 
-        } else if (cell.attributes.resetPort) {
-            code += `    else\n`;
+                }
+                code += `            END IF;\n`;
+            }
+        }
+        else if (cell.attributes.resetPort && (cell.attributes.rstType === 'sync')) {
+            code += `            IF ${clkEdge}(${clkSignal}) THEN\n`;
+            code += `                IF ${rstSignal} = '${rstEdge}' THEN\n`;
+            code += `                    ${qSignal} <= (others => '0');\n`;
+            if (cell.attributes.enablePort) {
+                code += `                ELSIF ${enSignal} = '1' THEN\n`;
+                code += `                    ${qSignal} <= ${dSignal};\n`;
+                if (cell.attributes.qInverted) {
+                    code += `                    ${qInvertedSignal} <= NOT ${dSignal};\n`;
+
+                }
+                code += `                END IF;\n`;
+                code += `            END IF;\n`;
+            }
+            else {
+                code += `                ELSE\n`;
+                code += `                    ${qSignal} <= ${dSignal};\n`;
+                if (cell.attributes.qInverted) {
+                    code += `                    ${qInvertedSignal} <= NOT ${dSignal};\n`;
+
+                }
+                code += `                END IF;\n`;
+                code += `            END IF;\n`;
+            }
+        }
+        else {
+            code += `            IF ${clkEdge}(${clkSignal}) THEN\n`;
+            if (cell.attributes.enablePort) {
+                code += `                IF ${enSignal} = '1' THEN\n`;
+                code += `                    ${qSignal} <= ${dSignal};\n`;
+                if (cell.attributes.qInverted) {
+                    code += `                    ${qInvertedSignal} <= NOT ${dSignal};\n`;
+
+                }
+                code += `                END IF;\n`;
+                code += `            END IF;\n`;
+            }
+            else {
+                code += `                ${qSignal} <= ${dSignal};\n`;
+                if (cell.attributes.qInverted) {
+                    code += `                ${qInvertedSignal} <= NOT ${dSignal};\n`;
+
+                }
+                code += `            END IF;\n`;
+            }
         }
 
-        // qInverted
-        const dAssignment = cell.attributes.qInverted ? `~${dSignal}` : dSignal;
-        code += `        ${qSignal} <= ${dAssignment};\n`;
-
-        code += `end\n\n`;
     });
     sramCells.forEach(cell => {
-        const ramName = getPortName(cell);
-        const dataWidth = cell.attributes.bandwidth;
-        const depth = 1 << cell.attributes.addressBandwidth; // 2^addressBandwidth
+        const ramName = elementNames[cell.id];
 
         const clkKey = `${cell.id}:clk`;
         const dataInKey = `${cell.id}:data_in`;
@@ -443,16 +494,23 @@ export function generateVHDLCode(graph: dia.Graph): string {
         const weSignal = connectionMap[weKey] ? connectionMap[weKey][0] : '/* unconnected */';
         const dataOutSignal = outputConnectionMap[dataOutKey] ? outputConnectionMap[dataOutKey][0] : ramName;
 
-        const clkEdge = cell.attributes.clkEdge === 'falling' ? 'negedge' : 'posedge';
+        const clkEdge = cell.attributes.clkEdge === 'falling' ? 'falling_edge' : 'rising_edge';
 
-        code += `logic [${dataWidth - 1}:0] ${ramName} [0:${depth - 1}];\n\n`;
+        code += `    PROCESS(${clkSignal})\n`;
+        code += `        BEGIN\n`;
+        code += `            IF ${clkEdge}(${clkSignal}) THEN\n`;
+        if (cell.attributes.enablePort) {
+            code += `                IF ${weSignal} = '1' THEN\n`;
+            code += `                    ${ramName}(to_integer(unsigned(${addrSignal}))) <= ${dataInSignal};\n`;
+            code += `                END IF;\n`;
+            code += `            END IF;\n`;
+        }
+        else {
+            code += `                ${ramName}(to_integer(unsigned(${addrSignal}))) <= ${dataInSignal};\n`;
+            code += `            END IF;\n`;
+        }
 
-        code += `always_ff @(${clkEdge} ${clkSignal}) begin\n`;
-        code += `    if (${weSignal})\n`;
-        code += `        ${ramName}[${addrSignal}] <= ${dataInSignal};\n`;
-        code += `end\n\n`;
-
-        code += `assign ${dataOutSignal} = ${ramName}[${addrSignal}];\n\n`;
+        code += `    ${dataOutSignal} <= ${ramName}(to_integer(unsigned(${addrSignal})));\n`;
     });
 
     outputCells.forEach(cell => {

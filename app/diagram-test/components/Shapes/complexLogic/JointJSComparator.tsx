@@ -1,4 +1,4 @@
-import {Comparator} from '../classes/comparator';
+import {Comparator} from "@/app/diagram-test/components/Shapes/classes/comparator";
 import { shapes } from "@joint/core";
 
 export const JointJSComparator = (comparator: Comparator) => {

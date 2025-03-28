@@ -1,24 +1,13 @@
 // pages/diagram-test/components/Sidebar/Sidebar.tsx
 import Image from 'next/image';
 import React, { useRef, useState } from "react";
-import {
-    FaSearchPlus,
-    FaSearchMinus,
-    FaExpand,
-    FaSave,
-    FaFolderOpen,
-    FaCode,
-    FaBars,
-    FaTools,
-    FaRegFileCode
-} from 'react-icons/fa';
-import Tippy from '@tippyjs/react';
-import 'tippy.js/dist/tippy.css';
-import { useDiagramContext } from '../../context/useDiagramContext';
-import { generateSystemVerilogCode } from '../../utils/CodeGeneration/SystemVerilogGeneration/SystemVerilogCodeGenerator';
-import { generateVHDLCode } from '../../utils/CodeGeneration/VHDLGeneration/VDHLCodeGenerator';
+import {Plus, Minus, Expand, ArrowDownToLine, FolderOpen, Code, Menu, Frame, FileCode} from 'lucide-react'
+import {Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { useDiagramContext } from "@/app/diagram-test/context/useDiagramContext";
+import { generateSystemVerilogCode } from "@/app/diagram-test/utils/CodeGeneration/SystemVerilogGeneration/SystemVerilogCodeGenerator";
+import { generateVHDLCode } from "@/app/diagram-test/utils/CodeGeneration/VHDLGeneration/VDHLCodeGenerator";
 import ResizablePanel from '../common/ResizablePanel';
-import styles from './Sidebar.module.css';
+// import styles from './Sidebar.module.css';
 
 const Sidebar = () => {
     const { zoomIn, zoomOut, fitToView, graph } = useDiagramContext();
@@ -28,6 +17,20 @@ const Sidebar = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [gridColumns, setGridColumns] = useState(3);
 
+    const getGridColsClass = (cols: number) => {
+        switch (cols) {
+            case 1:
+                return "grid-cols-1";
+            case 2:
+                return "grid-cols-2";
+            case 3:
+                return "grid-cols-3";
+            case 4:
+                return "grid-cols-4";
+            default:
+                return "grid-cols-3"; // fallback
+        }
+    };
     const calculateGridColumns = (width: number) => {
         if (width < 200) return 1;
         if (width < 350) return 2;
@@ -35,12 +38,122 @@ const Sidebar = () => {
         return 4;
     };
 
-    const iconListStyle = {
-        display: 'grid',
-        gridTemplateColumns: `repeat(${gridColumns}, 1fr)`,
-        gap: '8px',
-        padding: '4px'
-    };
+    const iconListStyle = `grid ${getGridColsClass(gridColumns)} gap-2 p-1`;
+
+    const elements = [
+        { type: 'and', label: 'AND Gate', img: 'andIcon.svg' },
+        { type: 'or', label: 'OR Gate', img: 'orIcon.svg' },
+        { type: 'xor', label: 'XOR Gate', img: 'xorIcon.svg' },
+        { type: 'xnor', label: 'XNOR Gate', img: 'xnorIcon.svg' },
+        { type: 'nand', label: 'NAND Gate', img: 'nandIcon.svg' },
+        { type: 'nor', label: 'NOR Gate', img: 'norIcon.svg' },
+        { type: 'not', label: 'NOT Gate', img: 'notIcon.svg' },
+        { type: 'multiplexer', label: 'Multiplexer', img: 'multiplexer_2_ports.svg' },
+        { type: 'decoder', label: 'Decoder', img: 'decoder.svg' },
+        { type: 'encoder', label: 'Encoder', img: 'encoder.svg' },
+        { type: 'alu', label: 'Alu', img: 'alu.svg' },
+        { type: 'comp', label: 'Comparator', img: 'comparatorIcon.svg' },
+        { type: 'input', label: 'Input Port', img: 'inputPort.svg' },
+        { type: 'output', label: 'Output Port', img: 'outputPort.svg' },
+        { type: 'newModule', label: 'New Module', img: 'NewModule.svg' },
+        { type: 'newModule', label: 'Existing Module', img: 'ExistingModule.svg' },
+        { type: 'ram', label: 'SRAM', img: 'Ram.svg' },
+        { type: 'register', label: 'REGISTER', img: 'Register.svg' },
+        { type: 'bitSelect', label: 'Bit Select', img: 'BitSelect.svg' },
+        { type: 'bitCombine', label: 'Bit Combine', img: 'BitCombine.svg' },
+    ];
+
+    const paperActions = [
+        { icon: <Plus size={24} />, label: "Zoom In", action: () => zoomIn() },
+        { icon: <Minus size={24} />, label: "Zoom Out", action: () => zoomOut() },
+        { icon: <Expand size={24} />, label: "Fit to View", action: () => fitToView() },
+    ];
+    const saveLoadActions = [
+        {
+            icon: <Code size={24} />,
+            label: "Generate SystemVerilog Code",
+            action: () => handleGenerateSystemVerilogCode(),
+            text: "Generate SystemVerilog Code"
+        },
+        {
+            icon: <Code size={24} />,
+            label: "Generate VHDL Code",
+            action: () => handleGenerateVHDLCode(),
+            text: "Generate VHDL Code"
+        },
+        {
+            icon: <ArrowDownToLine size={24} />,
+            label: "Save Diagram",
+            action: () => handleSaveDiagram(),
+            text: "Save Diagram"
+        },
+        {
+            icon: <FolderOpen size={24} />,
+            label: "Load Diagram",
+            action: () => triggerLoadDiagram(),
+            text: "Load Diagram"
+        },
+    ];
+    const iconItemClass = "flex items-center justify-center p-1.5 min-h-[60px] bg-white border border-gray-300 rounded cursor-grab hover:bg-blue-50 hover:shadow-md transition-transform active:cursor-grabbing";
+    const svgIconClass = "w-10 h-auto";
+
+    const ElementIcon = ({ type, label, img }: { type: string; label: string; img: string }) => (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <div
+                    className={iconItemClass}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, type)}
+                >
+                    <Image
+                        src={`/images/svg/${img}`}
+                        alt={label}
+                        className={svgIconClass}
+                        width={40}
+                        height={40}
+                    />
+                </div>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+                {label}
+            </TooltipContent>
+        </Tooltip>
+    );
+
+    const ActionsIcon = ({ icon, label, action }: { icon: React.JSX.Element; label: string; action: () => void }) => (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <div
+                    className={iconItemClass}
+                    onClick={action}
+                >
+                    {icon}
+                </div>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+                {label}
+            </TooltipContent>
+        </Tooltip>
+    );
+
+    const SaveLoadIcon = ({ icon, label, action, text }: { icon: React.JSX.Element; label: string; action: () => void, text: string }) => (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <div
+                    className={`${iconItemClass} space-x-2`}
+                    onClick={action}
+                >
+                    {icon}
+                    <span className="text-sm text-gray-800">{text}</span>
+                </div>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+                {label}
+            </TooltipContent>
+        </Tooltip>
+    );
+
+
 
     const handleWidthChange = (newWidth: number) => {
         setGridColumns(calculateGridColumns(newWidth));
@@ -109,407 +222,54 @@ const Sidebar = () => {
 
     return (
         <ResizablePanel
-            className={styles.sidebar}
+            className="bg-[#f6f6f6] text-[#333] p-2 box-border flex flex-col h-screen overflow-y-auto relative scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
             onWidthChange={handleWidthChange}
             direction="right"
         >
             {/* Logic Elements Group */}
             <div>
-                <div className={styles.groupHeader} onClick={() => setIsElementsCollapsed(!isElementsCollapsed)}>
-                    <FaTools className={styles.collapseIcon} />
+                <div className="flex items-center justify-between p-2 bg-blue-100 border border-blue-200 rounded hover:bg-blue-200 cursor-pointer" onClick={() => setIsElementsCollapsed(!isElementsCollapsed)}>
+                    <Frame className="flex items-center gap-2" />
                     <h3>Elements</h3>
-                    <FaBars className={styles.toggleIcon} />
+                    <Menu className="flex items-center gap-2" />
                 </div>
                 {!isElementsCollapsed && (
-                    <div style={iconListStyle}>
-                        <Tippy content="AND Gate" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'and')}
-                            >
-                                <Image
-                                    src="/images/svg/andIcon.svg"
-                                    alt="AND Gate"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
-                        <Tippy content="OR Gate" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'or')}
-                            >
-                                <Image
-                                    src="/images/svg/orIcon.svg"
-                                    alt="OR Gate"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
-                        <Tippy content="XOR Gate" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'xor')}
-                            >
-                                <Image
-                                    src="/images/svg/xorIcon.svg"
-                                    alt="XOR Gate"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
-                        <Tippy content="XNOR Gate" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'xnor')}
-                            >
-                                <Image
-                                    src="/images/svg/xnorIcon.svg"
-                                    alt="XNOR Gate"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
-                        <Tippy content="NAND Gate" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'nand')}
-                            >
-                                <Image
-                                    src="/images/svg/nandIcon.svg"
-                                    alt="NAND Gate"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
-                        <Tippy content="NOR Gate" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'nor')}
-                            >
-                                <Image
-                                    src="/images/svg/norIcon.svg"
-                                    alt="NOR Gate"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
-                        <Tippy content="NOT Gate" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'not')}
-                            >
-                                <Image
-                                    src="/images/svg/notIcon.svg"
-                                    alt="NOT Gate"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
-                        {/* Complex Logic Elements Group */}
-                        <Tippy content="Multiplexer" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'multiplexer')}
-                            >
-                                <Image
-                                    src="/images/svg/multiplexer_2_ports.svg"
-                                    alt="Multiplexer"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
-                        <Tippy content="Decoder" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'decoder')}
-                            >
-                                <Image
-                                    src="/images/svg/decoder.svg"
-                                    alt="Decoder"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
-                        <Tippy content="Encoder" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'encoder')}
-                            >
-                                <Image
-                                    src="/images/svg/encoder.svg"
-                                    alt="Encoder"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
-                        <Tippy content="Alu" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'alu')}
-                            >
-                                <Image
-                                    src="/images/svg/alu.svg"
-                                    alt="Alu"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
-                        <Tippy content="Comparator" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'comp')}
-                            >
-                                <Image
-                                    src="/images/svg/comparatorIcon.svg"
-                                    alt="Comparator"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
-                        {/* I/O Elements Group */}
-                        <Tippy content="Input Port" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'input')}
-                            >
-                                <Image
-                                    src="/images/svg/inputPort.svg"
-                                    alt="Input Port"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-
-                                />
-                            </div>
-                        </Tippy>
-                        <Tippy content="Output Port" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'output')}
-                            >
-                                <Image
-                                    src="/images/svg/outputPort.svg"
-                                    alt="Output Port"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
-                        {/* Module Group */}
-                        <Tippy content="New Module" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'newModule')}
-                            >
-                                <Image
-                                    src="/images/svg/NewModule.svg"
-                                    alt="New Module"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
-                        <Tippy content="Existing Module" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'newModule')}
-                            >
-                                <Image
-                                    src="/images/svg/ExistingModule.svg"
-                                    alt="Existing Module"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
-                        {/* Memory Group */}
-                        <Tippy content="SRAM" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'ram')}
-                            >
-                                <Image
-                                    src="/images/svg/Ram.svg"
-                                    alt="SRAM"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
-                        <Tippy content="REGISTER" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'register')}
-                            >
-                                <Image
-                                    src="/images/svg/Register.svg"
-                                    alt="REGISTER"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
-                        {/* Bit Operations Group */}
-                        <Tippy content="Bit Select" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'bitSelect')}
-                            >
-                                <Image
-                                    src="/images/svg/BitSelect.svg"
-                                    alt="Bit Select"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
-                        <Tippy content="Bit Combine" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, 'bitCombine')}
-                            >
-                                <Image
-                                    src="/images/svg/BitCombine.svg"
-                                    alt="Bit Combine"
-                                    className={styles.svgIcon}
-                                    width={40}
-                                    height={40}
-                                />
-                            </div>
-                        </Tippy>
+                    <div className={iconListStyle}>
+                        {elements.map((el) => (
+                            <ElementIcon key={`${el.type}-${el.label}`} {...el} />
+                        ))}
                     </div>
                 )}
             </div>
 
             {/* Paper Actions Group */}
             <div>
-                <div className={styles.groupHeader} onClick={() => setIsActionsCollapsed(!isActionsCollapsed)}>
-                    <FaExpand className={styles.collapseIcon} />
+                <div className="flex items-center justify-between p-2 bg-blue-100 border border-blue-200 rounded hover:bg-blue-200 cursor-pointer" onClick={() => setIsActionsCollapsed(!isActionsCollapsed)}>
+                    <Expand className="flex items-center gap-2" />
                     <h3>Paper Actions</h3>
-                    <FaBars className={styles.toggleIcon} />
+                    <Menu className="flex items-center gap-2"/>
                 </div>
                 {!isActionsCollapsed && (
-                    <div style={iconListStyle}>
-                        <Tippy content="Zoom In" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                onClick={zoomIn}
-                            >
-                                <FaSearchPlus size={24} />
-                            </div>
-                        </Tippy>
-                        <Tippy content="Zoom Out" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                onClick={zoomOut}
-                            >
-                                <FaSearchMinus size={24} />
-                            </div>
-                        </Tippy>
-                        <Tippy content="Fit to View" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-                                onClick={fitToView}
-                            >
-                                <FaExpand size={24} />
-                            </div>
-                        </Tippy>
+                    <div className={iconListStyle}>
+                        {paperActions.map((el) => (
+                            <ActionsIcon key={el.label} {...el} />
+                        ))}
                     </div>
                 )}
             </div>
 
             {/* Save & Load Group */}
             <div>
-                <div className={styles.groupHeader} onClick={() => setIsSaveLoadCollapsed(!isSaveLoadCollapsed)}>
-                    <FaRegFileCode className={styles.collapseIcon} />
+                <div className="flex items-center justify-between p-2 bg-blue-100 border border-blue-200 rounded hover:bg-blue-200 cursor-pointer" onClick={() => setIsSaveLoadCollapsed(!isSaveLoadCollapsed)}>
+                    <FileCode className="flex items-center gap-2" />
                     <h3>Generate</h3>
-                    <FaBars className={styles.toggleIcon} />
+                    <Menu className="flex items-center gap-2" />
                 </div>
                 {!isSaveLoadCollapsed && (
-                    <div style={iconListStyle}>
-                        <Tippy content="Generate SystemVerilog Code" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-
-                                onClick={handleGenerateSystemVerilogCode}
-                            >
-                                <FaCode size={24} />
-                                <span>Generate SystemVerilog Code</span>
-                            </div>
-                        </Tippy>
-                        <Tippy content="Generate VHDL Code" placement="right" delay={[500, 0]}>
-                            <div
-                                className={styles.iconItem}
-
-                                onClick={handleGenerateVHDLCode}
-                            >
-                                <FaCode size={24} />
-                                <span>Generate VHDL Code</span>
-                            </div>
-                        </Tippy>
-                        <Tippy content="Save Diagram" placement="right" delay={[500, 0]}>
-                            <div className={styles.iconItem} onClick={handleSaveDiagram}>
-                                <FaSave size={24} />
-                                <span>Save Diagram</span>
-                            </div>
-                        </Tippy>
-                        <Tippy content="Load Diagram" placement="right" delay={[500, 0]}>
-                            <div className={styles.iconItem} onClick={triggerLoadDiagram}>
-                                <FaFolderOpen size={24} />
-                                <span>Load Diagram</span>
-                            </div>
-                        </Tippy>
+                    <div className={iconListStyle}>
+                        {saveLoadActions.map((el) => (
+                            <SaveLoadIcon key={el.label} {...el} />
+                        ))}
                         {/* Hidder input for loading */}
                         <input
                             type="file"

@@ -1,4 +1,4 @@
-import { Xor } from '../classes/xor';
+import { Xor } from "@/app/diagram-test/components/Shapes/classes/xor";
 import { shapes } from "@joint/core";
 
 export const JointJSXor = (xor: Xor) => {

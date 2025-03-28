@@ -1,10 +1,15 @@
-import {Alu} from '../classes/alu';
+import {Alu} from "@/app/diagram-test/components/Shapes/classes/alu";
 import { shapes } from "@joint/core";
 
 export const JointJSAlu = (alu: Alu) => {
 
     const dimension = 100;
     const portItems = [];
+    const outputBandwidth = (alu.type === '+' || alu.type === '-')
+        ? alu.dataBandwidth + 1
+        : alu.type === '*'
+            ? alu.dataBandwidth * 2
+            : alu.dataBandwidth;
 
     portItems.push({
         id: 'input1',
@@ -29,7 +34,7 @@ export const JointJSAlu = (alu: Alu) => {
     portItems.push({
         id: 'output1',
         group: 'output',
-        bandwidth: alu.dataBandwidth + 1,
+        bandwidth: outputBandwidth,
         args: {
             x: dimension / 2,
             y: dimension / 2

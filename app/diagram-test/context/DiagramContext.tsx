@@ -1,7 +1,6 @@
 // pages/diagram-test/context/DiagramContext.tsx
 
 import React, { createContext, useState, ReactNode } from 'react';
-import * as joint from "@joint/core";
 import { dia, shapes } from "@joint/core";
 
 interface DiagramContextProps {

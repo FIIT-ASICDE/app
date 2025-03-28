@@ -1,4 +1,4 @@
-import { Multiplexer } from '../classes/multiplexer';
+import { Multiplexer } from "@/app/diagram-test/components/Shapes/classes/multiplexer";
 import { shapes } from "@joint/core";
 
 export const JointJSMultiplexer = (multiplexer: Multiplexer) => {
