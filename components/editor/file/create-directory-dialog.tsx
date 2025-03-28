@@ -40,9 +40,7 @@ export const CreateDirectoryDialog = ({
 
             const newDirectory: DirectoryDisplayItem = {
                 type: "directory-display",
-                name: parentItem
-                    ? parentItem.absolutePath + "/" + item.name
-                    : item.name,
+                name: item.name,
                 lastActivity: item.lastActivity,
                 absolutePath: item.absolutePath,
             };
@@ -68,7 +66,7 @@ export const CreateDirectoryDialog = ({
                 type: "directory",
                 name: directoryName.trim(),
                 repoId: repositoryId,
-                path: parentItem?.name,
+                path: parentItem?.absolutePath,
             });
         }
     };
@@ -96,8 +94,7 @@ export const CreateDirectoryDialog = ({
                                 {" "}
                                 in{" "}
                                 <span className="text-muted-foreground">
-                                    {parentItem.name.split("/").pop() ??
-                                        parentItem.name}
+                                    {parentItem.name}
                                 </span>
                             </span>
                         )}

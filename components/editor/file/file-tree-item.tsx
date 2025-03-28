@@ -169,11 +169,7 @@ export const FileTreeItem = ({
                         setSelectedItemAction(undefined);
                     }
                 }}
-                onDoubleClick={() => {
-                    if (onItemClick) {
-                        onItemClick(item);
-                    }
-                }}
+                onDoubleClick={() => onItemClick?.(item)}
             >
                 <div className="flex flex-1 flex-row items-center rounded text-sm hover:bg-accent">
                     {item.type === "directory" ||

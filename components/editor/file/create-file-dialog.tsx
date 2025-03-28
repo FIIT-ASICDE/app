@@ -36,19 +36,14 @@ export const CreateFileDialog = ({
 
     const addFileMutation = api.editor.addItem.useMutation({
         onSuccess: (item) => {
+            if (item.type !== "file-display")
+                throw new Error(
+                    "unexpected state when creating new file, didn't receive 'file-display'",
+                );
+
             toast.success("File created successfully");
 
-            const trimmedFileName: string = fileName.trim();
-
-            const newFile: FileDisplayItem = {
-                type: "file-display",
-                name: item.name,
-                lastActivity: item.lastActivity,
-                language: trimmedFileName.split(".").pop() ?? "",
-                absolutePath: parentItem
-                    ? parentItem.name + "/" + item.name
-                    : item.name,
-            };
+            const newFile: FileDisplayItem = { ...item };
 
             if (!parentItem) {
                 setTree([...tree, newFile]);
@@ -71,7 +66,7 @@ export const CreateFileDialog = ({
                 type: "file",
                 name: fileName.trim(),
                 repoId: repositoryId,
-                path: parentItem?.name,
+                path: parentItem?.absolutePath,
             });
         }
     };
@@ -99,8 +94,7 @@ export const CreateFileDialog = ({
                                 {" "}
                                 in{" "}
                                 <span className="text-muted-foreground">
-                                    {parentItem.name.split("/").pop() ??
-                                        parentItem.name}
+                                    {parentItem.name}
                                 </span>
                             </span>
                         )}
