@@ -1,3 +1,4 @@
+import { stripServerPath } from "@/lib/server/api/routers/repos";
 import {
     FileItem,
     LanguageStatistics,
@@ -6,8 +7,6 @@ import {
 import { TRPCError } from "@trpc/server";
 import fs from "fs";
 import path from "path";
-
-import { stripServerPath } from "../server/api/routers/repos";
 
 /**
  * Reads repository items from a filesystem directory

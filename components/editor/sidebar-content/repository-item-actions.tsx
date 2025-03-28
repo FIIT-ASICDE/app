@@ -93,7 +93,7 @@ export const RepositoryItemActions = ({
                     <>
                         <CreateFileDialog
                             repositoryId={repositoryId}
-                            repositoryItem={parentItem}
+                            parentItem={parentItem}
                             buttonSize="full"
                             tree={tree}
                             setTree={setTree}
@@ -142,7 +142,7 @@ export const RepositoryItemActions = ({
 
                 <RenameItemDialog
                     repositoryId={repositoryId}
-                    repositoryItem={parentItem}
+                    parentItem={parentItem}
                     tree={tree}
                     setTree={setTree}
                     onAction={onAction}
