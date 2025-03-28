@@ -7,6 +7,8 @@ import { TRPCError } from "@trpc/server";
 import fs from "fs";
 import path from "path";
 
+import { stripServerPath } from "../server/api/routers/repos";
+
 /**
  * Reads repository items from a filesystem directory
  *
@@ -49,7 +51,9 @@ export function loadRepoItems(
                         name: entry.name,
                         lastActivity,
                         children: readDirectory(entryPath, currentDepth + 1),
-                        absolutePath: path.join(currentPath, entry.name),
+                        absolutePath: stripServerPath(
+                            path.join(currentPath, entry.name),
+                        ),
                     };
                 }
 
@@ -57,7 +61,9 @@ export function loadRepoItems(
                     type: "directory-display",
                     name: entry.name,
                     lastActivity,
-                    absolutePath: path.join(currentPath, entry.name),
+                    absolutePath: stripServerPath(
+                        path.join(currentPath, entry.name),
+                    ),
                 };
             }
 
@@ -81,7 +87,7 @@ export function loadRepoItems(
                 name: entry.name,
                 lastActivity,
                 language,
-                absolutePath: currentPath,
+                absolutePath: stripServerPath(currentPath),
             };
         });
     }
@@ -109,7 +115,7 @@ export function loadRepoDirOrFile(
             name: path.basename(pathString),
             lastActivity: stat.mtime,
             children: loadRepoItems(pathString, maxDepth, loadContents),
-            absolutePath: pathString,
+            absolutePath: stripServerPath(pathString),
         };
     } else if (stat.isFile()) {
         return loadRepoFile(pathString);
@@ -139,7 +145,7 @@ export function loadRepoFile(filePath: string): FileItem {
         name: fileName,
         lastActivity,
         language,
-        absolutePath: filePath,
+        absolutePath: stripServerPath(filePath),
         content: fs.readFileSync(filePath, "utf-8"),
     };
 }

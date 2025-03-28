@@ -7,6 +7,7 @@ import {
 import {
     hasUserRole,
     resolveRepoPathOrThrow,
+    stripServerPath,
 } from "@/lib/server/api/routers/repos";
 import { createTRPCRouter, protectedProcedure } from "@/lib/server/api/trpc";
 import { FileDisplayItem, RepositoryItem } from "@/lib/types/repository";
@@ -173,7 +174,7 @@ export function addItem() {
                         type: "directory-display",
                         name: input.name,
                         lastActivity: new Date(),
-                        absolutePath: fullPath,
+                        absolutePath: stripServerPath(fullPath),
                     };
                 } else {
                     await writeFile(fullPath, "");
@@ -187,7 +188,7 @@ export function addItem() {
                         name: input.name,
                         lastActivity: new Date(),
                         language,
-                        absolutePath: fullPath,
+                        absolutePath: stripServerPath(fullPath),
                     };
                 }
             } catch (error) {
