@@ -1,19 +1,19 @@
-import { Ram } from "@/app/diagram-test/components/Shapes/classes/ram";
+import { Sram } from "@/app/diagram-test/components/Shapes/classes/sram";
 import { shapes } from "@joint/core";
 
-export const JointJSSRam = (ram: Ram) => {
+export const JointJSSRam = (sram: Sram) => {
 
     const dimension = 200;
     const portItems = [];
 
-    const ramRefD = ram.clkEdge === 'rising'
+    const ramRefD = sram.clkEdge === 'rising'
         ? 'M 0 0 L 30 0 L 25 10 L 20 0 L 50 0 L 50 100 L 0 100 Z'
         : 'M 0 0 L 30 0 L 25 10 L 20 0 L 50 0 L 50 100 L 0 100 Z M 23 2 a 2,2 0 1,0 0,-0.1 Z';
 
 
     portItems.push({
         id: 'data_in',
-        bandwidth: ram.dataBandwidth,
+        bandwidth: sram.dataBandwidth,
         group: 'input',
         args: {
             x: 0,
@@ -26,7 +26,7 @@ export const JointJSSRam = (ram: Ram) => {
 
     portItems.push({
         id: 'addr',
-        bandwidth: ram.addressBandwidth,
+        bandwidth: sram.addressBandwidth,
         group: 'input',
         args: {
             x: 0,
@@ -72,7 +72,7 @@ export const JointJSSRam = (ram: Ram) => {
 
     portItems.push({
         id: 'data_out',
-        bandwidth: ram.dataBandwidth,
+        bandwidth: sram.dataBandwidth,
         group: 'output',
         args: {
             x: dimension / 2,
@@ -85,12 +85,12 @@ export const JointJSSRam = (ram: Ram) => {
 
 
     return new shapes.standard.Path({
-        elType: 'ram',
-        name: ram.name,
-        clkEdge: ram.clkEdge,
-        bandwidth: ram.dataBandwidth,
-        addressBandwidth: ram.addressBandwidth,
-        position: { x: ram.position?.x || 100, y: ram.position?.y || 100 },
+        elType: 'sram',
+        name: sram.name,
+        clkEdge: sram.clkEdge,
+        bandwidth: sram.dataBandwidth,
+        addressBandwidth: sram.addressBandwidth,
+        position: { x: sram.position?.x || 100, y: sram.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {
             body: {
@@ -100,7 +100,7 @@ export const JointJSSRam = (ram: Ram) => {
                 strokeWidth: 2,
             },
             label: {
-                text: `SRAM\n${ram.name}`,
+                text: `SRAM\n${sram.name}`,
                 fontSize: 14,
                 fontFamily: 'Arial',
                 fontWeight: 'bold',

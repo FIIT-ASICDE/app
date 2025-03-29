@@ -2,8 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useHotkeys } from "@/app/diagram-test/hooks/useHotkeys";
 import { useDiagramContext } from "@/app/diagram-test/context/useDiagramContext";
-import styles from './PropertiesPanel.module.css';
-import ResizablePanel from '../common/ResizablePanel';
+import ResizablePanel from '@/app/diagram-test/components/common/ResizablePanel';
 import {Multiplexer} from "@/app/diagram-test/components/Shapes/classes/multiplexer";
 import {JointJSMultiplexer} from "@/app/diagram-test/components/Shapes/complexLogic/JointJSMultiplexer";
 import {JointJSAnd} from "@/app/diagram-test/components/Shapes/gates/JointJSAnd";
@@ -23,7 +22,7 @@ import {Module} from "@/app/diagram-test/components/Shapes/classes/module";
 import {JointJSRegister} from "@/app/diagram-test/components/Shapes/memory/JointJSRegister";
 import {Register} from "@/app/diagram-test/components/Shapes/classes/register";
 import {JointJSSRam} from "@/app/diagram-test/components/Shapes/memory/JointJSSRam";
-import {Ram} from "@/app/diagram-test/components/Shapes/classes/ram";
+import {Sram} from "@/app/diagram-test/components/Shapes/classes/sram";
 import {JointJSCombiner} from "@/app/diagram-test/components/Shapes/bitOperations/JointJSCombiner";
 import {Combiner} from "@/app/diagram-test/components/Shapes/classes/combiner";
 import {JointJSBitSplitter} from "@/app/diagram-test/components/Shapes/bitOperations/JointJSBitSplitter";
@@ -47,6 +46,7 @@ interface Properties {
     comparatorType?: string;
     aluType?: string;
     bandwidth?: number;
+    bandwidthType?: string;
     addressBandwidth?: number;
     inputPorts?: number;
     instance?: string;
@@ -62,11 +62,12 @@ interface Properties {
 
 
 const PropertiesPanel = () => {
-    const { selectedElement,graph,setSelectedElement, updateElement, hasFormErrors, setHasFormErrors } = useDiagramContext();
+    const { selectedElement,graph,setSelectedElement, updateElement, setHasFormErrors } = useDiagramContext();
     const [properties, setProperties] = useState<Properties>({
         label: '',
         instance: '',
         bandwidth: 1,
+        bandwidthType: 'bit',
         addressBandwidth: 8,
         inputPorts: 2,
         comparatorType: '',
@@ -80,8 +81,6 @@ const PropertiesPanel = () => {
         rstEdge: 'falling',
         rstType: 'async',
     });
-    const [portWidthMode, setPortWidthMode] = useState<'bit' | 'vector' | 'struct'>('bit');
-    const [logicWidthMode, setLogicWidthMode] = useState<'bit' | 'vector'>('bit');
     const [errorMessage, setErrorMessage] = useState('');
     const [showAddPortDialog, setShowAddPortDialog] = useState(false);
     const [newPortType, setNewPortType] = useState<'input' | 'output'>('input');
@@ -90,6 +89,7 @@ const PropertiesPanel = () => {
     const [editPortIndex, setEditPortIndex] = useState<number | null>(null);
     const [editPortType, setEditPortType] = useState<'input' | 'output'>('input');
     const [showSaveNotification, setShowSaveNotification] = useState(false);
+    const [showErrorNotification, setShowErrorNotification] = useState(false);
     const [panelWidth, setPanelWidth] = useState(300);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [clipboardCell, setClipboardCell] = useState<dia.Cell | null>(null);
@@ -104,6 +104,7 @@ const PropertiesPanel = () => {
             const props: Properties = {
                 label: selectedElement.attributes.name || '',
                 bandwidth: selectedElement.attributes.bandwidth || 1,
+                bandwidthType: selectedElement.attributes.bandwidth === 1 ? 'bit' : selectedElement.attributes.isStruct ? 'struct' : 'vector',
                 inputPorts: selectedElement.attributes.inPorts || 0,
                 createdInPorts: selectedElement.attributes.moduleInPorts || selectedElement.attributes.combineInPorts || [],
                 createdOutPorts: selectedElement.attributes.moduleOutPorts || selectedElement.attributes.selectOutPorts || [],
@@ -120,21 +121,13 @@ const PropertiesPanel = () => {
 
             };
 
-            if (props.bandwidth === 1) {
-                setPortWidthMode('bit');
-            } else if (props.bandwidth != undefined) {
-                if (props.bandwidth > 1) {
-                    setPortWidthMode('vector');
-                }
-            } else {
-                setPortWidthMode('struct');
-            }
             setProperties(props);
         } else {
             setProperties({
                 label: '',
                 instance: '',
                 bandwidth: 1,
+                bandwidthType: 'bit',
                 addressBandwidth: 8,
                 inputPorts: 2,
                 comparatorType: '',
@@ -223,7 +216,13 @@ const PropertiesPanel = () => {
             }, 2000);
             return () => clearTimeout(timer);
         }
-    }, [showSaveNotification]);
+        if (showErrorNotification) {
+            const timer = setTimeout(() => {
+                setShowErrorNotification(false);
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [showSaveNotification, showErrorNotification]);
 
     const handleAddInputPort = () => {
         setNewPortType('input');
@@ -472,19 +471,19 @@ const PropertiesPanel = () => {
             graph.addCell(newRegister);
             setSelectedElement(newRegister);
         }
-        if (selectedElement?.attributes.elType === 'ram') {
+        if (selectedElement?.attributes.elType === 'sram') {
             const { x, y } = selectedElement.position();
-            const ramData = new Ram();
-            ramData.name = properties.label || '';
-            ramData.dataBandwidth = properties.bandwidth || 1;
-            ramData.addressBandwidth = properties.addressBandwidth || 8;
-            ramData.position = { x, y };
-            ramData.clkEdge = properties.clkEdge;
+            const sramData = new Sram();
+            sramData.name = properties.label || '';
+            sramData.dataBandwidth = properties.bandwidth || 1;
+            sramData.addressBandwidth = properties.addressBandwidth || 8;
+            sramData.position = { x, y };
+            sramData.clkEdge = properties.clkEdge;
 
             graph.removeCells([selectedElement]);
-            const newRam = JointJSSRam(ramData);
-            graph.addCell(newRam);
-            setSelectedElement(newRam);
+            const newSram = JointJSSRam(sramData);
+            graph.addCell(newSram);
+            setSelectedElement(newSram);
         }
     }
     const handleLogicPortChange = () => {
@@ -603,7 +602,7 @@ const PropertiesPanel = () => {
 
         const hasAnyErrors = Object.values(errors).some((msg) => msg);
         if (hasAnyErrors) {
-            alert("Cannot save! Check if the fields are filled in correctly");
+            setShowErrorNotification(true);
             return;
         }
 
@@ -627,7 +626,7 @@ const PropertiesPanel = () => {
             handleEncodeDecodeChange();
             return;
         }
-        else if (selectedElement.attributes.elType === 'ram') {
+        else if (selectedElement.attributes.elType === 'sram') {
             selectedElement.attributes.addressBandwidth = properties.addressBandwidth;
             handleMemoryPortChange();
             return;
@@ -741,28 +740,7 @@ const PropertiesPanel = () => {
         onPaste: handlePaste,
     });
 
-    const handleBandwidthRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newMode = e.target.value as 'bit' | 'vector' | 'struct';
-        setPortWidthMode(newMode);
 
-        if (newMode === 'bit') {
-            setProperties(prev => ({ ...prev, bandwidth: 1 }));
-        } else if (newMode === 'vector') {
-            setProperties(prev => ({ ...prev, bandwidth: 2 }));
-        } else {
-            setProperties(prev => ({ ...prev, bandwidth: 0 }));
-        }
-    };
-    const handleLogicRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newMode = e.target.value as 'bit' | 'vector';
-        setLogicWidthMode(newMode);
-
-        if (newMode === 'bit') {
-            setProperties(prev => ({ ...prev, bandwidth: 1 }));
-        } else {
-            setProperties(prev => ({...prev, bandwidth: 2}));
-        }
-    };
     function toTitleCase(str: string) {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
@@ -771,13 +749,13 @@ const PropertiesPanel = () => {
     if (!selectedElement || selectedElement.isLink()) {
         return (
             <ResizablePanel
-                className={styles.propertiesPanel}
+                className="bg-white border-l border-gray-200 shadow-md h-full overflow-y-auto"
                 defaultWidth={300}
                 direction="left"
                 onWidthChange={handleWidthChange}
             >
-                <h3>Properties</h3>
-                <p>Select an element to see its properties.</p>
+                <h3 className="text-lg font-semibold p-4 border-b border-gray-200">Properties</h3>
+                <p className="p-4 text-gray-600">Select an element to see its properties.</p>
             </ResizablePanel>
         );
     }
@@ -785,20 +763,23 @@ const PropertiesPanel = () => {
     return (
         <ResizablePanel
             ref={panelRef}
-            className={styles.propertiesPanel}
+            className="bg-white border-l border-gray-200 shadow-md h-full overflow-y-auto"
             defaultWidth={300}
             direction="left"
             onWidthChange={handleWidthChange}
         >
-            <h3>{selectedElement.attributes.elType.toUpperCase()} Properties</h3>
+            <h3 className="text-lg font-semibold p-4 border-b border-gray-200">
+                {selectedElement.attributes.elType.toUpperCase()} Properties
+            </h3>
 
-
-            {/* Пример для I/O портов */}
-            {(['output', 'input'].includes(selectedElement.attributes.elType)) && (
-                <>
-                    <label>
-                        Name of your Port:
+            <div className="p-4 space-y-4">
+                {(['output', 'input', 'and', 'nand', 'xor', 'or', 'nor', 'not', 'xnor', 'multiplexer', 'decoder', 'encoder', 'alu', 'comparator', 'newModule', 'sram', 'register', 'combiner'].includes(selectedElement.attributes.elType)) && (
+                    <div className="space-y-1">
+                        <label className="block text-sm font-medium text-gray-700">
+                            {toTitleCase(selectedElement.attributes.elType)} name:
+                        </label>
                         <input
+                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             type="text"
                             name="label"
                             placeholder="Port's name..."
@@ -806,772 +787,538 @@ const PropertiesPanel = () => {
                             onChange={handleChange}
                         />
                         {errors.label && (
-                            <div className={styles.errorMessage}>
-                                <CircleAlert className={styles.errorIcon} />
+                            <div className="text-red-500 text-sm mt-1 flex items-center">
+                                <CircleAlert className="w-4 h-4 mr-1" />
                                 {errors.label}
                             </div>
                         )}
-                    </label>
-
-                    <div className={styles.radioContainer}>
-                        <span>Select Port width:</span>
-                        <div className={styles.radioOption}>
-                            <input
-                                type="radio"
-                                name="portWidth"
-                                value="bit"
-                                checked={portWidthMode === 'bit'}
-                                onChange={handleBandwidthRadioChange}
-                            />
-                            <label>Bit</label>
-                        </div>
-
-                        <div className={styles.radioOption}>
-                            <input
-                                type="radio"
-                                name="portWidth"
-                                value="vector"
-                                checked={portWidthMode === 'vector'}
-                                onChange={handleBandwidthRadioChange}
-                            />
-                            <label>Vector</label>
-                        </div>
-
-                        <div className={styles.radioOption}>
-                            <input
-                                type="radio"
-                                name="portWidth"
-                                value="struct"
-                                checked={portWidthMode === 'struct'}
-                                onChange={handleBandwidthRadioChange}
-                            />
-                            <label>User defined</label>
-                        </div>
                     </div>
+                )}
 
-                    {portWidthMode === 'vector' && (
-                        <label>
-                            Width of vector:
-                            <input
-                                type="number"
-                                name="bandwidth"
-                                value={properties.bandwidth || 0}
-                                onChange={handleChange}
-                            />
-                            {errors.bandwidth && (
-                                <div className={styles.errorMessage}>
-                                    <CircleAlert className={styles.errorIcon} />
-                                    {errors.bandwidth}
-                                </div>
+                {(['output', 'input', 'and', 'nand', 'xor', 'or', 'nor', 'not', 'xnor', 'multiplexer', 'decoder', 'encoder', 'alu', 'comparator', 'sram', 'register'].includes(selectedElement.attributes.elType)) && (
+                    <div className="space-y-1">
+                        <label className="block text-sm font-medium text-gray-700">
+                            Select Data width:
+                        </label>
+                        <select
+                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            name="bandwidthType"
+                            value={properties.bandwidthType}
+                            onChange={handleChange}>
+                            <option value="bit">Bit</option>
+                            <option value="vector">Vector</option>
+                            {(['output', 'input', 'multiplexer', 'sram', 'register'].includes(selectedElement.attributes.elType)) && (
+                                <option value="struct">User Defined</option>
                             )}
-                        </label>
-                    )}
-                    {portWidthMode === 'struct' && (
-                        <label>
-                            Choose package file:
-                            <select
-                                value='packageFile'
-                            >
-                                <option value="">--Select--</option>
-                            </select>
-                            Choose user defined type:
-                            <select
-                                value='packageType'
-                            >
-                                <option value="">--Select--</option>
-                            </select>
-                        </label>
-                    )}
-                </>
-            )}
-
-            {(['and', 'nand', 'xor', 'or', 'nor', 'not', 'xnor'].includes(selectedElement.attributes.elType)) && (
-                <>
-                    <label>
-                        {selectedElement.attributes.elType.toUpperCase()} signal name:
-                        <input
-                            type="text"
-                            name="label"
-                            placeholder="Insert name..."
-                            value={properties.label || ''}
-                            onChange={handleChange}
-                        />
-                        {errors.label && (
-                            <div className={styles.errorMessage}>
-                                <CircleAlert className={styles.errorIcon} />
-                                {errors.label}
+                        </select>
+                        {properties.bandwidthType === 'vector' && (
+                            <div className="space-y-1">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Width of vector:
+                                </label>
+                                <input
+                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    type="number"
+                                    name="bandwidth"
+                                    value={properties.bandwidth || 0}
+                                    onChange={handleChange}
+                                />
+                                {errors.bandwidth && (
+                                    <div className="text-red-500 text-sm mt-1 flex items-center">
+                                        <CircleAlert className="w-4 h-4 mr-1" />
+                                        {errors.bandwidth}
+                                    </div>
+                                )}
                             </div>
                         )}
-                    </label>
 
-                    <div className={styles.radioContainer}>
-                        <span>Select {selectedElement.attributes.elType.toUpperCase()} width:</span>
-                        <div className={styles.radioOption}>
-                            <input
-                                type="radio"
-                                name="logicWidth"
-                                value="bit"
-                                checked={logicWidthMode === 'bit'}
-                                onChange={handleLogicRadioChange}
-                            />
-                            <label>Bit</label>
-                        </div>
-
-                        <div className={styles.radioOption}>
-                            <input
-                                type="radio"
-                                name="logicWidth"
-                                value="vector"
-                                checked={logicWidthMode === 'vector'}
-                                onChange={handleLogicRadioChange}
-                            />
-                            <label>Vector</label>
-                        </div>
-
+                        {properties.bandwidthType === 'struct' && (
+                            <div className="space-y-3">
+                                <div className="space-y-1">
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Choose package file:
+                                    </label>
+                                    <select
+                                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        value='packageFile'
+                                    >
+                                        <option value="">--Select--</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Choose user defined type:
+                                    </label>
+                                    <select
+                                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        value='packageType'
+                                    >
+                                        <option value="">--Select--</option>
+                                    </select>
+                                </div>
+                            </div>
+                        )}
                     </div>
-                    {(['and', 'nand', 'xor', 'or', 'nor', 'xnor'].includes(selectedElement.attributes.elType)) && (
-                        <label>
+                )}
+
+                {(['and', 'nand', 'xor', 'or', 'nor', 'xnor'].includes(selectedElement.attributes.elType)) && (
+                    <div className="space-y-1">
+                        <label className="block text-sm font-medium text-gray-700">
                             Number of input ports:
-                            <input
-                                type="number"
-                                name="inputPorts"
-                                value={properties.inputPorts || 0}
-                                onChange={handleChange}
-                            />
-                            {errors.inputPorts && (
-                                <div className={styles.errorMessage}>
-                                    <CircleAlert className={styles.errorIcon} />
-                                    {errors.inputPorts}
-                                </div>
-                            )}
                         </label>
-                    )
-                    }
-                    {logicWidthMode === 'vector' && (
-                        <label>
-                            Width of vector:
-                            <input
-                                type="number"
-                                name="bandwidth"
-                                value={properties.bandwidth || 0}
-                                onChange={handleChange}
-                            />
-                            {errors.bandwidth && (
-                                <div className={styles.errorMessage}>
-                                    <CircleAlert className={styles.errorIcon} />
-                                    {errors.bandwidth}
-                                </div>
-                            )}
-                        </label>
-                    )}
-                </>
-            )}
-
-
-            {selectedElement.attributes.elType === 'multiplexer' && (
-                <>
-                    <label>
-                        {toTitleCase(selectedElement.attributes.elType)} signal name:
                         <input
-                            type="text"
-                            name="label"
-                            placeholder="Insert name..."
-                            value={properties.label || ''}
+                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            type="number"
+                            name="inputPorts"
+                            value={properties.inputPorts || 0}
                             onChange={handleChange}
                         />
-                        {errors.label && (
-                            <div className={styles.errorMessage}>
-                                <CircleAlert className={styles.errorIcon} />
-                                {errors.label}
+                        {errors.inputPorts && (
+                            <div className="text-red-500 text-sm mt-1 flex items-center">
+                                <CircleAlert className="w-4 h-4 mr-1" />
+                                {errors.inputPorts}
                             </div>
                         )}
-                    </label>
-
-                    <div className={styles.radioContainer}>
-                        <span>Select DATA input(s) width:</span>
-                        <div className={styles.radioOption}>
-                            <input
-                                type="radio"
-                                name="portWidth"
-                                value="bit"
-                                checked={portWidthMode === 'bit'}
-                                onChange={handleBandwidthRadioChange}
-                            />
-                            <label>Bit</label>
-                        </div>
-
-                        <div className={styles.radioOption}>
-                            <input
-                                type="radio"
-                                name="portWidth"
-                                value="vector"
-                                checked={portWidthMode === 'vector'}
-                                onChange={handleBandwidthRadioChange}
-                            />
-                            <label>Vector</label>
-                        </div>
-
-                        <div className={styles.radioOption}>
-                            <input
-                                type="radio"
-                                name="portWidth"
-                                value="struct"
-                                checked={portWidthMode === 'struct'}
-                                onChange={handleBandwidthRadioChange}
-                            />
-                            <label>User defined</label>
-                        </div>
                     </div>
+                )}
 
-                    {portWidthMode === 'vector' && (
-                        <label>
-                            Width of vector:
-                            <input
-                                type="number"
-                                name="bandwidth"
-                                value={properties.bandwidth || 0}
-                                onChange={handleChange}
-                            />
-                            {errors.bandwidth && (
-                                <div className={styles.errorMessage}>
-                                    <CircleAlert className={styles.errorIcon} />
-                                    {errors.bandwidth}
-                                </div>
-                            )}
+                {selectedElement.attributes.elType === 'multiplexer' && (
+                    <div className="space-y-1">
+                        <label className="block text-sm font-medium text-gray-700">
+                            Multiplexer type:
                         </label>
-                    )}
-                    {portWidthMode === 'struct' && (
-                        <label>
-                            Choose package file:
-                            <select
-                                name="packageFile"
-                            >
-                                {/*<option value=">">{'>'}</option>*/}
-                            </select>
-                            Choose user defined type:
-                            <select
-                                name="packageType"
-                            >
-                                {/*<option value=">">{'>'}</option>*/}
-                            </select>
-                        </label>
-                    )}
-
-                    <label>
-                        Multiplexer type:
-                        <select onChange={handleChange} defaultValue="2" name="inputPorts">
+                        <select
+                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            onChange={handleChange}
+                            defaultValue="2"
+                            name="inputPorts"
+                        >
                             <option value="2">2-to-1</option>
                             <option value="4">4-to-1</option>
                             <option value="8">8-to-1</option>
                         </select>
-                    </label>
-                </>
+                    </div>
+                )}
 
-            )}
-            {(['decoder', 'encoder'].includes(selectedElement.attributes.elType)) && (
-                <>
-                    <label>
-                        {selectedElement.attributes.elType.toUpperCase()} name:
-                        <input
-                            type="text"
-                            name="label"
-                            placeholder="Insert name..."
-                            value={properties.label || ''}
-                            onChange={handleChange}
-                        />
-                        {errors.label && (
-                            <div className={styles.errorMessage}>
-                                <CircleAlert className={styles.errorIcon} />
-                                {errors.label}
-                            </div>
-                        )}
-                    </label>
-                    <label>
-                    DATA width:
-                        <input
-                            type="number"
-                            name="bandwidth"
-                            value={properties.bandwidth || 0}
-                            onChange={handleChange}
-                        />
-                        {errors.bandwidth && (
-                            <div className={styles.errorMessage}>
-                                <CircleAlert className={styles.errorIcon} />
-                                {errors.bandwidth}
-                            </div>
-                        )}
-                    </label>
-
-                </>
-
-            )}
-
-            {(['alu', 'comparator'].includes(selectedElement.attributes.elType)) && (
-                <>
-                    <label>
-                        {selectedElement.attributes.elType.toUpperCase()} name:
-                        <input
-                            type="text"
-                            name="label"
-                            placeholder="Insert name..."
-                            value={properties.label || ''}
-                            onChange={handleChange}
-                        />
-                        {errors.label && (
-                            <div className={styles.errorMessage}>
-                                <CircleAlert className={styles.errorIcon} />
-                                {errors.label}
-                            </div>
-                        )}
-                    </label>
-                    <label>
-                        DATA width:
-                        <input
-                            type="number"
-                            name="bandwidth"
-                            value={properties.bandwidth || 0}
-                            onChange={handleChange}
-                        />
-                        {errors.bandwidth && (
-                            <div className={styles.errorMessage}>
-                                <CircleAlert className={styles.errorIcon} />
-                                {errors.bandwidth}
-                            </div>
-                        )}
-                    </label>
-                    {selectedElement.attributes.elType === 'alu' && (
-                        <label>
+                {selectedElement.attributes.elType === 'alu' && (
+                    <div className="space-y-1">
+                        <label className="block text-sm font-medium text-gray-700">
                             ALU Type:
-                            <select
-                                name="aluType"
-                                value={properties.aluType}
-                                onChange={handleChange}
-                            >
-                                <option value="+">{'+'}</option>
-                                <option value="-">{'-'}</option>
-                                <option value="*">{'*'}</option>
-                                <option value="/">{'/'}</option>
-                                <option value="%">{'%'}</option>
-                            </select>
                         </label>
-                    )}
-                    {selectedElement.attributes.elType === 'comparator' && (
-                        <label>
+                        <select
+                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            name="aluType"
+                            value={properties.aluType}
+                            onChange={handleChange}
+                        >
+                            <option value="+">{'+'}</option>
+                            <option value="-">{'-'}</option>
+                            <option value="*">{'*'}</option>
+                            <option value="/">{'/'}</option>
+                            <option value="%">{'%'}</option>
+                        </select>
+                    </div>
+                )}
+
+                {selectedElement.attributes.elType === 'comparator' && (
+                    <div className="space-y-1">
+                        <label className="block text-sm font-medium text-gray-700">
                             Comparator Type:
-                            <select
-                                name="comparatorType"
-                                value={properties.comparatorType}
-                                onChange={handleChange}
-                            >
-                                <option value=">">{'>'}</option>
-                                <option value="<">{'<'}</option>
-                                <option value=">=">{'>='}</option>
-                                <option value="<=">{'<='}</option>
-                                <option value="==">{'=='}</option>
-                                <option value="!=">{'!='}</option>
-                            </select>
                         </label>
-                    )}
-                </>
-
-            )}
-            {(['newModule'].includes(selectedElement.attributes.elType)) && (
-                <>
-                    <label>
-                        New Module name:
-                        <input
-                            type="text"
-                            name="label"
-                            placeholder="Insert name..."
-                            value={properties.label || ''}
+                        <select
+                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            name="comparatorType"
+                            value={properties.comparatorType}
                             onChange={handleChange}
-                        />
-                        {errors.label && (
-                            <div className={styles.errorMessage}>
-                                <CircleAlert className={styles.errorIcon} />
-                                {errors.label}
-                            </div>
-                        )}
-                    </label>
-                    <label>
-                        Instance name:
-                        <input
-                            type="text"
-                            name="instance"
-                            placeholder="Insert instance..."
-                            value={properties.instance || ''}
-                            onChange={handleChange}
-                        />
-                        {errors.instance && (
-                            <div className={styles.errorMessage}>
-                                <CircleAlert className={styles.errorIcon} />
-                                {errors.instance}
-                            </div>
-                        )}
-                    </label>
-
-                    <div className={styles.portSection}>
-                        <h4>Input Ports</h4>
-                        {properties.createdInPorts.map((p, idx) => (
-                            <div key={idx} className={styles.portItem}>
-                                <span>{p.name} (bw={p.bandwidth})</span>
-
-                                <Pencil
-                                    className={styles.portIcon}
-                                    onClick={() => handleEditPort('input', idx)}
-                                />
-
-                                <Trash2
-                                    className={styles.portIcon}
-                                    onClick={() => handleDeletePort('input', idx)}
-                                />
-                            </div>
-                        ))}
-                        <button onClick={handleAddInputPort} className={styles.addPortButton}>
-                            Add Input Port
-                        </button>
+                        >
+                            <option value=">">{'>'}</option>
+                            <option value="<">{'<'}</option>
+                            <option value=">=">{'>='}</option>
+                            <option value="<=">{'<='}</option>
+                            <option value="==">{'=='}</option>
+                            <option value="!=">{'!='}</option>
+                        </select>
                     </div>
-                    <div className={styles.portSection}>
-                        <h4>Output Ports</h4>
-                        {properties.createdOutPorts.map((p, idx) => (
-                            <div key={idx} className={styles.portItem}>
-                                <span>{p.name} (bw={p.bandwidth})</span>
+                )}
 
-                                <Pencil
-                                    className={styles.portIcon}
-                                    onClick={() => handleEditPort('output', idx)}
-                                />
-
-                                <Trash2
-                                    className={styles.portIcon}
-                                    onClick={() => handleDeletePort('output', idx)}
-                                />
-                            </div>
-                        ))}
-                        <button onClick={handleAddOutputPort} className={styles.addPortButton}>
-                            Add Output Port
-                        </button>
-                    </div>
-                </>
-            )}
-            {(['ram', 'register'].includes(selectedElement.attributes.elType)) && (
-                <>
-                    <label>
-                        SRAM name:
-                        <input
-                            type="text"
-                            name="label"
-                            placeholder="Insert name..."
-                            value={properties.label || ''}
-                            onChange={handleChange}
-                        />
-                        {errors.label && (
-                            <div className={styles.errorMessage}>
-                                <CircleAlert className={styles.errorIcon} />
-                                {errors.label}
-                            </div>
-                        )}
-                    </label>
-                    {(['ram'].includes(selectedElement.attributes.elType)) && (
-                        <label>
-                            Address width:
+                {(['newModule'].includes(selectedElement.attributes.elType)) && (
+                    <>
+                        <div className="space-y-1">
+                            <label className="block text-sm font-medium text-gray-700">
+                                Instance name:
+                            </label>
                             <input
-                                type="number"
-                                name="addressBandwidth"
-                                placeholder="Insert width..."
-                                value={properties.addressBandwidth || ''}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                type="text"
+                                name="instance"
+                                placeholder="Insert instance..."
+                                value={properties.instance || ''}
                                 onChange={handleChange}
                             />
-                            {errors.addressBandwidth && (
-                                <div className={styles.errorMessage}>
-                                    <CircleAlert className={styles.errorIcon} />
-                                    {errors.addressBandwidth}
+                            {errors.instance && (
+                                <div className="text-red-500 text-sm mt-1 flex items-center">
+                                    <CircleAlert className="w-4 h-4 mr-1" />
+                                    {errors.instance}
                                 </div>
                             )}
-                        </label>
-                    )}
-                    {(['register'].includes(selectedElement.attributes.elType)) && (
-                        <>
-                            <label>
-                                Reset Port:
+                        </div>
+
+                        <div className="mt-6 border-t border-gray-200 pt-4">
+                            <h4 className="font-medium text-gray-800 mb-2">Input Ports</h4>
+                            <div className="space-y-1 max-h-40 overflow-y-auto">
+                                {properties.createdInPorts.map((p, idx) => (
+                                    <div key={idx} className="flex items-center justify-between p-2 border-b border-gray-100">
+                                        <span className="text-sm">{p.name} (bw={p.bandwidth})</span>
+                                        <div className="flex space-x-2">
+                                            <button
+                                                onClick={() => handleEditPort('input', idx)}
+                                                className="text-blue-500 hover:text-blue-700"
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeletePort('input', idx)}
+                                                className="text-red-500 hover:text-red-700"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <button
+                                onClick={handleAddInputPort}
+                                className="mt-2 px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+                            >
+                                Add Input Port
+                            </button>
+                        </div>
+
+                        <div className="mt-4 border-t border-gray-200 pt-4">
+                            <h4 className="font-medium text-gray-800 mb-2">Output Ports</h4>
+                            <div className="space-y-1 max-h-40 overflow-y-auto">
+                                {properties.createdOutPorts.map((p, idx) => (
+                                    <div key={idx} className="flex items-center justify-between p-2 border-b border-gray-100">
+                                        <span className="text-sm">{p.name} (bw={p.bandwidth})</span>
+                                        <div className="flex space-x-2">
+                                            <button
+                                                onClick={() => handleEditPort('output', idx)}
+                                                className="text-blue-500 hover:text-blue-700"
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeletePort('output', idx)}
+                                                className="text-red-500 hover:text-red-700"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <button
+                                onClick={handleAddOutputPort}
+                                className="mt-2 px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+                            >
+                                Add Output Port
+                            </button>
+                        </div>
+                    </>
+                )}
+
+                {(['sram', 'register'].includes(selectedElement.attributes.elType)) && (
+                    <>
+                        {(['sram'].includes(selectedElement.attributes.elType)) && (
+                            <div className="space-y-1">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Address width:
+                                </label>
                                 <input
-                                    type="checkbox"
-                                    name="resetPort"
-                                    checked={!!properties.resetPort}
+                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    type="number"
+                                    name="addressBandwidth"
+                                    placeholder="Insert width..."
+                                    value={properties.addressBandwidth || ''}
                                     onChange={handleChange}
                                 />
-                            </label>
-                            <label>
-                                Enable Port:
-                                <input
-                                    type="checkbox"
-                                    name="enablePort"
-                                    checked={!!properties.enablePort}
-                                    onChange={handleChange}
-                                />
-                            </label>
-                            <label>
-                                Q Output Inversion:
-                                <input
-                                    type="checkbox"
-                                    name="qInverted"
-                                    checked={!!properties.qInverted}
-                                    onChange={handleChange}
-                                />
-                            </label>
-                            {(properties.resetPort) && (
-                                <>
-                                    <label>
-                                        Reset Edge:
+                                {errors.addressBandwidth && (
+                                    <div className="text-red-500 text-sm mt-1 flex items-center">
+                                        <CircleAlert className="w-4 h-4 mr-1" />
+                                        {errors.addressBandwidth}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {(['register'].includes(selectedElement.attributes.elType)) && (
+                            <>
+                                <div className="flex items-center space-x-2 mt-2">
+                                    <input
+                                        id="resetPort"
+                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                        type="checkbox"
+                                        name="resetPort"
+                                        checked={!!properties.resetPort}
+                                        onChange={handleChange}
+                                    />
+                                    <label htmlFor="resetPort" className="text-sm font-medium text-gray-700">
+                                        Reset Port
+                                    </label>
+                                </div>
+
+                                <div className="flex items-center space-x-2 mt-2">
+                                    <input
+                                        id="enablePort"
+                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                        type="checkbox"
+                                        name="enablePort"
+                                        checked={!!properties.enablePort}
+                                        onChange={handleChange}
+                                    />
+                                    <label htmlFor="enablePort" className="text-sm font-medium text-gray-700">
+                                        Enable Port
+                                    </label>
+                                </div>
+
+                                <div className="flex items-center space-x-2 mt-2">
+                                    <input
+                                        id="qInverted"
+                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                        type="checkbox"
+                                        name="qInverted"
+                                        checked={!!properties.qInverted}
+                                        onChange={handleChange}
+                                    />
+                                    <label htmlFor="qInverted" className="text-sm font-medium text-gray-700">
+                                        Q Output Inversion
+                                    </label>
+                                </div>
+
+                                {(properties.resetPort) && (
+                                    <div className="space-y-1 mt-3">
+                                        <label className="block text-sm font-medium text-gray-700">
+                                            Reset Edge:
+                                        </label>
                                         <select
+                                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                             name="rstEdge"
                                             value={properties.rstEdge}
                                             onChange={handleChange}>
                                             <option value="rising">Rising</option>
                                             <option value="falling">Falling</option>
                                         </select>
-                                    </label>
-                                    <label>
-                                        Reset Type:
+                                    </div>
+                                )}
+
+                                {(properties.resetPort) && (
+                                    <div className="space-y-1 mt-3">
+                                        <label className="block text-sm font-medium text-gray-700">
+                                            Reset Type:
+                                        </label>
                                         <select
+                                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                             name="rstType"
                                             value={properties.rstType}
                                             onChange={handleChange}>
                                             <option value="async">Asynchronous</option>
                                             <option value="sync">Synchronous</option>
                                         </select>
-                                    </label>
-
-                                </>
-                            )}
-                        </>
-                    )}
-
-
-                    <label>
-                        Clock Edge:
-                        <select
-                            name="clkEdge"
-                            value={properties.clkEdge}
-                            onChange={handleChange}>
-                            <option value="rising">Rising</option>
-                            <option value="falling">Falling</option>
-                        </select>
-                    </label>
-                    <div className={styles.radioContainer}>
-                        <span>Select DATA width:</span>
-                        <div className={styles.radioOption}>
-                            <input
-                                type="radio"
-                                name="portWidth"
-                                value="bit"
-                                checked={portWidthMode === 'bit'}
-                                onChange={handleBandwidthRadioChange}
-                            />
-                            <label>Bit</label>
-                        </div>
-
-                        <div className={styles.radioOption}>
-                            <input
-                                type="radio"
-                                name="portWidth"
-                                value="vector"
-                                checked={portWidthMode === 'vector'}
-                                onChange={handleBandwidthRadioChange}
-                            />
-                            <label>Vector</label>
-                        </div>
-
-                        <div className={styles.radioOption}>
-                            <input
-                                type="radio"
-                                name="portWidth"
-                                value="struct"
-                                checked={portWidthMode === 'struct'}
-                                onChange={handleBandwidthRadioChange}
-                            />
-                            <label>User defined</label>
-                        </div>
-                    </div>
-
-                    {portWidthMode === 'vector' && (
-                        <label>
-                            Width of vector:
-                            <input
-                                type="number"
-                                name="bandwidth"
-                                value={properties.bandwidth || 0}
-                                onChange={handleChange}
-                            />
-                            {errors.bandwidth && (
-                                <div className={styles.errorMessage}>
-                                    <CircleAlert className={styles.errorIcon} />
-                                    {errors.bandwidth}
-                                </div>
-                            )}
-                        </label>
-                    )}
-                    {portWidthMode === 'struct' && (
-                        <label>
-                            Choose package file:
-                            <select
-                                name="packageFile"
-                            >
-                                {/*<option value=">">{'>'}</option>*/}
-                            </select>
-                            Choose user defined type:
-                            <select
-                                name="packageType"
-                            >
-                                {/*<option value=">">{'>'}</option>*/}
-                            </select>
-                        </label>
-                    )}
-                </>
-            )}
-            {(['combiner', 'splitter'].includes(selectedElement.attributes.elType)) && (
-                <>
-                    <label>
-                        {toTitleCase(selectedElement.attributes.elType)} signal name:
-                        <input
-                            type="text"
-                            name="label"
-                            placeholder="Insert name..."
-                            value={properties.label || ''}
-                            onChange={handleChange}
-                        />
-                        {errors.label && (
-                            <div className={styles.errorMessage}>
-                                <CircleAlert className={styles.errorIcon} />
-                                {errors.label}
-                            </div>
+                                    </div>
+                                )}
+                            </>
                         )}
-                    </label>
+                        <div className="space-y-1 mt-3">
+                            <label className="block text-sm font-medium text-gray-700">
+                                Clock Edge:
+                            </label>
+                            <select
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                name="clkEdge"
+                                value={properties.clkEdge}
+                                onChange={handleChange}>
+                                <option value="rising">Rising</option>
+                                <option value="falling">Falling</option>
+                            </select>
+                        </div>
+                    </>
+                )}
+                {(['combiner', 'splitter'].includes(selectedElement.attributes.elType)) && (
+                    <>
                     {(['combiner'].includes(selectedElement.attributes.elType)) && (
-                        <div className={styles.portSection}>
-                            <h4>Input Ports</h4>
-                            {properties.createdInPorts.map((p, idx) => (
-                                <div key={idx} className={styles.portItem}>
-                                    <span>{p.name} (bw={p.bandwidth})</span>
-
-                                    <Pencil
-                                        className={styles.portIcon}
-                                        onClick={() => handleEditPort('input', idx)}
-                                    />
-
-                                    <Trash2
-                                        className={styles.portIcon}
-                                        onClick={() => handleDeletePort('input', idx)}
-                                    />
-                                </div>
-                            ))}
-                            <button onClick={handleAddInputPort} className={styles.addPortButton}>
+                        <div className="mt-6 border-t border-gray-200 pt-4">
+                            <h4 className="font-medium text-gray-800 mb-2">Input Ports</h4>
+                            <div className="space-y-1 max-h-40 overflow-y-auto">
+                                {properties.createdInPorts.map((p, idx) => (
+                                    <div key={idx} className="flex items-center justify-between p-2 border-b border-gray-100">
+                                        <span className="text-sm">{p.name} (bw={p.bandwidth})</span>
+                                        <div className="flex space-x-2">
+                                            <button
+                                                onClick={() => handleEditPort('input', idx)}
+                                                className="text-blue-500 hover:text-blue-700"
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeletePort('input', idx)}
+                                                className="text-red-500 hover:text-red-700"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <button
+                                onClick={handleAddInputPort}
+                                className="mt-2 px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+                            >
                                 Add Input Port
                             </button>
                         </div>
-                    )}
+                        )}
                     {(['splitter'].includes(selectedElement.attributes.elType)) && (
-                        <div className={styles.portSection}>
-                            <h4>Output Ports</h4>
-                            {properties.createdOutPorts.map((p, idx) => (
-                                <div key={idx} className={styles.portItem}>
-                                    <span>{p.name} ({p.startBit} - {p.endBit})</span>
-
-                                    <Pencil
-                                        className={styles.portIcon}
-                                        onClick={() => handleEditPort('output', idx)}
-                                    />
-
-                                    <Trash2
-                                        className={styles.portIcon}
-                                        onClick={() => handleDeletePort('output', idx)}
-                                    />
-                                </div>
-                            ))}
-                            <button onClick={handleAddOutputPort} className={styles.addPortButton}>
+                        <div className="mt-4 border-t border-gray-200 pt-4">
+                            <h4 className="font-medium text-gray-800 mb-2">Output Ports</h4>
+                            <div className="space-y-1 max-h-40 overflow-y-auto">
+                                {properties.createdOutPorts.map((p, idx) => (
+                                    <div key={idx} className="flex items-center justify-between p-2 border-b border-gray-100">
+                                        <span className="text-sm">{p.name} ({p.startBit} - {p.endBit})</span>
+                                        <div className="flex space-x-2">
+                                            <button
+                                                onClick={() => handleEditPort('output', idx)}
+                                                className="text-blue-500 hover:text-blue-700"
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeletePort('output', idx)}
+                                                className="text-red-500 hover:text-red-700"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <button
+                                onClick={handleAddOutputPort}
+                                className="mt-2 px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+                            >
                                 Add Output Port
                             </button>
                         </div>
                     )}
+                    </>
+                )}
 
-
-
-                </>
-
-            )}
-
-            <div className={styles.buttonContainer}>
-                <button onClick={handleSave} className={styles.saveButton}>
-                    Save
-                </button>
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                    <button
+                        onClick={handleSave}
+                        className="w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                    >
+                        Save Changes
+                    </button>
+                </div>
             </div>
+
             {showSaveNotification && (
-                <div className={styles.saveNotification}>Element saved successfully!</div>
+                <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg">
+                    Changes saved successfully!
+                </div>
             )}
-            {/* Модальное окно для добавления порта */}
+            {showErrorNotification && (
+                <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg">
+                    Changes cannot be saved!
+                </div>
+            )}
+
             {showAddPortDialog && (
-                <div className={styles.modalOverlay}>
-                    <div className={styles.modal}>
-                        <h3>Add {newPortType === 'input' ? 'Input' : 'Output'} Port</h3>
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-96 shadow-xl">
+                        <h3 className="text-lg font-semibold mb-4">
+                            {isEditingPort ? 'Edit Port' : 'Add New Port'}
+                        </h3>
+
                         {errorMessage && (
-                            <div className={styles.errorMessage}>
-                                <CircleAlert className={styles.errorIcon} />
-                                <span>{errorMessage}</span>
+                            <div className="text-red-500 text-sm mt-1 flex items-center">
+                                <CircleAlert className="w-4 h-4 mr-1" />
+                                {errorMessage}
                             </div>
                         )}
-                        <label>
-                            Port Name:
-                            <input
-                                type="text"
-                                name="name"
-                                value={newPortData.name}
-                                onChange={handleNewPortDataChange}
-                            />
-                            {errors.label && (
-                                <div className={styles.errorMessage}>
-                                    <CircleAlert className={styles.errorIcon} />
-                                    {errors.label}
-                                </div>
-                            )}
-                        </label>
-                        {(['combiner', 'newModule'].includes(selectedElement.attributes.elType)) && (
-                            <label>
-                                Bandwidth:
+
+                        <div className="space-y-4">
+                            <div className="space-y-1">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Port Name:
+                                </label>
                                 <input
-                                    type="number"
-                                    name="bandwidth"
-                                    value={newPortData.bandwidth}
+                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    type="text"
+                                    name="name"
+                                    value={newPortData.name}
                                     onChange={handleNewPortDataChange}
                                 />
-                            </label>
-                        )
-                        }
-                        {(['splitter'].includes(selectedElement.attributes.elType)) && (
-                            <>
-                                <label>
-                                    End Bit:
+                            </div>
+                            {(['combiner', 'newModule'].includes(selectedElement.attributes.elType)) && (
+                                <div className="space-y-1">
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Bandwidth:
+                                    </label>
                                     <input
+                                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         type="number"
-                                        name="endBit"
-                                        value={newPortData.endBit}
+                                        name="bandwidth"
+                                        value={newPortData.bandwidth}
                                         onChange={handleNewPortDataChange}
                                     />
-                                </label>
-                                <label>
-                                    Start Bit:
-                                    <input
-                                        type="number"
-                                        name="startBit"
-                                        value={newPortData.startBit}
-                                        onChange={handleNewPortDataChange}
-                                    />
-                                </label>
-                            </>
-                        )
-                        }
-                        <div className={styles.modalButtons}>
-                            <button onClick={handleNewPortSubmit}>Add Port</button>
-                            <button onClick={handleNewPortCancel}>Cancel</button>
+                                </div>
+                                )}
+
+
+                            {(['splitter'].includes(selectedElement.attributes.elType)) && (
+                                <>
+                                    <div className="space-y-1">
+                                        <label className="block text-sm font-medium text-gray-700">
+                                            End Bit:
+                                        </label>
+                                        <input
+                                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            type="number"
+                                            name="endBit"
+                                            value={newPortData.endBit}
+                                            onChange={handleNewPortDataChange}
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="block text-sm font-medium text-gray-700">
+                                            Start Bit:
+                                        </label>
+                                        <input
+                                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            type="number"
+                                            name="startBit"
+                                            value={newPortData.startBit}
+                                            onChange={handleNewPortDataChange}
+                                        />
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        <div className="flex justify-end mt-6 space-x-2">
+                            <button
+                                onClick={handleNewPortCancel}
+                                className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleNewPortSubmit}
+                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                            >
+                                {isEditingPort ? 'Update' : 'Add'}
+                            </button>
                         </div>
                     </div>
                 </div>

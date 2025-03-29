@@ -39,7 +39,7 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         ['splitter', 'combiner'].includes(cell.attributes.elType)
     );
     const moduleCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'newModule');
-    const sramCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'ram');
+    const sramCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'sram');
     const registerCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'register');
     const links = cells.filter(cell => cell.isLink());
     const splitterTable: { name: string, connectedTo: string, connectedFrom: string, startBit: number, endBit: number }[] = [];
@@ -405,7 +405,7 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         code += `end\n\n`;
     });
     sramCells.forEach(cell => {
-        const ramName = getPortName(cell);
+        const sramName = getPortName(cell);
         const dataWidth = cell.attributes.bandwidth;
         const depth = 1 << cell.attributes.addressBandwidth; // 2^addressBandwidth
 
@@ -415,22 +415,22 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         const weKey = `${cell.id}:we`;
         const dataOutKey = `${cell.id}:data_out`;
 
-        const clkSignal = connectionMap[clkKey] ? getBitSelectedSignal(connectionMap[clkKey][0], ramName) : '/* unconnected */';
-        const dataInSignal = connectionMap[dataInKey] ? getBitSelectedSignal(connectionMap[dataInKey][0], ramName) : '/* unconnected */';
-        const addrSignal = connectionMap[addrKey] ? getBitSelectedSignal(connectionMap[addrKey][0], ramName) : '/* unconnected */';
-        const weSignal = connectionMap[weKey] ? getBitSelectedSignal(connectionMap[weKey][0], ramName) : '/* unconnected */';
-        const dataOutSignal = outputConnectionMap[dataOutKey] ? getBitSelectedSignal(outputConnectionMap[dataOutKey][0], ramName) : ramName;
+        const clkSignal = connectionMap[clkKey] ? getBitSelectedSignal(connectionMap[clkKey][0], sramName) : '/* unconnected */';
+        const dataInSignal = connectionMap[dataInKey] ? getBitSelectedSignal(connectionMap[dataInKey][0], sramName) : '/* unconnected */';
+        const addrSignal = connectionMap[addrKey] ? getBitSelectedSignal(connectionMap[addrKey][0], sramName) : '/* unconnected */';
+        const weSignal = connectionMap[weKey] ? getBitSelectedSignal(connectionMap[weKey][0], sramName) : '/* unconnected */';
+        const dataOutSignal = outputConnectionMap[dataOutKey] ? getBitSelectedSignal(outputConnectionMap[dataOutKey][0], sramName) : sramName;
 
         const clkEdge = cell.attributes.clkEdge === 'falling' ? 'negedge' : 'posedge';
 
-        code += `logic [${dataWidth - 1}:0] ${ramName} [0:${depth - 1}];\n\n`;
+        code += `logic [${dataWidth - 1}:0] ${sramName} [0:${depth - 1}];\n\n`;
 
         code += `always_ff @(${clkEdge} ${clkSignal}) begin\n`;
         code += `    if (${weSignal})\n`;
-        code += `        ${ramName}[${addrSignal}] <= ${dataInSignal};\n`;
+        code += `        ${sramName}[${addrSignal}] <= ${dataInSignal};\n`;
         code += `end\n\n`;
 
-        code += `assign ${dataOutSignal} = ${ramName}[${addrSignal}];\n\n`;
+        code += `assign ${dataOutSignal} = ${sramName}[${addrSignal}];\n\n`;
     });
 
     outputCells.forEach(cell => {

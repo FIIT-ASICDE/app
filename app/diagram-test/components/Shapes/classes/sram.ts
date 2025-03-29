@@ -1,4 +1,4 @@
-export class Ram {
+export class Sram {
     public name: string;
     public id: string;
     public position: {

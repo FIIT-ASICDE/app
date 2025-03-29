@@ -32,7 +32,7 @@ import { Comparator } from "@/app/diagram-test/components/Shapes/classes/compara
 import { JointJSNewModule } from "@/app/diagram-test/components/Shapes/modules/JointJSNewModule";
 import { Module } from "@/app/diagram-test/components/Shapes/classes/module";
 import { JointJSSRam } from "@/app/diagram-test/components/Shapes/memory/JointJSSRam";
-import { Ram } from "@/app/diagram-test/components/Shapes/classes/ram";
+import { Sram } from "@/app/diagram-test/components/Shapes/classes/sram";
 import { JointJSRegister } from "@/app/diagram-test/components/Shapes/memory/JointJSRegister";
 import { Register } from "@/app/diagram-test/components/Shapes/classes/register";
 import { JointJSBitSplitter } from "@/app/diagram-test/components/Shapes/bitOperations/JointJSBitSplitter";
@@ -69,7 +69,7 @@ const DiagramArea = () => {
         case 'alu':        return 'alu';
         case 'comp':       return 'comparator';
         case 'newModule':  return 'newModule';
-        case 'ram':        return 'ram';
+        case 'sram':       return 'sram';
         case 'register':   return 'register';
         case 'splitter':   return 'splitter';
         case 'combiner':   return 'combiner';
@@ -211,12 +211,13 @@ const DiagramArea = () => {
             newModule.instance = `instance_${elementName}`;
             element = JointJSNewModule(newModule);
             break;
-        case 'ram':
-            const ram = new Ram();
-            ram.name = elementName;
-            ram.dataBandwidth = 1;
-            ram.clkEdge = "rising";
-            element = JointJSSRam(ram);
+        case 'sram':
+            const sram = new Sram();
+            sram.name = elementName;
+            sram.dataBandwidth = 1;
+            sram.addressBandwidth = 8;
+            sram.clkEdge = "rising";
+            element = JointJSSRam(sram);
             break;
         case 'register':
             const register = new Register();

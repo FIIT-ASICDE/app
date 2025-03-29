@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { dia, shapes, linkTools, elementTools, Selec, V } from "@joint/core";
+import { dia, shapes, linkTools, elementTools, V } from "@joint/core";
 import { useDiagramContext } from "@/app/diagram-test/context/useDiagramContext";
 import './jointjs.css'
 

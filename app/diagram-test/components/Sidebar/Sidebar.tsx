@@ -6,7 +6,7 @@ import {Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { useDiagramContext } from "@/app/diagram-test/context/useDiagramContext";
 import { generateSystemVerilogCode } from "@/app/diagram-test/utils/CodeGeneration/SystemVerilogGeneration/SystemVerilogCodeGenerator";
 import { generateVHDLCode } from "@/app/diagram-test/utils/CodeGeneration/VHDLGeneration/VDHLCodeGenerator";
-import ResizablePanel from '../common/ResizablePanel';
+import ResizablePanel from '@/app/diagram-test/components/common/ResizablePanel';
 
 const Sidebar = () => {
     const { zoomIn, zoomOut, fitToView, graph } = useDiagramContext();
@@ -56,7 +56,7 @@ const Sidebar = () => {
         { type: 'output', label: 'Output Port', img: 'outputPort.svg' },
         { type: 'newModule', label: 'New Module', img: 'NewModule.svg' },
         { type: 'newModule', label: 'Existing Module', img: 'ExistingModule.svg' },
-        { type: 'ram', label: 'SRAM', img: 'Ram.svg' },
+        { type: 'sram', label: 'SRAM', img: 'Sram.svg' },
         { type: 'register', label: 'REGISTER', img: 'Register.svg' },
         { type: 'splitter', label: 'Splitter', img: 'Splitter.svg' },
         { type: 'combiner', label: 'Combiner', img: 'Combiner.svg' },

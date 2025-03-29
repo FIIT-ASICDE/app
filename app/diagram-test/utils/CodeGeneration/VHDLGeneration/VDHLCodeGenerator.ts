@@ -39,7 +39,7 @@ export function generateVHDLCode(graph: dia.Graph): string {
         ['splitter', 'combiner'].includes(cell.attributes.elType)
     );
     const moduleCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'newModule');
-    const sramCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'ram');
+    const sramCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'sram');
     const registerCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'register');
     const links = cells.filter(cell => cell.isLink());
     const splitterTable: { name: string, connectedTo: string, connectedFrom: string, startBit: number, endBit: number }[] = [];
@@ -480,7 +480,7 @@ export function generateVHDLCode(graph: dia.Graph): string {
 
     });
     sramCells.forEach(cell => {
-        const ramName = elementNames[cell.id];
+        const sramName = elementNames[cell.id];
 
         const clkKey = `${cell.id}:clk`;
         const dataInKey = `${cell.id}:data_in`;
@@ -492,7 +492,7 @@ export function generateVHDLCode(graph: dia.Graph): string {
         const dataInSignal = connectionMap[dataInKey] ? connectionMap[dataInKey][0] : '/* unconnected */';
         const addrSignal = connectionMap[addrKey] ? connectionMap[addrKey][0] : '/* unconnected */';
         const weSignal = connectionMap[weKey] ? connectionMap[weKey][0] : '/* unconnected */';
-        const dataOutSignal = outputConnectionMap[dataOutKey] ? outputConnectionMap[dataOutKey][0] : ramName;
+        const dataOutSignal = outputConnectionMap[dataOutKey] ? outputConnectionMap[dataOutKey][0] : sramName;
 
         const clkEdge = cell.attributes.clkEdge === 'falling' ? 'falling_edge' : 'rising_edge';
 
@@ -501,16 +501,16 @@ export function generateVHDLCode(graph: dia.Graph): string {
         code += `            IF ${clkEdge}(${clkSignal}) THEN\n`;
         if (cell.attributes.enablePort) {
             code += `                IF ${weSignal} = '1' THEN\n`;
-            code += `                    ${ramName}(to_integer(unsigned(${addrSignal}))) <= ${dataInSignal};\n`;
+            code += `                    ${sramName}(to_integer(unsigned(${addrSignal}))) <= ${dataInSignal};\n`;
             code += `                END IF;\n`;
             code += `            END IF;\n`;
         }
         else {
-            code += `                ${ramName}(to_integer(unsigned(${addrSignal}))) <= ${dataInSignal};\n`;
+            code += `                ${sramName}(to_integer(unsigned(${addrSignal}))) <= ${dataInSignal};\n`;
             code += `            END IF;\n`;
         }
 
-        code += `    ${dataOutSignal} <= ${ramName}(to_integer(unsigned(${addrSignal})));\n`;
+        code += `    ${dataOutSignal} <= ${sramName}(to_integer(unsigned(${addrSignal})));\n`;
     });
 
     outputCells.forEach(cell => {

@@ -4,13 +4,12 @@ import React from 'react';
 import Sidebar from '../Sidebar/Sidebar';
 import DiagramArea from '../DiagramArea/DiagramArea';
 import PropertiesPanel from '../PropertiesPanel/PropertiesPanel';
-import styles from './Layout.module.css';
 
 const Layout = () => {
     return (
-        <div className={styles.appContainer}>
+        <div className="flex h-screen">
             <Sidebar />
-            <div className={styles.mainContent}>
+            <div className="flex-1 flex flex-col relative">
                 <DiagramArea />
             </div>
             <PropertiesPanel />
