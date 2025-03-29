@@ -1,6 +1,6 @@
-import { Port } from '@/app/diagram-test/models/Port';
+import { Port } from '@/app/diagram-test/components/Shapes/classes/port';
 
-export class BitCombine {
+export class Splitter {
     public name: string;
     public id: string;
     public dataBandwidth: number;
@@ -8,5 +8,5 @@ export class BitCombine {
         x: number,
         y: number
     };
-    public inPorts: Port[];
+    public outPorts: Port[];
 }

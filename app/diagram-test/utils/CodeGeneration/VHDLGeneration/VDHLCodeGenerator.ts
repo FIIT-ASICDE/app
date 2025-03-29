@@ -36,13 +36,13 @@ export function generateVHDLCode(graph: dia.Graph): string {
     );
     const bitManipulationCells = cells.filter(cell =>
         !cell.isLink() &&
-        ['bitSelect', 'bitCombine'].includes(cell.attributes.elType)
+        ['splitter', 'combiner'].includes(cell.attributes.elType)
     );
     const moduleCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'newModule');
     const sramCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'ram');
     const registerCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'register');
     const links = cells.filter(cell => cell.isLink());
-    const bitSelectTable: { name: string, connectedTo: string, connectedFrom: string, startBit: number, endBit: number }[] = [];
+    const splitterTable: { name: string, connectedTo: string, connectedFrom: string, startBit: number, endBit: number }[] = [];
 
 
     const excludedNames = new Set([
@@ -55,7 +55,7 @@ export function generateVHDLCode(graph: dia.Graph): string {
         return cell.attributes.name;
     }
     function getBitSelectedSignal(signal: string, netName: string): string {
-        const bitSelectEntry = bitSelectTable.find(entry =>
+        const bitSelectEntry = splitterTable.find(entry =>
             entry.name === signal && entry.connectedTo === netName
         );
         if (bitSelectEntry) {
@@ -134,7 +134,7 @@ export function generateVHDLCode(graph: dia.Graph): string {
         const cellPorts = cell.attributes.ports?.items || [];
         elementNames[cell.id] = netName;
 
-        if (cell.attributes.elType === 'bitCombine') {
+        if (cell.attributes.elType === 'combiner') {
             const outPort = cellPorts.find(p => p.group === 'output');
             code += `    SIGNAL ${netName} : STD_LOGIC_VECTOR(${outPort.bandwidth - 1} DOWNTO 0);\n`;
         }
@@ -188,7 +188,7 @@ export function generateVHDLCode(graph: dia.Graph): string {
         const netName = elementNames[cell.id];
         const cellPorts = cell.attributes.ports?.items || [];
 
-        if (type === 'bitSelect') {
+        if (type === 'splitter') {
 
             const inputPort = cellPorts.find(p => p.group === 'input');
             const inputKey = `${cell.id}:${inputPort?.id}`;
@@ -199,7 +199,7 @@ export function generateVHDLCode(graph: dia.Graph): string {
                 const outputSignal = outputConnectionMap[outputKey] ? outputConnectionMap[outputKey][0] : '/* unconnected */';
                 const bitStart = outputPort.startBit;
                 const bitEnd = outputPort.endBit;
-                bitSelectTable.push({
+                splitterTable.push({
                     name: netName,
                     connectedTo: outputSignal,
                     connectedFrom: inputSignal,
@@ -211,7 +211,7 @@ export function generateVHDLCode(graph: dia.Graph): string {
             code += `\n`;
         }
 
-        if (type === 'bitCombine') {
+        if (type === 'combiner') {
             const inputPorts = cellPorts.filter(p => p.group === 'input').reverse();
             const inputSignals = inputPorts.map(p => {
                 const key = `${cell.id}:${p.id}`;

@@ -1,6 +1,6 @@
-import { Port } from '@/app/diagram-test/models/Port';
+import { Port } from '@/app/diagram-test/components/Shapes/classes/port';
 
-export class BitSelect {
+export class Combiner {
     public name: string;
     public id: string;
     public dataBandwidth: number;
@@ -8,5 +8,5 @@ export class BitSelect {
         x: number,
         y: number
     };
-    public outPorts: Port[];
+    public inPorts: Port[];
 }

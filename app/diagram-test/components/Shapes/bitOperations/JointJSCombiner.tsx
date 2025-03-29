@@ -1,7 +1,7 @@
-import { BitCombine } from "@/app/diagram-test/components/Shapes/classes/bitCombine";
+import { Combiner } from "@/app/diagram-test/components/Shapes/classes/combiner";
 import { shapes } from "@joint/core";
 
-export const JointJSBitCombine = (bitCombine: BitCombine) => {
+export const JointJSCombiner = (bitCombine: Combiner) => {
 
     const combineInPorts = bitCombine.inPorts || [];
     const inCount = combineInPorts.length;
@@ -33,7 +33,7 @@ export const JointJSBitCombine = (bitCombine: BitCombine) => {
 
 
     return new shapes.standard.Path({
-        elType: 'bitCombine',
+        elType: 'combiner',
         name: bitCombine.name,
         bandwidth: bitCombine.dataBandwidth,
         inPorts: inCount,

@@ -7,7 +7,6 @@ import { useDiagramContext } from "@/app/diagram-test/context/useDiagramContext"
 import { generateSystemVerilogCode } from "@/app/diagram-test/utils/CodeGeneration/SystemVerilogGeneration/SystemVerilogCodeGenerator";
 import { generateVHDLCode } from "@/app/diagram-test/utils/CodeGeneration/VHDLGeneration/VDHLCodeGenerator";
 import ResizablePanel from '../common/ResizablePanel';
-// import styles from './Sidebar.module.css';
 
 const Sidebar = () => {
     const { zoomIn, zoomOut, fitToView, graph } = useDiagramContext();
@@ -59,8 +58,8 @@ const Sidebar = () => {
         { type: 'newModule', label: 'Existing Module', img: 'ExistingModule.svg' },
         { type: 'ram', label: 'SRAM', img: 'Ram.svg' },
         { type: 'register', label: 'REGISTER', img: 'Register.svg' },
-        { type: 'bitSelect', label: 'Bit Select', img: 'BitSelect.svg' },
-        { type: 'bitCombine', label: 'Bit Combine', img: 'BitCombine.svg' },
+        { type: 'splitter', label: 'Splitter', img: 'Splitter.svg' },
+        { type: 'combiner', label: 'Combiner', img: 'Combiner.svg' },
     ];
 
     const paperActions = [

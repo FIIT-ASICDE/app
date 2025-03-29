@@ -24,10 +24,10 @@ import {JointJSRegister} from "@/app/diagram-test/components/Shapes/memory/Joint
 import {Register} from "@/app/diagram-test/components/Shapes/classes/register";
 import {JointJSSRam} from "@/app/diagram-test/components/Shapes/memory/JointJSSRam";
 import {Ram} from "@/app/diagram-test/components/Shapes/classes/ram";
-import {JointJSBitCombine} from "@/app/diagram-test/components/Shapes/bitOperations/JointJSBitCombine";
-import {BitCombine} from "@/app/diagram-test/components/Shapes/classes/bitCombine";
-import {JointJSBitSelect} from "@/app/diagram-test/components/Shapes/bitOperations/JointJSBitSelect";
-import {BitSelect} from "@/app/diagram-test/components/Shapes/classes/bitSelect";
+import {JointJSCombiner} from "@/app/diagram-test/components/Shapes/bitOperations/JointJSCombiner";
+import {Combiner} from "@/app/diagram-test/components/Shapes/classes/combiner";
+import {JointJSBitSplitter} from "@/app/diagram-test/components/Shapes/bitOperations/JointJSBitSplitter";
+import {Splitter} from "@/app/diagram-test/components/Shapes/classes/splitter";
 import {JointJSInputPort} from "@/app/diagram-test/components/Shapes/io/JointJSInputPort";
 import {JointJSOutputPort} from "@/app/diagram-test/components/Shapes/io/JointJSOutputPort";
 import {Port} from "@/app/diagram-test/components/Shapes/classes/port";
@@ -260,7 +260,7 @@ const PropertiesPanel = () => {
             setErrorMessage('Port Name is mandatory');
             return;
         }
-        if (['bitCombine', 'newModule'].includes(selectedElement.attributes.elType) && newPortData.bandwidth < 1) {
+        if (['combiner', 'newModule'].includes(selectedElement.attributes.elType) && newPortData.bandwidth < 1) {
             setErrorMessage('Bandwidth must be > 0');
             return;
         }
@@ -376,13 +376,13 @@ const PropertiesPanel = () => {
         setSelectedElement(newModuleCell);
     };
 
-    const handleBitSelectPortChange = () => {
+    const handleSplitterPortChange = () => {
         if (!selectedElement) return;
 
-        const newBitSelect = new BitSelect();
-        newBitSelect.name = properties.label || '';
+        const newSplitter = new Splitter();
+        newSplitter.name = properties.label || '';
 
-        newBitSelect.outPorts = properties.createdOutPorts.map((p, i) => ({
+        newSplitter.outPorts = properties.createdOutPorts.map((p, i) => ({
             name: p.name,
             bandwidth: p.bandwidth,
             startBit: p.startBit,
@@ -390,36 +390,36 @@ const PropertiesPanel = () => {
         }));
 
         const { x, y } = selectedElement.position();
-        newBitSelect.position = { x, y };
+        newSplitter.position = { x, y };
 
         graph.removeCells([selectedElement]);
 
-        const newBitSelectCell = JointJSBitSelect(newBitSelect);
-        graph.addCell(newBitSelectCell);
+        const newSplitterCell = JointJSBitSplitter(newSplitter);
+        graph.addCell(newSplitterCell);
 
-        setSelectedElement(newBitSelectCell);
+        setSelectedElement(newSplitterCell);
     };
 
-    const handleBitCombinePortChange = () => {
+    const handleCombinerPortChange = () => {
         if (!selectedElement) return;
 
-        const bitCombine = new BitCombine();
-        bitCombine.name = properties.label || '';
+        const newCombiner = new Combiner();
+        newCombiner.name = properties.label || '';
 
-        bitCombine.inPorts = properties.createdInPorts.map((p, i) => ({
+        newCombiner.inPorts = properties.createdInPorts.map((p, i) => ({
             name: p.name,
             bandwidth: p.bandwidth,
         }));
 
         const { x, y } = selectedElement.position();
-        bitCombine.position = { x, y };
+        newCombiner.position = { x, y };
 
         graph.removeCells([selectedElement]);
 
-        const newBitCombineCell = JointJSBitCombine(bitCombine);
-        graph.addCell(newBitCombineCell);
+        const newCombinerCell = JointJSCombiner(newCombiner);
+        graph.addCell(newCombinerCell);
 
-        setSelectedElement(newBitCombineCell);
+        setSelectedElement(newCombinerCell);
     };
 
     const handleEditPort = (portType: 'input' | 'output', index: number) => {
@@ -643,12 +643,12 @@ const PropertiesPanel = () => {
             return;
 
         }
-        else if (selectedElement.attributes.elType === 'bitCombine') {
-            handleBitCombinePortChange()
+        else if (selectedElement.attributes.elType === 'combiner') {
+            handleCombinerPortChange()
             return;
         }
-        else if (selectedElement.attributes.elType === 'bitSelect') {
-            handleBitSelectPortChange()
+        else if (selectedElement.attributes.elType === 'splitter') {
+            handleSplitterPortChange()
             return;
         }
         else if (selectedElement.attributes.elType === 'alu') {
@@ -1429,7 +1429,7 @@ const PropertiesPanel = () => {
                     )}
                 </>
             )}
-            {(['bitCombine', 'bitSelect'].includes(selectedElement.attributes.elType)) && (
+            {(['combiner', 'splitter'].includes(selectedElement.attributes.elType)) && (
                 <>
                     <label>
                         {toTitleCase(selectedElement.attributes.elType)} signal name:
@@ -1447,7 +1447,7 @@ const PropertiesPanel = () => {
                             </div>
                         )}
                     </label>
-                    {(['bitCombine'].includes(selectedElement.attributes.elType)) && (
+                    {(['combiner'].includes(selectedElement.attributes.elType)) && (
                         <div className={styles.portSection}>
                             <h4>Input Ports</h4>
                             {properties.createdInPorts.map((p, idx) => (
@@ -1470,7 +1470,7 @@ const PropertiesPanel = () => {
                             </button>
                         </div>
                     )}
-                    {(['bitSelect'].includes(selectedElement.attributes.elType)) && (
+                    {(['splitter'].includes(selectedElement.attributes.elType)) && (
                         <div className={styles.portSection}>
                             <h4>Output Ports</h4>
                             {properties.createdOutPorts.map((p, idx) => (
@@ -1534,7 +1534,7 @@ const PropertiesPanel = () => {
                                 </div>
                             )}
                         </label>
-                        {(['bitCombine', 'newModule'].includes(selectedElement.attributes.elType)) && (
+                        {(['combiner', 'newModule'].includes(selectedElement.attributes.elType)) && (
                             <label>
                                 Bandwidth:
                                 <input
@@ -1546,7 +1546,7 @@ const PropertiesPanel = () => {
                             </label>
                         )
                         }
-                        {(['bitSelect'].includes(selectedElement.attributes.elType)) && (
+                        {(['splitter'].includes(selectedElement.attributes.elType)) && (
                             <>
                                 <label>
                                     End Bit:

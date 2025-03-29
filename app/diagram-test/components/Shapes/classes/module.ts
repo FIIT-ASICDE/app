@@ -1,4 +1,4 @@
-import { Port } from '@/app/diagram-test/models/Port';
+import { Port } from '@/app/diagram-test/components/Shapes/classes/port';
 
 export class Module {
     public name: string;

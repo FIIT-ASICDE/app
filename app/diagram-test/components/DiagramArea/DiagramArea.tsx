@@ -1,10 +1,7 @@
-// pages/diagram-test/components/DiagramArea/DiagramArea.tsx
-
-import React, {useRef, useState} from 'react';
+import React, {useRef} from 'react';
 import { dia } from "@joint/core";
 import useJointJS from '@/app/diagram-test/hooks/useJointJS';
 import { useDiagramContext } from '@/app/diagram-test/context/useDiagramContext';
-import styles from './DiagramArea.module.css';
 import { JointJSAnd } from "@/app/diagram-test/components/Shapes/gates/JointJSAnd";
 import { And } from "@/app/diagram-test/components/Shapes/classes/and";
 import { JointJSNand } from "@/app/diagram-test/components/Shapes/gates/JointJSNand";
@@ -38,19 +35,18 @@ import { JointJSSRam } from "@/app/diagram-test/components/Shapes/memory/JointJS
 import { Ram } from "@/app/diagram-test/components/Shapes/classes/ram";
 import { JointJSRegister } from "@/app/diagram-test/components/Shapes/memory/JointJSRegister";
 import { Register } from "@/app/diagram-test/components/Shapes/classes/register";
-import { JointJSBitSelect } from "@/app/diagram-test/components/Shapes/bitOperations/JointJSBitSelect";
-import { BitSelect } from "@/app/diagram-test/components/Shapes/classes/bitSelect";
-import { JointJSBitCombine } from "@/app/diagram-test/components/Shapes/bitOperations/JointJSBitCombine";
-import { BitCombine } from "@/app/diagram-test/components/Shapes/classes/bitCombine";
+import { JointJSBitSplitter } from "@/app/diagram-test/components/Shapes/bitOperations/JointJSBitSplitter";
+import { Splitter } from "@/app/diagram-test/components/Shapes/classes/splitter";
+import { JointJSCombiner } from "@/app/diagram-test/components/Shapes/bitOperations/JointJSCombiner";
+import { Combiner } from "@/app/diagram-test/components/Shapes/classes/combiner";
 import {useDiagramEvents} from "@/app/diagram-test/hooks/useDiagramEvents";
 
 
 
 const DiagramArea = () => {
     const paperElement = useRef<HTMLDivElement>(null);
-    const { graph, isPanning} = useDiagramContext();
+    const { graph } = useDiagramContext();
     const paper = useJointJS(paperElement);
-    const [isModalOpen, setIsModalOpen] = useState(false);
     useDiagramEvents({
         paper: paper,
         paperElement: paperElement.current
@@ -75,8 +71,8 @@ const DiagramArea = () => {
         case 'newModule':  return 'newModule';
         case 'ram':        return 'ram';
         case 'register':   return 'register';
-        case 'bitSelect':   return 'bitSelect';
-        case 'bitCombine':   return 'bitCombine';
+        case 'splitter':   return 'splitter';
+        case 'combiner':   return 'combiner';
         default:           return toolType;
         }
     }
@@ -234,17 +230,17 @@ const DiagramArea = () => {
             register.rstType = "async";
             element = JointJSRegister(register);
             break;
-        case 'bitSelect':
-            const bitSelect = new BitSelect();
-            bitSelect.name = elementName;
-            bitSelect.position = {x, y};
-            element = JointJSBitSelect(bitSelect);
+        case 'splitter':
+            const splitter = new Splitter();
+            splitter.name = elementName;
+            splitter.position = {x, y};
+            element = JointJSBitSplitter(splitter);
             break;
-        case 'bitCombine':
-            const bitCombine = new BitCombine();
-            bitCombine.name = elementName;
-            bitCombine.position = {x, y};
-            element = JointJSBitCombine(bitCombine);
+        case 'combiner':
+            const combiner = new Combiner();
+            combiner.name = elementName;
+            combiner.position = {x, y};
+            element = JointJSCombiner(combiner);
             break;
         default:
             return;
@@ -263,12 +259,11 @@ const DiagramArea = () => {
     return (
 
         <div
-            className={`${styles.diagramArea} ${isPanning ? styles.grabbing : ''}`}
+            className="w-full h-full bg-white overflow-hidden cursor-default"
             ref={paperElement}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
         ></div>
-
     );
 };
 

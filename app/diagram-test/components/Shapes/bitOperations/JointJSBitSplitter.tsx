@@ -1,7 +1,7 @@
-import { BitSelect } from "@/app/diagram-test/components/Shapes/classes/bitSelect";
+import { Splitter } from "@/app/diagram-test/components/Shapes/classes/splitter";
 import { shapes } from "@joint/core";
 
-export const JointJSBitSelect = (bitSelect: BitSelect) => {
+export const JointJSBitSplitter = (bitSelect: Splitter) => {
 
     const selectOutPorts = bitSelect.outPorts || [];
     const outCount = selectOutPorts.length;
@@ -34,7 +34,7 @@ export const JointJSBitSelect = (bitSelect: BitSelect) => {
 
 
     return new shapes.standard.Path({
-        elType: 'bitSelect',
+        elType: 'splitter',
         name: bitSelect.name,
         bandwidth: bitSelect.dataBandwidth,
         outPorts: outCount,

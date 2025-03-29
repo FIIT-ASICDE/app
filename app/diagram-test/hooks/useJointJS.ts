@@ -26,7 +26,7 @@ function highlightAllInputPorts(
         ports.forEach((p) => {
             if (p.group === 'input') {
                 let portBw = p.bandwidth ?? -1;
-                if (elem.attributes.elType === 'bitSelect') {
+                if (elem.attributes.elType === 'splitter') {
                     const ports = elem.get('ports')?.items ?? [];
                     const outputPorts = ports.filter((p: any) => p.group === 'output');
                     const maxEndBit = outputPorts.reduce((max: number, p: any) => {
@@ -35,10 +35,10 @@ function highlightAllInputPorts(
                     }, 0);
                     portBw = maxEndBit + 1;
                 }
-                if (elem.attributes.elType === 'bitSelect' && portBw <= neededBw){
+                if (elem.attributes.elType === 'splitter' && portBw <= neededBw){
                     elem.portProp(p.id, 'attrs/portCircle/fill', 'green');
                 }
-                else if (elem.attributes.elType !== 'bitSelect' && portBw === neededBw) {
+                else if (elem.attributes.elType !== 'splitter' && portBw === neededBw) {
                     elem.portProp(p.id, 'attrs/portCircle/fill', 'green');
                 } else {
                     elem.portProp(p.id, 'attrs/portCircle/fill', 'red');
@@ -226,7 +226,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                     const sourceBw = getPortBandwidth(sourceView.model, sourcePortId);
                     let targetBw = getPortBandwidth(targetView.model, targetPortId);
 
-                    if (targetView.model.attributes.elType === 'bitSelect') {
+                    if (targetView.model.attributes.elType === 'splitter') {
                         const ports = targetView.model.get('ports')?.items ?? [];
                         const outputPorts = ports.filter((p: any) => p.group === 'output');
                         const maxEndBit = outputPorts.reduce((max: number, p: any) => {
@@ -240,10 +240,10 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                         return false;
                     }
 
-                    if (targetView.model.attributes.elType === 'bitSelect' && sourceBw < targetBw){
+                    if (targetView.model.attributes.elType === 'splitter' && sourceBw < targetBw){
                         return false;
                     }
-                    if (targetView.model.attributes.elType !== 'bitSelect' && sourceBw !== targetBw) {
+                    if (targetView.model.attributes.elType !== 'splitter' && sourceBw !== targetBw) {
                         return false;
                     }
 
