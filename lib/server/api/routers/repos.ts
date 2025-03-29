@@ -1966,20 +1966,45 @@ export async function hasUserRole(
     }
 }
 
-export function absoluteRepoPath(ownerName: string, repoName?: string) {
-    if (
-        !process.env.REPOSITORIES_STORAGE_ROOT ||
-        process.env.REPOSITORIES_STORAGE_ROOT === ""
-    ) {
+export function absoluteRepoPath(ownerName: string, repoName: string = ""): string {
+  const storageRoot = ensureStorageRootSet();
+  return path.join(storageRoot, ownerName, repoName);
+}
+
+export function getRelativePathInRepo(absolutePath: string): string {
+    const storageRoot = ensureStorageRootSet();
+    const normalizedAbsolutePath = path.normalize(absolutePath);
+    // path relative to the storage root
+    const pathRelativeToRoot = path.relative(
+        storageRoot,
+        normalizedAbsolutePath,
+    ); // e.g., "ownerName/repoName/src/index.ts" or "ownerName\repoName"
+
+    const components = pathRelativeToRoot
+        .split(path.sep)
+        .filter((comp) => comp !== "");
+
+    // are there enough components (at least ownerName and repoName)
+    if (components.length <= 2) {
+        // the path relative to root is just "ownerName", "ownerName/repoName",
+        // or empty, stripping them leaves nothing (the root of the repo).
+        return "";
+    } else {
+        // remove the first two components (ownerName, repoName)
+        const remainingComponents = components.slice(2);
+        // join the rest back together
+        return path.join(...remainingComponents);
+    }
+}
+
+function ensureStorageRootSet(): string {
+    const storageRoot = process.env.REPOSITORIES_STORAGE_ROOT;
+    if (!storageRoot || storageRoot === "") {
         throw new Error(
             "REPOSITORIES_STORAGE_ROOT environment variable is not set or empty.",
         );
     }
-    return path.join(
-        process.env.REPOSITORIES_STORAGE_ROOT,
-        ownerName,
-        repoName ?? "",
-    );
+    return path.normalize(storageRoot);
 }
 
 export async function initializeGit(

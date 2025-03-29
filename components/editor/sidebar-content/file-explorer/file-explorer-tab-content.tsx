@@ -37,20 +37,6 @@ export const FileExplorerTabContent = ({
         [],
     );
 
-    // adding dummy cpp file to test simulation dialog
-    if (
-        repository.tree &&
-        !repository.tree.find((item) => item.name === "testbench.cpp")
-    ) {
-        repository.tree.push({
-            type: "file-display",
-            name: "testbench.cpp",
-            language: "cpp",
-            absolutePath: "testbench.cpp",
-            lastActivity: new Date(),
-        });
-    }
-
     return (
         <ScrollArea className="relative h-full w-full">
             <div className="flex flex-auto flex-col text-nowrap">

@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 
 interface CreateDirectoryDialogProps {
     repositoryId: string;
-    repositoryItem?: RepositoryItem;
+    parentItem?: RepositoryItem;
     buttonSize: "icon" | "full";
     tree: Array<RepositoryItem>;
     setTree: Dispatch<SetStateAction<Array<RepositoryItem>>>;
@@ -25,7 +25,7 @@ interface CreateDirectoryDialogProps {
 
 export const CreateDirectoryDialog = ({
     repositoryId,
-    repositoryItem,
+    parentItem,
     buttonSize,
     tree,
     setTree,
@@ -35,29 +35,21 @@ export const CreateDirectoryDialog = ({
     const [directoryName, setDirectoryName] = useState<string>("");
 
     const addDirectoryMutation = api.editor.addItem.useMutation({
-        onSuccess: () => {
+        onSuccess: (item) => {
             toast.success("Directory created successfully");
-
-            const trimmedDirectoryName: string = directoryName.trim();
 
             const newDirectory: DirectoryDisplayItem = {
                 type: "directory-display",
-                name: repositoryItem
-                    ? repositoryItem.name + "/" + trimmedDirectoryName
-                    : trimmedDirectoryName,
-                lastActivity: new Date(),
-            } satisfies DirectoryDisplayItem;
+                name: item.name,
+                lastActivity: item.lastActivity,
+                absolutePath: item.absolutePath,
+            };
 
-            if (repositoryItem === undefined) {
+            if (!parentItem) {
                 setTree([...tree, newDirectory]);
-                console.log("Create directory in root: " + newDirectory.name);
-            } else {
-                console.log("Create directory on path: " + newDirectory.name);
             }
 
-            if (onAction) {
-                onAction();
-            }
+            onAction?.();
             setDirectoryName("");
             setOpen(false);
         },
@@ -74,7 +66,7 @@ export const CreateDirectoryDialog = ({
                 type: "directory",
                 name: directoryName.trim(),
                 repoId: repositoryId,
-                path: repositoryItem?.name,
+                path: parentItem?.absolutePath,
             });
         }
     };
@@ -97,13 +89,12 @@ export const CreateDirectoryDialog = ({
                 <DialogHeader>
                     <DialogTitle className="text-center">
                         Create a new directory
-                        {repositoryItem && (
+                        {parentItem && (
                             <span>
                                 {" "}
                                 in{" "}
                                 <span className="text-muted-foreground">
-                                    {repositoryItem.name.split("/").pop() ??
-                                        repositoryItem.name}
+                                    {parentItem.name}
                                 </span>
                             </span>
                         )}

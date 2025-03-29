@@ -8,6 +8,7 @@ import {
     writeVarUint,
     writeVarUint8Array,
 } from "lib0/encoding";
+import path from "node:path";
 import {
     Awareness,
     applyAwarenessUpdate,
@@ -138,21 +139,22 @@ export class WSSharedFile extends Y.Doc {
 export function onOpen(ws: ServerWebSocket<EditorSocketData>) {
     ws.binaryType = "arraybuffer";
 
-    const pendingCleanup = pendingCleanups.get(ws.data.filePath);
+    const filePath = absoluteFilePath(ws.data.filePath);
+    const pendingCleanup = pendingCleanups.get(filePath);
     if (pendingCleanup) {
         logger.debug(
             {
                 event: "cleanup_cancelled",
-                filePath: ws.data.filePath,
+                filePath: filePath,
             },
             "Cancelled pending file cleanup due to new connection",
         );
 
         clearTimeout(pendingCleanup);
-        pendingCleanups.delete(ws.data.filePath);
+        pendingCleanups.delete(filePath);
     }
 
-    const file = getFile(ws.data.filePath);
+    const file = getFile(filePath);
 
     const encoder = createEncoder();
     writeVarUint(encoder, MESSAGE_SYNC);
@@ -178,11 +180,12 @@ export function onMessage(
     ws: ServerWebSocket<EditorSocketData>,
     message: string | Buffer,
 ) {
-    const file = files.get(ws.data.filePath);
+    const filePath = absoluteFilePath(ws.data.filePath);
+    const file = files.get(filePath);
     if (!file) {
         logger.error(
-            { event: "message_error", filePath: ws.data.filePath },
-            `File '${ws.data.filePath}' doesn't exist`,
+            { event: "message_error", filePath: filePath },
+            `File '${filePath}' doesn't exist`,
         );
         return;
     }
@@ -234,7 +237,8 @@ export function onClose(
     _code: number,
     _reason: string,
 ) {
-    const file = files.get(ws.data.filePath);
+    const filePath = absoluteFilePath(ws.data.filePath);
+    const file = files.get(filePath);
     if (!file) return;
 
     const controlledIds = file.getIds(ws);
@@ -242,7 +246,7 @@ export function onClose(
     removeAwarenessStates(file.awareness, Array.from(controlledIds), null);
 
     // cancel existing cleanup
-    const existingCleanup = pendingCleanups.get(ws.data.filePath);
+    const existingCleanup = pendingCleanups.get(filePath);
     if (existingCleanup) {
         clearTimeout(existingCleanup);
     }
@@ -250,7 +254,7 @@ export function onClose(
     // and schedule new cleanup
     const cleanup = setTimeout(() => {
         // Check if there are any active connections for this file
-        const file = files.get(ws.data.filePath);
+        const file = files.get(filePath);
         if (!file) return;
 
         // If there are no connections, cleanup the file
@@ -258,19 +262,19 @@ export function onClose(
             logger.debug(
                 {
                     event: "file_cleanup",
-                    filePath: ws.data.filePath,
+                    filePath,
                 },
                 "Cleaning up file after delay",
             );
 
-            files.delete(ws.data.filePath);
+            files.delete(filePath);
             file.destroy();
-            pendingCleanups.delete(ws.data.filePath);
+            pendingCleanups.delete(filePath);
         } else {
             logger.debug(
                 {
                     event: "file_cleanup_cancelled",
-                    filePath: ws.data.filePath,
+                    filePath,
                     activeConnections: file.getIds(ws).size,
                 },
                 "File cleanup cancelled - active connections exist",
@@ -278,7 +282,7 @@ export function onClose(
         }
     }, CLEANUP_DELAY);
 
-    pendingCleanups.set(ws.data.filePath, cleanup);
+    pendingCleanups.set(filePath, cleanup);
 }
 
 function updateHandler(
@@ -338,4 +342,11 @@ async function getFileContents(filePath: string): Promise<string> {
  */
 function safeSend(ws: ServerWebSocket<EditorSocketData>, data: Uint8Array) {
     ws?.send?.(data);
+}
+
+export function absoluteFilePath(relativePath: string): string {
+    if (relativePath.startsWith(process.env.REPOSITORIES_STORAGE_ROOT)) {
+        return relativePath;
+    }
+    return path.join(process.env.REPOSITORIES_STORAGE_ROOT, relativePath);
 }

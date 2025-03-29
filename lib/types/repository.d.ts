@@ -55,17 +55,20 @@ interface FileDisplayItem {
 export type FileItem = Omit<FileDisplayItem, "type"> & {
     type: "file";
     content: string;
+    absolutePath: string;
 };
 
 interface DirectoryDisplayItem {
     type: "directory-display";
     name: string;
     lastActivity: Date;
+    absolutePath: string;
 }
 
 type DirectoryItem = Omit<DirectoryDisplayItem, "type"> & {
     type: "directory";
     children: RepositoryItem[];
+    absolutePath: string;
 };
 
 export type RepositoryItem =

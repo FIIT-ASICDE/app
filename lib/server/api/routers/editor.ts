@@ -5,6 +5,7 @@ import {
     renameItemSchema,
 } from "@/lib/schemas/editor-schemas";
 import {
+    getRelativePathInRepo,
     hasUserRole,
     resolveRepoPathOrThrow,
 } from "@/lib/server/api/routers/repos";
@@ -173,6 +174,7 @@ export function addItem() {
                         type: "directory-display",
                         name: input.name,
                         lastActivity: new Date(),
+                        absolutePath: getRelativePathInRepo(fullPath),
                     };
                 } else {
                     await writeFile(fullPath, "");
@@ -186,7 +188,7 @@ export function addItem() {
                         name: input.name,
                         lastActivity: new Date(),
                         language,
-                        absolutePath: fullPath,
+                        absolutePath: getRelativePathInRepo(fullPath),
                     };
                 }
             } catch (error) {

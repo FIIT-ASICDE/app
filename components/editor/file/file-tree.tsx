@@ -82,6 +82,7 @@ export const FileTree = ({
         type: "directory-display",
         name: "",
         lastActivity: new Date(),
+        absolutePath: "",
     };
 
     const sortedTree: Array<RepositoryItem> = sortTree([...tree]);
@@ -174,11 +175,7 @@ export const FileTree = ({
                     item={item}
                     tree={tree}
                     setTreeAction={setTreeAction}
-                    onItemClick={() => {
-                        if (onItemClick) {
-                            onItemClick(item);
-                        }
-                    }}
+                    onItemClick={() => onItemClick?.(item)}
                     selectedItem={selectedItem}
                     setSelectedItemAction={setSelectedItemAction}
                     depth={0}
