@@ -34,12 +34,10 @@ export const MoveItemDialog = ({
     onConfirm,
     onCancel,
 }: MoveItemDialogProps) => {
-    const sourceItemName: string =
-        sourceItem.name.split("/").pop() || sourceItem.name;
     const targetItemName: string =
         targetItem.name === ""
             ? "root directory"
-            : targetItem.name.split("/").pop() || targetItem.name;
+            : targetItem.name;
 
     const itemType =
         sourceItem.type === "directory" ||
@@ -68,11 +66,11 @@ export const MoveItemDialog = ({
                                                 fill="currentColor"
                                             />
                                         )}
-                                        {sourceItemName}
+                                        {sourceItem.name}
                                     </span>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    {sourceItemName}
+                                    {sourceItem.name}
                                 </TooltipContent>
                             </Tooltip>
                             <DialogDescription> to </DialogDescription>

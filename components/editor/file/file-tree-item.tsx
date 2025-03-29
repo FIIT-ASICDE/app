@@ -55,14 +55,14 @@ export const FileTreeItem = ({
     const [isDragOver, setIsDragOver] = useState<boolean>(false);
     const itemRef: RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
 
-    const isHovered: boolean = hoveredItem?.name === item.name;
+    const isHovered: boolean = hoveredItem?.absolutePath === item.absolutePath;
 
     const handleToggle = () => {
         if (item.type === "directory" || item.type === "directory-display") {
             if (
                 !expandedItems.find(
                     (expandedItem: RepositoryItem) =>
-                        expandedItem.name === item.name,
+                        expandedItem.absolutePath === item.absolutePath,
                 )
             ) {
                 setExpandedItemsAction([...expandedItems, item]);
@@ -70,7 +70,7 @@ export const FileTreeItem = ({
                 const filteredExpandedItems: Array<RepositoryItem> =
                     expandedItems.filter(
                         (expandedItem: RepositoryItem) =>
-                            expandedItem.name !== item.name,
+                            expandedItem.absolutePath !== item.absolutePath,
                     );
                 setExpandedItemsAction(filteredExpandedItems);
             }
@@ -78,7 +78,7 @@ export const FileTreeItem = ({
     };
 
     const handleDragStart = (event: DragEvent<HTMLDivElement>) => {
-        event.dataTransfer.setData("text/plain", item.name);
+        event.dataTransfer.setData("text/plain", item.absolutePath);
         event.dataTransfer.effectAllowed = "move";
     };
 
@@ -116,17 +116,17 @@ export const FileTreeItem = ({
                 const sourcePath: string =
                     event.dataTransfer.getData("text/plain");
                 const sourceItem: RepositoryItem | undefined = tree.find(
-                    (treeItem) => treeItem.name === sourcePath,
+                    (treeItem: RepositoryItem) => treeItem.absolutePath === sourcePath,
                 );
 
                 if (!sourceItem) return;
-                if (sourceItem.name === item.name) return;
+                if (sourceItem.absolutePath === item.absolutePath) return;
                 if (
                     item.type !== "directory" &&
                     item.type !== "directory-display"
                 )
                     return;
-                if (item.name.startsWith(sourceItem.name + "/")) return;
+                if (item.absolutePath.startsWith(sourceItem.absolutePath + "/")) return;
 
                 if (onMoveItem) {
                     onMoveItem(sourceItem, item);
@@ -150,7 +150,7 @@ export const FileTreeItem = ({
             <div
                 className={cn(
                     "flex cursor-default flex-row items-center justify-between rounded border border-transparent px-2 py-1.5 text-sm",
-                    selectedItem?.name === item.name &&
+                    selectedItem?.absolutePath === item.absolutePath &&
                         "border-primary bg-accent font-medium",
                     isDragOver && "border-primary bg-accent",
                     "hover:bg-accent",
@@ -163,7 +163,7 @@ export const FileTreeItem = ({
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={() => {
-                    if (!(selectedItem?.name === item.name)) {
+                    if (!(selectedItem?.absolutePath === item.absolutePath)) {
                         setSelectedItemAction(item);
                     } else {
                         setSelectedItemAction(undefined);
@@ -178,7 +178,7 @@ export const FileTreeItem = ({
                             <span className="mr-2">
                                 {expandedItems.find(
                                     (expandedItem: RepositoryItem) =>
-                                        expandedItem.name === item.name,
+                                        expandedItem.absolutePath === item.absolutePath,
                                 ) ? (
                                     <div onClick={handleToggle}>
                                         <ChevronDown className="max-h-4 min-h-4 min-w-4 max-w-4 cursor-pointer" />
@@ -217,7 +217,7 @@ export const FileTreeItem = ({
 
             {expandedItems.find(
                 (expandedItem: RepositoryItem) =>
-                    expandedItem.name === item.name,
+                    expandedItem.absolutePath === item.absolutePath,
             ) &&
                 item.type === "directory" && (
                     <div>

@@ -31,9 +31,6 @@ export const RenameItemDialog = ({
     const [open, setOpen] = useState<boolean>(false);
     const [newItemName, setNewItemName] = useState<string>("");
 
-    const itemName: string =
-        parentItem.name.split("/").pop() ?? parentItem.name;
-
     const itemDisplayType: string =
         parentItem.type === "file" || parentItem.type === "file-display"
             ? "File"
@@ -48,16 +45,17 @@ export const RenameItemDialog = ({
             const trimmedNewItemName = newItemName.trim();
 
             const itemToRename: RepositoryItem | undefined = tree.find(
-                (item) => item.name === parentItem.name,
+                (item) => item.absolutePath
+                    === parentItem.absolutePath,
             );
 
             if (itemToRename) {
-                itemToRename.name = parentItem.name.replace(
+                itemToRename.absolutePath = parentItem.name.replace(
                     /[^/]+$/,
                     trimmedNewItemName,
                 );
                 const filteredTree: Array<RepositoryItem> = tree.filter(
-                    (item) => item.name !== parentItem.name,
+                    (item) => item.absolutePath !== parentItem.absolutePath,
                 );
                 setTree([...filteredTree, itemToRename]);
             }
@@ -78,7 +76,7 @@ export const RenameItemDialog = ({
         if (trimmedNewItemName) {
             renameItemMutation.mutate({
                 repoId: repositoryId,
-                originalPath: parentItem.name,
+                originalPath: parentItem.absolutePath,
                 newPath: parentItem.name.replace(/[^/]+$/, trimmedNewItemName),
             });
         }
@@ -95,7 +93,7 @@ export const RenameItemDialog = ({
                     <DialogTitle className="text-center">
                         Rename{" "}
                         <span className="text-muted-foreground">
-                            {itemName}
+                            {parentItem.name}
                         </span>
                     </DialogTitle>
                 </DialogHeader>

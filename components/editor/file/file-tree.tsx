@@ -46,12 +46,10 @@ export const FileTree = ({
         onSuccess: () => {
             if (!sourceItem || !targetItem) return;
 
-            const sourceItemName: string =
-                sourceItem.name.split("/").pop() || sourceItem.name;
             const newPath =
                 targetItem.name === ""
-                    ? sourceItemName
-                    : targetItem.name + "/" + sourceItemName;
+                    ? sourceItem.name
+                    : targetItem.absolutePath + "/" + sourceItem.name;
 
             const updatedItem: RepositoryItem = {
                 ...sourceItem,
@@ -60,7 +58,7 @@ export const FileTree = ({
 
             setTreeAction((previousTree) => {
                 const newTree = previousTree.filter(
-                    (item: RepositoryItem) => item.name !== sourceItem.name,
+                    (item: RepositoryItem) => item.absolutePath !== sourceItem.absolutePath,
                 );
                 return [...newTree, updatedItem];
             });
@@ -102,16 +100,14 @@ export const FileTree = ({
     const confirmMoveItem = async () => {
         if (!sourceItem || !targetItem) return;
 
-        const sourceItemName: string =
-            sourceItem.name.split("/").pop() || sourceItem.name;
         const newPath =
             targetItem.name === ""
-                ? sourceItemName
-                : `${targetItem.name}/${sourceItemName}`;
+                ? sourceItem.name
+                : `${targetItem.absolutePath}/${sourceItem.name}`;
 
         moveItemMutation.mutate({
             repoId: repositoryId,
-            originalPath: sourceItem.name,
+            originalPath: sourceItem.absolutePath,
             newPath: newPath,
         });
     };
@@ -139,19 +135,18 @@ export const FileTree = ({
         try {
             const sourcePath: string = event.dataTransfer.getData("text/plain");
             const sourceItem: RepositoryItem | undefined = tree.find(
-                (treeItem: RepositoryItem) => treeItem.name === sourcePath,
+                (treeItem: RepositoryItem) => treeItem.absolutePath === sourcePath,
             );
 
             if (!sourceItem) return;
 
-            const isAlreadyInRoot = !sourceItem.name.includes("/");
+            const isAlreadyInRoot = !sourceItem.absolutePath.includes("/");
 
             if (isAlreadyInRoot) {
                 toast.info("Item is already in the root directory");
                 return;
             }
 
-            console.log("Handling move to root");
             handleMoveItem(sourceItem, rootDirectoryItem);
         } catch (error) {
             console.log("Error handling drop:", error);

@@ -139,8 +139,8 @@ export default function EditorPage({ repository }: EditorPageProps) {
             language: item.language,
         };
 
-        if (!openFiles.some((file) => file.name === item.name)) {
-            setOpenFiles((prevFiles) => [...prevFiles, fileDisplay]);
+        if (!openFiles.some((file: FileDisplayItem) => file.absolutePath === item.absolutePath)) {
+            setOpenFiles((prevFiles: Array<FileDisplayItem>) => [...prevFiles, fileDisplay]);
         }
         setActiveFile(fileDisplay);
     };

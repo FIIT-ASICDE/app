@@ -34,9 +34,6 @@ export const RepositoryItemActions = ({
     setDropdownOpen,
     onAction,
 }: RepositoryItemActionsProps) => {
-    const itemName: string =
-        parentItem.name.split("/").pop() ?? parentItem.name;
-
     const openFile = () => {
         // TODO: handle open file in editor
         console.log("Open file: " + parentItem.name);
@@ -44,7 +41,7 @@ export const RepositoryItemActions = ({
 
     const copyName = () => {
         navigator.clipboard
-            .writeText(itemName)
+            .writeText(parentItem.name)
             .then(() => {
                 toast.success(
                     parentItem.type === "directory" ||
@@ -52,7 +49,7 @@ export const RepositoryItemActions = ({
                         ? "Directory name copied to clipboard"
                         : "File name copied to clipboard",
                     {
-                        description: itemName,
+                        description: parentItem.name,
                     },
                 );
             })
