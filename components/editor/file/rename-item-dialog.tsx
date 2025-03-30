@@ -12,6 +12,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { renameItemInTree } from "@/components/generic/generic";
 
 interface RenameItemDialogProps {
     repositoryId: string;
@@ -29,7 +30,7 @@ export const RenameItemDialog = ({
     onAction,
 }: RenameItemDialogProps) => {
     const [open, setOpen] = useState<boolean>(false);
-    const [newItemName, setNewItemName] = useState<string>("");
+    const [newItemName, setNewItemName] = useState<string>(parentItem.name);
 
     const itemDisplayType: string =
         parentItem.type === "file" || parentItem.type === "file-display"
@@ -42,23 +43,12 @@ export const RenameItemDialog = ({
                 description: newItemName.trim(),
             });
 
-            const trimmedNewItemName = newItemName.trim();
-
-            const itemToRename: RepositoryItem | undefined = tree.find(
-                (item) => item.absolutePath
-                    === parentItem.absolutePath,
+            const updatedTree = renameItemInTree(
+                tree,
+                parentItem.absolutePath,
+                newItemName.trim()
             );
-
-            if (itemToRename) {
-                itemToRename.absolutePath = parentItem.name.replace(
-                    /[^/]+$/,
-                    trimmedNewItemName,
-                );
-                const filteredTree: Array<RepositoryItem> = tree.filter(
-                    (item) => item.absolutePath !== parentItem.absolutePath,
-                );
-                setTree([...filteredTree, itemToRename]);
-            }
+            setTree(updatedTree);
 
             onAction?.();
             setNewItemName("");

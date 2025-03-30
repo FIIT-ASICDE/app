@@ -14,6 +14,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { deleteItemFromTree } from "@/components/generic/generic";
 
 interface DeleteItemDialogProps {
     repositoryId: string;
@@ -41,21 +42,13 @@ export const DeleteItemDialog = ({
         onSuccess: () => {
             toast.success(itemDisplayType + " deleted successfully");
 
-            const itemToDelete: RepositoryItem | undefined = tree.find(
-                (item) => item.absolutePath === repositoryItem.absolutePath,
+            const updatedTree: Array<RepositoryItem> = deleteItemFromTree(
+                tree,
+                repositoryItem.absolutePath
             );
+            setTree(updatedTree);
 
-            if (itemToDelete) {
-                const filteredTree: Array<RepositoryItem> = tree.filter(
-                    (item) => item.absolutePath !== repositoryItem.absolutePath,
-                );
-                setTree(filteredTree);
-            }
-
-            if (onAction) {
-                onAction();
-            }
-
+            onAction?.();
             setOpen(false);
         },
         onError: (error) => {

@@ -2,7 +2,7 @@
 
 import type { RepositoryItem } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronRight, FileIcon, Folder } from "lucide-react";
+import { FileIcon, Folder } from "lucide-react";
 import {
     Dispatch,
     DragEvent,
@@ -13,7 +13,8 @@ import {
 } from "react";
 
 import { RepositoryItemActions } from "@/components/editor/sidebar-content/file-explorer/repository-item-actions";
-import { sortTree } from "@/components/generic/generic";
+import { findItemInTree, sortTree } from "@/components/generic/generic";
+import { ExpandCollapseIcon } from "@/components/editor/file/expand-collapse-icon";
 
 interface FileTreeItemProps {
     repositoryId: string;
@@ -88,18 +89,14 @@ export const FileTreeItem = ({
         event.dataTransfer.dropEffect = "move";
         setIsDragOver(true);
 
-        if (onDragOverItem) {
-            onDragOverItem();
-        }
+        onDragOverItem?.();
     };
 
     const handleDragEnter = (event: DragEvent<HTMLDivElement>) => {
         event.preventDefault();
         event.stopPropagation();
 
-        if (onDragOverItem) {
-            onDragOverItem();
-        }
+        onDragOverItem?.();
     };
 
     const handleDragLeave = () => {
@@ -112,26 +109,15 @@ export const FileTreeItem = ({
         setIsDragOver(false);
 
         try {
-            if (event.dataTransfer) {
-                const sourcePath: string =
-                    event.dataTransfer.getData("text/plain");
-                const sourceItem: RepositoryItem | undefined = tree.find(
-                    (treeItem: RepositoryItem) => treeItem.absolutePath === sourcePath,
-                );
+            const sourcePath: string = event.dataTransfer.getData("text/plain");
+            const sourceItem: RepositoryItem | undefined = findItemInTree(tree, sourcePath);
 
-                if (!sourceItem) return;
-                if (sourceItem.absolutePath === item.absolutePath) return;
-                if (
-                    item.type !== "directory" &&
-                    item.type !== "directory-display"
-                )
-                    return;
-                if (item.absolutePath.startsWith(sourceItem.absolutePath + "/")) return;
+            if (!sourceItem) return;
+            if (sourceItem.absolutePath === item.absolutePath) return;
+            if (item.type !== "directory") return;
+            if (item.absolutePath.startsWith(sourceItem.absolutePath + "/")) return;
 
-                if (onMoveItem) {
-                    onMoveItem(sourceItem, item);
-                }
-            }
+            onMoveItem?.(sourceItem, item);
         } catch (error) {
             console.error(error);
         }
@@ -175,20 +161,15 @@ export const FileTreeItem = ({
                     {item.type === "directory" ||
                     item.type === "directory-display" ? (
                         <>
-                            <span className="mr-2">
-                                {expandedItems.find(
+                            <ExpandCollapseIcon
+                                expanded={expandedItems.some(
                                     (expandedItem: RepositoryItem) =>
                                         expandedItem.absolutePath === item.absolutePath,
-                                ) ? (
-                                    <div onClick={handleToggle}>
-                                        <ChevronDown className="max-h-4 min-h-4 min-w-4 max-w-4 cursor-pointer" />
-                                    </div>
-                                ) : (
-                                    <div onClick={handleToggle}>
-                                        <ChevronRight className="max-h-4 min-h-4 min-w-4 max-w-4 cursor-pointer" />
-                                    </div>
                                 )}
-                            </span>
+                                hasChildren={item.type === "directory" && item.children.length > 0}
+                                handleToggle={handleToggle}
+                                className="mr-2"
+                            />
                             <Folder
                                 className="mr-2 max-h-4 min-h-4 min-w-4 max-w-4"
                                 fill="currentColor"
@@ -197,7 +178,7 @@ export const FileTreeItem = ({
                     ) : (
                         <FileIcon className="ml-6 mr-2 max-h-4 min-h-4 min-w-4 max-w-4" />
                     )}
-                    <span className="truncate">{item.name}</span>
+                    {item.name}
                 </div>
                 {(isHovered || dropdownOpen) && (
                     <RepositoryItemActions
@@ -211,6 +192,7 @@ export const FileTreeItem = ({
                             setHoveredItemAction(undefined);
                             setDropdownOpen(false);
                         }}
+                        onOpenFile={onItemClick}
                     />
                 )}
             </div>

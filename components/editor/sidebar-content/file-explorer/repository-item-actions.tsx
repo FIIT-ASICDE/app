@@ -23,6 +23,7 @@ interface RepositoryItemActionsProps {
     dropdownOpen: boolean;
     setDropdownOpen: Dispatch<SetStateAction<boolean>>;
     onAction: () => void;
+    onOpenFile?: (item: RepositoryItem) => void;
 }
 
 export const RepositoryItemActions = ({
@@ -33,10 +34,10 @@ export const RepositoryItemActions = ({
     dropdownOpen,
     setDropdownOpen,
     onAction,
+    onOpenFile,
 }: RepositoryItemActionsProps) => {
     const openFile = () => {
-        // TODO: handle open file in editor
-        console.log("Open file: " + parentItem.name);
+        onOpenFile?.(parentItem);
     };
 
     const copyName = () => {
@@ -60,7 +61,7 @@ export const RepositoryItemActions = ({
 
     const copyPath = () => {
         navigator.clipboard
-            .writeText(parentItem.name)
+            .writeText(parentItem.absolutePath)
             .then(() => {
                 toast.success(
                     parentItem.type === "directory" ||
@@ -68,7 +69,7 @@ export const RepositoryItemActions = ({
                         ? "Directory path copied to clipboard"
                         : "File path copied to clipboard",
                     {
-                        description: parentItem.name,
+                        description: parentItem.absolutePath,
                     },
                 );
             })

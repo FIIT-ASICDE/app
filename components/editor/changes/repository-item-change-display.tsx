@@ -51,7 +51,7 @@ export const RepositoryItemChangeDisplay = ({
             <Label className="flex flex-1 cursor-pointer flex-row items-center justify-between gap-x-2 text-sm font-normal">
                 <div className="flex flex-row items-center gap-x-2">
                     <FileIcon className="h-4 w-4" />
-                    {itemChange.itemPath.split("/").pop()}
+                    {itemChange.itemPath}
                 </div>
                 {getChangeContent(itemChange)}
             </Label>

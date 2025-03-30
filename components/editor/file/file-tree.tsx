@@ -1,14 +1,14 @@
 "use client";
 
 import { api } from "@/lib/trpc/react";
-import type { RepositoryItem } from "@/lib/types/repository";
+import type { DirectoryDisplayItem, RepositoryItem } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { Dispatch, DragEvent, SetStateAction, useState } from "react";
 import { toast } from "sonner";
 
 import { FileTreeItem } from "@/components/editor/file/file-tree-item";
 import { MoveItemDialog } from "@/components/editor/file/move-item-dialog";
-import { sortTree } from "@/components/generic/generic";
+import { moveItemInTree, sortTree } from "@/components/generic/generic";
 
 interface FileTreeProps {
     repositoryId: string;
@@ -33,50 +33,42 @@ export const FileTree = ({
 }: FileTreeProps) => {
     const [moveDialogOpen, setMoveDialogOpen] = useState<boolean>(false);
     const [sourceItem, setSourceItem] = useState<RepositoryItem | undefined>(
-        undefined,
+        undefined
     );
     const [targetItem, setTargetItem] = useState<RepositoryItem | undefined>(
-        undefined,
+        undefined
     );
     const [isDragOverRoot, setIsDragOverRoot] = useState<boolean>(false);
     const [hoveredItem, setHoveredItem] = useState<RepositoryItem | undefined>(
-        undefined,
+        undefined
     );
+
     const moveItemMutation = api.editor.renameItem.useMutation({
         onSuccess: () => {
             if (!sourceItem || !targetItem) return;
 
-            const newPath =
-                targetItem.name === ""
-                    ? sourceItem.name
-                    : targetItem.absolutePath + "/" + sourceItem.name;
-
-            const updatedItem: RepositoryItem = {
-                ...sourceItem,
-                name: newPath,
-            };
-
-            setTreeAction((previousTree) => {
-                const newTree = previousTree.filter(
-                    (item: RepositoryItem) => item.absolutePath !== sourceItem.absolutePath,
-                );
-                return [...newTree, updatedItem];
-            });
+            const updatedTree: Array<RepositoryItem> = moveItemInTree(
+                tree,
+                sourceItem,
+                targetItem
+            );
+            setTreeAction(updatedTree);
 
             setMoveDialogOpen(false);
             setSourceItem(undefined);
             setTargetItem(undefined);
 
-            toast.success(
-                (sourceItem.type === "directory" ||
+            const sourceItemDisplayType: string =
+                sourceItem.type === "directory" ||
                 sourceItem.type === "directory-display"
                     ? "Directory"
-                    : "File") + " moved successfully",
-            );
+                    : "File";
+
+            toast.success(sourceItemDisplayType + " moved successfully");
         },
     });
 
-    const rootDirectoryItem: RepositoryItem = {
+    const rootDirectoryItem: DirectoryDisplayItem = {
         type: "directory-display",
         name: "",
         lastActivity: new Date(),
@@ -86,21 +78,23 @@ export const FileTree = ({
     const sortedTree: Array<RepositoryItem> = sortTree([...tree]);
 
     const handleMoveItem = (source: RepositoryItem, target: RepositoryItem) => {
+        console.log("handleMoveItem called with source:", source.absolutePath, "target:", target.absolutePath);
+
         if (source && target) {
             setSourceItem(source);
             setTargetItem(target);
             setMoveDialogOpen(true);
         } else {
             console.error(
-                "Cannot open move dialog: source or target is undefined",
+                "Cannot open move dialog: source or target is undefined"
             );
         }
     };
 
-    const confirmMoveItem = async () => {
+    const confirmMoveItem = () => {
         if (!sourceItem || !targetItem) return;
 
-        const newPath =
+        const newPath: string =
             targetItem.name === ""
                 ? sourceItem.name
                 : `${targetItem.absolutePath}/${sourceItem.name}`;
@@ -135,7 +129,8 @@ export const FileTree = ({
         try {
             const sourcePath: string = event.dataTransfer.getData("text/plain");
             const sourceItem: RepositoryItem | undefined = tree.find(
-                (treeItem: RepositoryItem) => treeItem.absolutePath === sourcePath,
+                (treeItem: RepositoryItem) =>
+                    treeItem.absolutePath === sourcePath
             );
 
             if (!sourceItem) return;
@@ -157,7 +152,7 @@ export const FileTree = ({
         <div
             className={cn(
                 "flex min-h-full flex-1 flex-grow flex-col rounded border border-transparent p-4 pt-2",
-                isDragOverRoot && "border-primary bg-accent",
+                isDragOverRoot && "border-primary bg-accent"
             )}
             onDragOver={handleRootDragOver}
             onDragLeave={handleRootDragLeave}

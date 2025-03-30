@@ -39,7 +39,7 @@ export const MoveItemDialog = ({
             ? "root directory"
             : targetItem.name;
 
-    const itemType =
+    const itemType: "file" | "directory" =
         sourceItem.type === "directory" ||
         sourceItem.type === "directory-display"
             ? "directory"
