@@ -1,3 +1,4 @@
+import { PaginationResult } from "@/lib/types/generic";
 import { Invitation } from "@/lib/types/invitation";
 import { UserDisplay } from "@/lib/types/user";
 
@@ -54,17 +55,20 @@ interface FileDisplayItem {
 export type FileItem = Omit<FileDisplayItem, "type"> & {
     type: "file";
     content: string;
+    absolutePath: string;
 };
 
 interface DirectoryDisplayItem {
     type: "directory-display";
     name: string;
     lastActivity: Date;
+    absolutePath: string;
 }
 
 type DirectoryItem = Omit<DirectoryDisplayItem, "type"> & {
     type: "directory";
     children: RepositoryItem[];
+    absolutePath: string;
 };
 
 export type RepositoryItem =
@@ -124,4 +128,20 @@ export type RepositoryItemChange = {
         | { type: "added" | "modified" | "deleted" }
         | { type: "renamed"; oldName: string }
         | { type: "moved"; oldPath: string };
+};
+
+export type CommitHistory = {
+    commits: GitCommit[];
+    pagination: PaginationResult;
+};
+
+export type GitCommit = {
+    hash: string;
+    authorName: string;
+    authorEmail: string;
+    authorDate: Date;
+    message: string;
+    body: string;
+    changes: RepositoryItemChange[];
+    pushed: boolean;
 };

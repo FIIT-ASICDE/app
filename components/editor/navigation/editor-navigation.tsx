@@ -1,13 +1,15 @@
 import type {
     BottomPanelContentTab,
-    SidebarContentTab, SimulationType
+    SidebarContentTab,
+    SimulationConfiguration,
+    SimulationType,
 } from "@/lib/types/editor";
+import { Repository, RepositoryItem } from "@/lib/types/repository";
 import {
     Cog,
     Command,
     File,
     GitCommitHorizontal,
-    Play,
     SearchIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -18,52 +20,73 @@ import { CommandBarDialog } from "@/components/command/command-bar-dialog";
 import { useUser } from "@/components/context/user-context";
 import { NavigationButton } from "@/components/editor/navigation/navigation-button";
 import { SidebarNavigationButton } from "@/components/editor/navigation/sidebar-navigation-button";
+import { SimulationButton } from "@/components/editor/navigation/simulation-button";
+import { SimulationDialog } from "@/components/editor/simulation-dialog";
 import { HeaderDropdown } from "@/components/header/header-dropdown";
 import LogoIcon from "@/components/icons/logo";
 import { Separator } from "@/components/ui/separator";
-import { SimulationDialog } from "@/components/editor/simulation-dialog";
-import { Repository, RepositoryItem } from "@/lib/types/repository";
 
 interface EditorNavigationProps {
-    activeSidebarContent: SidebarContentTab;
-    setActiveSidebarContent: Dispatch<SetStateAction<SidebarContentTab>>;
-    activeBottomPanelContent: BottomPanelContentTab;
-    setActiveBottomPanelContent: Dispatch<
-        SetStateAction<BottomPanelContentTab>
-    >;
-    verticalGroupRef: RefObject<ImperativePanelGroupHandle>;
-    horizontalGroupRef: RefObject<ImperativePanelGroupHandle>;
-    verticalCollapsed: boolean;
-    setVerticalCollapsed: Dispatch<SetStateAction<boolean>>;
-    horizontalCollapsed: boolean;
-    setHorizontalCollapsed: Dispatch<SetStateAction<boolean>>;
-    lastOpenedBottomPanelSize: number;
-    setLastOpenedBottomPanelSize: Dispatch<SetStateAction<number>>;
-    lastOpenedSidebarSize: number;
-    setLastOpenedSidebarSize: Dispatch<SetStateAction<number>>;
+    sidebarProps: {
+        horizontalGroupRef: RefObject<ImperativePanelGroupHandle>;
+        horizontalCollapsed: boolean;
+        setHorizontalCollapsed: Dispatch<SetStateAction<boolean>>;
+        activeSidebarContent: SidebarContentTab;
+        setActiveSidebarContent: Dispatch<SetStateAction<SidebarContentTab>>;
+        lastOpenedSidebarSize: number;
+        setLastOpenedSidebarSize: Dispatch<SetStateAction<number>>;
+    };
+    bottomPanelProps: {
+        verticalGroupRef: RefObject<ImperativePanelGroupHandle>;
+        verticalCollapsed: boolean;
+        setVerticalCollapsed: Dispatch<SetStateAction<boolean>>;
+        activeBottomPanelContent: BottomPanelContentTab;
+        setActiveBottomPanelContent: Dispatch<
+            SetStateAction<BottomPanelContentTab>
+        >;
+        lastOpenedBottomPanelSize: number;
+        setLastOpenedBottomPanelSize: Dispatch<SetStateAction<number>>;
+    };
+    simulationProps: {
+        onStartSimulation: (
+            selectedType: SimulationType,
+            selectedFile: RepositoryItem,
+        ) => void;
+        simulationConfiguration: SimulationConfiguration | undefined;
+        setSimulationConfiguration: Dispatch<
+            SetStateAction<SimulationConfiguration | undefined>
+        >;
+    };
     isGitRepo?: boolean;
     repository: Repository;
-    onStartSimulation: (selectedType: SimulationType, selectedFile: RepositoryItem) => void;
 }
 
 export const EditorNavigation = ({
-    activeSidebarContent,
-    setActiveSidebarContent,
-    activeBottomPanelContent,
-    setActiveBottomPanelContent,
-    verticalGroupRef,
-    horizontalGroupRef,
-    verticalCollapsed,
-    setVerticalCollapsed,
-    horizontalCollapsed,
-    setHorizontalCollapsed,
-    lastOpenedBottomPanelSize,
-    setLastOpenedBottomPanelSize,
-    lastOpenedSidebarSize,
-    setLastOpenedSidebarSize,
+    sidebarProps: {
+        horizontalGroupRef,
+        horizontalCollapsed,
+        setHorizontalCollapsed,
+        activeSidebarContent,
+        setActiveSidebarContent,
+        lastOpenedSidebarSize,
+        setLastOpenedSidebarSize,
+    },
+    bottomPanelProps: {
+        verticalGroupRef,
+        verticalCollapsed,
+        setVerticalCollapsed,
+        activeBottomPanelContent,
+        setActiveBottomPanelContent,
+        lastOpenedBottomPanelSize,
+        setLastOpenedBottomPanelSize,
+    },
+    simulationProps: {
+        onStartSimulation,
+        simulationConfiguration,
+        setSimulationConfiguration,
+    },
     isGitRepo,
     repository,
-    onStartSimulation,
 }: EditorNavigationProps) => {
     const { user } = useUser();
 
@@ -128,7 +151,7 @@ export const EditorNavigation = ({
         <>
             <div className="flex h-full w-14 flex-col rounded-none border-r bg-header">
                 <div className="flex flex-col items-center gap-2 p-2">
-                    <Link href={"/public"}>
+                    <Link href={"/"}>
                         <NavigationButton icon={LogoIcon} tooltip="Home" />
                     </Link>
                     <NavigationButton
@@ -179,10 +202,23 @@ export const EditorNavigation = ({
                 </div>
 
                 <div className="flex flex-col items-center gap-2 p-2">
-                    <NavigationButton
-                        icon={Play}
-                        tooltip="Simulation"
-                        onClick={() => setSimulationOpen(!simulationOpen)}
+                    <SimulationButton
+                        setSimulationOpen={setSimulationOpen}
+                        onStartSimulation={(
+                            selectedType: SimulationType,
+                            selectedFile: RepositoryItem,
+                        ) => {
+                            if (verticalGroupRef.current) {
+                                verticalGroupRef.current.setLayout([
+                                    100 - lastOpenedBottomPanelSize,
+                                    lastOpenedBottomPanelSize,
+                                ]);
+                                setVerticalCollapsed(false);
+                                setActiveBottomPanelContent("simulation");
+                            }
+                            onStartSimulation(selectedType, selectedFile);
+                        }}
+                        simulationConfiguration={simulationConfiguration}
                     />
                     <NavigationButton
                         icon={Cog}
@@ -202,7 +238,10 @@ export const EditorNavigation = ({
 
             <SimulationDialog
                 repository={repository}
-                onStartSimulation={(selectedType: SimulationType, selectedFile: RepositoryItem) => {
+                onStartSimulation={(
+                    selectedType: SimulationType,
+                    selectedFile: RepositoryItem,
+                ) => {
                     if (verticalGroupRef.current) {
                         verticalGroupRef.current.setLayout([
                             100 - lastOpenedBottomPanelSize,
@@ -215,6 +254,7 @@ export const EditorNavigation = ({
                 }}
                 simulationOpen={simulationOpen}
                 setSimulationOpen={setSimulationOpen}
+                setSimulationConfiguration={setSimulationConfiguration}
             />
 
             <CommandBarDialog

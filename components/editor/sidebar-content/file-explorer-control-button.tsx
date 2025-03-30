@@ -16,6 +16,7 @@ interface FileExplorerControlButtonProps {
     dropdownMenuTrigger?: boolean;
     className?: string;
     iconClassName?: string;
+    onClick?: () => void;
 }
 
 export const FileExplorerControlButton = ({
@@ -25,6 +26,7 @@ export const FileExplorerControlButton = ({
     dropdownMenuTrigger,
     className,
     iconClassName,
+    onClick,
 }: FileExplorerControlButtonProps) => {
     return (
         <Tooltip>
@@ -67,6 +69,7 @@ export const FileExplorerControlButton = ({
                             "rounded border border-transparent p-[4px] hover:border-accent",
                             className,
                         )}
+                        onClick={onClick}
                     >
                         <Icon
                             className={cn(

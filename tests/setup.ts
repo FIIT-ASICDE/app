@@ -19,7 +19,7 @@ export type InitializeUserResult = Awaited<ReturnType<typeof initializeUser>>;
 export async function testingPrisma() {
     let connectionUri: string;
     let prisma: PrismaType;
-    let cleanupFn = async () => {};
+    let cleanupFn: () => Promise<void>;
 
     if (process.env.CI === "true") {
         // running in GitLab CI/CD:

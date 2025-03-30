@@ -1,3 +1,4 @@
+import { getRelativePathInRepo } from "@/lib/server/api/routers/repos";
 import {
     FileItem,
     LanguageStatistics,
@@ -49,6 +50,7 @@ export function loadRepoItems(
                         name: entry.name,
                         lastActivity,
                         children: readDirectory(entryPath, currentDepth + 1),
+                        absolutePath: getRelativePathInRepo(entryPath),
                     };
                 }
 
@@ -56,6 +58,7 @@ export function loadRepoItems(
                     type: "directory-display",
                     name: entry.name,
                     lastActivity,
+                    absolutePath: getRelativePathInRepo(entryPath),
                 };
             }
 
@@ -79,7 +82,7 @@ export function loadRepoItems(
                 name: entry.name,
                 lastActivity,
                 language,
-                absolutePath: currentPath,
+                absolutePath: getRelativePathInRepo(entryPath),
             };
         });
     }
@@ -107,6 +110,7 @@ export function loadRepoDirOrFile(
             name: path.basename(pathString),
             lastActivity: stat.mtime,
             children: loadRepoItems(pathString, maxDepth, loadContents),
+            absolutePath: getRelativePathInRepo(pathString),
         };
     } else if (stat.isFile()) {
         return loadRepoFile(pathString);
@@ -136,7 +140,7 @@ export function loadRepoFile(filePath: string): FileItem {
         name: fileName,
         lastActivity,
         language,
-        absolutePath: filePath,
+        absolutePath: getRelativePathInRepo(filePath),
         content: fs.readFileSync(filePath, "utf-8"),
     };
 }

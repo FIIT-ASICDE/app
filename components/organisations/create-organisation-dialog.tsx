@@ -13,7 +13,7 @@ import {
     Image as ImageIcon,
     Loader2,
     UserRound,
-    UserRoundPlus
+    UserRoundPlus,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useState } from "react";
@@ -109,7 +109,7 @@ export const CreateOrganisationDialog = () => {
         ) : (
             <div
                 role="note"
-                className="my-5 text-center text-sm font-normal text-muted-foreground w-[375px] overflow-hidden"
+                className="my-5 w-[375px] overflow-hidden text-center text-sm font-normal text-muted-foreground"
             >
                 You are creating an organisation called{" "}
                 <span className="font-bold">{form.watch("name")}</span>
@@ -209,7 +209,7 @@ export const CreateOrganisationDialog = () => {
                             <form>
                                 <fieldset
                                     disabled={createOrgMutation.isPending}
-                                    className="space-y-3 pt-3 w-[375px]"
+                                    className="w-[375px] space-y-3 pt-3"
                                 >
                                     <FormField
                                         control={form.control}
@@ -261,7 +261,7 @@ export const CreateOrganisationDialog = () => {
                                         render={({
                                             field: { value, ...fieldProps },
                                         }) => (
-                                            <FormItem className="flex flex-col w-[375px]">
+                                            <FormItem className="flex w-[375px] flex-col">
                                                 <div className="flex flex-row items-center gap-5">
                                                     <div className="flex flex-col justify-center">
                                                         <FormLabel className="mb-3 text-muted-foreground">

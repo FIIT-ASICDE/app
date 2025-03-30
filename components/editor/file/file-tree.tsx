@@ -1,67 +1,203 @@
 "use client";
 
+import { api } from "@/lib/trpc/react";
 import type { RepositoryItem } from "@/lib/types/repository";
-import { FileX } from "lucide-react";
-import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { Dispatch, DragEvent, SetStateAction, useState } from "react";
+import { toast } from "sonner";
 
 import { FileTreeItem } from "@/components/editor/file/file-tree-item";
-import { NoData } from "@/components/generic/no-data";
+import { MoveItemDialog } from "@/components/editor/file/move-item-dialog";
+import { sortTree } from "@/components/generic/generic";
 
 interface FileTreeProps {
+    repositoryId: string;
     tree: Array<RepositoryItem>;
+    setTreeAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
     onItemClick?: (item: RepositoryItem) => void;
+    selectedItem: RepositoryItem | undefined;
+    setSelectedItemAction: Dispatch<SetStateAction<RepositoryItem | undefined>>;
+    expandedItems: Array<RepositoryItem>;
+    setExpandedItemsAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
 }
 
-export const FileTree = ({ tree, onItemClick }: FileTreeProps) => {
-    const [selected, setSelected] = useState<RepositoryItem | undefined>(
+export const FileTree = ({
+    repositoryId,
+    tree,
+    setTreeAction,
+    onItemClick,
+    selectedItem,
+    setSelectedItemAction,
+    expandedItems,
+    setExpandedItemsAction,
+}: FileTreeProps) => {
+    const [moveDialogOpen, setMoveDialogOpen] = useState<boolean>(false);
+    const [sourceItem, setSourceItem] = useState<RepositoryItem | undefined>(
         undefined,
     );
-
-    if (!tree || tree.length === 0) {
-        return (
-            <NoData icon={FileX} message={"No files or directories found"} />
-        );
-    }
-
-    const sortedTree: Array<RepositoryItem> = [...tree].sort(
-        (a: RepositoryItem, b: RepositoryItem) => {
-            if (
-                (a.type === "directory" || a.type === "directory-display") &&
-                (b.type === "file" || b.type === "file-display")
-            )
-                return -1;
-            if (
-                (a.type === "file" || a.type === "file-display") &&
-                (b.type === "directory" || b.type === "directory-display")
-            )
-                return 1;
-            return a.name.localeCompare(b.name);
-        },
+    const [targetItem, setTargetItem] = useState<RepositoryItem | undefined>(
+        undefined,
     );
+    const [isDragOverRoot, setIsDragOverRoot] = useState<boolean>(false);
+    const [hoveredItem, setHoveredItem] = useState<RepositoryItem | undefined>(
+        undefined,
+    );
+    const moveItemMutation = api.editor.renameItem.useMutation({
+        onSuccess: () => {
+            if (!sourceItem || !targetItem) return;
 
-    const compareRepositoryItems = (repositoryItem: RepositoryItem) => {
-        return (
-            selected !== undefined &&
-            repositoryItem.type === selected.type &&
-            repositoryItem.name === selected.name
-        );
+            const sourceItemName: string =
+                sourceItem.name.split("/").pop() || sourceItem.name;
+            const newPath =
+                targetItem.name === ""
+                    ? sourceItemName
+                    : targetItem.name + "/" + sourceItemName;
+
+            const updatedItem: RepositoryItem = {
+                ...sourceItem,
+                name: newPath,
+            };
+
+            setTreeAction((previousTree) => {
+                const newTree = previousTree.filter(
+                    (item: RepositoryItem) => item.name !== sourceItem.name,
+                );
+                return [...newTree, updatedItem];
+            });
+
+            setMoveDialogOpen(false);
+            setSourceItem(undefined);
+            setTargetItem(undefined);
+
+            toast.success(
+                (sourceItem.type === "directory" ||
+                sourceItem.type === "directory-display"
+                    ? "Directory"
+                    : "File") + " moved successfully",
+            );
+        },
+    });
+
+    const rootDirectoryItem: RepositoryItem = {
+        type: "directory-display",
+        name: "",
+        lastActivity: new Date(),
+        absolutePath: "",
+    };
+
+    const sortedTree: Array<RepositoryItem> = sortTree([...tree]);
+
+    const handleMoveItem = (source: RepositoryItem, target: RepositoryItem) => {
+        if (source && target) {
+            setSourceItem(source);
+            setTargetItem(target);
+            setMoveDialogOpen(true);
+        } else {
+            console.error(
+                "Cannot open move dialog: source or target is undefined",
+            );
+        }
+    };
+
+    const confirmMoveItem = async () => {
+        if (!sourceItem || !targetItem) return;
+
+        const sourceItemName: string =
+            sourceItem.name.split("/").pop() || sourceItem.name;
+        const newPath =
+            targetItem.name === ""
+                ? sourceItemName
+                : `${targetItem.name}/${sourceItemName}`;
+
+        moveItemMutation.mutate({
+            repoId: repositoryId,
+            originalPath: sourceItem.name,
+            newPath: newPath,
+        });
+    };
+
+    const cancelMoveItem = () => {
+        setMoveDialogOpen(false);
+        setSourceItem(undefined);
+        setTargetItem(undefined);
+    };
+
+    const handleRootDragOver = (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+        setIsDragOverRoot(true);
+    };
+
+    const handleRootDragLeave = () => {
+        setIsDragOverRoot(false);
+    };
+
+    const handleRootDrop = (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        setIsDragOverRoot(false);
+
+        try {
+            const sourcePath: string = event.dataTransfer.getData("text/plain");
+            const sourceItem: RepositoryItem | undefined = tree.find(
+                (treeItem: RepositoryItem) => treeItem.name === sourcePath,
+            );
+
+            if (!sourceItem) return;
+
+            const isAlreadyInRoot = !sourceItem.name.includes("/");
+
+            if (isAlreadyInRoot) {
+                toast.info("Item is already in the root directory");
+                return;
+            }
+
+            console.log("Handling move to root");
+            handleMoveItem(sourceItem, rootDirectoryItem);
+        } catch (error) {
+            console.log("Error handling drop:", error);
+        }
     };
 
     return (
-        <div className="space-y-1">
+        <div
+            className={cn(
+                "flex min-h-full flex-1 flex-grow flex-col rounded border border-transparent p-4 pt-2",
+                isDragOverRoot && "border-primary bg-accent",
+            )}
+            onDragOver={handleRootDragOver}
+            onDragLeave={handleRootDragLeave}
+            onDrop={handleRootDrop}
+        >
             {sortedTree.map((item: RepositoryItem, index: number) => (
                 <FileTreeItem
                     key={index + item.lastActivity.toLocaleString()}
+                    repositoryId={repositoryId}
                     item={item}
-                    onItemClick={() => {
-                        setSelected(item);
-                        if (onItemClick) {
-                            onItemClick(item);
-                        }
-                    }}
-                    isSelected={compareRepositoryItems(item)}
+                    tree={tree}
+                    setTreeAction={setTreeAction}
+                    onItemClick={() => onItemClick?.(item)}
+                    selectedItem={selectedItem}
+                    setSelectedItemAction={setSelectedItemAction}
+                    depth={0}
+                    expandedItems={expandedItems}
+                    setExpandedItemsAction={setExpandedItemsAction}
+                    hoveredItem={hoveredItem}
+                    setHoveredItemAction={setHoveredItem}
+                    onMoveItem={handleMoveItem}
+                    onDragOverItem={() => setIsDragOverRoot(false)}
                 />
             ))}
+
+            {sourceItem && targetItem && (
+                <MoveItemDialog
+                    isOpen={moveDialogOpen}
+                    setIsOpen={setMoveDialogOpen}
+                    sourceItem={sourceItem}
+                    targetItem={targetItem}
+                    onConfirm={confirmMoveItem}
+                    onCancel={cancelMoveItem}
+                />
+            )}
         </div>
     );
 };

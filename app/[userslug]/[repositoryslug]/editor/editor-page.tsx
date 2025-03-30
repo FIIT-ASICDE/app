@@ -4,7 +4,9 @@ import { commitSchema } from "@/lib/schemas/git-schemas";
 import { api } from "@/lib/trpc/react";
 import type {
     BottomPanelContentTab,
-    SidebarContentTab, SimulationType
+    SidebarContentTab,
+    SimulationConfiguration,
+    SimulationType,
 } from "@/lib/types/editor";
 import type {
     FileDisplayItem,
@@ -14,6 +16,7 @@ import type {
 import { X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { type ElementRef, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
 import { z } from "zod";
 
@@ -58,6 +61,14 @@ export default function EditorPage({ repository }: EditorPageProps) {
     const [activeFile, setActiveFile] = useState<FileDisplayItem | null>(null);
     const [openFiles, setOpenFiles] = useState<FileDisplayItem[]>([]);
 
+    const [simulationConfiguration, setSimulationConfiguration] = useState<
+        SimulationConfiguration | undefined
+    >(undefined);
+
+    const [tree, setTree] = useState<Array<RepositoryItem>>(
+        repository.tree ?? [],
+    );
+
     const changes = api.git.changes.useQuery(
         { repoId: repository.id },
         {
@@ -68,11 +79,13 @@ export default function EditorPage({ repository }: EditorPageProps) {
 
     const commitMutation = api.git.commit.useMutation({
         onSuccess: () => {
-            toast.success("Successfully commited " + changes.data?.changes.length);
+            toast.success(
+                "Successfully commited " + changes.data?.changes.length,
+            );
         },
         onError: (error) => {
             toast.error(error.message);
-        }
+        },
     });
 
     const handleOnCommit = async (data: z.infer<typeof commitSchema>) => {
@@ -98,18 +111,36 @@ export default function EditorPage({ repository }: EditorPageProps) {
         }
     };
 
-    const onStartSimulation = (selectedType: SimulationType, selectedFile: RepositoryItem) => {
+    const onStartSimulation = (
+        selectedType: SimulationType,
+        selectedFile: RepositoryItem,
+    ) => {
         // TODO: adam start simulation
-        console.log("Starting simulation with type: " + selectedType + " and file: " + selectedFile?.name);
+        console.log(
+            "Starting simulation with type: " +
+                selectedType +
+                " and file: " +
+                selectedFile?.name,
+        );
     };
 
     const handleFileClick = (item: RepositoryItem) => {
-        if (item.type === "file-display") {
-            if (!openFiles.some((file) => file.name === item.name)) {
-                setOpenFiles((prevFiles) => [...prevFiles, item]);
-            }
-            setActiveFile(item);
+        if (item.type !== "file-display" && item.type !== "file") {
+            return;
         }
+
+        const fileDisplay: FileDisplayItem = {
+            type: "file-display",
+            name: item.name,
+            absolutePath: item.absolutePath,
+            lastActivity: item.lastActivity,
+            language: item.language,
+        };
+
+        if (!openFiles.some((file) => file.name === item.name)) {
+            setOpenFiles((prevFiles) => [...prevFiles, fileDisplay]);
+        }
+        setActiveFile(fileDisplay);
     };
 
     const handleTabSwitch = (item: FileDisplayItem) => {
@@ -172,25 +203,34 @@ export default function EditorPage({ repository }: EditorPageProps) {
 
     useEffect(() => {
         saveSessionDebounced();
-    }, [openFiles, activeFile, repository.id]);
+    }, [openFiles, activeFile, repository.id, saveSessionDebounced]);
 
     return (
         <div className="flex h-screen flex-row">
             <EditorNavigation
-                activeSidebarContent={activeSidebarContent}
-                setActiveSidebarContent={setActiveSidebarContent}
-                activeBottomPanelContent={activeBottomPanelContent}
-                setActiveBottomPanelContent={setActiveBottomPanelContent}
-                verticalGroupRef={verticalGroupRef}
-                horizontalGroupRef={horizontalGroupRef}
-                verticalCollapsed={verticalCollapsed}
-                setVerticalCollapsed={setVerticalCollapsed}
-                horizontalCollapsed={horizontalCollapsed}
-                setHorizontalCollapsed={setHorizontalCollapsed}
-                lastOpenedBottomPanelSize={lastOpenedBottomPanelSize}
-                setLastOpenedBottomPanelSize={setLastOpenedBottomPanelSize}
-                lastOpenedSidebarSize={lastOpenedSidebarSize}
-                setLastOpenedSidebarSize={setLastOpenedSidebarSize}
+                sidebarProps={{
+                    horizontalGroupRef,
+                    horizontalCollapsed,
+                    setHorizontalCollapsed,
+                    activeSidebarContent,
+                    setActiveSidebarContent,
+                    lastOpenedSidebarSize,
+                    setLastOpenedSidebarSize,
+                }}
+                bottomPanelProps={{
+                    verticalGroupRef,
+                    verticalCollapsed,
+                    setVerticalCollapsed,
+                    activeBottomPanelContent,
+                    setActiveBottomPanelContent,
+                    lastOpenedBottomPanelSize,
+                    setLastOpenedBottomPanelSize,
+                }}
+                simulationProps={{
+                    onStartSimulation,
+                    simulationConfiguration,
+                    setSimulationConfiguration,
+                }}
                 isGitRepo={repository.isGitRepo}
                 repository={repository}
                 onStartSimulation={onStartSimulation}
@@ -225,8 +265,10 @@ export default function EditorPage({ repository }: EditorPageProps) {
                             <SidebarTabContent
                                 activeSidebarContent={activeSidebarContent}
                                 repository={repository}
+                                tree={tree}
+                                setTreeAction={setTree}
                                 changes={changes.data?.changes ?? []}
-                                handleCloseSidebar={handleCloseSidebar}
+                                handleCloseSidebarAction={handleCloseSidebar}
                                 onFileClick={handleFileClick}
                                 onCommit={{
                                     action: handleOnCommit,
@@ -271,9 +313,11 @@ export default function EditorPage({ repository }: EditorPageProps) {
                                     ) : (
                                         <DynamicEditor
                                             filePath={
-                                                activeFile.absolutePath +
+                                                repository.ownerName +
                                                 "/" +
-                                                activeFile.name
+                                                repository.name +
+                                                "/" +
+                                                activeFile.absolutePath
                                             }
                                         />
                                     )

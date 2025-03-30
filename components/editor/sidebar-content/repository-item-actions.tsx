@@ -16,22 +16,30 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface RepositoryItemActionsProps {
-    repositoryItem: RepositoryItem;
+    repositoryId: string;
+    parentItem: RepositoryItem;
+    tree: Array<RepositoryItem>;
+    setTree: Dispatch<SetStateAction<Array<RepositoryItem>>>;
     dropdownOpen: boolean;
     setDropdownOpen: Dispatch<SetStateAction<boolean>>;
+    onAction: () => void;
 }
 
 export const RepositoryItemActions = ({
-    repositoryItem,
+    repositoryId,
+    parentItem,
+    tree,
+    setTree,
     dropdownOpen,
     setDropdownOpen,
+    onAction,
 }: RepositoryItemActionsProps) => {
     const itemName: string =
-        repositoryItem.name.split("/").pop() ?? repositoryItem.name;
+        parentItem.name.split("/").pop() ?? parentItem.name;
 
     const openFile = () => {
         // TODO: handle open file in editor
-        console.log("Open file: " + repositoryItem.name);
+        console.log("Open file: " + parentItem.name);
     };
 
     const copyName = () => {
@@ -39,8 +47,8 @@ export const RepositoryItemActions = ({
             .writeText(itemName)
             .then(() => {
                 toast.success(
-                    repositoryItem.type === "directory" ||
-                        repositoryItem.type === "directory-display"
+                    parentItem.type === "directory" ||
+                        parentItem.type === "directory-display"
                         ? "Directory name copied to clipboard"
                         : "File name copied to clipboard",
                     {
@@ -55,15 +63,15 @@ export const RepositoryItemActions = ({
 
     const copyPath = () => {
         navigator.clipboard
-            .writeText(repositoryItem.name)
+            .writeText(parentItem.name)
             .then(() => {
                 toast.success(
-                    repositoryItem.type === "directory" ||
-                        repositoryItem.type === "directory-display"
+                    parentItem.type === "directory" ||
+                        parentItem.type === "directory-display"
                         ? "Directory path copied to clipboard"
                         : "File path copied to clipboard",
                     {
-                        description: repositoryItem.name,
+                        description: parentItem.name,
                     },
                 );
             })
@@ -76,20 +84,28 @@ export const RepositoryItemActions = ({
         <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
             <DropdownMenuTrigger asChild>
                 <button className="rounded border border-transparent p-[1px] hover:border-transparent hover:text-foreground">
-                    <Ellipsis className="max-h-4 min-h-4 min-w-4 max-w-4 text-muted-foreground" />
+                    <Ellipsis className="max-h-4 min-h-4 min-w-4 max-w-4" />
                 </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="min-w-40">
-                {repositoryItem.type === "directory" ||
-                repositoryItem.type === "directory-display" ? (
+                {parentItem.type === "directory" ||
+                parentItem.type === "directory-display" ? (
                     <>
                         <CreateFileDialog
-                            repositoryItem={repositoryItem}
+                            repositoryId={repositoryId}
+                            parentItem={parentItem}
                             buttonSize="full"
+                            tree={tree}
+                            setTree={setTree}
+                            onAction={onAction}
                         />
                         <CreateDirectoryDialog
-                            repositoryItem={repositoryItem}
+                            repositoryId={repositoryId}
+                            parentItem={parentItem}
                             buttonSize="full"
+                            tree={tree}
+                            setTree={setTree}
+                            onAction={onAction}
                         />
                         <DropdownMenuSeparator />
                     </>
@@ -124,9 +140,21 @@ export const RepositoryItemActions = ({
 
                 <DropdownMenuSeparator />
 
-                <RenameItemDialog repositoryItem={repositoryItem} />
+                <RenameItemDialog
+                    repositoryId={repositoryId}
+                    parentItem={parentItem}
+                    tree={tree}
+                    setTree={setTree}
+                    onAction={onAction}
+                />
 
-                <DeleteItemDialog repositoryItem={repositoryItem} />
+                <DeleteItemDialog
+                    repositoryId={repositoryId}
+                    repositoryItem={parentItem}
+                    tree={tree}
+                    setTree={setTree}
+                    onAction={onAction}
+                />
             </DropdownMenuContent>
         </DropdownMenu>
     );

@@ -1,3 +1,4 @@
+import { imgSrc } from "@/lib/client-file-utils";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { api } from "@/lib/trpc/react";
 import { UserDisplay } from "@/lib/types/user";
@@ -5,6 +6,7 @@ import { MailPlus, Search } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { useUser } from "@/components/context/user-context";
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,8 +25,6 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useUser } from "@/components/context/user-context";
-import { imgSrc } from "@/lib/client-file-utils";
 
 interface InviteContributorDialogProps {
     repositoryName: string;
@@ -141,27 +141,30 @@ export const InviteContributorDialog = ({
                         {isFetching ? (
                             <p className="text-center">Loading...</p>
                         ) : users.length > 0 ? (
-                            users.filter((member) => member.id !== user.id).map((member) => {
-                                return (
-                                    <CommandItem
-                                        key={member.id}
-                                        value={member.username}
-                                        className="cursor-pointer"
-                                        onSelect={() => {
-                                            setCommandOpen(false);
-                                            setSelectedUser(member);
-                                        }}
-                                    >
-                                        <div className="flex flex-row items-center gap-x-3">
-                                            <AvatarDisplay
-                                                displayType="select"
-                                                name={member.username}
-                                                image={imgSrc(member.image)}
-                                            />
-                                            {member.username}
-                                        </div>
-                                    </CommandItem>
-                            )})
+                            users
+                                .filter((member) => member.id !== user.id)
+                                .map((member) => {
+                                    return (
+                                        <CommandItem
+                                            key={member.id}
+                                            value={member.username}
+                                            className="cursor-pointer"
+                                            onSelect={() => {
+                                                setCommandOpen(false);
+                                                setSelectedUser(member);
+                                            }}
+                                        >
+                                            <div className="flex flex-row items-center gap-x-3">
+                                                <AvatarDisplay
+                                                    displayType="select"
+                                                    name={member.username}
+                                                    image={imgSrc(member.image)}
+                                                />
+                                                {member.username}
+                                            </div>
+                                        </CommandItem>
+                                    );
+                                })
                         ) : (
                             <CommandEmpty>No users found.</CommandEmpty>
                         )}

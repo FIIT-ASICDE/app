@@ -1,7 +1,6 @@
-export type SidebarContentTab =
-    | "fileExplorer"
-    | "search"
-    | "sourceControl";
+import { FileDisplayItem, FileItem } from "@/lib/types/repository";
+
+export type SidebarContentTab = "fileExplorer" | "search" | "sourceControl";
 
 export type BottomPanelContentTab =
     | "simulation"
@@ -13,3 +12,8 @@ export type SimulationType =
     | "verilatorC++"
     | "verilatorSystemVerilog"
     | "icarusVerilog";
+
+export type SimulationConfiguration = {
+    simulationType: SimulationType;
+    testBenchFile: FileDisplayItem | FileItem;
+};

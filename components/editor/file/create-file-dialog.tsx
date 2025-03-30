@@ -1,6 +1,8 @@
-import { RepositoryItem } from "@/lib/types/repository";
+import { api } from "@/lib/trpc/react";
+import { FileDisplayItem, RepositoryItem } from "@/lib/types/repository";
 import { FileIcon, FilePlus } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { Dispatch, FormEvent, SetStateAction, useState } from "react";
+import { toast } from "sonner";
 
 import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer-control-button";
 import {
@@ -13,29 +15,59 @@ import {
 import { Input } from "@/components/ui/input";
 
 interface CreateFileDialogProps {
-    repositoryItem?: RepositoryItem;
+    repositoryId: string;
+    parentItem?: RepositoryItem;
     buttonSize?: "icon" | "full";
+    tree: Array<RepositoryItem>;
+    setTree: Dispatch<SetStateAction<Array<RepositoryItem>>>;
+    onAction?: () => void;
 }
 
 export const CreateFileDialog = ({
-    repositoryItem,
+    repositoryId,
+    parentItem,
     buttonSize,
+    tree,
+    setTree,
+    onAction,
 }: CreateFileDialogProps) => {
     const [open, setOpen] = useState<boolean>(false);
     const [fileName, setFileName] = useState<string>("");
 
-    const handleSubmit = (e: FormEvent) => {
-        e.preventDefault();
-        if (fileName.trim()) {
-            // TODO: handle create file
-            console.log(
-                "Create file on path: " +
-                    (repositoryItem !== undefined ? repositoryItem.name : "") +
-                    "/" +
-                    fileName,
-            );
+    const addFileMutation = api.editor.addItem.useMutation({
+        onSuccess: (item) => {
+            if (item.type !== "file-display")
+                throw new Error(
+                    "unexpected state when creating new file, didn't receive 'file-display'",
+                );
+
+            toast.success("File created successfully");
+
+            const newFile: FileDisplayItem = { ...item };
+
+            if (!parentItem) {
+                setTree([...tree, newFile]);
+            }
+
+            onAction?.();
             setFileName("");
             setOpen(false);
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        },
+    });
+
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+
+        if (fileName.trim()) {
+            addFileMutation.mutate({
+                type: "file",
+                name: fileName.trim(),
+                repoId: repositoryId,
+                path: parentItem?.absolutePath,
+            });
         }
     };
 
@@ -57,13 +89,12 @@ export const CreateFileDialog = ({
                 <DialogHeader>
                     <DialogTitle className="text-center">
                         Create a new file
-                        {repositoryItem && (
+                        {parentItem && (
                             <span>
                                 {" "}
                                 in{" "}
                                 <span className="text-muted-foreground">
-                                    {repositoryItem.name.split("/").pop() ??
-                                        repositoryItem.name}
+                                    {parentItem.name}
                                 </span>
                             </span>
                         )}

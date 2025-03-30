@@ -1,7 +1,6 @@
 import { createRepositoryFormSchema } from "@/lib/schemas/repo-schemas";
+import { testingTRPC } from "@/tests/setup";
 import { User } from "@prisma/client";
-
-import { testingTRPC } from "./setup";
 
 export async function createRepositoryForUser(
     user: User,

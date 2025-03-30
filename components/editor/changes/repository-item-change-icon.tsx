@@ -15,14 +15,22 @@ export const RepositoryItemChangeIcon = ({
 
     switch (itemChange.change.type) {
         case "added":
-            return <CirclePlus className={cn(fullClassName, "text-green-900")} />;
+            return (
+                <CirclePlus className={cn(fullClassName, "text-green-900")} />
+            );
         case "modified":
             return <CircleDot className={cn(fullClassName, "text-blue-500")} />;
         case "deleted":
-            return <CircleX className={cn(fullClassName, "text-destructive")} />;
+            return (
+                <CircleX className={cn(fullClassName, "text-destructive")} />
+            );
         case "renamed":
             return <Pen className={cn(fullClassName, "text-yellow-500")} />;
         case "moved":
-            return <MoveUpRight className={cn(fullClassName, "text-badge-admin")} />;
+            return (
+                <MoveUpRight
+                    className={cn(fullClassName, "text-badge-admin")}
+                />
+            );
     }
 };

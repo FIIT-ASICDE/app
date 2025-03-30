@@ -1,6 +1,8 @@
-import { RepositoryItem } from "@/lib/types/repository";
+import { api } from "@/lib/trpc/react";
+import { DirectoryDisplayItem, RepositoryItem } from "@/lib/types/repository";
 import { Folder, FolderPlus } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { Dispatch, FormEvent, SetStateAction, useState } from "react";
+import { toast } from "sonner";
 
 import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer-control-button";
 import {
@@ -13,29 +15,59 @@ import {
 import { Input } from "@/components/ui/input";
 
 interface CreateDirectoryDialogProps {
-    repositoryItem?: RepositoryItem;
+    repositoryId: string;
+    parentItem?: RepositoryItem;
     buttonSize: "icon" | "full";
+    tree: Array<RepositoryItem>;
+    setTree: Dispatch<SetStateAction<Array<RepositoryItem>>>;
+    onAction?: () => void;
 }
 
 export const CreateDirectoryDialog = ({
-    repositoryItem,
+    repositoryId,
+    parentItem,
     buttonSize,
+    tree,
+    setTree,
+    onAction,
 }: CreateDirectoryDialogProps) => {
     const [open, setOpen] = useState<boolean>(false);
     const [directoryName, setDirectoryName] = useState<string>("");
 
-    const handleSubmit = (e: FormEvent) => {
-        e.preventDefault();
-        if (directoryName.trim()) {
-            // TODO: handle create directory
-            console.log(
-                "Create directory on path: " +
-                    (repositoryItem !== undefined ? repositoryItem.name : "") +
-                    "/" +
-                    directoryName,
-            );
+    const addDirectoryMutation = api.editor.addItem.useMutation({
+        onSuccess: (item) => {
+            toast.success("Directory created successfully");
+
+            const newDirectory: DirectoryDisplayItem = {
+                type: "directory-display",
+                name: item.name,
+                lastActivity: item.lastActivity,
+                absolutePath: item.absolutePath,
+            };
+
+            if (!parentItem) {
+                setTree([...tree, newDirectory]);
+            }
+
+            onAction?.();
             setDirectoryName("");
             setOpen(false);
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        },
+    });
+
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+
+        if (directoryName.trim()) {
+            addDirectoryMutation.mutate({
+                type: "directory",
+                name: directoryName.trim(),
+                repoId: repositoryId,
+                path: parentItem?.absolutePath,
+            });
         }
     };
 
@@ -57,13 +89,12 @@ export const CreateDirectoryDialog = ({
                 <DialogHeader>
                     <DialogTitle className="text-center">
                         Create a new directory
-                        {repositoryItem && (
+                        {parentItem && (
                             <span>
                                 {" "}
                                 in{" "}
                                 <span className="text-muted-foreground">
-                                    {repositoryItem.name.split("/").pop() ??
-                                        repositoryItem.name}
+                                    {parentItem.name}
                                 </span>
                             </span>
                         )}

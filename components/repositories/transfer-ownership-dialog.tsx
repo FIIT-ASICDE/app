@@ -73,10 +73,10 @@ export const TransferOwnershipDialog = ({
             toast.success("Repository ownership transferred successfully");
             const newOwnerData:
                 | {
-                name: string;
-                image: string | undefined;
-                type: "user" | "org";
-            }
+                      name: string;
+                      image: string | undefined;
+                      type: "user" | "org";
+                  }
                 | undefined = getNewOwnerData();
             router.push("/" + newOwnerData.name + "/" + repository.name);
         },
