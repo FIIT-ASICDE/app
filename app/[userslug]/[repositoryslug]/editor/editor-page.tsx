@@ -28,7 +28,6 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { toast } from "sonner";
 import DiagramPage from "@/app/diagram-test/page";
 
 interface EditorPageProps {

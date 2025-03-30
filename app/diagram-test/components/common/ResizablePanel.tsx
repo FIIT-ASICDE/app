@@ -1,7 +1,6 @@
 // components/common/ResizablePanel.tsx
 import React from 'react';
 import { useResizable } from "@/app/diagram-test/hooks/useResizable";
-import styles from './ResizablePanel.module.css';
 
 interface ResizablePanelProps {
     children: React.ReactNode;
@@ -23,7 +22,7 @@ const ResizablePanel: React.FC<ResizablePanelProps> = ({
     resizerClassName = '',
     direction = 'right',
     onWidthChange
-}) => {
+   }) => {
     const { width, isResizing, startResizing } = useResizable({
         defaultWidth,
         minWidth,
@@ -33,15 +32,15 @@ const ResizablePanel: React.FC<ResizablePanelProps> = ({
     });
 
     return (
-        <div className={styles.resizableContainer}>
+        <div className="relative flex h-full">
             <div
-                className={`${styles.resizableContent} ${className}`}
+                className={`h-full overflow-auto ${className}`}
                 style={{ width: `${width}px` }}
             >
                 {children}
             </div>
             <div
-                className={`${styles.resizer} ${isResizing ? styles.active : ''} ${resizerClassName}`}
+                className={`absolute w-1 h-full cursor-col-resize hover:bg-gray-400 active:bg-gray-500 ${isResizing ? 'bg-gray-500' : 'bg-gray-300'} ${resizerClassName}`}
                 onMouseDown={startResizing}
                 style={{
                     [direction === 'right' ? 'right' : 'left']: 0

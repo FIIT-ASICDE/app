@@ -39,7 +39,9 @@ import {Decoder} from "@/app/diagram-test/components/Shapes/classes/decoder";
 import {JointJSEncoder} from "@/app/diagram-test/components/Shapes/complexLogic/JointJSEncoder";
 import {Encoder} from "@/app/diagram-test/components/Shapes/classes/encoder";
 import { Pencil, Trash2, CircleAlert } from 'lucide-react';
+import { parseSystemVerilogText } from '@/app/diagram-test/utils/DiagramGeneration/SystemVerilog/SVParser'
 import { dia } from "@joint/core";
+
 
 interface Properties {
     label?: string;
@@ -96,6 +98,8 @@ const PropertiesPanel = () => {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [clipboardCell, setClipboardCell] = useState<dia.Cell | null>(null);
     const panelRef = useRef<HTMLDivElement | null>(null);
+    const [parseResults, setParseResults] = useState<any>(null);
+
 
     const handleWidthChange = (newWidth: number) => {
         setPanelWidth(newWidth);
@@ -149,6 +153,22 @@ const PropertiesPanel = () => {
         }
     }, [selectedElement]);
 
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        // Чтение файла как текст
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const content = e.target?.result as string;
+            if (content) {
+                const packages = parseSystemVerilogText(content);
+                console.log('Parsed packages:', packages);
+                // Здесь вы можете обработать результаты парсинга
+            }
+        };
+        reader.readAsText(file);
+    };
 
     function validateField(fieldName: string, fieldValue: any): string {
         if (typeof fieldValue === 'string') {
@@ -777,6 +797,16 @@ const PropertiesPanel = () => {
             <h3 className="text-lg font-semibold p-4 border-b border-gray-200">
                 {selectedElement.attributes.elType.toUpperCase()} Properties
             </h3>
+
+            <div className="mt-4">
+                <h3 className="text-lg font-semibold mb-2">Test SystemVerilog Parser</h3>
+                <input
+                    type="file"
+                    accept=".sv,.v"
+                    onChange={handleFileUpload}
+                    className="block w-full text-sm"
+                />
+            </div>
 
             <div className="p-4 space-y-4">
                 {(['output', 'input', 'and', 'nand', 'xor', 'or', 'nor', 'not', 'xnor', 'multiplexer', 'decoder', 'encoder', 'alu', 'comparator', 'newModule', 'sram', 'register', 'combiner'].includes(selectedElement.attributes.elType)) && (
