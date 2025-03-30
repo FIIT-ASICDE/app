@@ -1,7 +1,7 @@
 // pages/diagram-test/components/Sidebar/Sidebar.tsx
 import Image from 'next/image';
 import React, { useRef, useState } from "react";
-import {Plus, Minus, Expand, ArrowDownToLine, FolderOpen, Code, Menu, Frame, FileCode} from 'lucide-react'
+import {ArrowDownToLine, FolderOpen, Code, Menu, Frame, FileCode} from 'lucide-react'
 import {Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useDiagramContext } from "@/app/diagram-test/context/useDiagramContext";
 import { generateSystemVerilogCode } from "@/app/diagram-test/utils/CodeGeneration/SystemVerilogGeneration/SystemVerilogCodeGenerator";
@@ -9,10 +9,9 @@ import { generateVHDLCode } from "@/app/diagram-test/utils/CodeGeneration/VHDLGe
 import ResizablePanel from '@/app/diagram-test/components/common/ResizablePanel';
 
 const Sidebar = () => {
-    const { zoomIn, zoomOut, fitToView, graph } = useDiagramContext();
+    const { graph } = useDiagramContext();
     const [isElementsCollapsed, setIsElementsCollapsed] = useState(true);
     const [isSaveLoadCollapsed, setIsSaveLoadCollapsed] = useState(true);
-    const [isActionsCollapsed, setIsActionsCollapsed] = useState(true);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [gridColumns, setGridColumns] = useState(3);
 
@@ -62,11 +61,6 @@ const Sidebar = () => {
         { type: 'combiner', label: 'Combiner', img: 'Combiner.svg' },
     ];
 
-    const paperActions = [
-        { icon: <Plus size={24} />, label: "Zoom In", action: () => zoomIn() },
-        { icon: <Minus size={24} />, label: "Zoom Out", action: () => zoomOut() },
-        { icon: <Expand size={24} />, label: "Fit to View", action: () => fitToView() },
-    ];
     const saveLoadActions = [
         {
             icon: <Code size={24} />,
@@ -119,21 +113,6 @@ const Sidebar = () => {
         </Tooltip>
     );
 
-    const ActionsIcon = ({ icon, label, action }: { icon: React.JSX.Element; label: string; action: () => void }) => (
-        <Tooltip>
-            <TooltipTrigger asChild>
-                <div
-                    className={iconItemClass}
-                    onClick={action}
-                >
-                    {icon}
-                </div>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-                {label}
-            </TooltipContent>
-        </Tooltip>
-    );
 
     const SaveLoadIcon = ({ icon, label, action, text }: { icon: React.JSX.Element; label: string; action: () => void, text: string }) => (
         <Tooltip>
@@ -236,22 +215,6 @@ const Sidebar = () => {
                     <div className={iconListStyle}>
                         {elements.map((el) => (
                             <ElementIcon key={`${el.type}-${el.label}`} {...el} />
-                        ))}
-                    </div>
-                )}
-            </div>
-
-            {/* Paper Actions Group */}
-            <div>
-                <div className="flex items-center justify-between p-2 bg-blue-100 border border-blue-200 rounded hover:bg-blue-200 cursor-pointer" onClick={() => setIsActionsCollapsed(!isActionsCollapsed)}>
-                    <Expand className="flex items-center gap-2" />
-                    <h3>Paper Actions</h3>
-                    <Menu className="flex items-center gap-2"/>
-                </div>
-                {!isActionsCollapsed && (
-                    <div className={iconListStyle}>
-                        {paperActions.map((el) => (
-                            <ActionsIcon key={el.label} {...el} />
                         ))}
                     </div>
                 )}

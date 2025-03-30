@@ -91,6 +91,15 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
     const currentLinkBandwidthRef = useRef<number>(1);
 
 
+    const selectedElementsRef = useRef<dia.Element[]>([]);
+    const selectionRectRef = useRef<SVGRectElement | null>(null);
+    const selectionOriginRef = useRef({ x: 0, y: 0 });
+    const isDraggingSelectionRef = useRef(false);
+    const dragStartPointRef = useRef<{ x: number; y: number } | null>(null);
+
+
+
+
 
     const removeAllTools = (paper: dia.Paper) => {
         const elements = graph.getElements();
@@ -105,6 +114,8 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
             if (linkView) linkView.removeTools();
         });
     };
+
+
     const hasFormErrorsRef = useRef(hasFormErrors);
 
     useEffect(() => {
@@ -271,23 +282,48 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
 
             setPaper(paper);
 
+            const clearSelection = () => {
+                selectedElementsRef.current.forEach((el) => {
+                    const view = paper.findViewByModel(el);
+                    if (view) {
+                        // Используем специфичный highlighter для выделения группы
+                        view.unhighlight(null, {
+                            name: 'stroke',
+                            options: {
+                                attrs: {
+                                    stroke: '#3399ff',
+                                    'stroke-width': 2,
+                                    'stroke-dasharray': '5,5'
+                                }
+                            }
+                        });
+                    }
+                });
+                selectedElementsRef.current = [];
+            };
+
             paper.on('cell:pointerclick', (cellView) => {
 
                 if (hasFormErrorsRef.current) {
                     console.log("Cannot switch, form has errors.");
                     return;
                 }
-                console.log(hasFormErrors);
-                removeAllTools(paper);
 
-                if (selectedCellViewRef.current) {
-                    selectedCellViewRef.current.unhighlight('image', { highlighter: highlightSettings });
+                if (!isDraggingSelectionRef.current) {
+                    removeAllTools(paper);
+
+                    clearSelection();
+
+                    if (selectedCellViewRef.current) {
+                        selectedCellViewRef.current.unhighlight('image', { highlighter: highlightSettings });
+                    }
+
+                    cellView.highlight('image', { highlighter: highlightSettings });
+                    selectedCellViewRef.current = cellView;
+                    setSelectedElement(cellView.model);
                 }
 
-                cellView.highlight('image', { highlighter: highlightSettings });
-
-                selectedCellViewRef.current = cellView;
-                setSelectedElement(cellView.model);
+                isDraggingSelectionRef.current = false;
             });
 
 
@@ -315,15 +351,9 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                     isLinkingRef.current = false;
                 }
             });
-            let selectedElements: dia.Element[] = [];
+            const selectedElements: dia.Element[] = [];
 
-            const clearSelection = () => {
-                console.log(selectedElements);
-                selectedElements.forEach((el) => {
-                    paper.findViewByModel(el)?.unhighlight();
-                });
-                selectedElements = [];
-            };
+
 
 
             paper.on('element:pointerclick', (elementView) => {
@@ -495,8 +525,11 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
             let origin = { x: 0, y: 0 };
 
             paper.on('blank:pointerdown', (evt: dia.Event, x: number, y: number) => {
-                origin = { x, y };
-                selectionRect = V('rect', {
+                // Очищаем предыдущее выделение при начале нового
+                clearSelection();
+
+                selectionOriginRef.current = { x, y };
+                selectionRectRef.current = V('rect', {
                     x,
                     y,
                     width: 1,
@@ -506,80 +539,216 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                     'stroke-dasharray': '5,5',
                 }).node as SVGRectElement;
 
-                paper.svg.appendChild(selectionRect);
+                paper.svg.appendChild(selectionRectRef.current);
             });
+
             paper.on('blank:pointermove', (evt: dia.Event, x: number, y: number) => {
-                if (!selectionRect) return;
+                if (!selectionRectRef.current) return;
 
                 const rect = {
-                    x: Math.min(x, origin.x),
-                    y: Math.min(y, origin.y),
-                    width: Math.abs(x - origin.x),
-                    height: Math.abs(y - origin.y),
+                    x: Math.min(x, selectionOriginRef.current.x),
+                    y: Math.min(y, selectionOriginRef.current.y),
+                    width: Math.abs(x - selectionOriginRef.current.x),
+                    height: Math.abs(y - selectionOriginRef.current.y),
                 };
 
-                V(selectionRect).attr(rect);
+                V(selectionRectRef.current).attr(rect);
             });
-
 
 
             paper.on('blank:pointerup', () => {
+                if (!selectionRectRef.current) return;
 
-                if (!selectionRect) return;
+                const bbox = V(selectionRectRef.current).bbox();
+                paper.svg.removeChild(selectionRectRef.current);
+                selectionRectRef.current = null;
 
-                const bbox = V(selectionRect).bbox();
-                paper.svg.removeChild(selectionRect);
-                selectionRect = null;
-
-                selectedElements = graph.getElements().filter((el) => {
+                // Находим элементы, которые пересекаются с областью выделения
+                selectedElementsRef.current = graph.getElements().filter((el) => {
                     return el.getBBox().intersect(bbox);
                 });
 
-                console.log(selectedElements);
+                // Если выбран только один элемент, обрабатываем его как обычный выбор элемента
+                if (selectedElementsRef.current.length === 1) {
+                    const singleElement = selectedElementsRef.current[0];
+                    const view = paper.findViewByModel(singleElement);
 
-                selectedElements.forEach((el) => {
-                    paper.findViewByModel(el)?.highlight();
-                });
+                    // Устанавливаем новый выбранный элемент
+                    if (view) {
+                        view.highlight('image', { highlighter: highlightSettings });
+                        selectedCellViewRef.current = view;
+
+                        // Добавляем инструмент удаления
+                        const elementTool = new dia.ToolsView({
+                            tools: [
+                                new elementTools.Remove({
+                                    x: '100%',
+                                    y: 0,
+                                    offset: { x: 10, y: -10 },
+                                    markup: [
+                                        {
+                                            tagName: 'circle',
+                                            selector: 'button',
+                                            attributes: {
+                                                'r': 7,
+                                                'fill': '#FF1D00',
+                                                'cursor': 'pointer'
+                                            }
+                                        },
+                                        {
+                                            tagName: 'path',
+                                            selector: 'icon',
+                                            attributes: {
+                                                'd': 'M -3 -3 3 3 M -3 3 3 -3',
+                                                'fill': 'none',
+                                                'stroke': '#FFFFFF',
+                                                'stroke-width': 2,
+                                                'pointer-events': 'none'
+                                            }
+                                        }
+                                    ],
+                                    action: function(evt) {
+                                        graph.removeCells([singleElement]);
+                                        setSelectedElement(null);
+                                    }
+                                })
+                            ]
+                        });
+                        view.addTools(elementTool);
+                    }
+
+                    setSelectedElement(singleElement);
+                    selectedElementsRef.current = []; // Очищаем групповое выделение
+                } else if (selectedElementsRef.current.length > 1) {
+                    // Подсвечиваем выбранные элементы специфичным стилем для группового выделения
+                    selectedElementsRef.current.forEach((el) => {
+                        const view = paper.findViewByModel(el);
+                        if (view) {
+                            view.highlight(null, {
+                                name: 'stroke',
+                                options: {
+                                    attrs: {
+                                        stroke: '#3399ff',
+                                        'stroke-width': 2,
+                                        'stroke-dasharray': '5,5'
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
             });
             let dragStartPoint: { x: number; y: number } | null = null;
             let isDraggingSelection = false;
 
             paper.on('element:pointerdown', (elementView, evt, x, y) => {
-                const model = elementView.model;
+                const model = elementView.model as dia.Element;
 
-                const alreadySelected = selectedElements.includes(model);
-                const isMulti = evt.ctrlKey || evt.metaKey;
+                // Проверяем, является ли элемент частью текущего выделения
+                const isSelected = selectedElementsRef.current.some(el => el.id === model.id);
 
-                console.log(selectedElements);
+                // Если элемент не выбран и не используется множественное выделение (Ctrl/Cmd)
+                if (!isSelected && !(evt.ctrlKey || evt.metaKey)) {
+                    // Очищаем все инструменты
+                    removeAllTools(paper);
 
-                if (!alreadySelected && !isMulti) {
-                    clearSelection();
+                    // Очищаем предыдущее выделение
+                    clearSelection(paper);
+
+                    // Снимаем подсветку с предыдущего выбранного элемента
+                    if (selectedCellViewRef.current) {
+                        selectedCellViewRef.current.unhighlight('image', { highlighter: highlightSettings });
+                    }
+
+                    // Подсвечиваем новый выбранный элемент
+                    elementView.highlight('image', { highlighter: highlightSettings });
+                    selectedCellViewRef.current = elementView;
+                    setSelectedElement(model);
+
+                    // Добавляем инструмент удаления
+                    const elementTool = new dia.ToolsView({
+                        tools: [
+                            new elementTools.Remove({
+                                x: '100%',
+                                y: 0,
+                                offset: { x: 10, y: -10 },
+                                markup: [
+                                    {
+                                        tagName: 'circle',
+                                        selector: 'button',
+                                        attributes: {
+                                            'r': 7,
+                                            'fill': '#FF1D00',
+                                            'cursor': 'pointer'
+                                        }
+                                    },
+                                    {
+                                        tagName: 'path',
+                                        selector: 'icon',
+                                        attributes: {
+                                            'd': 'M -3 -3 3 3 M -3 3 3 -3',
+                                            'fill': 'none',
+                                            'stroke': '#FFFFFF',
+                                            'stroke-width': 2,
+                                            'pointer-events': 'none'
+                                        }
+                                    }
+                                ],
+                                action: function(evt) {
+                                    graph.removeCells([model]);
+                                    setSelectedElement(null);
+                                }
+                            })
+                        ]
+                    });
+                    elementView.addTools(elementTool);
+                }
+                // Если используется Ctrl/Cmd для множественного выделения
+                else if (!isSelected && (evt.ctrlKey || evt.metaKey)) {
+                    // Добавляем элемент к существующему выделению
+                    selectedElementsRef.current.push(model);
+                    elementView.highlight(null, {
+                        name: 'stroke',
+                        options: {
+                            attrs: {
+                                stroke: '#3399ff',
+                                'stroke-width': 2,
+                                'stroke-dasharray': '5,5'
+                            }
+                        }
+                    });
                 }
 
-                if (!alreadySelected) {
-                    selectedElements.push(model);
-                    elementView.highlight();
-                }
-
-                dragStartPoint = { x, y };
-                isDraggingSelection = true;
+                // Запоминаем начальную точку для перетаскивания
+                dragStartPointRef.current = { x, y };
+                isDraggingSelectionRef.current = true;
             });
 
             paper.on('element:pointermove', (elementView, evt, x, y) => {
-                if (!isDraggingSelection || !dragStartPoint) return;
+                if (!isDraggingSelectionRef.current || !dragStartPointRef.current) return;
 
-                const dx = x - dragStartPoint.x;
-                const dy = y - dragStartPoint.y;
+                const dx = x - dragStartPointRef.current.x;
+                const dy = y - dragStartPointRef.current.y;
 
-                selectedElements.forEach((el) => {
-                    const pos = el.position();
-                    el.position(pos.x + dx, pos.y + dy);
-                });
+                // Если есть групповое выделение, перемещаем все выбранные элементы
+                if (selectedElementsRef.current.length > 0) {
+                    selectedElementsRef.current.forEach((el) => {
+                        const pos = el.position();
+                        el.position(pos.x + dx, pos.y + dy);
+                    });
+                }
+                // Иначе перемещаем только текущий элемент
+                else {
+                    const pos = elementView.model.position();
+                    elementView.model.position(pos.x + dx, pos.y + dy);
+                }
 
-                dragStartPoint = { x, y };
+                // Обновляем начальную точку для следующего движения
+                dragStartPointRef.current = { x, y };
             });
 
             paper.on('element:pointerup', () => {
+                dragStartPointRef.current = null;
                 dragStartPoint = null;
                 isDraggingSelection = false;
             });

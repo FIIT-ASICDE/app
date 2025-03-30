@@ -40,6 +40,7 @@ import { Splitter } from "@/app/diagram-test/components/Shapes/classes/splitter"
 import { JointJSCombiner } from "@/app/diagram-test/components/Shapes/bitOperations/JointJSCombiner";
 import { Combiner } from "@/app/diagram-test/components/Shapes/classes/combiner";
 import {useDiagramEvents} from "@/app/diagram-test/hooks/useDiagramEvents";
+import PaperToolbar from "@/app/diagram-test/components/Sidebar/PaperToolbar";
 
 
 
@@ -258,13 +259,15 @@ const DiagramArea = () => {
 
 
     return (
-
-        <div
-            className="w-full h-full bg-white overflow-hidden cursor-default"
-            ref={paperElement}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-        ></div>
+        <div className="flex flex-col h-full">
+            <PaperToolbar />
+            <div
+                className="w-full h-full bg-white overflow-hidden cursor-default"
+                ref={paperElement}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+            ></div>
+        </div>
     );
 };
 
