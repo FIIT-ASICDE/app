@@ -35,7 +35,7 @@ import { JointJSSRam } from "@/app/diagram-test/components/Shapes/memory/JointJS
 import { Sram } from "@/app/diagram-test/components/Shapes/classes/sram";
 import { JointJSRegister } from "@/app/diagram-test/components/Shapes/memory/JointJSRegister";
 import { Register } from "@/app/diagram-test/components/Shapes/classes/register";
-import { JointJSBitSplitter } from "@/app/diagram-test/components/Shapes/bitOperations/JointJSBitSplitter";
+import { JointJSSplitter } from "@/app/diagram-test/components/Shapes/bitOperations/JointJSSplitter";
 import { Splitter } from "@/app/diagram-test/components/Shapes/classes/splitter";
 import { JointJSCombiner } from "@/app/diagram-test/components/Shapes/bitOperations/JointJSCombiner";
 import { Combiner } from "@/app/diagram-test/components/Shapes/classes/combiner";
@@ -236,7 +236,7 @@ const DiagramArea = () => {
             const splitter = new Splitter();
             splitter.name = elementName;
             splitter.position = {x, y};
-            element = JointJSBitSplitter(splitter);
+            element = JointJSSplitter(splitter);
             break;
         case 'combiner':
             const combiner = new Combiner();

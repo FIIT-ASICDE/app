@@ -25,7 +25,7 @@ import {JointJSSRam} from "@/app/diagram-test/components/Shapes/memory/JointJSSR
 import {Sram} from "@/app/diagram-test/components/Shapes/classes/sram";
 import {JointJSCombiner} from "@/app/diagram-test/components/Shapes/bitOperations/JointJSCombiner";
 import {Combiner} from "@/app/diagram-test/components/Shapes/classes/combiner";
-import {JointJSBitSplitter} from "@/app/diagram-test/components/Shapes/bitOperations/JointJSBitSplitter";
+import {JointJSSplitter} from "@/app/diagram-test/components/Shapes/bitOperations/JointJSSplitter";
 import {Splitter} from "@/app/diagram-test/components/Shapes/classes/splitter";
 import {JointJSInputPort} from "@/app/diagram-test/components/Shapes/io/JointJSInputPort";
 import {JointJSOutputPort} from "@/app/diagram-test/components/Shapes/io/JointJSOutputPort";
@@ -58,6 +58,7 @@ interface Properties {
     clkEdge?: 'rising' | 'falling';
     rstEdge?: 'rising' | 'falling';
     rstType?: 'async' | 'sync';
+    bitPortType?: string;
 }
 
 
@@ -80,6 +81,7 @@ const PropertiesPanel = () => {
         clkEdge: 'rising',
         rstEdge: 'falling',
         rstType: 'async',
+        bitPortType: 'custom'
     });
     const [errorMessage, setErrorMessage] = useState('');
     const [showAddPortDialog, setShowAddPortDialog] = useState(false);
@@ -118,6 +120,7 @@ const PropertiesPanel = () => {
                 clkEdge: selectedElement.attributes.clkEdge || 'rising',
                 rstEdge: selectedElement.attributes.rstEdge || 'falling',
                 rstType: selectedElement.attributes.rstType || 'async',
+                bitPortType: selectedElement.attributes.bitPortType || 'custom',
 
             };
 
@@ -140,6 +143,7 @@ const PropertiesPanel = () => {
                 clkEdge: 'rising',
                 rstEdge: 'falling',
                 rstType: 'async',
+                bitPortType: 'custom'
 
             });
         }
@@ -380,6 +384,7 @@ const PropertiesPanel = () => {
 
         const newSplitter = new Splitter();
         newSplitter.name = properties.label || '';
+        newSplitter.bitPortType = properties.bitPortType || 'custom';
 
         newSplitter.outPorts = properties.createdOutPorts.map((p, i) => ({
             name: p.name,
@@ -393,7 +398,7 @@ const PropertiesPanel = () => {
 
         graph.removeCells([selectedElement]);
 
-        const newSplitterCell = JointJSBitSplitter(newSplitter);
+        const newSplitterCell = JointJSSplitter(newSplitter);
         graph.addCell(newSplitterCell);
 
         setSelectedElement(newSplitterCell);
@@ -404,6 +409,7 @@ const PropertiesPanel = () => {
 
         const newCombiner = new Combiner();
         newCombiner.name = properties.label || '';
+        newCombiner.bitPortType = properties.bitPortType || 'custom';
 
         newCombiner.inPorts = properties.createdInPorts.map((p, i) => ({
             name: p.name,
@@ -1145,7 +1151,20 @@ const PropertiesPanel = () => {
                 )}
                 {(['combiner', 'splitter'].includes(selectedElement.attributes.elType)) && (
                     <>
-                    {(['combiner'].includes(selectedElement.attributes.elType)) && (
+                    <div className="space-y-1">
+                        <label className="block text-sm font-medium text-gray-700">
+                            {selectedElement.attributes.elType === 'combiner' ? 'Input' : 'Output'} Ports Type
+                        </label>
+                        <select
+                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            name="bitPortType"
+                            value={properties.bitPortType}
+                            onChange={handleChange}>
+                            <option value="custom">Custom Ports</option>
+                            <option value="struct">User Defined</option>
+                        </select>
+                    </div>
+                    {(['combiner'].includes(selectedElement.attributes.elType) && properties.bitPortType === 'custom') && (
                         <div className="mt-6 border-t border-gray-200 pt-4">
                             <h4 className="font-medium text-gray-800 mb-2">Input Ports</h4>
                             <div className="space-y-1 max-h-40 overflow-y-auto">
@@ -1177,7 +1196,7 @@ const PropertiesPanel = () => {
                             </button>
                         </div>
                         )}
-                    {(['splitter'].includes(selectedElement.attributes.elType)) && (
+                    {(['splitter'].includes(selectedElement.attributes.elType) && properties.bitPortType === 'custom') && (
                         <div className="mt-4 border-t border-gray-200 pt-4">
                             <h4 className="font-medium text-gray-800 mb-2">Output Ports</h4>
                             <div className="space-y-1 max-h-40 overflow-y-auto">
@@ -1209,6 +1228,33 @@ const PropertiesPanel = () => {
                             </button>
                         </div>
                     )}
+                    {properties.bitPortType === 'struct' && (
+                        <div className="space-y-3">
+                            <div className="space-y-1">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Choose package file:
+                                </label>
+                                <select
+                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    value='packageFile'
+                                >
+                                    <option value="">--Select--</option>
+                                </select>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Choose user defined type:
+                                </label>
+                                <select
+                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    value='packageType'
+                                >
+                                    <option value="">--Select--</option>
+                                </select>
+                            </div>
+                        </div>
+                    )}
+
                     </>
                 )}
 

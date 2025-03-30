@@ -9,4 +9,5 @@ export class Combiner {
         y: number
     };
     public inPorts: Port[];
+    public bitPortType: string;
 }

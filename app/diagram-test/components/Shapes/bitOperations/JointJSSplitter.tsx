@@ -1,9 +1,9 @@
 import { Splitter } from "@/app/diagram-test/components/Shapes/classes/splitter";
 import { shapes } from "@joint/core";
 
-export const JointJSBitSplitter = (bitSelect: Splitter) => {
+export const JointJSSplitter = (splitter: Splitter) => {
 
-    const selectOutPorts = bitSelect.outPorts || [];
+    const selectOutPorts = splitter.outPorts || [];
     const outCount = selectOutPorts.length;
     const dimension = 100 + (outCount - 2) * 20;
     const totalBandwidth = selectOutPorts.reduce((sum, port) => sum + port.bandwidth, 0);
@@ -35,11 +35,12 @@ export const JointJSBitSplitter = (bitSelect: Splitter) => {
 
     return new shapes.standard.Path({
         elType: 'splitter',
-        name: bitSelect.name,
-        bandwidth: bitSelect.dataBandwidth,
+        name: splitter.name,
+        bandwidth: splitter.dataBandwidth,
+        bitPortType: splitter.bitPortType,
         outPorts: outCount,
         selectOutPorts: selectOutPorts,
-        position: { x: bitSelect.position?.x || 100, y: bitSelect.position?.y || 100 },
+        position: { x: splitter.position?.x || 100, y: splitter.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {
             body: {
@@ -49,7 +50,7 @@ export const JointJSBitSplitter = (bitSelect: Splitter) => {
                 strokeWidth: 2,
             },
             label: {
-                text: bitSelect.name,
+                text: splitter.name,
                 fontSize: 14,
                 fontFamily: 'Arial',
                 fontWeight: 'bold',

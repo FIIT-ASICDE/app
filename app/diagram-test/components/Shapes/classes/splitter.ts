@@ -9,4 +9,5 @@ export class Splitter {
         y: number
     };
     public outPorts: Port[];
+    public bitPortType: string
 }

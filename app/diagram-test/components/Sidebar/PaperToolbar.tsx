@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useDiagramContext } from "@/app/diagram-test/context/useDiagramContext";
-import { Button } from '@/components/ui/button';
 import { Expand } from "lucide-react";
 
 const PaperToolbar: React.FC = () => {

@@ -1,9 +1,9 @@
 import { Combiner } from "@/app/diagram-test/components/Shapes/classes/combiner";
 import { shapes } from "@joint/core";
 
-export const JointJSCombiner = (bitCombine: Combiner) => {
+export const JointJSCombiner = (combiner: Combiner) => {
 
-    const combineInPorts = bitCombine.inPorts || [];
+    const combineInPorts = combiner.inPorts || [];
     const inCount = combineInPorts.length;
     const dimension = 100 + (inCount - 2) * 20;
     const totalBandwidth = combineInPorts.reduce((sum, port) => sum + port.bandwidth, 0);
@@ -34,11 +34,12 @@ export const JointJSCombiner = (bitCombine: Combiner) => {
 
     return new shapes.standard.Path({
         elType: 'combiner',
-        name: bitCombine.name,
-        bandwidth: bitCombine.dataBandwidth,
+        name: combiner.name,
+        bandwidth: combiner.dataBandwidth,
+        bitPortType: combiner.bitPortType,
         inPorts: inCount,
         combineInPorts: combineInPorts,
-        position: { x: bitCombine.position?.x || 100, y: bitCombine.position?.y || 100 },
+        position: { x: combiner.position?.x || 100, y: combiner.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {
             body: {
@@ -48,7 +49,7 @@ export const JointJSCombiner = (bitCombine: Combiner) => {
                 strokeWidth: 2,
             },
             label: {
-                text: bitCombine.name,
+                text: combiner.name,
                 fontSize: 14,
                 fontFamily: 'Arial',
                 fontWeight: 'bold',
