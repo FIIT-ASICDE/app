@@ -52,7 +52,7 @@ export const SidebarTabContent = ({
             {activeSidebarContent === "search" && (
                 <SearchTabContent
                     repository={repository}
-                    handleCloseSidebar={handleCloseSidebarAction}
+                    handleCloseSidebarAction={handleCloseSidebarAction}
                 />
             )}
             {activeSidebarContent === "sourceControl" && (
