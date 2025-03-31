@@ -23,7 +23,7 @@ export const CloseButton = ({
             <TooltipTrigger asChild>
                 <button
                     className={cn(
-                        "rounded border border-transparent p-[4px] hover:border-accent",
+                        "rounded border border-accent p-[4px] hover:bg-accent",
                         className,
                     )}
                     onClick={onClick}

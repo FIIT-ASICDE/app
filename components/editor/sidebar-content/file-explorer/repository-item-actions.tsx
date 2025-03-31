@@ -140,7 +140,7 @@ export const RepositoryItemActions = ({
 
                 <RenameItemDialog
                     repositoryId={repositoryId}
-                    parentItem={parentItem}
+                    item={parentItem}
                     tree={tree}
                     setTree={setTree}
                     onAction={onAction}

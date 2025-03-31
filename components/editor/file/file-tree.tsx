@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 import { FileTreeItem } from "@/components/editor/file/file-tree-item";
 import { MoveItemDialog } from "@/components/editor/file/move-item-dialog";
-import { moveItemInTree, sortTree } from "@/components/generic/generic";
+import { findItemInTree, handleToggle, moveItemInTree, sortTree } from "@/components/generic/generic";
 
 interface FileTreeProps {
     repositoryId: string;
@@ -128,14 +128,13 @@ export const FileTree = ({
 
         try {
             const sourcePath: string = event.dataTransfer.getData("text/plain");
-            const sourceItem: RepositoryItem | undefined = tree.find(
-                (treeItem: RepositoryItem) =>
-                    treeItem.absolutePath === sourcePath
-            );
+            const sourceItem: RepositoryItem | undefined = findItemInTree(tree, sourcePath);
 
             if (!sourceItem) return;
 
-            const isAlreadyInRoot = !sourceItem.absolutePath.includes("/");
+            const isAlreadyInRoot: boolean =
+                !sourceItem.absolutePath.includes("/") &&
+                !sourceItem.absolutePath.includes("\\");
 
             if (isAlreadyInRoot) {
                 toast.info("Item is already in the root directory");
@@ -151,7 +150,7 @@ export const FileTree = ({
     return (
         <div
             className={cn(
-                "flex min-h-full flex-1 flex-grow flex-col rounded border border-transparent p-4 pt-2",
+                "flex min-h-full flex-1 flex-grow flex-col rounded border border-transparent p-2 pt-2",
                 isDragOverRoot && "border-primary bg-accent"
             )}
             onDragOver={handleRootDragOver}
@@ -165,7 +164,15 @@ export const FileTree = ({
                     item={item}
                     tree={tree}
                     setTreeAction={setTreeAction}
-                    onItemClick={() => onItemClick?.(item)}
+                    onItemClick={(repoItem: RepositoryItem) => {
+                        console.log("2clicked on:", repoItem);
+
+                        if (repoItem.type === "directory" || repoItem.type === "directory-display") {
+                            handleToggle(repoItem, expandedItems, setExpandedItemsAction);
+                        } else {
+                            onItemClick?.(repoItem);
+                        }
+                    }}
                     selectedItem={selectedItem}
                     setSelectedItemAction={setSelectedItemAction}
                     depth={0}

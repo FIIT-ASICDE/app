@@ -17,6 +17,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Dispatch, SetStateAction } from "react";
 
 export const getTimeDeltaString = (lastActivity: Date): string => {
     const now = new Date();
@@ -350,6 +351,13 @@ export const addItemToTree = (
     parentPath: string,
     newItem: FileDisplayItem | DirectoryItem
 ): Array<RepositoryItem> => {
+    if (parentPath === "") {
+        return [
+            ...tree,
+            newItem,
+        ];
+    }
+
     return tree.map((item) => {
         if (item.absolutePath === parentPath && item.type === "directory") {
             const updatedChildren = item.children
@@ -395,10 +403,7 @@ export const renameItemInTree = (
 ): Array<RepositoryItem> => {
     return tree.map((item: RepositoryItem) => {
         if (item.absolutePath === originalPath) {
-            const newAbsolutePath: string = item.absolutePath.replace(
-                /[^/]+$/,
-                newName
-            );
+            const newAbsolutePath: string = item.absolutePath.split("\\").join("/").split("/").slice(0, -1).join("/") + "/" + newName;
 
             return {
                 ...item,
@@ -426,6 +431,11 @@ export const moveItemInTree = (
 ): Array<RepositoryItem> => {
     const treeWithoutSource: Array<RepositoryItem> = deleteItemFromTree(tree, sourceItem.absolutePath);
 
+    sourceItem.absolutePath = targetItem.name === "" ?
+        sourceItem.name : targetItem.absolutePath + "/" + sourceItem.name;
+
+    console.log(sourceItem);
+
     return addItemToTree(
         treeWithoutSource,
         targetItem.absolutePath,
@@ -447,4 +457,28 @@ export const findItemInTree = (
         }
     }
     return undefined;
+};
+
+export const handleToggle = (
+    item: RepositoryItem,
+    expandedItems: Array<RepositoryItem>,
+    setExpandedItemsAction: Dispatch<SetStateAction<Array<RepositoryItem>>>,
+) => {
+    if (item.type === "directory" || item.type === "directory-display") {
+        if (
+            !expandedItems.find(
+                (expandedItem: RepositoryItem) =>
+                    expandedItem.absolutePath === item.absolutePath,
+            )
+        ) {
+            setExpandedItemsAction([...expandedItems, item]);
+        } else {
+            const filteredExpandedItems: Array<RepositoryItem> =
+                expandedItems.filter(
+                    (expandedItem: RepositoryItem) =>
+                        expandedItem.absolutePath !== item.absolutePath,
+                );
+            setExpandedItemsAction(filteredExpandedItems);
+        }
+    }
 };

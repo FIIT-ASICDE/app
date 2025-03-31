@@ -13,7 +13,7 @@ import {
 } from "react";
 
 import { RepositoryItemActions } from "@/components/editor/sidebar-content/file-explorer/repository-item-actions";
-import { findItemInTree, sortTree } from "@/components/generic/generic";
+import { findItemInTree, handleToggle, sortTree } from "@/components/generic/generic";
 import { ExpandCollapseIcon } from "@/components/editor/file/expand-collapse-icon";
 
 interface FileTreeItemProps {
@@ -57,26 +57,6 @@ export const FileTreeItem = ({
     const itemRef: RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
 
     const isHovered: boolean = hoveredItem?.absolutePath === item.absolutePath;
-
-    const handleToggle = () => {
-        if (item.type === "directory" || item.type === "directory-display") {
-            if (
-                !expandedItems.find(
-                    (expandedItem: RepositoryItem) =>
-                        expandedItem.absolutePath === item.absolutePath,
-                )
-            ) {
-                setExpandedItemsAction([...expandedItems, item]);
-            } else {
-                const filteredExpandedItems: Array<RepositoryItem> =
-                    expandedItems.filter(
-                        (expandedItem: RepositoryItem) =>
-                            expandedItem.absolutePath !== item.absolutePath,
-                    );
-                setExpandedItemsAction(filteredExpandedItems);
-            }
-        }
-    };
 
     const handleDragStart = (event: DragEvent<HTMLDivElement>) => {
         event.dataTransfer.setData("text/plain", item.absolutePath);
@@ -148,14 +128,14 @@ export const FileTreeItem = ({
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                onClick={() => {
-                    if (!(selectedItem?.absolutePath === item.absolutePath)) {
-                        setSelectedItemAction(item);
-                    } else {
-                        setSelectedItemAction(undefined);
-                    }
-                }}
+                onClick={() => setSelectedItemAction(item)}
                 onDoubleClick={() => onItemClick?.(item)}
+                onContextMenu={(e) => {
+                    e.preventDefault();
+                    setSelectedItemAction(item);
+                    setHoveredItemAction(item);
+                    setDropdownOpen(true);
+                }}
             >
                 <div className="flex flex-1 flex-row items-center rounded text-sm hover:bg-accent">
                     {item.type === "directory" ||
@@ -167,7 +147,7 @@ export const FileTreeItem = ({
                                         expandedItem.absolutePath === item.absolutePath,
                                 )}
                                 hasChildren={item.type === "directory" && item.children.length > 0}
-                                handleToggle={handleToggle}
+                                handleToggle={() => handleToggle(item, expandedItems, setExpandedItemsAction)}
                                 className="mr-2"
                             />
                             <Folder
@@ -214,9 +194,13 @@ export const FileTreeItem = ({
                                     item={child}
                                     tree={tree}
                                     setTreeAction={setTreeAction}
-                                    onItemClick={() => {
-                                        if (onItemClick) {
-                                            onItemClick(child);
+                                    onItemClick={(repoItem: RepositoryItem) => {
+                                        console.log("2clicked on:", repoItem);
+
+                                        if (repoItem.type === "directory" || repoItem.type === "directory-display") {
+                                            handleToggle(repoItem, expandedItems, setExpandedItemsAction);
+                                        } else {
+                                            onItemClick?.(repoItem);
                                         }
                                     }}
                                     selectedItem={selectedItem}

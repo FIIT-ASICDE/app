@@ -16,7 +16,7 @@ import { renameItemInTree } from "@/components/generic/generic";
 
 interface RenameItemDialogProps {
     repositoryId: string;
-    parentItem: RepositoryItem;
+    item: RepositoryItem;
     tree: Array<RepositoryItem>;
     setTree: Dispatch<SetStateAction<Array<RepositoryItem>>>;
     onAction?: () => void;
@@ -24,16 +24,16 @@ interface RenameItemDialogProps {
 
 export const RenameItemDialog = ({
     repositoryId,
-    parentItem,
+    item,
     tree,
     setTree,
     onAction,
 }: RenameItemDialogProps) => {
     const [open, setOpen] = useState<boolean>(false);
-    const [newItemName, setNewItemName] = useState<string>(parentItem.name);
+    const [newItemName, setNewItemName] = useState<string>(item.name);
 
     const itemDisplayType: string =
-        parentItem.type === "file" || parentItem.type === "file-display"
+        item.type === "file" || item.type === "file-display"
             ? "File"
             : "Directory";
 
@@ -45,7 +45,7 @@ export const RenameItemDialog = ({
 
             const updatedTree = renameItemInTree(
                 tree,
-                parentItem.absolutePath,
+                item.absolutePath,
                 newItemName.trim()
             );
             setTree(updatedTree);
@@ -63,11 +63,13 @@ export const RenameItemDialog = ({
         e.preventDefault();
         const trimmedNewItemName: string = newItemName.trim();
 
+        const newPath: string = item.absolutePath.split("\\").join("/").split("/").slice(0, -1).join("/") + "/" + trimmedNewItemName;
+
         if (trimmedNewItemName) {
             renameItemMutation.mutate({
                 repoId: repositoryId,
-                originalPath: parentItem.absolutePath,
-                newPath: parentItem.name.replace(/[^/]+$/, trimmedNewItemName),
+                originalPath: item.absolutePath,
+                newPath: newPath,
             });
         }
     };
@@ -83,14 +85,14 @@ export const RenameItemDialog = ({
                     <DialogTitle className="text-center">
                         Rename{" "}
                         <span className="text-muted-foreground">
-                            {parentItem.name}
+                            {item.name}
                         </span>
                     </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
                     <div className="relative">
-                        {parentItem.type === "directory" ||
-                        parentItem.type === "directory-display" ? (
+                        {item.type === "directory" ||
+                        item.type === "directory-display" ? (
                             <Folder
                                 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"
                                 fill="currentColor"
