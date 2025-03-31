@@ -14,6 +14,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { deleteItemFromTree } from "@/components/generic/generic";
 
 interface DeleteItemDialogProps {
     repositoryId: string;
@@ -32,9 +33,6 @@ export const DeleteItemDialog = ({
 }: DeleteItemDialogProps) => {
     const [open, setOpen] = useState<boolean>(false);
 
-    const itemName: string =
-        repositoryItem.name.split("/").pop() ?? repositoryItem.name;
-
     const itemDisplayType: string =
         repositoryItem.type === "file" || repositoryItem.type === "file-display"
             ? "File"
@@ -44,21 +42,13 @@ export const DeleteItemDialog = ({
         onSuccess: () => {
             toast.success(itemDisplayType + " deleted successfully");
 
-            const itemToDelete: RepositoryItem | undefined = tree.find(
-                (item) => item.name === repositoryItem.name,
+            const updatedTree: Array<RepositoryItem> = deleteItemFromTree(
+                tree,
+                repositoryItem.absolutePath
             );
+            setTree(updatedTree);
 
-            if (itemToDelete) {
-                const filteredTree: Array<RepositoryItem> = tree.filter(
-                    (item) => item.name !== repositoryItem.name,
-                );
-                setTree(filteredTree);
-            }
-
-            if (onAction) {
-                onAction();
-            }
-
+            onAction?.();
             setOpen(false);
         },
         onError: (error) => {
@@ -71,7 +61,7 @@ export const DeleteItemDialog = ({
 
         deleteItemMutation.mutate({
             repoId: repositoryId,
-            path: repositoryItem.name,
+            path: repositoryItem.absolutePath,
         });
     };
 
@@ -86,7 +76,7 @@ export const DeleteItemDialog = ({
                     <DialogTitle className="text-center">
                         Delete{" "}
                         <span className="text-muted-foreground">
-                            {itemName}
+                            {repositoryItem.name}
                         </span>
                     </DialogTitle>
                     <DialogDescription className="text-center">

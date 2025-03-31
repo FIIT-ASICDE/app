@@ -1,0 +1,58 @@
+"use client";
+
+import { Repository } from "@/lib/types/repository";
+import { SearchIcon } from "lucide-react";
+import { useState } from "react";
+
+import { CloseButton } from "@/components/editor/navigation/close-button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+
+interface SearchTabContentProps {
+    repository: Repository;
+    handleCloseSidebarAction: () => void;
+}
+
+export const SearchTabContent = ({
+    repository,
+    handleCloseSidebarAction,
+}: SearchTabContentProps) => {
+    const [repositorySearchTerm, setRepositorySearchTerm] =
+        useState<string>("");
+
+    return (
+        <div className="flex flex-col h-full w-full relative">
+            <header className="flex flex-col gap-y-3 p-4 w-full">
+                <div className="flex flex-row items-center justify-between gap-x-3">
+                    <span className="font-medium text-lg pr-8">Search</span>
+                    <CloseButton
+                        onClick={handleCloseSidebarAction}
+                        tooltip="Close sidebar"
+                        className="absolute top-4 right-4"
+                    />
+                </div>
+            </header>
+
+            <Separator />
+
+            <ScrollArea className="relative h-full w-full">
+                <div className="text-nowrap p-4">
+                    <div className="space-y-3">
+                        <div className="relative w-full">
+                            <SearchIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder={"Search in " + repository.name}
+                                value={repositorySearchTerm}
+                                onChange={(e) =>
+                                    setRepositorySearchTerm(e.target.value)
+                                }
+                                className="pl-9"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </ScrollArea>
+        </div>
+    );
+};

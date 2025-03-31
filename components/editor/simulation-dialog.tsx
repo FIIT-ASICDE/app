@@ -271,7 +271,7 @@ export const SimulationDialog = ({
                                 {getFiles().map(
                                     (fileItem: FileItem | FileDisplayItem) => (
                                         <CommandItem
-                                            key={fileItem.name}
+                                            key={fileItem.absolutePath}
                                             onSelect={() => {
                                                 setFileSelectOpen(false);
                                                 setSelectedFile(fileItem);

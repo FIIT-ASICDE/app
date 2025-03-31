@@ -77,8 +77,12 @@ export default function EditorPage({ repository }: EditorPageProps) {
 
     const commitMutation = api.git.commit.useMutation({
         onSuccess: () => {
+            const changesCount: number = changes.data?.changes.length ?? 0;
             toast.success(
-                "Successfully commited " + changes.data?.changes.length,
+                "Successfully commited " +
+                    changesCount +
+                    " change" +
+                    (changesCount !== 1 && "s"),
             );
         },
         onError: (error) => {
@@ -118,7 +122,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
             "Starting simulation with type: " +
                 selectedType +
                 " and file: " +
-                selectedFile?.name,
+                selectedFile!.name,
         );
     };
 
@@ -135,8 +139,8 @@ export default function EditorPage({ repository }: EditorPageProps) {
             language: item.language,
         };
 
-        if (!openFiles.some((file) => file.name === item.name)) {
-            setOpenFiles((prevFiles) => [...prevFiles, fileDisplay]);
+        if (!openFiles.some((file: FileDisplayItem) => file.absolutePath === item.absolutePath)) {
+            setOpenFiles((prevFiles: Array<FileDisplayItem>) => [...prevFiles, fileDisplay]);
         }
         setActiveFile(fileDisplay);
     };

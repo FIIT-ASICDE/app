@@ -1,10 +1,10 @@
 import { api } from "@/lib/trpc/react";
-import { DirectoryDisplayItem, RepositoryItem } from "@/lib/types/repository";
+import { DirectoryItem, RepositoryItem } from "@/lib/types/repository";
 import { Folder, FolderPlus } from "lucide-react";
 import { Dispatch, FormEvent, SetStateAction, useState } from "react";
 import { toast } from "sonner";
 
-import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer-control-button";
+import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer/file-explorer-control-button";
 import {
     Dialog,
     DialogContent,
@@ -13,6 +13,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { addItemToTree } from "@/components/generic/generic";
 
 interface CreateDirectoryDialogProps {
     repositoryId: string;
@@ -38,15 +39,23 @@ export const CreateDirectoryDialog = ({
         onSuccess: (item) => {
             toast.success("Directory created successfully");
 
-            const newDirectory: DirectoryDisplayItem = {
-                type: "directory-display",
+            const newDirectory: DirectoryItem = {
+                type: "directory",
                 name: item.name,
                 lastActivity: item.lastActivity,
                 absolutePath: item.absolutePath,
+                children: [],
             };
 
             if (!parentItem) {
                 setTree([...tree, newDirectory]);
+            } else {
+                const updatedTree = addItemToTree(
+                    tree,
+                    parentItem.absolutePath,
+                    newDirectory
+                );
+                setTree(updatedTree);
             }
 
             onAction?.();

@@ -6,7 +6,6 @@ import { FileText, GitCommitHorizontal, Loader2 } from "lucide-react";
 import { Dispatch, SetStateAction, useState } from "react";
 import { z } from "zod";
 
-import { CommitHistoryDialog } from "@/components/editor/sidebar-content/commit-history-dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -97,8 +96,6 @@ export const CommitChanges = ({
                     )}
                 </Button>
             )}
-
-            <CommitHistoryDialog repositoryId={repositoryId} />
         </div>
     );
 };
