@@ -9,5 +9,7 @@ export class Splitter {
         y: number
     };
     public outPorts: Port[];
-    public bitPortType: string
+    public bitPortType: string;
+    public structPackage: string;
+    public structTypeDef: string;
 }

@@ -40,7 +40,21 @@ import {JointJSEncoder} from "@/app/diagram-test/components/Shapes/complexLogic/
 import {Encoder} from "@/app/diagram-test/components/Shapes/classes/encoder";
 import { Pencil, Trash2, CircleAlert } from 'lucide-react';
 import { parseSystemVerilogText } from '@/app/diagram-test/utils/DiagramGeneration/SystemVerilog/SVParser'
+import { api } from "@/lib/trpc/react";
+
+
 import { dia } from "@joint/core";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
+import {Label} from "@/components/ui/label";
 
 
 interface Properties {
@@ -61,6 +75,8 @@ interface Properties {
     rstEdge?: 'rising' | 'falling';
     rstType?: 'async' | 'sync';
     bitPortType?: string;
+    structPackage?: string;
+    structTypeDef?: string;
 }
 
 
@@ -83,7 +99,9 @@ const PropertiesPanel = () => {
         clkEdge: 'rising',
         rstEdge: 'falling',
         rstType: 'async',
-        bitPortType: 'custom'
+        bitPortType: 'custom',
+        structPackage: '',
+        structTypeDef: '',
     });
     const [errorMessage, setErrorMessage] = useState('');
     const [showAddPortDialog, setShowAddPortDialog] = useState(false);
@@ -98,8 +116,7 @@ const PropertiesPanel = () => {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [clipboardCell, setClipboardCell] = useState<dia.Cell | null>(null);
     const panelRef = useRef<HTMLDivElement | null>(null);
-    const [parseResults, setParseResults] = useState<any>(null);
-
+    const [parseResults, setParseResults] = useState<any[]>([]);
 
     const handleWidthChange = (newWidth: number) => {
         setPanelWidth(newWidth);
@@ -125,7 +142,8 @@ const PropertiesPanel = () => {
                 rstEdge: selectedElement.attributes.rstEdge || 'falling',
                 rstType: selectedElement.attributes.rstType || 'async',
                 bitPortType: selectedElement.attributes.bitPortType || 'custom',
-
+                structPackage: selectedElement.attributes.structPackage || '',
+                structTypeDef: selectedElement.attributes.structTypeDef || '',
             };
 
             setProperties(props);
@@ -147,28 +165,50 @@ const PropertiesPanel = () => {
                 clkEdge: 'rising',
                 rstEdge: 'falling',
                 rstType: 'async',
-                bitPortType: 'custom'
+                bitPortType: 'custom',
+                structPackage: '',
+                structTypeDef: '',
 
             });
         }
     }, [selectedElement]);
 
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
 
-        // Чтение файла как текст
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const content = e.target?.result as string;
-            if (content) {
-                const packages = parseSystemVerilogText(content);
-                console.log('Parsed packages:', packages);
-                // Здесь вы можете обработать результаты парсинга
-            }
-        };
-        reader.readAsText(file);
-    };
+    const { repository } = useDiagramContext();
+    console.log(repository.name, repository.ownerName);
+    const { data: allFiles, isLoading, error } = api.repo.loadAllFilesInRepo.useQuery({
+        ownerSlug: repository.ownerName,
+        repositorySlug: repository.name,
+    });
+    useEffect(() => {
+        if (allFiles) {
+            console.log("📂 All loaded files with content:", allFiles);
+        }
+    }, [allFiles]);
+
+    useEffect(() => {
+        if (allFiles && Array.isArray(allFiles)) {
+            const svFiles = allFiles.filter(
+                (file) =>
+                    file.type === "file" &&
+                    file.name.toLowerCase().endsWith(".sv") &&
+                    file.content
+            );
+
+            const parsedPackages = svFiles.flatMap((file) => {
+                try {
+                    return parseSystemVerilogText(file.content);
+                } catch (err) {
+                    console.warn(`Failed to parse ${file.name}`, err);
+                    return [];
+                }
+            });
+
+            console.log("Parsed packages from repo:", parsedPackages);
+            setParseResults(parsedPackages);
+        }
+    }, [allFiles]);
+
 
     function validateField(fieldName: string, fieldValue: any): string {
         if (typeof fieldValue === 'string') {
@@ -405,6 +445,8 @@ const PropertiesPanel = () => {
         const newSplitter = new Splitter();
         newSplitter.name = properties.label || '';
         newSplitter.bitPortType = properties.bitPortType || 'custom';
+        newSplitter.structPackage = properties.structPackage || '';
+        newSplitter.structTypeDef = properties.structTypeDef || '';
 
         newSplitter.outPorts = properties.createdOutPorts.map((p, i) => ({
             name: p.name,
@@ -430,11 +472,19 @@ const PropertiesPanel = () => {
         const newCombiner = new Combiner();
         newCombiner.name = properties.label || '';
         newCombiner.bitPortType = properties.bitPortType || 'custom';
+        newCombiner.structPackage = properties.structPackage || '';
+        newCombiner.structTypeDef = properties.structTypeDef || '';
 
-        newCombiner.inPorts = properties.createdInPorts.map((p, i) => ({
-            name: p.name,
-            bandwidth: p.bandwidth,
-        }));
+        if (properties.bitPortType === 'custom') {
+            newCombiner.inPorts = properties.createdInPorts.map((p, i) => ({
+                name: p.name,
+                bandwidth: p.bandwidth,
+            }));
+        }
+        else {
+            // TODO: handle structs
+        }
+
 
         const { x, y } = selectedElement.position();
         newCombiner.position = { x, y };
@@ -775,7 +825,7 @@ const PropertiesPanel = () => {
     if (!selectedElement || selectedElement.isLink()) {
         return (
             <ResizablePanel
-                className="bg-white border-l border-gray-200 shadow-md h-full overflow-y-auto"
+                className="bg-white border-l border-gray-200 shadow-md h-full overflow-y-auto dark:bg-black"
                 defaultWidth={300}
                 direction="left"
                 onWidthChange={handleWidthChange}
@@ -789,7 +839,7 @@ const PropertiesPanel = () => {
     return (
         <ResizablePanel
             ref={panelRef}
-            className="bg-white border-l border-gray-200 shadow-md h-full overflow-y-auto"
+            className="bg-white border-l border-gray-200 shadow-md h-full overflow-y-auto dark:bg-black"
             defaultWidth={300}
             direction="left"
             onWidthChange={handleWidthChange}
@@ -798,24 +848,13 @@ const PropertiesPanel = () => {
                 {selectedElement.attributes.elType.toUpperCase()} Properties
             </h3>
 
-            <div className="mt-4">
-                <h3 className="text-lg font-semibold mb-2">Test SystemVerilog Parser</h3>
-                <input
-                    type="file"
-                    accept=".sv,.v"
-                    onChange={handleFileUpload}
-                    className="block w-full text-sm"
-                />
-            </div>
-
             <div className="p-4 space-y-4">
                 {(['output', 'input', 'and', 'nand', 'xor', 'or', 'nor', 'not', 'xnor', 'multiplexer', 'decoder', 'encoder', 'alu', 'comparator', 'newModule', 'sram', 'register', 'combiner'].includes(selectedElement.attributes.elType)) && (
                     <div className="space-y-1">
                         <label className="block text-sm font-medium text-gray-700">
                             {toTitleCase(selectedElement.attributes.elType)} name:
                         </label>
-                        <input
-                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        <Input
                             type="text"
                             name="label"
                             placeholder="Port's name..."
@@ -833,27 +872,33 @@ const PropertiesPanel = () => {
 
                 {(['output', 'input', 'and', 'nand', 'xor', 'or', 'nor', 'not', 'xnor', 'multiplexer', 'decoder', 'encoder', 'alu', 'comparator', 'sram', 'register'].includes(selectedElement.attributes.elType)) && (
                     <div className="space-y-1">
-                        <label className="block text-sm font-medium text-gray-700">
+                        <Label>
                             Select Data width:
-                        </label>
-                        <select
-                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        </Label>
+
+                        <Select
                             name="bandwidthType"
                             value={properties.bandwidthType}
-                            onChange={handleChange}>
-                            <option value="bit">Bit</option>
-                            <option value="vector">Vector</option>
-                            {(['output', 'input', 'multiplexer', 'sram', 'register'].includes(selectedElement.attributes.elType)) && (
-                                <option value="struct">User Defined</option>
-                            )}
-                        </select>
+                            onValueChange={(value) => {
+                                handleChange({ target: { name: 'bandwidthType', type: 'select', value } });
+                            }}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select Data width" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="bit">Bit</SelectItem>
+                                <SelectItem value="vector">Vector</SelectItem>
+                                {(['output', 'input', 'multiplexer', 'sram', 'register'].includes(selectedElement.attributes.elType)) && (
+                                    <SelectItem value="struct">User Defined</SelectItem>
+                                )}
+                            </SelectContent>
+                        </Select>
                         {properties.bandwidthType === 'vector' && (
                             <div className="space-y-1">
-                                <label className="block text-sm font-medium text-gray-700">
+                                <Label>
                                     Width of vector:
-                                </label>
-                                <input
-                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                </Label>
+                                <Input
                                     type="number"
                                     name="bandwidth"
                                     value={properties.bandwidth || 0}
@@ -870,27 +915,53 @@ const PropertiesPanel = () => {
 
                         {properties.bandwidthType === 'struct' && (
                             <div className="space-y-3">
+                                {/* PACKAGE FILE SELECT */}
                                 <div className="space-y-1">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        Choose package file:
-                                    </label>
-                                    <select
-                                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        value='packageFile'
-                                    >
-                                        <option value="">--Select--</option>
-                                    </select>
+                                    <Label>Choose package file:</Label>
+                                    <Select
+                                        name="structPackage"
+                                        value={properties.structPackage}
+                                        onValueChange={(value) => {
+                                            handleChange({ target: { name: 'structPackage', type: 'select', value } });
+                                        }}
+                                        >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select package file" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {parseResults.map((pkg, idx) => (
+                                                <SelectItem key={idx} value={pkg.name}>
+                                                    {pkg.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
+
+                                {/* STRUCT TYPE SELECT */}
                                 <div className="space-y-1">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        Choose user defined type:
-                                    </label>
-                                    <select
-                                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        value='packageType'
+                                    <Label>Choose user defined type:</Label>
+                                    <Select
+                                        name="structTypeDef"
+                                        value={properties.structTypeDef}
+                                        onValueChange={(value) => {
+                                            handleChange({ target: { name: 'structTypeDef', type: 'select', value } });
+                                        }}
+                                        disabled={!properties.structPackage}
                                     >
-                                        <option value="">--Select--</option>
-                                    </select>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {parseResults
+                                                .find(pkg => pkg.name === properties.structPackage)
+                                                ?.structs.map((strct, idx) => (
+                                                    <SelectItem key={idx} value={strct.name}>
+                                                        {strct.name}
+                                                    </SelectItem>
+                                                ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
                         )}
@@ -899,11 +970,10 @@ const PropertiesPanel = () => {
 
                 {(['and', 'nand', 'xor', 'or', 'nor', 'xnor'].includes(selectedElement.attributes.elType)) && (
                     <div className="space-y-1">
-                        <label className="block text-sm font-medium text-gray-700">
+                        <Label>
                             Number of input ports:
-                        </label>
-                        <input
-                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        </Label>
+                        <Input
                             type="number"
                             name="inputPorts"
                             value={properties.inputPorts || 0}
@@ -920,71 +990,86 @@ const PropertiesPanel = () => {
 
                 {selectedElement.attributes.elType === 'multiplexer' && (
                     <div className="space-y-1">
-                        <label className="block text-sm font-medium text-gray-700">
+                        <Label>
                             Multiplexer type:
-                        </label>
-                        <select
-                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            onChange={handleChange}
-                            defaultValue="2"
+                        </Label>
+
+                        <Select
                             name="inputPorts"
-                        >
-                            <option value="2">2-to-1</option>
-                            <option value="4">4-to-1</option>
-                            <option value="8">8-to-1</option>
-                        </select>
+                            value={properties.inputPorts?.toString()}
+                            onValueChange={(value) => {
+                                handleChange({ target: { name: 'inputPorts', type: 'select', value } });
+                            }}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Multiplexer type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="2">2-to-1</SelectItem>
+                                <SelectItem value="4">4-to-1</SelectItem>
+                                <SelectItem value="8">8-to-1</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 )}
 
                 {selectedElement.attributes.elType === 'alu' && (
                     <div className="space-y-1">
-                        <label className="block text-sm font-medium text-gray-700">
+                        <Label>
                             ALU Type:
-                        </label>
-                        <select
-                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        </Label>
+                        <Select
                             name="aluType"
                             value={properties.aluType}
-                            onChange={handleChange}
-                        >
-                            <option value="+">{'+'}</option>
-                            <option value="-">{'-'}</option>
-                            <option value="*">{'*'}</option>
-                            <option value="/">{'/'}</option>
-                            <option value="%">{'%'}</option>
-                        </select>
+                            onValueChange={(value) => {
+                                handleChange({ target: { name: 'aluType', type: 'select', value } });
+                            }}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="ALU Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="+">Addition (+)</SelectItem>
+                                <SelectItem value="-">Subtraction (-)</SelectItem>
+                                <SelectItem value="*">Multiplication (*)</SelectItem>
+                                <SelectItem value="/">Division (/)</SelectItem>
+                                <SelectItem value="%">Residuals (%)</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 )}
 
                 {selectedElement.attributes.elType === 'comparator' && (
                     <div className="space-y-1">
-                        <label className="block text-sm font-medium text-gray-700">
+                        <Label>
                             Comparator Type:
-                        </label>
-                        <select
-                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        </Label>
+                        <Select
                             name="comparatorType"
                             value={properties.comparatorType}
-                            onChange={handleChange}
-                        >
-                            <option value=">">{'>'}</option>
-                            <option value="<">{'<'}</option>
-                            <option value=">=">{'>='}</option>
-                            <option value="<=">{'<='}</option>
-                            <option value="==">{'=='}</option>
-                            <option value="!=">{'!='}</option>
-                        </select>
+                            onValueChange={(value) => {
+                                handleChange({ target: { name: 'comparatorType', type: 'select', value } });
+                            }}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Comparator Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value=">">Greater than (&gt;)</SelectItem>
+                                <SelectItem value="<">Less than (&lt;)</SelectItem>
+                                <SelectItem value="==">Equal (==)</SelectItem>
+                                <SelectItem value="!=">Not equal (!=)</SelectItem>
+                                <SelectItem value=">=">Greater or equal (&gt;=)</SelectItem>
+                                <SelectItem value="<=">Less or equal (&lt;=)</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 )}
 
                 {(['newModule'].includes(selectedElement.attributes.elType)) && (
                     <>
                         <div className="space-y-1">
-                            <label className="block text-sm font-medium text-gray-700">
+                            <Label>
                                 Instance name:
-                            </label>
-                            <input
-                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            </Label>
+                            <Input
                                 type="text"
                                 name="instance"
                                 placeholder="Insert instance..."
@@ -1006,28 +1091,32 @@ const PropertiesPanel = () => {
                                     <div key={idx} className="flex items-center justify-between p-2 border-b border-gray-100">
                                         <span className="text-sm">{p.name} (bw={p.bandwidth})</span>
                                         <div className="flex space-x-2">
-                                            <button
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
                                                 onClick={() => handleEditPort('input', idx)}
                                                 className="text-blue-500 hover:text-blue-700"
                                             >
                                                 <Pencil className="w-4 h-4" />
-                                            </button>
-                                            <button
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
                                                 onClick={() => handleDeletePort('input', idx)}
                                                 className="text-red-500 hover:text-red-700"
                                             >
                                                 <Trash2 className="w-4 h-4" />
-                                            </button>
+                                            </Button>
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                            <button
+                            <Button
+                                size="sm"
                                 onClick={handleAddInputPort}
-                                className="mt-2 px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
                             >
                                 Add Input Port
-                            </button>
+                            </Button>
                         </div>
 
                         <div className="mt-4 border-t border-gray-200 pt-4">
@@ -1037,28 +1126,32 @@ const PropertiesPanel = () => {
                                     <div key={idx} className="flex items-center justify-between p-2 border-b border-gray-100">
                                         <span className="text-sm">{p.name} (bw={p.bandwidth})</span>
                                         <div className="flex space-x-2">
-                                            <button
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
                                                 onClick={() => handleEditPort('output', idx)}
                                                 className="text-blue-500 hover:text-blue-700"
                                             >
                                                 <Pencil className="w-4 h-4" />
-                                            </button>
-                                            <button
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
                                                 onClick={() => handleDeletePort('output', idx)}
                                                 className="text-red-500 hover:text-red-700"
                                             >
                                                 <Trash2 className="w-4 h-4" />
-                                            </button>
+                                            </Button>
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                            <button
+                            <Button
+                                size="sm"
                                 onClick={handleAddOutputPort}
-                                className="mt-2 px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
                             >
                                 Add Output Port
-                            </button>
+                            </Button>
                         </div>
                     </>
                 )}
@@ -1067,11 +1160,10 @@ const PropertiesPanel = () => {
                     <>
                         {(['sram'].includes(selectedElement.attributes.elType)) && (
                             <div className="space-y-1">
-                                <label className="block text-sm font-medium text-gray-700">
+                                <Label>
                                     Address width:
-                                </label>
-                                <input
-                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                </Label>
+                                <Input
                                     type="number"
                                     name="addressBandwidth"
                                     placeholder="Insert width..."
@@ -1089,110 +1181,141 @@ const PropertiesPanel = () => {
 
                         {(['register'].includes(selectedElement.attributes.elType)) && (
                             <>
-                                <div className="flex items-center space-x-2 mt-2">
-                                    <input
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
                                         id="resetPort"
-                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                        type="checkbox"
                                         name="resetPort"
-                                        checked={!!properties.resetPort}
-                                        onChange={handleChange}
+                                        checked={properties.resetPort}
+                                        onCheckedChange={(checked) => {
+                                            handleChange({ target: { name: 'resetPort', type: 'checkbox', checked: checked === true } });
+                                        }}
                                     />
-                                    <label htmlFor="resetPort" className="text-sm font-medium text-gray-700">
-                                        Reset Port
-                                    </label>
+                                    <Label htmlFor="resetPort">
+                                        Add reset port
+                                    </Label>
                                 </div>
-
-                                <div className="flex items-center space-x-2 mt-2">
-                                    <input
+                                
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
                                         id="enablePort"
-                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                        type="checkbox"
                                         name="enablePort"
-                                        checked={!!properties.enablePort}
-                                        onChange={handleChange}
+                                        checked={properties.enablePort}
+                                        onCheckedChange={(checked) => {
+                                            handleChange({ target: { name: 'enablePort', type: 'checkbox', checked: checked === true } });
+                                        }}
                                     />
-                                    <label htmlFor="enablePort" className="text-sm font-medium text-gray-700">
-                                        Enable Port
-                                    </label>
+                                    <Label htmlFor="enablePort">
+                                        Add enable port
+                                    </Label>
                                 </div>
 
-                                <div className="flex items-center space-x-2 mt-2">
-                                    <input
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
                                         id="qInverted"
-                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                        type="checkbox"
                                         name="qInverted"
-                                        checked={!!properties.qInverted}
-                                        onChange={handleChange}
+                                        checked={properties.qInverted}
+                                        onCheckedChange={(checked) => {
+                                            handleChange({ target: { name: 'qInverted', type: 'checkbox', checked: checked === true } });
+                                        }}
                                     />
-                                    <label htmlFor="qInverted" className="text-sm font-medium text-gray-700">
-                                        Q Output Inversion
-                                    </label>
+                                    <Label htmlFor="qInverted">
+                                        Invert Q output
+                                    </Label>
                                 </div>
 
                                 {(properties.resetPort) && (
                                     <div className="space-y-1 mt-3">
-                                        <label className="block text-sm font-medium text-gray-700">
+                                        <Label>
                                             Reset Edge:
-                                        </label>
-                                        <select
-                                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        </Label>
+                                        <Select
                                             name="rstEdge"
                                             value={properties.rstEdge}
-                                            onChange={handleChange}>
-                                            <option value="rising">Rising</option>
-                                            <option value="falling">Falling</option>
-                                        </select>
+                                            onValueChange={(value) => {
+                                                handleChange({ target: { name: 'rstEdge', type: 'select', value } });
+                                            }}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Reset Edge" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="rising">Rising</SelectItem>
+                                                <SelectItem value="falling">Falling</SelectItem>
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                 )}
 
                                 {(properties.resetPort) && (
                                     <div className="space-y-1 mt-3">
-                                        <label className="block text-sm font-medium text-gray-700">
+                                        <Label>
                                             Reset Type:
-                                        </label>
-                                        <select
-                                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        </Label>
+                                        <Select
                                             name="rstType"
                                             value={properties.rstType}
-                                            onChange={handleChange}>
-                                            <option value="async">Asynchronous</option>
-                                            <option value="sync">Synchronous</option>
-                                        </select>
+                                            onValueChange={(value) => {
+                                                handleChange({ target: { name: 'rstType', type: 'select', value } });
+                                            }}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Reset Type" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="async">Asynchronous</SelectItem>
+                                                <SelectItem value="sync">Synchronous</SelectItem>
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                 )}
                             </>
                         )}
                         <div className="space-y-1 mt-3">
-                            <label className="block text-sm font-medium text-gray-700">
+                            <Label>
                                 Clock Edge:
-                            </label>
-                            <select
-                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            </Label>
+
+                            <Select
                                 name="clkEdge"
                                 value={properties.clkEdge}
-                                onChange={handleChange}>
-                                <option value="rising">Rising</option>
-                                <option value="falling">Falling</option>
-                            </select>
+                                onValueChange={(value) => {
+                                    handleChange({ target: { name: 'clkEdge', type: 'select', value } });
+                                }}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Clock Edge" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="rising">Rising</SelectItem>
+                                    <SelectItem value="falling">Falling</SelectItem>
+                                </SelectContent>
+                            </Select>
+
+
                         </div>
                     </>
                 )}
                 {(['combiner', 'splitter'].includes(selectedElement.attributes.elType)) && (
                     <>
                     <div className="space-y-1">
-                        <label className="block text-sm font-medium text-gray-700">
+
+
+
+                        <Label>
                             {selectedElement.attributes.elType === 'combiner' ? 'Input' : 'Output'} Ports Type
-                        </label>
-                        <select
-                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        </Label>
+
+                        <Select
                             name="bitPortType"
                             value={properties.bitPortType}
-                            onChange={handleChange}>
-                            <option value="custom">Custom Ports</option>
-                            <option value="struct">User Defined</option>
-                        </select>
+                            onValueChange={(value) => {
+                                handleChange({ target: { name: 'bitPortType', type: 'select', value } });
+                            }}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select ports type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="custom">Custom Ports</SelectItem>
+                                <SelectItem value="struct">User Defined</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                     {(['combiner'].includes(selectedElement.attributes.elType) && properties.bitPortType === 'custom') && (
                         <div className="mt-6 border-t border-gray-200 pt-4">
@@ -1202,28 +1325,32 @@ const PropertiesPanel = () => {
                                     <div key={idx} className="flex items-center justify-between p-2 border-b border-gray-100">
                                         <span className="text-sm">{p.name} (bw={p.bandwidth})</span>
                                         <div className="flex space-x-2">
-                                            <button
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
                                                 onClick={() => handleEditPort('input', idx)}
                                                 className="text-blue-500 hover:text-blue-700"
                                             >
                                                 <Pencil className="w-4 h-4" />
-                                            </button>
-                                            <button
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
                                                 onClick={() => handleDeletePort('input', idx)}
                                                 className="text-red-500 hover:text-red-700"
                                             >
                                                 <Trash2 className="w-4 h-4" />
-                                            </button>
+                                            </Button>
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                            <button
+                            <Button
+                                size="sm"
                                 onClick={handleAddInputPort}
-                                className="mt-2 px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
                             >
                                 Add Input Port
-                            </button>
+                            </Button>
                         </div>
                         )}
                     {(['splitter'].includes(selectedElement.attributes.elType) && properties.bitPortType === 'custom') && (
@@ -1234,53 +1361,83 @@ const PropertiesPanel = () => {
                                     <div key={idx} className="flex items-center justify-between p-2 border-b border-gray-100">
                                         <span className="text-sm">{p.name} ({p.startBit} - {p.endBit})</span>
                                         <div className="flex space-x-2">
-                                            <button
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
                                                 onClick={() => handleEditPort('output', idx)}
                                                 className="text-blue-500 hover:text-blue-700"
                                             >
                                                 <Pencil className="w-4 h-4" />
-                                            </button>
-                                            <button
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
                                                 onClick={() => handleDeletePort('output', idx)}
                                                 className="text-red-500 hover:text-red-700"
                                             >
                                                 <Trash2 className="w-4 h-4" />
-                                            </button>
+                                            </Button>
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                            <button
+                            <Button
+                                size="sm"
                                 onClick={handleAddOutputPort}
-                                className="mt-2 px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
                             >
                                 Add Output Port
-                            </button>
+                            </Button>
                         </div>
                     )}
                     {properties.bitPortType === 'struct' && (
                         <div className="space-y-3">
+                            {/* PACKAGE FILE SELECT */}
                             <div className="space-y-1">
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Choose package file:
-                                </label>
-                                <select
-                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    value='packageFile'
+                                <Label>Choose package file:</Label>
+                                <Select
+                                    name="structPackage"
+                                    value={properties.structPackage}
+                                    onValueChange={(value) => {
+                                        handleChange({ target: { name: 'structPackage', type: 'select', value } });
+                                    }}
                                 >
-                                    <option value="">--Select--</option>
-                                </select>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select package file" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {parseResults.map((pkg, idx) => (
+                                            <SelectItem key={idx} value={pkg.name}>
+                                                {pkg.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
+
+                            {/* STRUCT TYPE SELECT */}
                             <div className="space-y-1">
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Choose user defined type:
-                                </label>
-                                <select
-                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    value='packageType'
+                                <Label>Choose user defined type:</Label>
+                                <Select
+                                    name="structTypeDef"
+                                    value={properties.structTypeDef}
+                                    onValueChange={(value) => {
+                                        handleChange({ target: { name: 'structTypeDef', type: 'select', value } });
+                                    }}
+                                    disabled={!properties.structPackage}
                                 >
-                                    <option value="">--Select--</option>
-                                </select>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {parseResults
+                                            .find(pkg => pkg.name === properties.structPackage)
+                                            ?.structs.map((strct, idx) => (
+                                                <SelectItem key={idx} value={strct.name}>
+                                                    {strct.name}
+                                                </SelectItem>
+                                            ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                     )}
@@ -1289,12 +1446,12 @@ const PropertiesPanel = () => {
                 )}
 
                 <div className="mt-6 pt-4 border-t border-gray-200">
-                    <button
+                    <Button
                         onClick={handleSave}
-                        className="w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                        className="w-full"
                     >
                         Save Changes
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -1325,11 +1482,10 @@ const PropertiesPanel = () => {
 
                         <div className="space-y-4">
                             <div className="space-y-1">
-                                <label className="block text-sm font-medium text-gray-700">
+                                <Label>
                                     Port Name:
-                                </label>
-                                <input
-                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                </Label>
+                                <Input
                                     type="text"
                                     name="name"
                                     value={newPortData.name}
@@ -1338,11 +1494,10 @@ const PropertiesPanel = () => {
                             </div>
                             {(['combiner', 'newModule'].includes(selectedElement.attributes.elType)) && (
                                 <div className="space-y-1">
-                                    <label className="block text-sm font-medium text-gray-700">
+                                    <Label>
                                         Bandwidth:
-                                    </label>
-                                    <input
-                                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    </Label>
+                                    <Input
                                         type="number"
                                         name="bandwidth"
                                         value={newPortData.bandwidth}
@@ -1355,11 +1510,10 @@ const PropertiesPanel = () => {
                             {(['splitter'].includes(selectedElement.attributes.elType)) && (
                                 <>
                                     <div className="space-y-1">
-                                        <label className="block text-sm font-medium text-gray-700">
+                                        <Label>
                                             End Bit:
-                                        </label>
-                                        <input
-                                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        </Label>
+                                        <Input
                                             type="number"
                                             name="endBit"
                                             value={newPortData.endBit}
@@ -1367,11 +1521,10 @@ const PropertiesPanel = () => {
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="block text-sm font-medium text-gray-700">
+                                        <Label>
                                             Start Bit:
-                                        </label>
-                                        <input
-                                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        </Label>
+                                        <Input
                                             type="number"
                                             name="startBit"
                                             value={newPortData.startBit}
@@ -1383,18 +1536,17 @@ const PropertiesPanel = () => {
                         </div>
 
                         <div className="flex justify-end mt-6 space-x-2">
-                            <button
+                            <Button
+                                variant="outline"
                                 onClick={handleNewPortCancel}
-                                className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors"
                             >
                                 Cancel
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 onClick={handleNewPortSubmit}
-                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
                             >
                                 {isEditingPort ? 'Update' : 'Add'}
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

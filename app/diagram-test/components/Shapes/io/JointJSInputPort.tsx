@@ -19,6 +19,8 @@ export const JointJSInputPort = (input: Port) => {
         elType: 'input',
         name: input.name,
         bandwidth: input.bandwidth,
+        structPackage: input.structPackage,
+        structTypeDef: input.structTypeDef,
         position: { x: input.position?.x || 100, y: input.position?.y || 100 },
         size: { width: dimension, height: dimension/2},
         attrs: {

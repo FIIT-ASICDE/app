@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, { useEffect, useRef, useState } from "react";
 import { dia } from "@joint/core";
 import useJointJS from '@/app/diagram-test/hooks/useJointJS';
 import { useDiagramContext } from '@/app/diagram-test/context/useDiagramContext';
@@ -47,11 +47,53 @@ import PaperToolbar from "@/app/diagram-test/components/Sidebar/PaperToolbar";
 const DiagramArea = () => {
     const paperElement = useRef<HTMLDivElement>(null);
     const { graph } = useDiagramContext();
-    const paper = useJointJS(paperElement);
+    const [isReady, setIsReady] = useState(false);
+
+    useEffect(() => {
+        if (paperElement.current) {
+            setIsReady(true);
+        }
+    }, []);
+
+    const paper = useJointJS(paperElement, isReady);
+
     useDiagramEvents({
         paper: paper,
         paperElement: paperElement.current
     });
+
+    useEffect(() => {
+        if (paper && paperElement.current && isReady) {
+
+            const rect = paperElement.current.getBoundingClientRect();
+            console.log('Paper container dimensions after init:', {
+                width: rect.width,
+                height: rect.height,
+                offsetWidth: paperElement.current.offsetWidth,
+                offsetHeight: paperElement.current.offsetHeight
+            });
+
+            if (rect.width > 0 && rect.height > 0) {
+                paper.setDimensions(rect.width, rect.height);
+                console.log('Paper dimensions set to:', rect.width, rect.height);
+            }
+        }
+    }, [paper, isReady]);
+
+    // // addPaperEvents()
+    // // generateCode()
+
+    // const { ... } = useBlockDiagrams()
+
+    // useBlockDiagrams() -> generateCode(lang: Languages), generateDiagram(), getShapes(), createPaper(), addPaperEvents()
+
+    // useEffect(() => {
+    //     // Init paper -> useJointJS() -> basic paper -> add aditional attributes?
+    //     // addPaperEvents()
+    //     // useJointJS() -> blockDiagramShapes() -> { ... }
+    //      // const paper ...
+            // addPaperEvents(paper)
+    // })
 
     function getElType(toolType: string): string {
         switch (toolType) {
@@ -84,7 +126,6 @@ const DiagramArea = () => {
         return elType + '_' + (sameTypeCount + 1);
     }
 
-    console.log('DiagramArea mounted')
 
     const handleDrop = (event: React.DragEvent) => {
         event.preventDefault();

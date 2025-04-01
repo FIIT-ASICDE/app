@@ -10,4 +10,6 @@ export class Combiner {
     };
     public inPorts: Port[];
     public bitPortType: string;
+    public structPackage: string;
+    public structTypeDef: string;
 }

@@ -44,7 +44,7 @@ const PaperToolbar: React.FC = () => {
     };
 
     return (
-        <div className="flex items-center gap-1 p-1 bg-white border-b shadow-sm">
+        <div className="flex items-center gap-1 p-1 bg-white border-b shadow-sm dark:bg-black" >
             <div className="flex items-center gap-1 min-w-[120px]">
                 <span className="text-xs text-gray-500 min-w-[40px]">{displayZoom()}</span>
                 <input

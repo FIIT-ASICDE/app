@@ -39,6 +39,8 @@ export const JointJSCombiner = (combiner: Combiner) => {
         bitPortType: combiner.bitPortType,
         inPorts: inCount,
         combineInPorts: combineInPorts,
+        structPackage: combiner.structPackage,
+        structTypeDef: combiner.structTypeDef,
         position: { x: combiner.position?.x || 100, y: combiner.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {

@@ -8,4 +8,6 @@ export class Port {
         x: number,
         y: number
     };
+    public structPackage: string;
+    public structTypeDef: string;
 }

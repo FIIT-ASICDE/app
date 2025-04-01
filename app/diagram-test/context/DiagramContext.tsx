@@ -2,6 +2,7 @@
 
 import React, { createContext, useState, ReactNode } from 'react';
 import { dia, shapes } from "@joint/core";
+import { Repository } from "@/lib/types/repository";
 
 interface DiagramContextProps {
     graph: dia.Graph;
@@ -16,15 +17,17 @@ interface DiagramContextProps {
     removeElement: () => void;
     hasFormErrors: boolean;
     setHasFormErrors: (val: boolean) => void;
+    repository: Repository;
 }
 
 export const DiagramContext = createContext<DiagramContextProps | undefined>(undefined);
 
 interface DiagramProviderProps {
     children: ReactNode;
+    repository: Repository;
 }
 
-export const DiagramProvider = ({ children }: DiagramProviderProps) => {
+export const DiagramProvider = ({ children, repository }: DiagramProviderProps) => {
     const [graph] = useState(() =>
         new dia.Graph({}, { cellNamespace: { standard: shapes.standard } })
     );
@@ -84,6 +87,7 @@ export const DiagramProvider = ({ children }: DiagramProviderProps) => {
                 removeElement,
                 hasFormErrors,
                 setHasFormErrors,
+                repository
 
             }}
         >

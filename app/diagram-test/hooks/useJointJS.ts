@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { dia, shapes, linkTools, elementTools, V } from "@joint/core";
 import { useDiagramContext } from "@/app/diagram-test/context/useDiagramContext";
-import './jointjs.css'
 
 const highlightSettings = {
     name: 'stroke',
@@ -78,15 +77,11 @@ function getPort(magnet: Element | null): string | null {
 }
 
 
-const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
-    const { graph, setSelectedElement, setPaper, removeElement, hasFormErrors } = useDiagramContext();
+const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: boolean) => {
+    const { graph, setSelectedElement, setPaper, hasFormErrors } = useDiagramContext();
     console.log(hasFormErrors);
     const paperRef = useRef<dia.Paper | null>(null);
     const selectedCellViewRef = useRef<dia.CellView | null>(null);
-    const isDragging = useRef(false);
-    const lastClientX = useRef(0);
-    const lastClientY = useRef(0);
-    const translation = useRef({ x: 0, y: 0 });
     const isLinkingRef = useRef<boolean>(false);
     const currentLinkBandwidthRef = useRef<number>(1);
 
@@ -123,8 +118,8 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
     }, [hasFormErrors]);
 
     useEffect(() => {
-        if (paperElement.current && !paperRef.current) {
-            console.log(paperElement.current)
+        if (paperElement.current && !paperRef.current && isReady) {
+
             const paper = new dia.Paper({
                 el: paperElement.current,
                 model: graph,
@@ -761,7 +756,8 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>) => {
                 setPaper(null);
             };
         }
-    }, [paperElement, graph, setSelectedElement, setPaper]);
+
+    }, [paperElement, graph, setSelectedElement, setPaper, isReady]);
 
 
     return paperRef.current;

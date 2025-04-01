@@ -11,9 +11,11 @@ export const JointJSSplitter = (splitter: Splitter) => {
     const portItems = [];
     for (let i = 0; i < outCount; i++) {
         const portY = (dimension / (outCount + 1)) * (i+1);
+        const endBit = selectOutPorts[i].endBit || 0;
+        const startBit = selectOutPorts[i].startBit || 0;
         portItems.push({
             id: `output${i}`,
-            bandwidth: (selectOutPorts[i].endBit - selectOutPorts[i].startBit) + 1,
+            bandwidth: (endBit - startBit) + 1,
             name: selectOutPorts[i].name,
             startBit: selectOutPorts[i].startBit,
             endBit: selectOutPorts[i].endBit,
@@ -40,6 +42,8 @@ export const JointJSSplitter = (splitter: Splitter) => {
         bitPortType: splitter.bitPortType,
         outPorts: outCount,
         selectOutPorts: selectOutPorts,
+        structPackage: splitter.structPackage,
+        structTypeDef: splitter.structTypeDef,
         position: { x: splitter.position?.x || 100, y: splitter.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {

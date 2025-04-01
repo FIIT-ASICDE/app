@@ -1,5 +1,4 @@
 // pages/diagram-test/components/Layout/Layout.tsx
-
 import React from 'react';
 import Sidebar from '@/app/diagram-test/components/Sidebar/Sidebar';
 import DiagramArea from '@/app/diagram-test/components/DiagramArea/DiagramArea';

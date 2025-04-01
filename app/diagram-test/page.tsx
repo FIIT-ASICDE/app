@@ -1,17 +1,21 @@
+// DiagramPage.tsx
 "use client";
 
-import React from 'react';
-import Layout from './components/Layout/Layout';
+import React from "react";
+import Layout from "./components/Layout/Layout";
 import { DiagramProvider } from "@/app/diagram-test/context/DiagramContext";
-import styles from './DiagramPage.module.css';
+import type { Repository } from "@/lib/types/repository";
 
-const DiagramPage = () => {
+interface DiagramPageProps {
+    repository: Repository;
+}
+
+const DiagramPage = ({ repository }: DiagramPageProps) => {
     return (
-        <DiagramProvider>
+        <DiagramProvider repository={repository}>
             <Layout />
         </DiagramProvider>
     );
 };
 
 export default DiagramPage;
-

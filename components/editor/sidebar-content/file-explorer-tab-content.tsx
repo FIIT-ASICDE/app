@@ -14,6 +14,7 @@ import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { CreateDiagramDialog } from "@/components/editor/file/create-diagram-dialog";
 
 interface FileExplorerTabContentProps {
     repository: Repository;
@@ -69,6 +70,12 @@ export const FileExplorerTabContent = ({
                             setTree={setTreeAction}
                         />
                         <CreateFileDialog
+                            repositoryId={repository.id}
+                            buttonSize="icon"
+                            tree={tree}
+                            setTree={setTreeAction}
+                        />
+                        <CreateDiagramDialog
                             repositoryId={repository.id}
                             buttonSize="icon"
                             tree={tree}

@@ -1,7 +1,7 @@
 // pages/diagram-test/components/Sidebar/Sidebar.tsx
 import Image from 'next/image';
 import React, { useRef, useState } from "react";
-import {ArrowDownToLine, FolderOpen, Code, Menu, Frame, FileCode} from 'lucide-react'
+import {ArrowDownToLine, FolderOpen, Code, Menu, FileCode} from 'lucide-react'
 import {Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useDiagramContext } from "@/app/diagram-test/context/useDiagramContext";
 import { generateSystemVerilogCode } from "@/app/diagram-test/utils/CodeGeneration/SystemVerilogGeneration/SystemVerilogCodeGenerator";
@@ -10,7 +10,6 @@ import ResizablePanel from '@/app/diagram-test/components/common/ResizablePanel'
 
 const Sidebar = () => {
     const { graph } = useDiagramContext();
-    const [isElementsCollapsed, setIsElementsCollapsed] = useState(true);
     const [isSaveLoadCollapsed, setIsSaveLoadCollapsed] = useState(true);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [gridColumns, setGridColumns] = useState(3);
@@ -112,6 +111,8 @@ const Sidebar = () => {
             </TooltipContent>
         </Tooltip>
     );
+    // { createShape1, createShape2 } = useBlockDiagrams()
+    // Button - onDragStart, onClick{() => createSpecificShape}
 
 
     const SaveLoadIcon = ({ icon, label, action, text }: { icon: React.JSX.Element; label: string; action: () => void, text: string }) => (
@@ -200,24 +201,15 @@ const Sidebar = () => {
 
     return (
         <ResizablePanel
-            className="bg-[#f6f6f6] text-[#333] p-2 box-border flex flex-col h-screen overflow-y-auto relative scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
+            className="bg-[#f6f6f6] text-[#333] p-2 box-border flex flex-col h-screen overflow-y-auto relative scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 dark:bg-black"
             onWidthChange={handleWidthChange}
             direction="right"
         >
             {/* Logic Elements Group */}
-            <div>
-                <div className="flex items-center justify-between p-2 bg-blue-100 border border-blue-200 rounded hover:bg-blue-200 cursor-pointer" onClick={() => setIsElementsCollapsed(!isElementsCollapsed)}>
-                    <Frame className="flex items-center gap-2" />
-                    <h3>Elements</h3>
-                    <Menu className="flex items-center gap-2" />
-                </div>
-                {!isElementsCollapsed && (
-                    <div className={iconListStyle}>
-                        {elements.map((el) => (
-                            <ElementIcon key={`${el.type}-${el.label}`} {...el} />
-                        ))}
-                    </div>
-                )}
+            <div className={iconListStyle}>
+                {elements.map((el) => (
+                    <ElementIcon key={`${el.type}-${el.label}`} {...el} />
+                ))}
             </div>
 
             {/* Save & Load Group */}
