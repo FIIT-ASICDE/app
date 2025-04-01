@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import { MonacoBinding } from "y-monaco";
 import { WebsocketProvider } from "y-websocket";
 import * as Y from "yjs";
+import { loadSnippets } from "./editor-config/snippets";
 
 interface EditorProps {
     filePath: string;
@@ -14,13 +15,15 @@ interface EditorProps {
 
 export default function Editor({
     filePath,
-    language = "systemverilog",
+    language,
     theme = "vs-dark",
 }: EditorProps) {
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
     const monacoEl = useRef<HTMLElement | null>(null);
     const providerRef = useRef<WebsocketProvider | null>(null);
     const ydocRef = useRef<Y.Doc | null>(null);
+
+    const loadedLanguages = useRef<Set<string>>(new Set());
 
     useEffect(() => {
         if (!monacoEl.current) return;
@@ -48,17 +51,15 @@ export default function Editor({
             automaticLayout: true,
         });
 
-        if (process.env.NODE_ENV !== "production") {
+       // if (process.env.NODE_ENV !== "production") {
             const ydoc = new Y.Doc();
             ydocRef.current = ydoc;
 
-			console.log(filePath)
             const provider = new WebsocketProvider(
-                process.env.NEXT_PUBLIC_EDITOR_SERVER_URL ??
-                    "wss://ide.drasic.com/ws",
+                process.env.NEXT_PUBLIC_EDITOR_SERVER_URL ?? "wss://ide.drasic.com/ws",
                 "connect",
                 ydoc,
-                { params: { filePath } },
+                { params: { filePath } }
             );
             providerRef.current = provider;
 
@@ -68,10 +69,15 @@ export default function Editor({
                     type,
                     editorRef.current.getModel()!,
                     new Set([editorRef.current]),
-                    provider.awareness,
+                    provider.awareness
                 );
             }
-        }
+       // }
+
+       if (language && !loadedLanguages.current.has(language)) {
+        loadSnippets(language);
+        loadedLanguages.current.add(language); 
+    }
 
         return () => {
             if (editorRef.current) {

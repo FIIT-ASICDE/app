@@ -47,11 +47,11 @@ const server = Bun.serve<EditorSocketData>({
 
         // url looks like http://localhost:3001/connect?filePath=placeholder
         let filePath = req.url.split("?").at(1)?.split("=").at(1);
-
         if (filePath) {
             filePath = absoluteFilePath(
                 decodeURIComponent(filePath).replaceAll("\\", "/"),
             );
+            filePath = filePath.replaceAll("\\", "/");
         } else {
             logger.warn(
                 { event: "request", reason: "missing file path", url: req.url },

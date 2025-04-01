@@ -312,6 +312,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
                                         "/" +
                                         activeFile.absolutePath
                                     }
+                                    language={activeFile.language}
                                 />
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center text-gray-400">

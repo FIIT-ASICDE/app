@@ -40,7 +40,10 @@ export const createOrganisationFormSchema = z.object({
             z.object({
                 type: z.literal("local"),
                 file: z
-                    .instanceof(File)
+                .any() // Use z.any() and refine manually
+                .refine((file) => isFileInstance(file), {
+                    message: "Invalid file type.",
+                })
                     .refine((file: File) => file.size < 2000000, {
                         message: "Profile image must be less than 2MB.",
                     })
@@ -119,6 +122,10 @@ export const editOrganisationProcedureSchema = z.object({
         .transform((value) => value?.trim()),
 });
 
+const isFileInstance = (file: unknown): file is File => {
+  return typeof window !== "undefined" && file instanceof File;
+};
+
 export const editOrganisationFormSchema = z.object({
     name: z
         .string()
@@ -136,7 +143,10 @@ export const editOrganisationFormSchema = z.object({
             z.object({
                 type: z.literal("local"),
                 file: z
-                    .instanceof(File)
+                .any() // Use z.any() and refine manually
+                .refine((file) => isFileInstance(file), {
+                    message: "Invalid file type.",
+                })
                     .refine((file: File) => file.size < 2000000, {
                         message: "Profile image must be less than 2MB.",
                     })
