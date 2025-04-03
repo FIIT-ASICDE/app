@@ -6,7 +6,6 @@ import {Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { useDiagramContext } from "@/app/diagram-test/context/useDiagramContext";
 import { generateSystemVerilogCode } from "@/app/diagram-test/utils/CodeGeneration/SystemVerilogGeneration/SystemVerilogCodeGenerator";
 import { generateVHDLCode } from "@/app/diagram-test/utils/CodeGeneration/VHDLGeneration/VDHLCodeGenerator";
-import ResizablePanel from '@/app/diagram-test/components/common/ResizablePanel';
 
 const Sidebar = () => {
     const { graph } = useDiagramContext();
@@ -200,11 +199,7 @@ const Sidebar = () => {
 
 
     return (
-        <ResizablePanel
-            className="bg-[#f6f6f6] text-[#333] p-2 box-border flex flex-col h-screen overflow-y-auto relative scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 dark:bg-black"
-            onWidthChange={handleWidthChange}
-            direction="right"
-        >
+        <>
             {/* Logic Elements Group */}
             <div className={iconListStyle}>
                 {elements.map((el) => (
@@ -235,7 +230,7 @@ const Sidebar = () => {
                     </div>
                 )}
             </div>
-        </ResizablePanel>
+        </>
 
     );
 

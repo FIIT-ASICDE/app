@@ -1,7 +1,7 @@
 export class Port {
     public name?: string;
     public id?: string;
-    public bandwidth?: number;
+    public dataBandwidth?: number;
     startBit?: number;
     endBit?: number;
     public position?: {

@@ -43,7 +43,6 @@ import {useDiagramEvents} from "@/app/diagram-test/hooks/useDiagramEvents";
 import PaperToolbar from "@/app/diagram-test/components/Sidebar/PaperToolbar";
 
 
-
 const DiagramArea = () => {
     const paperElement = useRef<HTMLDivElement>(null);
     const { graph } = useDiagramContext();
@@ -63,22 +62,35 @@ const DiagramArea = () => {
     });
 
     useEffect(() => {
-        if (paper && paperElement.current && isReady) {
+        if (!paper || !paperElement.current) return;
 
-            const rect = paperElement.current.getBoundingClientRect();
-            console.log('Paper container dimensions after init:', {
-                width: rect.width,
-                height: rect.height,
-                offsetWidth: paperElement.current.offsetWidth,
-                offsetHeight: paperElement.current.offsetHeight
-            });
+        const el = paperElement.current;
 
-            if (rect.width > 0 && rect.height > 0) {
-                paper.setDimensions(rect.width, rect.height);
-                console.log('Paper dimensions set to:', rect.width, rect.height);
+        const updateSize = () => {
+            const container = el.parentElement;
+
+            if (container) {
+                const width = container.offsetWidth;
+                const height = container.offsetHeight;
+
+                paper.setDimensions(width, height);
+
+                console.log("📐 Resize ->", { width, height });
             }
-        }
-    }, [paper, isReady]);
+        };
+        updateSize();
+
+        window.addEventListener("resize", updateSize);
+
+        const interval = setInterval(() => {
+            updateSize();
+        }, 300);
+
+        return () => {
+            window.removeEventListener("resize", updateSize);
+            clearInterval(interval);
+        };
+    }, [paper]);
 
     // // addPaperEvents()
     // // generateCode()
@@ -145,7 +157,7 @@ const DiagramArea = () => {
             const and = new And();
             and.name = elementName;
             and.position = {x, y};
-            and.bandwidth = 1;
+            and.dataBandwidth = 1;
             and.inPorts = 2;
             element = JointJSAnd(and);
             break;
@@ -153,7 +165,7 @@ const DiagramArea = () => {
             const or = new Or();
             or.name = elementName;
             or.position = {x, y};
-            or.bandwidth = 1;
+            or.dataBandwidth = 1;
             or.inPorts = 2;
             element = JointJSOr(or);
             break;
@@ -161,7 +173,7 @@ const DiagramArea = () => {
             const xor = new Xor();
             xor.name = elementName;
             xor.position = {x, y};
-            xor.bandwidth = 1;
+            xor.dataBandwidth = 1;
             xor.inPorts = 2;
             element = JointJSXor(xor);
             break;
@@ -169,7 +181,7 @@ const DiagramArea = () => {
             const xnor = new Xnor();
             xnor.name = elementName;
             xnor.position = {x, y};
-            xnor.bandwidth = 1;
+            xnor.dataBandwidth = 1;
             xnor.inPorts = 2;
             element = JointJSXnor(xnor);
             break;
@@ -177,14 +189,14 @@ const DiagramArea = () => {
             const input = new Port();
             input.name = elementName;
             input.position = {x, y};
-            input.bandwidth = 1;
+            input.dataBandwidth = 1;
             element = JointJSInputPort(input);
             break;
         case 'nand':
             const nand = new Nand();
             nand.name = elementName;
             nand.position = {x, y};
-            nand.bandwidth = 1;
+            nand.dataBandwidth = 1;
             nand.inPorts = 2;
             element = JointJSNand(nand);
             break;
@@ -192,7 +204,7 @@ const DiagramArea = () => {
             const nor = new Nor();
             nor.name = elementName;
             nor.position = {x, y};
-            nor.bandwidth = 1;
+            nor.dataBandwidth = 1;
             nor.inPorts = 2;
             element = JointJSNor(nor);
             break;
@@ -200,14 +212,14 @@ const DiagramArea = () => {
             const not = new Not();
             not.name = elementName;
             not.position = {x, y};
-            not.bandwidth = 1;
+            not.dataBandwidth = 1;
             element = JointJSNot(not);
             break;
         case 'output':
             const output = new Port();
             output.name = elementName;
             output.position = {x, y};
-            output.bandwidth = 1;
+            output.dataBandwidth = 1;
             element = JointJSOutputPort(output);
             break;
         case 'multiplexer':

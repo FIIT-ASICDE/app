@@ -1,7 +1,7 @@
 export class Or {
     public name: string;
     public id: string;
-    public bandwidth: number;
+    public dataBandwidth: number;
     public inPorts: number;
     public position: {
         x: number,

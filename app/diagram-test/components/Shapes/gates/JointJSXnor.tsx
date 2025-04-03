@@ -38,7 +38,7 @@ export const JointJSXnor = (xnor: Xnor) => {
         portItems.push({
             id: `input${i}`,
             group: 'input',
-            bandwidth: xnor.bandwidth,
+            bandwidth: xnor.dataBandwidth,
             args: { x: finalX, y: finalY }
         });
     }
@@ -46,7 +46,7 @@ export const JointJSXnor = (xnor: Xnor) => {
     portItems.push({
         id: 'output1',
         group: 'output',
-        bandwidth: xnor.bandwidth,
+        bandwidth: xnor.dataBandwidth,
         args: {
             x: dimension,
             y: dimension / 2
@@ -56,7 +56,7 @@ export const JointJSXnor = (xnor: Xnor) => {
     return new shapes.standard.Path({
         elType: 'xnor',
         name: xnor.name,
-        bandwidth: xnor.bandwidth,
+        bandwidth: xnor.dataBandwidth,
         inPorts: inCount,
         position: { x: xnor.position?.x || 100, y: xnor.position?.y || 100 },
         size: { width: dimension, height: dimension},

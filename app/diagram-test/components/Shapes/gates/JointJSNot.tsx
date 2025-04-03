@@ -10,7 +10,7 @@ export const JointJSNot = (not: Not) => {
     portItems.push({
         id: 'input1',
         group: 'input',
-        bandwidth: not.bandwidth,
+        bandwidth: not.dataBandwidth,
         args: {
             x: 0,
             y: dimension / 2
@@ -20,7 +20,7 @@ export const JointJSNot = (not: Not) => {
     portItems.push({
         id: 'output1',
         group: 'output',
-        bandwidth: not.bandwidth,
+        bandwidth: not.dataBandwidth,
         args: {
             x: dimension,
             y: dimension / 2
@@ -30,7 +30,7 @@ export const JointJSNot = (not: Not) => {
     return new shapes.standard.Path({
         elType: 'not',
         name: not.name,
-        bandwidth: not.bandwidth,
+        bandwidth: not.dataBandwidth,
         inPorts: inCount,
         position: { x: not.position?.x || 100, y: not.position?.y || 100 },
         size: { width: dimension, height: dimension},

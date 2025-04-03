@@ -6,7 +6,7 @@ export const JointJSSplitter = (splitter: Splitter) => {
     const selectOutPorts = splitter.outPorts || [];
     const outCount = selectOutPorts.length;
     const dimension = 100 + (outCount - 2) * 20;
-    const totalBandwidth = selectOutPorts.reduce((sum, port) => sum + port.bandwidth, 0);
+    const totalBandwidth = selectOutPorts.reduce((sum, port) => sum + port.dataBandwidth, 0);
 
     const portItems = [];
     for (let i = 0; i < outCount; i++) {
@@ -38,7 +38,6 @@ export const JointJSSplitter = (splitter: Splitter) => {
     return new shapes.standard.Path({
         elType: 'splitter',
         name: splitter.name,
-        bandwidth: splitter.dataBandwidth,
         bitPortType: splitter.bitPortType,
         outPorts: outCount,
         selectOutPorts: selectOutPorts,

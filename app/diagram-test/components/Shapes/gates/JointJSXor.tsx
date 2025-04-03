@@ -38,7 +38,7 @@ export const JointJSXor = (xor: Xor) => {
         portItems.push({
             id: `input${i}`,
             group: 'input',
-            bandwidth: xor.bandwidth,
+            bandwidth: xor.dataBandwidth,
             args: { x: finalX, y: finalY }
         });
     }
@@ -46,7 +46,7 @@ export const JointJSXor = (xor: Xor) => {
     portItems.push({
         id: 'output1',
         group: 'output',
-        bandwidth: xor.bandwidth,
+        bandwidth: xor.dataBandwidth,
         args: {
             x: dimension,
             y: dimension / 2
@@ -56,7 +56,7 @@ export const JointJSXor = (xor: Xor) => {
     return new shapes.standard.Path({
         elType: 'xor',
         name: xor.name,
-        bandwidth: xor.bandwidth,
+        bandwidth: xor.dataBandwidth,
         inPorts: inCount,
         position: { x: xor.position?.x || 100, y: xor.position?.y || 100 },
         size: { width: dimension, height: dimension},

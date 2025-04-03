@@ -12,7 +12,7 @@ export const JointJSNand = (nand: Nand) => {
         portItems.push({
             id: `input${i}`,
             group: 'input',
-            bandwidth: nand.bandwidth,
+            bandwidth: nand.dataBandwidth,
             args: { x: 0, y: portY }
         });
     }
@@ -20,7 +20,7 @@ export const JointJSNand = (nand: Nand) => {
     portItems.push({
         id: 'output1',
         group: 'output',
-        bandwidth: nand.bandwidth,
+        bandwidth: nand.dataBandwidth,
         args: {
             x: dimension,
             y: dimension / 2
@@ -30,7 +30,7 @@ export const JointJSNand = (nand: Nand) => {
     return new shapes.standard.Path({
         elType: 'nand',
         name: nand.name,
-        bandwidth: nand.bandwidth,
+        bandwidth: nand.dataBandwidth,
         inPorts: inCount,
         position: { x: nand.position?.x || 100, y: nand.position?.y || 100 },
         size: { width: dimension, height: dimension},

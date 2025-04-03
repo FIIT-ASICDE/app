@@ -24,7 +24,7 @@ export const JointJSNewModule = (module: Module) => {
         const portY = (height / (inCount + 1)) * (i + 1);
         portItems.push({
             id: `input${i}`,
-            bandwidth: moduleInPorts[i].bandwidth,
+            bandwidth: moduleInPorts[i].dataBandwidth,
             name: moduleInPorts[i].name,
             group: 'input',
             args: { x: 0, y: portY },
@@ -34,7 +34,7 @@ export const JointJSNewModule = (module: Module) => {
         const portY = (height / (outCount + 1)) * (i + 1);
         portItems.push({
             id: `output${i}`,
-            bandwidth: moduleOutPorts[i].bandwidth,
+            bandwidth: moduleOutPorts[i].dataBandwidth,
             name: moduleOutPorts[i].name,
             group: 'output',
             args: { x: width, y: portY },

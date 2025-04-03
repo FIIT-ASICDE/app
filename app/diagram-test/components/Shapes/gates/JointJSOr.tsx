@@ -38,7 +38,7 @@ export const JointJSOr = (or: Or) => {
         portItems.push({
             id: `input${i}`,
             group: 'input',
-            bandwidth: or.bandwidth,
+            bandwidth: or.dataBandwidth,
             args: { x: finalX, y: finalY }
         });
     }
@@ -46,7 +46,7 @@ export const JointJSOr = (or: Or) => {
     portItems.push({
         id: 'output1',
         group: 'output',
-        bandwidth: or.bandwidth,
+        bandwidth: or.dataBandwidth,
         args: {
             x: dimension,
             y: dimension / 2
@@ -56,7 +56,7 @@ export const JointJSOr = (or: Or) => {
     return new shapes.standard.Path({
         elType: 'or',
         name: or.name,
-        bandwidth: or.bandwidth,
+        bandwidth: or.dataBandwidth,
         inPorts: inCount,
         position: { x: or.position?.x || 100, y: or.position?.y || 100 },
         size: { width: dimension, height: dimension},

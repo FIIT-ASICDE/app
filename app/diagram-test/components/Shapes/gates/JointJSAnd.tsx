@@ -12,7 +12,7 @@ export const JointJSAnd = (and: And) => {
         portItems.push({
             id: `input${i}`,
             group: 'input',
-            bandwidth: and.bandwidth,
+            bandwidth: and.dataBandwidth,
             args: {
                 x: 0,
                 y: portY,
@@ -23,7 +23,7 @@ export const JointJSAnd = (and: And) => {
     portItems.push({
         id: 'output1',
         group: 'output',
-        bandwidth: and.bandwidth,
+        bandwidth: and.dataBandwidth,
         args: {
             x: dimension,
             y: dimension / 2
@@ -33,7 +33,7 @@ export const JointJSAnd = (and: And) => {
     return new shapes.standard.Path({
         elType: 'and',
         name: and.name,
-        bandwidth: and.bandwidth,
+        bandwidth: and.dataBandwidth,
         inPorts: inCount,
         position: { x: and.position?.x || 100, y: and.position?.y || 100 },
         size: { width: dimension, height: dimension},

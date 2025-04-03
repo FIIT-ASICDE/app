@@ -8,7 +8,7 @@ export const JointJSOutputPort = (output: Port) => {
     portItems.push({
         id: 'input1',
         group: 'input',
-        bandwidth: output.bandwidth,
+        bandwidth: output.dataBandwidth,
         args: {
             x: 0,
             y: dimension / 4
@@ -18,7 +18,7 @@ export const JointJSOutputPort = (output: Port) => {
     return new shapes.standard.Path({
         elType: 'output',
         name: output.name,
-        bandwidth: output.bandwidth,
+        bandwidth: output.dataBandwidth,
         structPackage: output.structPackage,
         structTypeDef: output.structTypeDef,
         position: { x: output.position?.x || 100, y: output.position?.y || 100 },

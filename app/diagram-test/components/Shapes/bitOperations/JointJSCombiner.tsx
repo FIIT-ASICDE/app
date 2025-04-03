@@ -6,7 +6,7 @@ export const JointJSCombiner = (combiner: Combiner) => {
     const combineInPorts = combiner.inPorts || [];
     const inCount = combineInPorts.length;
     const dimension = 100 + (inCount - 2) * 20;
-    const totalBandwidth = combineInPorts.reduce((sum, port) => sum + port.bandwidth, 0);
+    const totalBandwidth = combineInPorts.reduce((sum, port) => sum + port.dataBandwidth, 0);
 
 
     const portItems = [];
@@ -14,7 +14,7 @@ export const JointJSCombiner = (combiner: Combiner) => {
         const portY = (dimension / (inCount + 1)) * (i+1);
         portItems.push({
             id: `input${i}`,
-            bandwidth: combineInPorts[i].bandwidth,
+            bandwidth: combineInPorts[i].dataBandwidth,
             name: combineInPorts[i].name,
             group: 'input',
             args: { x: 0, y: portY }
@@ -35,7 +35,6 @@ export const JointJSCombiner = (combiner: Combiner) => {
     return new shapes.standard.Path({
         elType: 'combiner',
         name: combiner.name,
-        bandwidth: combiner.dataBandwidth,
         bitPortType: combiner.bitPortType,
         inPorts: inCount,
         combineInPorts: combineInPorts,

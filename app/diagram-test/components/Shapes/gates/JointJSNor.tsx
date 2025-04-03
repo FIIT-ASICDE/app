@@ -38,7 +38,7 @@ export const JointJSNor = (nor: Nor) => {
         portItems.push({
             id: `input${i}`,
             group: 'input',
-            bandwidth: nor.bandwidth,
+            bandwidth: nor.dataBandwidth,
             args: { x: finalX, y: finalY }
         });
     }
@@ -46,7 +46,7 @@ export const JointJSNor = (nor: Nor) => {
     portItems.push({
         id: 'output1',
         group: 'output',
-        bandwidth: nor.bandwidth,
+        bandwidth: nor.dataBandwidth,
         args: {
             x: dimension,
             y: dimension / 2
@@ -57,7 +57,7 @@ export const JointJSNor = (nor: Nor) => {
     return new shapes.standard.Path({
         elType: 'nor',
         name: nor.name,
-        bandwidth: nor.bandwidth,
+        bandwidth: nor.dataBandwidth,
         inPorts: inCount,
         position: { x: nor.position?.x || 100, y: nor.position?.y || 100 },
         size: { width: dimension, height: dimension},

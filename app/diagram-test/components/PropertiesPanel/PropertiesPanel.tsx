@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useHotkeys } from "@/app/diagram-test/hooks/useHotkeys";
 import { useDiagramContext } from "@/app/diagram-test/context/useDiagramContext";
-import ResizablePanel from '@/app/diagram-test/components/common/ResizablePanel';
 import {Multiplexer} from "@/app/diagram-test/components/Shapes/classes/multiplexer";
 import {JointJSMultiplexer} from "@/app/diagram-test/components/Shapes/complexLogic/JointJSMultiplexer";
 import {JointJSAnd} from "@/app/diagram-test/components/Shapes/gates/JointJSAnd";
@@ -17,6 +16,8 @@ import {JointJSNand} from "@/app/diagram-test/components/Shapes/gates/JointJSNan
 import {Nand} from "@/app/diagram-test/components/Shapes/classes/nand";
 import {JointJSNor} from "@/app/diagram-test/components/Shapes/gates/JointJSNor";
 import {Nor} from "@/app/diagram-test/components/Shapes/classes/nor";
+import {JointJSNot} from "@/app/diagram-test/components/Shapes/gates/JointJSNot";
+import { Not } from "@/app/diagram-test/components/Shapes/classes/not";
 import {JointJSNewModule} from "@/app/diagram-test/components/Shapes/modules/JointJSNewModule";
 import {Module} from "@/app/diagram-test/components/Shapes/classes/module";
 import {JointJSRegister} from "@/app/diagram-test/components/Shapes/memory/JointJSRegister";
@@ -39,7 +40,12 @@ import {Decoder} from "@/app/diagram-test/components/Shapes/classes/decoder";
 import {JointJSEncoder} from "@/app/diagram-test/components/Shapes/complexLogic/JointJSEncoder";
 import {Encoder} from "@/app/diagram-test/components/Shapes/classes/encoder";
 import { Pencil, Trash2, CircleAlert } from 'lucide-react';
-import { parseSystemVerilogText } from '@/app/diagram-test/utils/DiagramGeneration/SystemVerilog/SVParser'
+import {
+    parseSystemVerilogText,
+    StructField,
+    StructType,
+    Package
+} from '@/app/diagram-test/utils/DiagramGeneration/SystemVerilog/SVParser'
 import { api } from "@/lib/trpc/react";
 
 
@@ -80,8 +86,9 @@ interface Properties {
 }
 
 
+
 const PropertiesPanel = () => {
-    const { selectedElement,graph,setSelectedElement, updateElement, setHasFormErrors } = useDiagramContext();
+    const { selectedElement,graph,setSelectedElement, setHasFormErrors } = useDiagramContext();
     const [properties, setProperties] = useState<Properties>({
         label: '',
         instance: '',
@@ -112,15 +119,33 @@ const PropertiesPanel = () => {
     const [editPortType, setEditPortType] = useState<'input' | 'output'>('input');
     const [showSaveNotification, setShowSaveNotification] = useState(false);
     const [showErrorNotification, setShowErrorNotification] = useState(false);
-    const [panelWidth, setPanelWidth] = useState(300);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [clipboardCell, setClipboardCell] = useState<dia.Cell | null>(null);
     const panelRef = useRef<HTMLDivElement | null>(null);
-    const [parseResults, setParseResults] = useState<any[]>([]);
+    const [parseResults, setParseResults] = useState<Package[]>([]);
+    const elementTypes = {
+        'input': { class: Port, create: JointJSInputPort },
+        'output': { class: Port, create: JointJSOutputPort },
+        'and': { class: And, create: JointJSAnd },
+        'or': { class: Or, create: JointJSOr },
+        'xor': { class: Xor, create: JointJSXor },
+        'xnor': { class: Xnor, create: JointJSXnor },
+        'nand': { class: Nand, create: JointJSNand },
+        'nor': { class: Nor, create: JointJSNor },
+        'not': {class: Not, create: JointJSNot },
+        'alu': { class: Alu, create: JointJSAlu },
+        'comparator': { class: Comparator, create: JointJSComparator },
+        'decoder': { class: Decoder, create: JointJSDecoder },
+        'encoder': { class: Encoder, create: JointJSEncoder },
+        'multiplexer': { class: Multiplexer, create: JointJSMultiplexer },
+        'splitter': { class: Splitter, create: JointJSSplitter },
+        'combiner': { class: Combiner, create: JointJSCombiner },
+        'sram': { class: Sram, create: JointJSSRam },
+        'register': { class: Register, create: JointJSRegister },
+        'newModule': { class: Module, create: JointJSNewModule}
 
-    const handleWidthChange = (newWidth: number) => {
-        setPanelWidth(newWidth);
     };
+
 
     useEffect(() => {
         if (selectedElement) {
@@ -176,7 +201,7 @@ const PropertiesPanel = () => {
 
     const { repository } = useDiagramContext();
     console.log(repository.name, repository.ownerName);
-    const { data: allFiles, isLoading, error } = api.repo.loadAllFilesInRepo.useQuery({
+    const { data: allFiles } = api.repo.loadAllFilesInRepo.useQuery({
         ownerSlug: repository.ownerName,
         repositorySlug: repository.name,
     });
@@ -240,12 +265,12 @@ const PropertiesPanel = () => {
         return "";
     }
 
-    const handleChange = (e: { target: { name: string; type: string; checked?: boolean; value?: any; }; }) => {
+    const handleChange = (e: { target: { name: string; type: string; checked?: boolean; value?: string | number | boolean; }; }) => {
         const { name, type, checked, value} = e.target;
 
-        let newValue: any = value;
+        let newValue: string | number | boolean | undefined = value;
         if (type === 'checkbox') {
-            newValue = checked;
+            newValue = checked as boolean;
         } else if (type === 'number') {
             newValue = Number(value);
         }
@@ -395,108 +420,6 @@ const PropertiesPanel = () => {
         setShowAddPortDialog(false);
     };
 
-
-    const handleMultiplexerPortChange = () => {
-        if (selectedElement?.attributes.elType === 'multiplexer') {
-            const { x, y } = selectedElement.position();
-            const multiplexerData = new Multiplexer();
-            multiplexerData.name = properties.label || '';
-            multiplexerData.dataBandwidth = properties.bandwidth || 1;
-            multiplexerData.dataPorts = properties.inputPorts || 2;
-            multiplexerData.position = { x, y };
-
-            graph.removeCells([selectedElement]);
-            const newMultiplexer = JointJSMultiplexer(multiplexerData);
-            graph.addCell(newMultiplexer);
-            setSelectedElement(newMultiplexer);
-        }
-    };
-
-    const handleModulePortChange = () => {
-        if (!selectedElement) return;
-
-        const newMod = new Module();
-        newMod.name = properties.label || '';
-        newMod.instance = properties.instance || '';
-
-        newMod.inPorts = properties.createdInPorts.map((p, i) => ({
-            name: p.name,
-            bandwidth: p.bandwidth,
-        }));
-        newMod.outPorts = properties.createdOutPorts.map((p, i) => ({
-            name: p.name,
-            bandwidth: p.bandwidth,
-        }));
-
-        const { x, y } = selectedElement.position();
-        newMod.position = { x, y };
-
-        graph.removeCells([selectedElement]);
-
-        const newModuleCell = JointJSNewModule(newMod);
-        graph.addCell(newModuleCell);
-
-        setSelectedElement(newModuleCell);
-    };
-
-    const handleSplitterPortChange = () => {
-        if (!selectedElement) return;
-
-        const newSplitter = new Splitter();
-        newSplitter.name = properties.label || '';
-        newSplitter.bitPortType = properties.bitPortType || 'custom';
-        newSplitter.structPackage = properties.structPackage || '';
-        newSplitter.structTypeDef = properties.structTypeDef || '';
-
-        newSplitter.outPorts = properties.createdOutPorts.map((p, i) => ({
-            name: p.name,
-            bandwidth: p.bandwidth,
-            startBit: p.startBit,
-            endBit: p.endBit
-        }));
-
-        const { x, y } = selectedElement.position();
-        newSplitter.position = { x, y };
-
-        graph.removeCells([selectedElement]);
-
-        const newSplitterCell = JointJSSplitter(newSplitter);
-        graph.addCell(newSplitterCell);
-
-        setSelectedElement(newSplitterCell);
-    };
-
-    const handleCombinerPortChange = () => {
-        if (!selectedElement) return;
-
-        const newCombiner = new Combiner();
-        newCombiner.name = properties.label || '';
-        newCombiner.bitPortType = properties.bitPortType || 'custom';
-        newCombiner.structPackage = properties.structPackage || '';
-        newCombiner.structTypeDef = properties.structTypeDef || '';
-
-        if (properties.bitPortType === 'custom') {
-            newCombiner.inPorts = properties.createdInPorts.map((p, i) => ({
-                name: p.name,
-                bandwidth: p.bandwidth,
-            }));
-        }
-        else {
-            // TODO: handle structs
-        }
-
-
-        const { x, y } = selectedElement.position();
-        newCombiner.position = { x, y };
-
-        graph.removeCells([selectedElement]);
-
-        const newCombinerCell = JointJSCombiner(newCombiner);
-        graph.addCell(newCombinerCell);
-
-        setSelectedElement(newCombinerCell);
-    };
-
     const handleEditPort = (portType: 'input' | 'output', index: number) => {
         setIsEditingPort(true);
         setEditPortIndex(index);
@@ -528,149 +451,103 @@ const PropertiesPanel = () => {
         }
     };
 
-    const handleMemoryPortChange = () => {
-        if (selectedElement?.attributes.elType === 'register') {
-            const { x, y } = selectedElement.position();
-            const registerData = new Register();
-            registerData.name = properties.label || '';
-            registerData.resetPort = properties.resetPort || false;
-            registerData.enablePort = properties.enablePort || false;
-            registerData.dataBandwidth = properties.bandwidth || 1;
-            registerData.position = { x, y };
-            registerData.clkEdge = properties.clkEdge;
-            registerData.rstEdge = properties.rstEdge;
-            registerData.qInverted = properties.qInverted;
-            registerData.rstType = properties.rstType;
-
-            graph.removeCells([selectedElement]);
-            const newRegister = JointJSRegister(registerData);
-            graph.addCell(newRegister);
-            setSelectedElement(newRegister);
-        }
-        if (selectedElement?.attributes.elType === 'sram') {
-            const { x, y } = selectedElement.position();
-            const sramData = new Sram();
-            sramData.name = properties.label || '';
-            sramData.dataBandwidth = properties.bandwidth || 1;
-            sramData.addressBandwidth = properties.addressBandwidth || 8;
-            sramData.position = { x, y };
-            sramData.clkEdge = properties.clkEdge;
-
-            graph.removeCells([selectedElement]);
-            const newSram = JointJSSRam(sramData);
-            graph.addCell(newSram);
-            setSelectedElement(newSram);
-        }
-    }
-    const handleLogicPortChange = () => {
+    const handleElementChange = () => {
         if (!selectedElement) return;
 
-        const logicGates = {
-            'and': { class: And, create: JointJSAnd },
-            'or': { class: Or, create: JointJSOr },
-            'xor': { class: Xor, create: JointJSXor },
-            'xnor': { class: Xnor, create: JointJSXnor },
-            'nand': { class: Nand, create: JointJSNand },
-            'nor': { class: Nor, create: JointJSNor }
-        };
-
         const elType = selectedElement.attributes.elType;
-        const gate = logicGates[elType];
+        const elementType = elementTypes[elType];
 
-        if (gate) {
+        if (elementType) {
             const { x, y } = selectedElement.position();
-            const gateData = new gate.class();
-            gateData.name = properties.label || '';
-            gateData.inPorts = properties.inputPorts || 2;
-            gateData.bandwidth = properties.bandwidth || 1;
-            gateData.position = { x, y };
+            const elementData = new elementType.class();
+            elementData.name = properties.label || ''; //TODO: handle that splitter do not have name
+            elementData.position = { x, y };
 
-            graph.removeCells([selectedElement]);
-            const newGate = gate.create(gateData);
-            graph.addCell(newGate);
-            setSelectedElement(newGate);
-        }
-    };
-    const handlePortElementChange = () => {
-        if (!selectedElement) return;
-
-        const portTypes = {
-            'input': { class: Port, create: JointJSInputPort },
-            'output': { class: Port, create: JointJSOutputPort },
-        };
-
-        const elType = selectedElement.attributes.elType;
-        const port = portTypes[elType];
-
-        if (port) {
-            const { x, y } = selectedElement.position();
-            const portData = new port.class();
-            portData.name = properties.label || '';
-            portData.bandwidth = properties.bandwidth || 1;
-            portData.position = { x, y };
-
-            graph.removeCells([selectedElement]);
-            const newPort = port.create(portData);
-            graph.addCell(newPort);
-            setSelectedElement(newPort);
-        }
-    };
-
-    const handleComplexLogicChange = () => {
-        if (!selectedElement) return;
-
-        const complexLogicTypes = {
-            'alu': { class: Alu, create: JointJSAlu },
-            'comparator': { class: Comparator, create: JointJSComparator },
-        };
-
-        const elType = selectedElement.attributes.elType;
-        const complexElement = complexLogicTypes[elType];
-
-        if (complexElement) {
-            const { x, y } = selectedElement.position();
-            const complexElementData = new complexElement.class();
-            complexElementData.name = properties.label || '';
-            complexElementData.dataBandwidth = properties.bandwidth || 1;
+            if (!['splitter', 'combiner', 'newModule', ].includes(elType)) {
+                elementData.dataBandwidth = properties.bandwidth; //TODO: handle that decoder and encoder will have min 2 width of bandwidth
+            }
             if (elType === 'comparator') {
+                elementData.type = properties.comparatorType || '>';
+            }
+            if (elType === 'alu') {
+                elementData.type = properties.aluType || '+';
+            }
+            if (['input', 'output', 'combiner', 'splitter', 'multiplexer'].includes(elType)) {
+                elementData.structPackage = properties.structPackage || '';
+                elementData.structTypeDef = properties.structTypeDef || '';
+            }
+            if (['and', 'or', 'nor', 'xnor', 'nand', 'xor'].includes(elType)) {
+                elementData.inPorts = properties.inputPorts || 2;
+            }
+            if (elType === 'multiplexer') {
+                elementData.dataPorts = properties.inputPorts || 2;
+                // TODO: handle structs
+            }
+            if (elType === 'sram') {
+                elementData.addressBandwidth = properties.addressBandwidth || 8;
+                elementData.clkEdge = properties.clkEdge;
+                // TODO: handle structs
+            }
+            if (elType === 'register') {
+                elementData.resetPort = properties.resetPort || false;
+                elementData.enablePort = properties.enablePort || false;
+                elementData.clkEdge = properties.clkEdge;
+                elementData.rstEdge = properties.rstEdge;
+                elementData.qInverted = properties.qInverted;
+                elementData.rstType = properties.rstType;
+                // TODO: handle structs
+            }
+            if (elType === 'combiner') {
+                elementData.bitPortType = properties.bitPortType || 'custom';
+                if (properties.bitPortType === 'custom') {
+                    elementData.inPorts = properties.createdInPorts.map((p, i) => ({
+                        name: p.name,
+                        bandwidth: p.bandwidth,
+                    }));
+                }
+                else {
+                    // TODO: handle structs
+                }
+            }
+            if (elType === 'splitter') {
+                elementData.bitPortType = properties.bitPortType || 'custom';
+                if (properties.bitPortType === 'custom') {
+                    elementData.outPorts = properties.createdOutPorts.map((p, i) => ({
+                        name: p.name,
+                        bandwidth: p.bandwidth,
+                        startBit: p.startBit,
+                        endBit: p.endBit
+                    }));
+                }
+                else {
+                    // TODO: handle structs
+                }
+            }
+            if (elType === 'newModule') {
+                elementData.instance = properties.instance || '';
 
-                complexElementData.type = properties.comparatorType || '>';
+                elementData.inPorts = properties.createdInPorts.map((p, i) => ({
+                    name: p.name,
+                    bandwidth: p.bandwidth,
+                }));
+                elementData.outPorts = properties.createdOutPorts.map((p, i) => ({
+                    name: p.name,
+                    bandwidth: p.bandwidth,
+                }));
             }
-            else {
-                complexElementData.type = properties.aluType || '+';
-            }
-            complexElementData.position = { x, y };
 
             graph.removeCells([selectedElement]);
-            const newComplexElement = complexElement.create(complexElementData);
-            graph.addCell(newComplexElement);
-            setSelectedElement(newComplexElement);
+            const newElement = elementType.create(elementData);
+            graph.addCell(newElement);
+            setSelectedElement(newElement);
+
         }
+
     };
-    const handleEncodeDecodeChange = () => {
-        if (!selectedElement) return;
 
-        const encodeDecodeTypes = {
-            'decoder': { class: Decoder, create: JointJSDecoder },
-            'encoder': { class: Encoder, create: JointJSEncoder },
-        };
 
-        const elType = selectedElement.attributes.elType;
-        const encodeDecode = encodeDecodeTypes[elType];
 
-        if (encodeDecode) {
-            const { x, y } = selectedElement.position();
-            const encodeDecodeData = new encodeDecode.class();
-            encodeDecodeData.name = properties.label || '';
-            encodeDecodeData.dataBandwidth = properties.bandwidth || 1;
-            encodeDecodeData.position = { x, y };
 
-            graph.removeCells([selectedElement]);
-            const newEncodeDecodeElement = encodeDecode.create(encodeDecodeData);
-            graph.addCell(newEncodeDecodeElement);
-            setSelectedElement(newEncodeDecodeElement);
-        }
-    };
 
 
     const handleSave = () => {
@@ -682,94 +559,9 @@ const PropertiesPanel = () => {
             return;
         }
 
-        const attrsToUpdate: any = {};
-
         setShowSaveNotification(true);
 
-        if (selectedElement.attributes.elType === 'multiplexer') {
-            handleMultiplexerPortChange();
-            return;
-        }
-        else if (selectedElement.attributes.elType === 'comparator') {
-            handleComplexLogicChange();
-            return;
-        }
-        else if (selectedElement.attributes.elType === 'decoder') {
-            handleEncodeDecodeChange();
-            return;
-        }
-        else if (selectedElement.attributes.elType === 'encoder') {
-            handleEncodeDecodeChange();
-            return;
-        }
-        else if (selectedElement.attributes.elType === 'sram') {
-            selectedElement.attributes.addressBandwidth = properties.addressBandwidth;
-            handleMemoryPortChange();
-            return;
-        }
-        else if (selectedElement.attributes.elType === 'register') {
-            handleMemoryPortChange();
-            return;
-        }
-
-        else if (selectedElement.attributes.elType === 'newModule') {
-            handleModulePortChange();
-            // attrsToUpdate.label = { text: properties.label + '\n' + properties.instance };
-            return;
-
-        }
-        else if (selectedElement.attributes.elType === 'combiner') {
-            handleCombinerPortChange()
-            return;
-        }
-        else if (selectedElement.attributes.elType === 'splitter') {
-            handleSplitterPortChange()
-            return;
-        }
-        else if (selectedElement.attributes.elType === 'alu') {
-            handleComplexLogicChange();
-            return;
-        }
-        else if (selectedElement.attributes.elType === 'and') {
-            handleLogicPortChange();
-            return;
-        }
-        else if (selectedElement.attributes.elType === 'or') {
-            handleLogicPortChange();
-            return;
-        }
-        else if (selectedElement.attributes.elType === 'xor') {
-            handleLogicPortChange();
-            return;
-        }
-        else if (selectedElement.attributes.elType === 'xnor') {
-            handleLogicPortChange();
-            return;
-        }
-        else if (selectedElement.attributes.elType === 'nand') {
-            handleLogicPortChange();
-            return;
-        }
-        else if (selectedElement.attributes.elType === 'nor') {
-            handleLogicPortChange();
-            return;
-        }
-        else if (selectedElement.attributes.elType === 'input') {
-            handlePortElementChange();
-            return;
-        }
-        else if (selectedElement.attributes.elType === 'output') {
-            handlePortElementChange();
-            return;
-        }
-        else {
-            attrsToUpdate.label = { text: properties.label };
-        }
-        selectedElement.attributes.bandwidth = properties.bandwidth;
-
-        selectedElement.attr(attrsToUpdate);
-        updateElement(selectedElement);
-
+        handleElementChange();
     };
 
     useEffect(() => {
@@ -824,26 +616,15 @@ const PropertiesPanel = () => {
 
     if (!selectedElement || selectedElement.isLink()) {
         return (
-            <ResizablePanel
-                className="bg-white border-l border-gray-200 shadow-md h-full overflow-y-auto dark:bg-black"
-                defaultWidth={300}
-                direction="left"
-                onWidthChange={handleWidthChange}
-            >
+            <>
                 <h3 className="text-lg font-semibold p-4 border-b border-gray-200">Properties</h3>
                 <p className="p-4 text-gray-600">Select an element to see its properties.</p>
-            </ResizablePanel>
+            </>
         );
     }
 
     return (
-        <ResizablePanel
-            ref={panelRef}
-            className="bg-white border-l border-gray-200 shadow-md h-full overflow-y-auto dark:bg-black"
-            defaultWidth={300}
-            direction="left"
-            onWidthChange={handleWidthChange}
-        >
+        <div className="h-full overflow-auto">
             <h3 className="text-lg font-semibold p-4 border-b border-gray-200">
                 {selectedElement.attributes.elType.toUpperCase()} Properties
             </h3>
@@ -1551,7 +1332,7 @@ const PropertiesPanel = () => {
                     </div>
                 </div>
             )}
-        </ResizablePanel>
+        </div>
     );
 };
 
