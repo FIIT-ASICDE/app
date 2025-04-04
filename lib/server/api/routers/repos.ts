@@ -51,6 +51,7 @@ export const repoRouter = createTRPCRouter({
     edit: edit(),
     removeContributor: removeContributor(),
     loadAllFilesInRepo: loadAllFilesInRepo(),
+    saveFileContent: saveFileContent(),
 });
 
 function create() {
@@ -2070,5 +2071,19 @@ function loadAllFilesInRepo() {
             }
 
             return tree.flatMap(flattenFiles);
+        });
+}
+function saveFileContent() {
+    return protectedProcedure
+        .input(z.object({
+            repoId: z.string(),
+            path: z.string(),
+            content: z.string(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            const repoPath = await resolveRepoPathOrThrow(ctx.prisma, input.repoId);
+            const filePath = path.join(repoPath, input.path);
+            await writeFile(filePath, input.content, "utf-8");
+            return { success: true };
         });
 }

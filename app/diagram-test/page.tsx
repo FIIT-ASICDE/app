@@ -4,15 +4,23 @@
 import React from "react";
 import Layout from "./components/Layout/Layout";
 import { DiagramProvider } from "@/app/diagram-test/context/DiagramContext";
-import type { Repository } from "@/lib/types/repository";
+import type { Repository, FileDisplayItem, RepositoryItem } from "@/lib/types/repository";
 
 interface DiagramPageProps {
     repository: Repository;
+    activeFile: FileDisplayItem;
+    tree: RepositoryItem[];
+    setTree: React.Dispatch<React.SetStateAction<RepositoryItem[]>>;
 }
 
-const DiagramPage = ({ repository }: DiagramPageProps) => {
+const DiagramPage = ({ repository, activeFile, tree, setTree }: DiagramPageProps) => {
     return (
-        <DiagramProvider repository={repository}>
+        <DiagramProvider
+            repository={repository}
+            activeFile={activeFile}
+            tree={tree}
+            setTree={setTree}
+        >
             <Layout />
         </DiagramProvider>
     );

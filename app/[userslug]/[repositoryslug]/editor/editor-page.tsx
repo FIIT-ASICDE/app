@@ -308,7 +308,12 @@ export default function EditorPage({ repository }: EditorPageProps) {
                             </div>
                             {activeFile ? (
                                 isDiagramFile(activeFile) ? (
-                                    <DiagramPage repository={repository} />
+                                    <DiagramPage
+                                        repository={repository}
+                                        activeFile={activeFile}
+                                        tree={tree}
+                                        setTree={setTree}
+                                    />
                                     ) : (
                                         <DynamicEditor
                                             filePath={

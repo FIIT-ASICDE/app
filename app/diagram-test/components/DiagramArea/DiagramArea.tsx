@@ -41,12 +41,37 @@ import { JointJSCombiner } from "@/app/diagram-test/components/Shapes/bitOperati
 import { Combiner } from "@/app/diagram-test/components/Shapes/classes/combiner";
 import {useDiagramEvents} from "@/app/diagram-test/hooks/useDiagramEvents";
 import PaperToolbar from "@/app/diagram-test/components/Sidebar/PaperToolbar";
-
+import { useDebouncedCallback } from "use-debounce";
+import { api } from "@/lib/trpc/react";
 
 const DiagramArea = () => {
     const paperElement = useRef<HTMLDivElement>(null);
-    const { graph } = useDiagramContext();
+    const { graph, repository, activeFile } = useDiagramContext();
     const [isReady, setIsReady] = useState(false);
+
+
+    const { data: fileData } = api.repo.loadRepoItem.useQuery(
+        {
+            ownerSlug: repository.ownerName,
+            repositorySlug: repository.name,
+            path: activeFile?.absolutePath ?? "",
+        },
+        {
+            enabled: !!activeFile,
+        }
+    );
+
+    useEffect(() => {
+        if (fileData?.type === "file" && fileData.content) {
+            try {
+                const json = JSON.parse(fileData.content);
+                graph.fromJSON(json);
+            } catch (err) {
+                console.error("Failed to parse diagram JSON:", err);
+            }
+        }
+    }, [fileData]);
+
 
     useEffect(() => {
         if (paperElement.current) {
@@ -74,8 +99,6 @@ const DiagramArea = () => {
                 const height = container.offsetHeight;
 
                 paper.setDimensions(width, height);
-
-                console.log("📐 Resize ->", { width, height });
             }
         };
         updateSize();
@@ -91,6 +114,29 @@ const DiagramArea = () => {
             clearInterval(interval);
         };
     }, [paper]);
+
+
+    const saveDiagramMutation = api.repo.saveFileContent.useMutation();
+
+    const debouncedSave = useDebouncedCallback(() => {
+        if (!repository || !activeFile) return;
+        const diagramJSON = JSON.stringify(graph.toJSON(), null, 2);
+        saveDiagramMutation.mutate({
+            repoId: repository.id,
+            path: activeFile.absolutePath,
+            content: diagramJSON,
+        });
+    }, 3000);
+
+    useEffect(() => {
+        const onChange = () => {
+            debouncedSave();
+        };
+        graph.on('change', onChange);
+        return () => {
+            graph.off('change', onChange);
+        };
+    }, [graph, debouncedSave]);
 
     // // addPaperEvents()
     // // generateCode()

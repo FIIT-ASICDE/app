@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, ReactNode } from 'react';
 import { dia, shapes } from "@joint/core";
-import { Repository } from "@/lib/types/repository";
+import { Repository, FileDisplayItem, RepositoryItem } from "@/lib/types/repository";
 
 interface DiagramContextProps {
     graph: dia.Graph;
@@ -18,6 +18,9 @@ interface DiagramContextProps {
     hasFormErrors: boolean;
     setHasFormErrors: (val: boolean) => void;
     repository: Repository;
+    activeFile: FileDisplayItem;
+    tree: RepositoryItem[];
+    setTree: React.Dispatch<React.SetStateAction<RepositoryItem[]>>;
 }
 
 export const DiagramContext = createContext<DiagramContextProps | undefined>(undefined);
@@ -25,9 +28,12 @@ export const DiagramContext = createContext<DiagramContextProps | undefined>(und
 interface DiagramProviderProps {
     children: ReactNode;
     repository: Repository;
+    activeFile: FileDisplayItem;
+    tree: RepositoryItem[];
+    setTree: React.Dispatch<React.SetStateAction<RepositoryItem[]>>;
 }
 
-export const DiagramProvider = ({ children, repository }: DiagramProviderProps) => {
+export const DiagramProvider = ({ children, repository, activeFile, tree, setTree }: DiagramProviderProps) => {
     const [graph] = useState(() =>
         new dia.Graph({}, { cellNamespace: { standard: shapes.standard } })
     );
@@ -87,8 +93,10 @@ export const DiagramProvider = ({ children, repository }: DiagramProviderProps) 
                 removeElement,
                 hasFormErrors,
                 setHasFormErrors,
-                repository
-
+                repository,
+                activeFile,
+                tree,
+                setTree
             }}
         >
             {children}
