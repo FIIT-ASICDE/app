@@ -4,7 +4,7 @@ import { FileIcon, FilePlus } from "lucide-react";
 import { Dispatch, FormEvent, SetStateAction, useState } from "react";
 import { toast } from "sonner";
 
-import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer-control-button";
+import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer/file-explorer-control-button";
 import {
     Dialog,
     DialogContent,
@@ -13,6 +13,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { addItemToTree } from "@/components/generic/generic";
 
 interface CreateFileDialogProps {
     repositoryId: string;
@@ -47,6 +48,13 @@ export const CreateFileDialog = ({
 
             if (!parentItem) {
                 setTree([...tree, newFile]);
+            } else {
+                const updatedTree: Array<RepositoryItem> = addItemToTree(
+                    tree,
+                    parentItem.absolutePath,
+                    newFile,
+                );
+                setTree(updatedTree);
             }
 
             onAction?.();

@@ -2,10 +2,12 @@ import { BadgeType, CardType, FilterType } from "@/lib/types/generic";
 import { Invitation } from "@/lib/types/invitation";
 import { RoleOrganisationFilter } from "@/lib/types/organisation";
 import {
+    DirectoryItem,
     FavoriteRepositoriesFilter,
+    FileDisplayItem,
     PinnedRepositoriesFilter,
     PublicRepositoriesFilter,
-    type RepositoryItem,
+    RepositoryItem,
     RepositoryItemChange,
 } from "@/lib/types/repository";
 
@@ -15,6 +17,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Dispatch, SetStateAction } from "react";
 
 export const getTimeDeltaString = (lastActivity: Date): string => {
     const now = new Date();
@@ -341,4 +344,141 @@ export const getChangeContent = (itemChange: RepositoryItemChange) => {
             </TooltipContent>
         </Tooltip>
     );
+};
+
+export const addItemToTree = (
+    tree: Array<RepositoryItem>,
+    parentPath: string,
+    newItem: FileDisplayItem | DirectoryItem
+): Array<RepositoryItem> => {
+    if (parentPath === "") {
+        return [
+            ...tree,
+            newItem,
+        ];
+    }
+
+    return tree.map((item) => {
+        if (item.absolutePath === parentPath && item.type === "directory") {
+            const updatedChildren = item.children
+                ? [...item.children, newItem]
+                : [newItem];
+
+            return {
+                ...item,
+                children: updatedChildren,
+            };
+        }
+        if (item.type === "directory" && item.children?.length) {
+            return {
+                ...item,
+                children: addItemToTree(item.children, parentPath, newItem),
+            };
+        }
+        return item;
+    });
+};
+
+export const deleteItemFromTree = (
+    tree: Array<RepositoryItem>,
+    deletePath: string
+): Array<RepositoryItem> => {
+    return tree
+        .filter((item: RepositoryItem) => item.absolutePath !== deletePath)
+        .map((item: RepositoryItem) => {
+            if (
+                (item.type === "directory") &&
+                item.children
+            ) {
+                return { ...item, children: deleteItemFromTree(item.children, deletePath) };
+            }
+            return item;
+        });
+};
+
+export const renameItemInTree = (
+    tree: Array<RepositoryItem>,
+    originalPath: string,
+    newName: string
+): Array<RepositoryItem> => {
+    return tree.map((item: RepositoryItem) => {
+        if (item.absolutePath === originalPath) {
+            const newAbsolutePath: string = item.absolutePath.split("\\").join("/").split("/").slice(0, -1).join("/") + "/" + newName;
+
+            return {
+                ...item,
+                name: newName,
+                absolutePath: newAbsolutePath,
+            };
+        }
+        if (
+            (item.type === "directory") &&
+            item.children
+        ) {
+            return {
+                ...item,
+                children: renameItemInTree(item.children, originalPath, newName),
+            };
+        }
+        return item;
+    });
+};
+
+export const moveItemInTree = (
+    tree: Array<RepositoryItem>,
+    sourceItem: RepositoryItem,
+    targetItem: RepositoryItem
+): Array<RepositoryItem> => {
+    const treeWithoutSource: Array<RepositoryItem> = deleteItemFromTree(tree, sourceItem.absolutePath);
+
+    sourceItem.absolutePath = targetItem.name === "" ?
+        sourceItem.name : targetItem.absolutePath + "/" + sourceItem.name;
+
+    console.log(sourceItem);
+
+    return addItemToTree(
+        treeWithoutSource,
+        targetItem.absolutePath,
+        sourceItem as FileDisplayItem | DirectoryItem,
+    );
+};
+
+export const findItemInTree = (
+    tree: Array<RepositoryItem>,
+    absolutePath: string
+): RepositoryItem | undefined => {
+    for (const item of tree) {
+        if (item.absolutePath === absolutePath) {
+            return item;
+        }
+        if (item.type === "directory" && item.children?.length) {
+            const found: RepositoryItem | undefined = findItemInTree(item.children, absolutePath);
+            if (found) return found;
+        }
+    }
+    return undefined;
+};
+
+export const handleToggle = (
+    item: RepositoryItem,
+    expandedItems: Array<RepositoryItem>,
+    setExpandedItemsAction: Dispatch<SetStateAction<Array<RepositoryItem>>>,
+) => {
+    if (item.type === "directory" || item.type === "directory-display") {
+        if (
+            !expandedItems.find(
+                (expandedItem: RepositoryItem) =>
+                    expandedItem.absolutePath === item.absolutePath,
+            )
+        ) {
+            setExpandedItemsAction([...expandedItems, item]);
+        } else {
+            const filteredExpandedItems: Array<RepositoryItem> =
+                expandedItems.filter(
+                    (expandedItem: RepositoryItem) =>
+                        expandedItem.absolutePath !== item.absolutePath,
+                );
+            setExpandedItemsAction(filteredExpandedItems);
+        }
+    }
 };

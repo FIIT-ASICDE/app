@@ -13,9 +13,8 @@ import type {
     Repository,
     RepositoryItem,
 } from "@/lib/types/repository";
-import { X } from "lucide-react";
 import dynamic from "next/dynamic";
-import { type ElementRef, useEffect, useRef, useState } from "react";
+import { type ElementRef, RefObject, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
 import { z } from "zod";
@@ -28,6 +27,8 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { EditorTabs } from "@/components/editor/editor-tabs";
+import { ImperativePanelGroupHandle } from "react-resizable-panels";
 import DiagramPage from "@/app/diagram-test/page";
 
 interface EditorPageProps {
@@ -45,9 +46,9 @@ export default function EditorPage({ repository }: EditorPageProps) {
     const [activeBottomPanelContent, setActiveBottomPanelContent] =
         useState<BottomPanelContentTab>("simulation");
 
-    const verticalGroupRef =
+    const verticalGroupRef: RefObject<ImperativePanelGroupHandle> =
         useRef<ElementRef<typeof ResizablePanelGroup>>(null);
-    const horizontalGroupRef =
+    const horizontalGroupRef: RefObject<ImperativePanelGroupHandle> =
         useRef<ElementRef<typeof ResizablePanelGroup>>(null);
 
     const [verticalCollapsed, setVerticalCollapsed] = useState<boolean>(false);
@@ -58,7 +59,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
     const [lastOpenedBottomPanelSize, setLastOpenedBottomPanelSize] =
         useState<number>(20);
     const [activeFile, setActiveFile] = useState<FileDisplayItem | null>(null);
-    const [openFiles, setOpenFiles] = useState<FileDisplayItem[]>([]);
+    const [openFiles, setOpenFiles] = useState<Array<FileDisplayItem>>([]);
 
     const [simulationConfiguration, setSimulationConfiguration] = useState<
         SimulationConfiguration | undefined
@@ -78,8 +79,12 @@ export default function EditorPage({ repository }: EditorPageProps) {
 
     const commitMutation = api.git.commit.useMutation({
         onSuccess: () => {
+            const changesCount: number = changes.data?.changes.length ?? 0;
             toast.success(
-                "Successfully commited " + changes.data?.changes.length,
+                "Successfully commited " +
+                    changesCount +
+                    " change" +
+                    (changesCount !== 1 && "s"),
             );
         },
         onError: (error) => {
@@ -119,7 +124,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
             "Starting simulation with type: " +
                 selectedType +
                 " and file: " +
-                selectedFile?.name,
+                selectedFile!.name,
         );
     };
 
@@ -136,8 +141,8 @@ export default function EditorPage({ repository }: EditorPageProps) {
             language: item.language,
         };
 
-        if (!openFiles.some((file) => file.name === item.name)) {
-            setOpenFiles((prevFiles) => [...prevFiles, fileDisplay]);
+        if (!openFiles.some((file: FileDisplayItem) => file.absolutePath === item.absolutePath)) {
+            setOpenFiles((prevFiles: Array<FileDisplayItem>) => [...prevFiles, fileDisplay]);
         }
         setActiveFile(fileDisplay);
     };
@@ -232,7 +237,6 @@ export default function EditorPage({ repository }: EditorPageProps) {
                 }}
                 isGitRepo={repository.isGitRepo}
                 repository={repository}
-                onStartSimulation={onStartSimulation}
             />
 
             <ResizablePanelGroup
@@ -279,33 +283,14 @@ export default function EditorPage({ repository }: EditorPageProps) {
                         <ResizableHandle />
 
                         <ResizablePanel defaultSize={80}>
-                            <div className="flex bg-background text-white">
-                                {openFiles.map((file) => (
-                                    <div key={file.name}>
-                                        <span
-                                            className={`flex cursor-pointer items-center justify-center px-2 py-2 text-sm font-semibold ${
-                                                activeFile?.name === file.name
-                                                    ? "bg-[#1e1e1e] text-white"
-                                                    : "text-gray-400 hover:bg-[#444444]"
-                                            }`}
-                                            onClick={() =>
-                                                handleTabSwitch(file)
-                                            }
-                                        >
-                                            {file.name}
-                                            <button
-                                                className="ml-2 hover:text-white"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleCloseTab(file);
-                                                }}
-                                            >
-                                                <X className="h-4 w-4" />
-                                            </button>
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
+                            <EditorTabs
+                                openFiles={openFiles}
+                                setOpenFilesAction={setOpenFiles}
+                                activeFile={activeFile}
+                                setActiveFileAction={setActiveFile}
+                                handleTabSwitchAction={handleTabSwitch}
+                                handleCloseTabAction={handleCloseTab}
+                            />
                             {activeFile ? (
                                 isDiagramFile(activeFile) ? (
                                     <DiagramPage
@@ -326,7 +311,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
                                         />
                                     )
                             ) : (
-                                <div className="flex h-full w-full items-center justify-center text-gray-400">
+                                <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                                     No file open
                                 </div>
                             )}
