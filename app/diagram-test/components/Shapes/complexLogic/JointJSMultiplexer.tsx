@@ -5,6 +5,7 @@ export const JointJSMultiplexer = (multiplexer: Multiplexer) => {
 
     const inCount = multiplexer.dataPorts || 2;
     const dimension = 100 + (inCount - 2) * 20;
+    const isStruct = multiplexer.structPackage ? multiplexer.structPackage.length > 0 : false;
 
     const portItems = [];
     for (let i = 1; i <= inCount; i++) {
@@ -13,6 +14,9 @@ export const JointJSMultiplexer = (multiplexer: Multiplexer) => {
             id: `input${i}`,
             bandwidth: multiplexer.dataBandwidth,
             group: 'input',
+            isStruct: isStruct,
+            structPackage: multiplexer.structPackage,
+            structTypeDef: multiplexer.structTypeDef,
             args: { x: 0, y: portY }
         });
     }
@@ -20,6 +24,9 @@ export const JointJSMultiplexer = (multiplexer: Multiplexer) => {
     portItems.push({
         id: 'output1',
         group: 'output',
+        isStruct: isStruct,
+        structPackage: multiplexer.structPackage,
+        structTypeDef: multiplexer.structTypeDef,
         bandwidth: multiplexer.dataBandwidth,
         args: {
             x: dimension/2,
@@ -30,6 +37,7 @@ export const JointJSMultiplexer = (multiplexer: Multiplexer) => {
     portItems.push({
         id: 'select',
         group: 'input',
+        isStruct: false,
         bandwidth: Math.ceil(Math.log2(inCount)),
         args: {
             x: 25,
@@ -50,6 +58,9 @@ export const JointJSMultiplexer = (multiplexer: Multiplexer) => {
         elType: 'multiplexer',
         name: multiplexer.name,
         bandwidth: multiplexer.dataBandwidth,
+        structPackage: multiplexer.structPackage,
+        structTypeDef: multiplexer.structTypeDef,
+        isStruct: isStruct,
         inPorts: inCount,
         position: { x: multiplexer.position?.x || 100, y: multiplexer.position?.y || 100 },
         size: { width: dimension/2, height: dimension},

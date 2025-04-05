@@ -7,4 +7,6 @@ export class Multiplexer {
         x: number,
         y: number
     };
+    public structPackage: string;
+    public structTypeDef: string;
 }

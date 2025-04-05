@@ -4,6 +4,9 @@ import React, { createContext, useState, ReactNode } from 'react';
 import { dia, shapes } from "@joint/core";
 import { Repository, FileDisplayItem, RepositoryItem } from "@/lib/types/repository";
 
+
+export type LanguageOption = "SystemVerilog" | "VHDL";
+
 interface DiagramContextProps {
     graph: dia.Graph;
     paper: dia.Paper | null;
@@ -21,6 +24,8 @@ interface DiagramContextProps {
     activeFile: FileDisplayItem;
     tree: RepositoryItem[];
     setTree: React.Dispatch<React.SetStateAction<RepositoryItem[]>>;
+    selectedLanguage: LanguageOption;
+    setSelectedLanguage: (lang: LanguageOption) => void;
 }
 
 export const DiagramContext = createContext<DiagramContextProps | undefined>(undefined);
@@ -40,6 +45,7 @@ export const DiagramProvider = ({ children, repository, activeFile, tree, setTre
     const [paper, setPaper] = useState<dia.Paper | null>(null);
     const [selectedElement, setSelectedElement] = useState<dia.Cell | null>(null);
     const [hasFormErrors, setHasFormErrors] = useState<boolean>(false);
+    const [selectedLanguage, setSelectedLanguage] = useState<LanguageOption>("SystemVerilog");
 
     const updateElement = (cell: dia.Cell) => {
         graph.addCell(cell);
@@ -96,7 +102,9 @@ export const DiagramProvider = ({ children, repository, activeFile, tree, setTre
                 repository,
                 activeFile,
                 tree,
-                setTree
+                setTree,
+                selectedLanguage,
+                setSelectedLanguage
             }}
         >
             {children}

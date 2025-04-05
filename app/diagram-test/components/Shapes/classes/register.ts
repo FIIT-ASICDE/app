@@ -12,4 +12,6 @@ export class Register {
     public clkEdge?: 'rising' | 'falling';
     public rstEdge?: 'rising' | 'falling';
     public rstType?: 'async' | 'sync';
+    public structPackage: string;
+    public structTypeDef: string;
 }

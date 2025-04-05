@@ -15,19 +15,19 @@ import {
 const Layout = () => {
     return (
         <ResizablePanelGroup direction="horizontal" className="h-screen w-full">
-            <ResizablePanel defaultSize={20} minSize={10} maxSize={30}>
+            <ResizablePanel defaultSize={15} minSize={10} maxSize={30}>
                 <Sidebar />
             </ResizablePanel>
 
             <ResizableHandle withHandle />
 
-            <ResizablePanel defaultSize={60} minSize={30}>
+            <ResizablePanel defaultSize={70} minSize={30}>
                 <DiagramArea />
             </ResizablePanel>
 
             <ResizableHandle withHandle />
 
-            <ResizablePanel defaultSize={20} minSize={10} maxSize={30}>
+            <ResizablePanel defaultSize={15} minSize={10} maxSize={30}>
                 <PropertiesPanel />
             </ResizablePanel>
         </ResizablePanelGroup>

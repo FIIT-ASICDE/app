@@ -40,12 +40,6 @@ import {Decoder} from "@/app/diagram-test/components/Shapes/classes/decoder";
 import {JointJSEncoder} from "@/app/diagram-test/components/Shapes/complexLogic/JointJSEncoder";
 import {Encoder} from "@/app/diagram-test/components/Shapes/classes/encoder";
 import { Pencil, Trash2, CircleAlert } from 'lucide-react';
-import {
-    parseSystemVerilogText,
-    StructField,
-    StructType,
-    Package
-} from '@/app/diagram-test/utils/DiagramGeneration/SystemVerilog/SVParser'
 import { api } from "@/lib/trpc/react";
 
 
@@ -61,6 +55,8 @@ import {
     SelectValue
 } from "@/components/ui/select";
 import {Label} from "@/components/ui/label";
+import { parseVHDLTextFromRegex } from "@/app/diagram-test/utils/DiagramGeneration/VHDL/parseVHDLTextFromRegex";
+import { parseSystemVerilogTextFromRegex } from "@/app/diagram-test/utils/DiagramGeneration/SystemVerilog/parseSystemVerilogTextFromRegex";
 
 
 interface Properties {
@@ -86,9 +82,25 @@ interface Properties {
 }
 
 
+interface UnifiedStructField {
+    name: string;
+    type: string;
+}
+
+interface UnifiedStructType {
+    name: string;
+    fields: UnifiedStructField[];
+}
+
+interface UnifiedPackage {
+    name: string;
+    structs: UnifiedStructType[];
+}
+
+
 
 const PropertiesPanel = () => {
-    const { selectedElement,graph,setSelectedElement, setHasFormErrors } = useDiagramContext();
+    const { selectedElement, graph, setSelectedElement, setHasFormErrors, selectedLanguage, setSelectedLanguage } = useDiagramContext();
     const [properties, setProperties] = useState<Properties>({
         label: '',
         instance: '',
@@ -122,7 +134,7 @@ const PropertiesPanel = () => {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [clipboardCell, setClipboardCell] = useState<dia.Cell | null>(null);
     const panelRef = useRef<HTMLDivElement | null>(null);
-    const [parseResults, setParseResults] = useState<Package[]>([]);
+    const [parseResults, setParseResults] = useState<UnifiedPackage[]>([]);
     const elementTypes = {
         'input': { class: Port, create: JointJSInputPort },
         'output': { class: Port, create: JointJSOutputPort },
@@ -152,7 +164,7 @@ const PropertiesPanel = () => {
             const props: Properties = {
                 label: selectedElement.attributes.name || '',
                 bandwidth: selectedElement.attributes.bandwidth || 1,
-                bandwidthType: selectedElement.attributes.bandwidth === 1 ? 'bit' : selectedElement.attributes.isStruct ? 'struct' : 'vector',
+                bandwidthType: selectedElement.attributes.isStruct ? 'struct' : selectedElement.attributes.bandwidth === 1 ? 'bit' : 'vector',
                 inputPorts: selectedElement.attributes.inPorts || 0,
                 createdInPorts: selectedElement.attributes.moduleInPorts || selectedElement.attributes.combineInPorts || [],
                 createdOutPorts: selectedElement.attributes.moduleOutPorts || selectedElement.attributes.selectOutPorts || [],
@@ -212,27 +224,41 @@ const PropertiesPanel = () => {
     }, [allFiles]);
 
     useEffect(() => {
-        if (allFiles && Array.isArray(allFiles)) {
+        if (!allFiles) return;
+
+        let parsedPackages: UnifiedPackage[] = [];
+
+        if (selectedLanguage === "SystemVerilog") {
             const svFiles = allFiles.filter(
                 (file) =>
                     file.type === "file" &&
                     file.name.toLowerCase().endsWith(".sv") &&
                     file.content
             );
-
-            const parsedPackages = svFiles.flatMap((file) => {
+            parsedPackages = svFiles.flatMap((file) => {
                 try {
-                    return parseSystemVerilogText(file.content);
+                    return parseSystemVerilogTextFromRegex(file.content);
                 } catch (err) {
                     console.warn(`Failed to parse ${file.name}`, err);
                     return [];
                 }
             });
-
-            console.log("Parsed packages from repo:", parsedPackages);
-            setParseResults(parsedPackages);
+        } else if (selectedLanguage === "VHDL") {
+            const vhdlFiles = allFiles.filter(file =>
+                file.name.toLowerCase().endsWith(".vhd")
+            );
+            parsedPackages = vhdlFiles.flatMap((file) => {
+                try {
+                    return parseVHDLTextFromRegex(file.content);
+                } catch (err) {
+                    console.warn(`Failed to parse ${file.name}`, err);
+                    return [];
+                }
+            });
         }
-    }, [allFiles]);
+
+        setParseResults(parsedPackages);
+    }, [allFiles, selectedLanguage]);
 
 
     function validateField(fieldName: string, fieldValue: any): string {
@@ -472,9 +498,16 @@ const PropertiesPanel = () => {
             if (elType === 'alu') {
                 elementData.type = properties.aluType || '+';
             }
-            if (['input', 'output', 'combiner', 'splitter', 'multiplexer'].includes(elType)) {
-                elementData.structPackage = properties.structPackage || '';
-                elementData.structTypeDef = properties.structTypeDef || '';
+            if (['input', 'output', 'combiner', 'splitter', 'multiplexer', 'register', 'sram'].includes(elType)) {
+                if (properties.bandwidthType === 'struct') {
+                    elementData.structPackage = properties.structPackage || '';
+                    elementData.structTypeDef = properties.structTypeDef || '';
+                }
+                else {
+                    elementData.structPackage = '';
+                    elementData.structTypeDef = '';
+                }
+
             }
             if (['and', 'or', 'nor', 'xnor', 'nand', 'xor'].includes(elType)) {
                 elementData.inPorts = properties.inputPorts || 2;
@@ -616,10 +649,25 @@ const PropertiesPanel = () => {
 
     if (!selectedElement || selectedElement.isLink()) {
         return (
-            <>
-                <h3 className="text-lg font-semibold p-4 border-b border-gray-200">Properties</h3>
-                <p className="p-4 text-gray-600">Select an element to see its properties.</p>
-            </>
+            <div className="p-4 space-y-4">
+                <div className="space-y-1">
+                    <Label>Select language for packages</Label>
+                    <Select
+                        value={selectedLanguage}
+                        onValueChange={(value) =>
+                            setSelectedLanguage(value as "SystemVerilog" | "VHDL")
+                        }
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Choose a language" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="SystemVerilog">SystemVerilog</SelectItem>
+                            <SelectItem value="VHDL">VHDL</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
         );
     }
 
@@ -670,7 +718,7 @@ const PropertiesPanel = () => {
                                 <SelectItem value="bit">Bit</SelectItem>
                                 <SelectItem value="vector">Vector</SelectItem>
                                 {(['output', 'input', 'multiplexer', 'sram', 'register'].includes(selectedElement.attributes.elType)) && (
-                                    <SelectItem value="struct">User Defined</SelectItem>
+                                    <SelectItem value="struct">Structure from package</SelectItem>
                                 )}
                             </SelectContent>
                         </Select>
@@ -721,7 +769,7 @@ const PropertiesPanel = () => {
 
                                 {/* STRUCT TYPE SELECT */}
                                 <div className="space-y-1">
-                                    <Label>Choose user defined type:</Label>
+                                    <Label>Choose structure from package:</Label>
                                     <Select
                                         name="structTypeDef"
                                         value={properties.structTypeDef}
@@ -1080,7 +1128,7 @@ const PropertiesPanel = () => {
 
 
                         <Label>
-                            {selectedElement.attributes.elType === 'combiner' ? 'Input' : 'Output'} Ports Type
+                            {selectedElement.attributes.elType === 'combiner' ? 'Output' : 'Input'} Ports Type
                         </Label>
 
                         <Select
@@ -1093,8 +1141,8 @@ const PropertiesPanel = () => {
                                 <SelectValue placeholder="Select ports type" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="custom">Custom Ports</SelectItem>
-                                <SelectItem value="struct">User Defined</SelectItem>
+                                <SelectItem value="custom">Vector</SelectItem>
+                                <SelectItem value="struct">Structure from package</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -1197,7 +1245,7 @@ const PropertiesPanel = () => {
 
                             {/* STRUCT TYPE SELECT */}
                             <div className="space-y-1">
-                                <Label>Choose user defined type:</Label>
+                                <Label>Choose structure from package:</Label>
                                 <Select
                                     name="structTypeDef"
                                     value={properties.structTypeDef}

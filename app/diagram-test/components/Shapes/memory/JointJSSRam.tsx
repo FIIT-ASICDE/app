@@ -5,6 +5,8 @@ export const JointJSSRam = (sram: Sram) => {
 
     const dimension = 200;
     const portItems = [];
+    const isStruct = sram.structPackage ? sram.structPackage.length > 0 : false;
+
 
     const ramRefD = sram.clkEdge === 'rising'
         ? 'M 0 0 L 30 0 L 25 10 L 20 0 L 50 0 L 50 100 L 0 100 Z'
@@ -15,6 +17,9 @@ export const JointJSSRam = (sram: Sram) => {
         id: 'data_in',
         bandwidth: sram.dataBandwidth,
         group: 'input',
+        isStruct: isStruct,
+        structPackage: sram.structPackage,
+        structTypeDef: sram.structTypeDef,
         args: {
             x: 0,
             y: (dimension/2 / (3 - 1))
@@ -28,6 +33,7 @@ export const JointJSSRam = (sram: Sram) => {
         id: 'addr',
         bandwidth: sram.addressBandwidth,
         group: 'input',
+        isStruct: false,
         args: {
             x: 0,
             y: (dimension/2 / (3 - 1)) * 2
@@ -41,6 +47,7 @@ export const JointJSSRam = (sram: Sram) => {
         id: 'we',
         bandwidth: 1,
         group: 'input',
+        isStruct: false,
         args: {
             x: 0,
             y: (dimension/2 / (3 - 1)) * 3
@@ -54,6 +61,7 @@ export const JointJSSRam = (sram: Sram) => {
         id: 'clk',
         bandwidth: 1,
         group: 'input',
+        isStruct: false,
         args: {
             x: dimension / 4,
             y: -15
@@ -74,6 +82,9 @@ export const JointJSSRam = (sram: Sram) => {
         id: 'data_out',
         bandwidth: sram.dataBandwidth,
         group: 'output',
+        isStruct: isStruct,
+        structPackage: sram.structPackage,
+        structTypeDef: sram.structTypeDef,
         args: {
             x: dimension / 2,
             y: dimension / 2
@@ -90,6 +101,9 @@ export const JointJSSRam = (sram: Sram) => {
         clkEdge: sram.clkEdge,
         bandwidth: sram.dataBandwidth,
         addressBandwidth: sram.addressBandwidth,
+        structPackage: sram.structPackage,
+        structTypeDef: sram.structTypeDef,
+        isStruct: isStruct,
         position: { x: sram.position?.x || 100, y: sram.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {

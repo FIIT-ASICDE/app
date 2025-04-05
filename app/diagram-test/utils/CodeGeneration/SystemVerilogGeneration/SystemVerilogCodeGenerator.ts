@@ -378,29 +378,34 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
 
         // resetPort
         if (cell.attributes.resetPort) {
-            code += `    if (${rstSignal})\n`;
+            code += `    if (${rstSignal}) begin\n`;
             code += `        ${qSignal} <= '0;\n`;
-        }
-
-        // enablePort
-        if (cell.attributes.enablePort) {
-            if (cell.attributes.resetPort){
-                code += `    else if (${enSignal})\n`;
+            if (cell.attributes.enablePort) {
+                code += `    end else if (${enSignal}) begin\n`;
             }
             else {
-                code += `    if (${enSignal})\n`;
+                code += `    end else begin\n`;
             }
-
-        } else if (cell.attributes.resetPort) {
-            code += `    else\n`;
+            if (cell.attributes.qInverted) {
+                code += `        ${qInvertedSignal} <= ~${dSignal};\n`;
+            }
+            code += `        ${qSignal} <= ${dSignal};\n`;
+            code += `    end\n`;
         }
-
-        // qInverted
-        if (cell.attributes.qInverted) {
-            code += `        ${qInvertedSignal} <= ~${dSignal};\n`;
+        else if (cell.attributes.enablePort) {
+            code += `    if (${enSignal}) begin\n`;
+            if (cell.attributes.qInverted) {
+                code += `        ${qInvertedSignal} <= ~${dSignal};\n`;
+            }
+            code += `        ${qSignal} <= ${dSignal};\n`;
+            code += `    end\n`;
         }
-
-        code += `        ${qSignal} <= ${dSignal};\n`;
+        else {
+            if (cell.attributes.qInverted) {
+                code += `    ${qInvertedSignal} <= ~${dSignal};\n`;
+            }
+            code += `    ${qSignal} <= ${dSignal};\n`;
+        }
 
         code += `end\n\n`;
     });
@@ -426,8 +431,9 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         code += `logic [${dataWidth - 1}:0] ${sramName} [0:${depth - 1}];\n\n`;
 
         code += `always_ff @(${clkEdge} ${clkSignal}) begin\n`;
-        code += `    if (${weSignal})\n`;
+        code += `    if (${weSignal}) begin\n`;
         code += `        ${sramName}[${addrSignal}] <= ${dataInSignal};\n`;
+        code += `    end\n`;
         code += `end\n\n`;
 
         code += `assign ${dataOutSignal} = ${sramName}[${addrSignal}];\n\n`;

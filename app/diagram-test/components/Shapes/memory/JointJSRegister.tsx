@@ -6,7 +6,7 @@ export const JointJSRegister = (register: Register) => {
     const dimension = 200;
     const portItems = [];
     const inLeftCount = 3;
-    const inRightCount = 2;
+    const isStruct = register.structPackage ? register.structPackage.length > 0 : false;
 
     let registerRefD = register.resetPort
         ? (register.clkEdge === 'rising'
@@ -32,6 +32,9 @@ export const JointJSRegister = (register: Register) => {
         id: 'd',
         bandwidth: register.dataBandwidth,
         group: 'input',
+        isStruct: isStruct,
+        structPackage: register.structPackage,
+        structTypeDef: register.structTypeDef,
         args: {
             x: 0,
             y: portLeftY(0),
@@ -45,6 +48,7 @@ export const JointJSRegister = (register: Register) => {
             id: 'en',
             bandwidth: 1,
             group: 'input',
+            isStruct: false,
             args: {
                 x: 0,
                 y: portLeftY(1)
@@ -60,6 +64,7 @@ export const JointJSRegister = (register: Register) => {
         id: 'clk',
         bandwidth: 1,
         group: 'input',
+        isStruct: false,
         args: {
             x: 0,
             y: portLeftY(2)
@@ -77,6 +82,7 @@ export const JointJSRegister = (register: Register) => {
             id: 'rst',
             bandwidth: 1,
             group: 'input',
+            isStruct: false,
             args: {
                 x: dimension / 4,
                 y: -15
@@ -102,6 +108,9 @@ export const JointJSRegister = (register: Register) => {
         id: 'q',
         bandwidth: register.dataBandwidth,
         group: 'output',
+        isStruct: isStruct,
+        structPackage: register.structPackage,
+        structTypeDef: register.structTypeDef,
         args: {
             x: dimension / 2,
             y: portRightY(0)
@@ -115,6 +124,9 @@ export const JointJSRegister = (register: Register) => {
             id: 'qInverted',
             bandwidth: register.dataBandwidth,
             group: 'output',
+            isStruct: isStruct,
+            structPackage: register.structPackage,
+            structTypeDef: register.structTypeDef,
             args: {
                 x: dimension / 2,
                 y: portRightY(1)
@@ -135,6 +147,9 @@ export const JointJSRegister = (register: Register) => {
         rstEdge: register.rstEdge,
         rstType: register.rstType,
         qInverted: register.qInverted,
+        structPackage: register.structPackage,
+        structTypeDef: register.structTypeDef,
+        isStruct: isStruct,
         position: { x: register.position?.x || 100, y: register.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {

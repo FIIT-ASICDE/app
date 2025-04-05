@@ -4,11 +4,15 @@ import { shapes } from "@joint/core";
 export const JointJSInputPort = (input: Port) => {
     const dimension = 40;
     const portItems = [];
+    const isStruct = input.structPackage ? input.structPackage.length > 0 : false;
 
     portItems.push({
         id: 'output1',
         group: 'output',
         bandwidth: input.dataBandwidth,
+        isStruct: isStruct,
+        structPackage: input.structPackage,
+        structTypeDef: input.structTypeDef,
         args: {
             x: dimension,
             y: dimension / 4
@@ -21,6 +25,7 @@ export const JointJSInputPort = (input: Port) => {
         bandwidth: input.dataBandwidth,
         structPackage: input.structPackage,
         structTypeDef: input.structTypeDef,
+        isStruct: isStruct,
         position: { x: input.position?.x || 100, y: input.position?.y || 100 },
         size: { width: dimension, height: dimension/2},
         attrs: {

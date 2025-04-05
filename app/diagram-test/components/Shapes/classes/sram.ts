@@ -8,5 +8,7 @@ export class Sram {
     public dataBandwidth: number;
     public addressBandwidth: number;
     clkEdge?: 'rising' | 'falling';
+    public structPackage: string;
+    public structTypeDef: string;
 
 }

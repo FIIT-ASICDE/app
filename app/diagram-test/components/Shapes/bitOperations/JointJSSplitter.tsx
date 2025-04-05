@@ -1,12 +1,15 @@
 import { Splitter } from "@/app/diagram-test/components/Shapes/classes/splitter";
 import { shapes } from "@joint/core";
 
+
+
 export const JointJSSplitter = (splitter: Splitter) => {
 
     const selectOutPorts = splitter.outPorts || [];
     const outCount = selectOutPorts.length;
     const dimension = 100 + (outCount - 2) * 20;
     const totalBandwidth = selectOutPorts.reduce((sum, port) => sum + port.dataBandwidth, 0);
+    const isStruct = splitter.structPackage ? splitter.structPackage.length > 0 : false;
 
     const portItems = [];
     for (let i = 0; i < outCount; i++) {
@@ -28,6 +31,9 @@ export const JointJSSplitter = (splitter: Splitter) => {
         id: 'input1',
         group: 'input',
         bandwidth: totalBandwidth,
+        isStruct: isStruct,
+        structPackage: splitter.structPackage,
+        structTypeDef: splitter.structTypeDef,
         args: {
             x: 0,
             y: dimension / 2
@@ -43,6 +49,7 @@ export const JointJSSplitter = (splitter: Splitter) => {
         selectOutPorts: selectOutPorts,
         structPackage: splitter.structPackage,
         structTypeDef: splitter.structTypeDef,
+        isStruct: isStruct,
         position: { x: splitter.position?.x || 100, y: splitter.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {

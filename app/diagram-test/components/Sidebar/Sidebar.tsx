@@ -1,17 +1,13 @@
 // pages/diagram-test/components/Sidebar/Sidebar.tsx
 import Image from 'next/image';
 import React, { useRef, useState } from "react";
-import {ArrowDownToLine, FolderOpen, Code, Menu, FileCode} from 'lucide-react'
+import {ArrowDownToLine, FolderOpen, Menu, FileCode} from 'lucide-react'
 import {Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useDiagramContext } from "@/app/diagram-test/context/useDiagramContext";
-import { generateSystemVerilogCode } from "@/app/diagram-test/utils/CodeGeneration/SystemVerilogGeneration/SystemVerilogCodeGenerator";
-import { generateVHDLCode } from "@/app/diagram-test/utils/CodeGeneration/VHDLGeneration/VDHLCodeGenerator";
-import { api } from "@/lib/trpc/react";
-import { toast } from "sonner";
-import type { FileDisplayItem } from "@/lib/types/repository";
+
 
 const Sidebar = () => {
-    const { graph, repository, activeFile, tree, setTree } = useDiagramContext();
+    const { graph} = useDiagramContext();
     const [isSaveLoadCollapsed, setIsSaveLoadCollapsed] = useState(true);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [gridColumns, setGridColumns] = useState(3);
@@ -63,18 +59,6 @@ const Sidebar = () => {
     ];
 
     const saveLoadActions = [
-        {
-            icon: <Code size={24} />,
-            label: "Generate SystemVerilog Code",
-            action: () => saveSystemVerilogToRepo(),
-            text: "Generate SystemVerilog Code"
-        },
-        {
-            icon: <Code size={24} />,
-            label: "Generate VHDL Code",
-            action: () => saveVHDLToRepo(),
-            text: "Generate VHDL Code"
-        },
         {
             icon: <ArrowDownToLine size={24} />,
             label: "Save Diagram",
@@ -145,44 +129,7 @@ const Sidebar = () => {
     };
 
 
-    const saveFileMutation = api.repo.saveFileContent.useMutation();
 
-    const addGeneratedFileToTree = (name: string, absolutePath: string, language: string) => {
-        const alreadyExists = tree.some(item => item.absolutePath === absolutePath);
-        if (!alreadyExists) {
-            const newFile: FileDisplayItem = {
-                type: "file-display",
-                name,
-                lastActivity: new Date(),
-                language,
-                absolutePath,
-            };
-            setTree([...tree, newFile]);
-        }
-    };
-
-    const saveCodeToRepo = (ext: string, generator: typeof generateSystemVerilogCode | typeof generateVHDLCode, language: string) => {
-        if (!repository || !activeFile) return;
-
-        const code = generator(graph);
-        const fileName = activeFile.name.replace(/\.bd$/, `.${ext}`);
-        const filePath = activeFile.absolutePath.replace(/[^/]+$/, fileName);
-
-        saveFileMutation.mutate({
-            repoId: repository.id,
-            path: filePath,
-            content: code,
-        }, {
-            onSuccess: () => {
-                toast.success(`${ext.toUpperCase()} file saved`);
-                addGeneratedFileToTree(fileName, filePath, language);
-            },
-            onError: (err) => toast.error("Failed to save file: " + err.message),
-        });
-    };
-
-    const saveSystemVerilogToRepo = () => saveCodeToRepo("sv", generateSystemVerilogCode, "system verilog");
-    const saveVHDLToRepo = () => saveCodeToRepo("vhd", generateVHDLCode, "vhdl");
 
 
     const handleSaveDiagram = () => {
