@@ -39,6 +39,7 @@ export const JointJSXor = (xor: Xor) => {
             id: `input${i}`,
             group: 'input',
             bandwidth: xor.dataBandwidth,
+            isStruct: false,
             args: { x: finalX, y: finalY }
         });
     }
@@ -47,6 +48,7 @@ export const JointJSXor = (xor: Xor) => {
         id: 'output1',
         group: 'output',
         bandwidth: xor.dataBandwidth,
+        isStruct: false,
         args: {
             x: dimension,
             y: dimension / 2

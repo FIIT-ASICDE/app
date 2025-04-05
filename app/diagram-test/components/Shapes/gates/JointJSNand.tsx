@@ -13,6 +13,7 @@ export const JointJSNand = (nand: Nand) => {
             id: `input${i}`,
             group: 'input',
             bandwidth: nand.dataBandwidth,
+            isStruct: false,
             args: { x: 0, y: portY }
         });
     }
@@ -21,6 +22,7 @@ export const JointJSNand = (nand: Nand) => {
         id: 'output1',
         group: 'output',
         bandwidth: nand.dataBandwidth,
+        isStruct: false,
         args: {
             x: dimension,
             y: dimension / 2

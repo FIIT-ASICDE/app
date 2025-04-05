@@ -10,6 +10,7 @@ export const JointJSComparator = (comparator: Comparator) => {
         id: 'input1',
         group: 'input',
         bandwidth: comparator.dataBandwidth,
+        isStruct: false,
         args: {
             x: 0,
             y: 25
@@ -20,6 +21,7 @@ export const JointJSComparator = (comparator: Comparator) => {
         id: 'input2',
         group: 'input',
         bandwidth: comparator.dataBandwidth,
+        isStruct: false,
         args: {
             x: 0,
             y: dimension - 25
@@ -30,6 +32,7 @@ export const JointJSComparator = (comparator: Comparator) => {
         id: 'output1',
         group: 'output',
         bandwidth: 1,
+        isStruct: false,
         args: {
             x: dimension / 2,
             y: dimension / 2

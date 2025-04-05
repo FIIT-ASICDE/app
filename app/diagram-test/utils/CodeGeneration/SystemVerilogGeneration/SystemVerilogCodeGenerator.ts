@@ -91,18 +91,31 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
     inputCells.forEach(cell => {
         const name = getPortName(cell);
         const bw: number = cell.attributes.bandwidth;
-        portDeclarations.push(`  input logic${bw > 1 ? ` [${bw - 1}:0]` : ''} ${name}`);
+        const isStruct = cell.attributes.isStruct;
+        const structPackage = cell.attributes.structPackage;
+        const structTypeDef = cell.attributes.structTypeDef;
+        if (isStruct && structPackage && structTypeDef) {
+            portDeclarations.push(`  input ${structPackage}::${structTypeDef} ${name}`);
+        } else {
+            portDeclarations.push(`  input logic${bw > 1 ? ` [${bw - 1}:0]` : ''} ${name}`);
+        }
     });
     outputCells.forEach(cell => {
         const name = getPortName(cell);
         const bw: number = cell.attributes.bandwidth;
-        portDeclarations.push(`  output logic${bw > 1 ? ` [${bw - 1}:0]` : ''} ${name}`);
+        const isStruct = cell.attributes.isStruct;
+        const structPackage = cell.attributes.structPackage;
+        const structTypeDef = cell.attributes.structTypeDef;
+        if (isStruct && structPackage && structTypeDef) {
+            portDeclarations.push(`  output ${structPackage}::${structTypeDef} ${name}`);
+        } else {
+            portDeclarations.push(`  output logic${bw > 1 ? ` [${bw - 1}:0]` : ''} ${name}`);
+        }
     });
 
     const moduleName = 'new_module';
 
-    let code = `// SystemVerilog code generated from diagram\n\n`;
-    code += `module ${moduleName} (\n${portDeclarations.join(',\n')}\n);\n\n`;
+    let code = `module ${moduleName} (\n${portDeclarations.join(',\n')}\n);\n\n`;
 
     const elementNames: { [key: string]: string } = {};
     logicCells.forEach(cell => {
@@ -115,17 +128,31 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         const netName = getPortName(cell);
         const cellPorts = cell.attributes.ports?.items || [];
         elementNames[cell.id] = netName;
+        const isStruct = cell.attributes.isStruct;
+        const structPackage = cell.attributes.structPackage;
+        const structTypeDef = cell.attributes.structTypeDef;
 
         if (cell.attributes.elType === 'combiner') {
             const outPort = cellPorts.find(p => p.group === 'output');
-            code += `logic [${outPort.bandwidth - 1}:0] ${netName};\n`;
+            if (isStruct && structPackage && structTypeDef) {
+                code += `${structPackage}::${structTypeDef} ${netName};\n`;
+            } else {
+                code += `logic${outPort.bandwidth > 1 ? ` [${outPort.bandwidth - 1}:0]` : ''} ${netName};\n`;
+            }
         }
     });
     multiplexerCells.forEach(cell => {
         const netName = getPortName(cell);
         const bw: number = cell.attributes.bandwidth;
         elementNames[cell.id] = netName;
-        code += `logic${bw > 1 ? ` [${bw - 1}:0]` : ''} ${netName};\n`;
+        const isStruct = cell.attributes.isStruct;
+        const structPackage = cell.attributes.structPackage;
+        const structTypeDef = cell.attributes.structTypeDef;
+        if (isStruct && structPackage && structTypeDef) {
+            code += `${structPackage}::${structTypeDef} ${netName};\n`;
+        } else {
+            code += `logic${bw > 1 ? ` [${bw - 1}:0]` : ''} ${netName};\n`;
+        }
     });
     complexLogicCells.forEach(cell => {
         const netName = getPortName(cell);
@@ -411,6 +438,10 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
     });
     sramCells.forEach(cell => {
         const sramName = getPortName(cell);
+        const isStruct = cell.attributes.isStruct;
+        const structPkg = cell.attributes.structPackage;
+        const structType = cell.attributes.structTypeDef;
+
         const dataWidth = cell.attributes.bandwidth;
         const depth = 1 << cell.attributes.addressBandwidth; // 2^addressBandwidth
 
@@ -428,7 +459,11 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
 
         const clkEdge = cell.attributes.clkEdge === 'falling' ? 'negedge' : 'posedge';
 
-        code += `logic [${dataWidth - 1}:0] ${sramName} [0:${depth - 1}];\n\n`;
+        if (isStruct && structPkg && structType) {
+            code += `${structPkg}::${structType} ${sramName} [0:${depth - 1}];\n\n`;
+        } else {
+            code += `logic [${dataWidth - 1}:0] ${sramName} [0:${depth - 1}];\n\n`;
+        }
 
         code += `always_ff @(${clkEdge} ${clkSignal}) begin\n`;
         code += `    if (${weSignal}) begin\n`;
@@ -452,8 +487,6 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         }
     });
 
-
-    code += `// End of generated code\nendmodule\n`;
 
     return code;
 }

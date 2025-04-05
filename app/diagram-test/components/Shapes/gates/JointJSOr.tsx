@@ -39,6 +39,7 @@ export const JointJSOr = (or: Or) => {
             id: `input${i}`,
             group: 'input',
             bandwidth: or.dataBandwidth,
+            isStruct: false,
             args: { x: finalX, y: finalY }
         });
     }
@@ -47,6 +48,7 @@ export const JointJSOr = (or: Or) => {
         id: 'output1',
         group: 'output',
         bandwidth: or.dataBandwidth,
+        isStruct: false,
         args: {
             x: dimension,
             y: dimension / 2

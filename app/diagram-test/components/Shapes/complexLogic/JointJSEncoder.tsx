@@ -10,6 +10,7 @@ export const JointJSEncoder = (encoder: Encoder) => {
         id: 'input1',
         group: 'input',
         bandwidth: encoder.dataBandwidth,
+        isStruct: false,
         args: {
             x: 0,
             y: dimension / 2
@@ -20,6 +21,7 @@ export const JointJSEncoder = (encoder: Encoder) => {
         id: 'output1',
         group: 'output',
         bandwidth: Math.ceil(Math.log2(encoder.dataBandwidth)),
+        isStruct: false,
         args: {
             x: dimension / 2,
             y: dimension / 2

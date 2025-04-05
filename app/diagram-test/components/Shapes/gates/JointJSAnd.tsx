@@ -13,6 +13,7 @@ export const JointJSAnd = (and: And) => {
             id: `input${i}`,
             group: 'input',
             bandwidth: and.dataBandwidth,
+            isStruct: false,
             args: {
                 x: 0,
                 y: portY,
@@ -24,6 +25,7 @@ export const JointJSAnd = (and: And) => {
         id: 'output1',
         group: 'output',
         bandwidth: and.dataBandwidth,
+        isStruct: false,
         args: {
             x: dimension,
             y: dimension / 2

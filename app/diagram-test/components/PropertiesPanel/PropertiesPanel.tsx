@@ -82,17 +82,21 @@ interface Properties {
 }
 
 
-interface UnifiedStructField {
+export interface UnifiedStructField {
     name: string;
     type: string;
+    startBit: number;
+    endBit: number;
+    bandwidth: number;
 }
 
-interface UnifiedStructType {
+export interface UnifiedStructType {
     name: string;
     fields: UnifiedStructField[];
+    isPacked?: boolean;
 }
 
-interface UnifiedPackage {
+export interface UnifiedPackage {
     name: string;
     structs: UnifiedStructType[];
 }
@@ -100,7 +104,7 @@ interface UnifiedPackage {
 
 
 const PropertiesPanel = () => {
-    const { selectedElement, graph, setSelectedElement, setHasFormErrors, selectedLanguage, setSelectedLanguage } = useDiagramContext();
+    const { selectedElement, graph, setSelectedElement, setHasFormErrors, selectedLanguage, setSelectedLanguage, parseResults, setParseResults } = useDiagramContext();
     const [properties, setProperties] = useState<Properties>({
         label: '',
         instance: '',
@@ -134,7 +138,6 @@ const PropertiesPanel = () => {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [clipboardCell, setClipboardCell] = useState<dia.Cell | null>(null);
     const panelRef = useRef<HTMLDivElement | null>(null);
-    const [parseResults, setParseResults] = useState<UnifiedPackage[]>([]);
     const elementTypes = {
         'input': { class: Port, create: JointJSInputPort },
         'output': { class: Port, create: JointJSOutputPort },
@@ -498,8 +501,18 @@ const PropertiesPanel = () => {
             if (elType === 'alu') {
                 elementData.type = properties.aluType || '+';
             }
-            if (['input', 'output', 'combiner', 'splitter', 'multiplexer', 'register', 'sram'].includes(elType)) {
+            if (['input', 'output', 'multiplexer', 'register', 'sram'].includes(elType)) {
                 if (properties.bandwidthType === 'struct') {
+                    elementData.structPackage = properties.structPackage || '';
+                    elementData.structTypeDef = properties.structTypeDef || '';
+                }
+                else {
+                    elementData.structPackage = '';
+                    elementData.structTypeDef = '';
+                }
+            }
+            if (['combiner', 'splitter'].includes(elType)) {
+                if (properties.bitPortType === 'struct') {
                     elementData.structPackage = properties.structPackage || '';
                     elementData.structTypeDef = properties.structTypeDef || '';
                 }
@@ -570,7 +583,13 @@ const PropertiesPanel = () => {
             }
 
             graph.removeCells([selectedElement]);
-            const newElement = elementType.create(elementData);
+            let newElement;
+            if (elType === 'splitter' || elType === 'combiner') {
+                newElement = elementType.create(elementData, parseResults);
+            }
+            else {
+                newElement = elementType.create(elementData);
+            }
             graph.addCell(newElement);
             setSelectedElement(newElement);
 

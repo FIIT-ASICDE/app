@@ -46,7 +46,7 @@ import { api } from "@/lib/trpc/react";
 
 const DiagramArea = () => {
     const paperElement = useRef<HTMLDivElement>(null);
-    const { graph, repository, activeFile } = useDiagramContext();
+    const { graph, repository, activeFile, parseResults } = useDiagramContext();
     const [isReady, setIsReady] = useState(false);
 
 
@@ -335,13 +335,13 @@ const DiagramArea = () => {
             const splitter = new Splitter();
             splitter.name = elementName;
             splitter.position = {x, y};
-            element = JointJSSplitter(splitter);
+            element = JointJSSplitter(splitter, parseResults);
             break;
         case 'combiner':
             const combiner = new Combiner();
             combiner.name = elementName;
             combiner.position = {x, y};
-            element = JointJSCombiner(combiner);
+            element = JointJSCombiner(combiner, parseResults);
             break;
         default:
             return;

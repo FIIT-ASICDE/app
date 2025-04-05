@@ -16,9 +16,7 @@ export interface VhdlPackage {
     structs: VhdlStructType[];
 }
 
-/**
- * Lightweight VHDL parser with startBit/endBit/bandwidth calculation
- */
+
 export function parseVHDLTextFromRegex(text: string): VhdlPackage[] {
     const packages: VhdlPackage[] = [];
 

@@ -15,6 +15,7 @@ export const JointJSAlu = (alu: Alu) => {
         id: 'input1',
         group: 'input',
         bandwidth: alu.dataBandwidth,
+        isStruct: false,
         args: {
             x: 0,
             y: 25
@@ -25,6 +26,7 @@ export const JointJSAlu = (alu: Alu) => {
         id: 'input2',
         group: 'input',
         bandwidth: alu.dataBandwidth,
+        isStruct: false,
         args: {
             x: 0,
             y: dimension - 25
@@ -35,6 +37,7 @@ export const JointJSAlu = (alu: Alu) => {
         id: 'output1',
         group: 'output',
         bandwidth: outputBandwidth,
+        isStruct: false,
         args: {
             x: dimension / 2,
             y: dimension / 2

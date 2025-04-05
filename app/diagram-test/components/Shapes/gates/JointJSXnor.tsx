@@ -39,6 +39,7 @@ export const JointJSXnor = (xnor: Xnor) => {
             id: `input${i}`,
             group: 'input',
             bandwidth: xnor.dataBandwidth,
+            isStruct: false,
             args: { x: finalX, y: finalY }
         });
     }
@@ -47,6 +48,7 @@ export const JointJSXnor = (xnor: Xnor) => {
         id: 'output1',
         group: 'output',
         bandwidth: xnor.dataBandwidth,
+        isStruct: false,
         args: {
             x: dimension,
             y: dimension / 2

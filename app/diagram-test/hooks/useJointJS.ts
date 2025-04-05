@@ -15,7 +15,8 @@ const highlightSettings = {
 function highlightAllInputPorts(
     graph: dia.Graph,
     neededBw: number,
-    sourceElemId: string
+    sourceElemId: string,
+    sourcePort: any
 ) {
     const elements = graph.getElements();
     elements.forEach((elem) => {
@@ -24,23 +25,33 @@ function highlightAllInputPorts(
         const ports = elem.get('ports')?.items || [];
         ports.forEach((p) => {
             if (p.group === 'input') {
-                let portBw = p.bandwidth ?? -1;
-                if (elem.attributes.elType === 'splitter') {
-                    const ports = elem.get('ports')?.items ?? [];
-                    const outputPorts = ports.filter((p: any) => p.group === 'output');
-                    const maxEndBit = outputPorts.reduce((max: number, p: any) => {
-                        const bw = p.endBit ?? 0;
-                        return bw > max ? bw : max;
-                    }, 0);
-                    portBw = maxEndBit + 1;
+                if (sourcePort.isStruct) {
+                    if (areStructPortsCompatible(sourcePort, p)) {
+                        elem.portProp(p.id, 'attrs/portCircle/fill', 'green');
+                    }
+                    else {
+                        elem.portProp(p.id, 'attrs/portCircle/fill', 'red');
+                    }
                 }
-                if (elem.attributes.elType === 'splitter' && portBw <= neededBw){
-                    elem.portProp(p.id, 'attrs/portCircle/fill', 'green');
-                }
-                else if (elem.attributes.elType !== 'splitter' && portBw === neededBw) {
-                    elem.portProp(p.id, 'attrs/portCircle/fill', 'green');
-                } else {
-                    elem.portProp(p.id, 'attrs/portCircle/fill', 'red');
+                else {
+                    let portBw = p.bandwidth ?? -1;
+                    if (elem.attributes.elType === 'splitter') {
+                        const ports = elem.get('ports')?.items ?? [];
+                        const outputPorts = ports.filter((p: any) => p.group === 'output');
+                        const maxEndBit = outputPorts.reduce((max: number, p: any) => {
+                            const bw = p.endBit ?? 0;
+                            return bw > max ? bw : max;
+                        }, 0);
+                        portBw = maxEndBit + 1;
+                    }
+                    if (elem.attributes.elType === 'splitter' && portBw <= neededBw){
+                        elem.portProp(p.id, 'attrs/portCircle/fill', 'green');
+                    }
+                    else if (elem.attributes.elType !== 'splitter' && portBw === neededBw) {
+                        elem.portProp(p.id, 'attrs/portCircle/fill', 'green');
+                    } else {
+                        elem.portProp(p.id, 'attrs/portCircle/fill', 'red');
+                    }
                 }
             }
         });
@@ -67,13 +78,39 @@ function resetAllPortsColor(graph: dia.Graph) {
     });
 }
 
-function getPort(magnet: Element | null): string | null {
+function getPortId(magnet: Element | null): string | null {
     if (!magnet) return null;
     let port = magnet.getAttribute('port');
     if (!port && magnet.parentElement) {
         port = magnet.parentElement.getAttribute('port');
     }
     return port;
+}
+function getPort(cell: dia.Cell, portId: string| null) {
+    return cell.get('ports')?.items?.find((p: any) => p.id === portId);
+}
+
+function areStructPortsCompatible(sourcePort: any, targetPort: any): boolean {
+    return (
+        sourcePort.structPackage === targetPort.structPackage &&
+        sourcePort.structTypeDef === targetPort.structTypeDef
+    );
+}
+
+function validateStructOrBandwidthConnection(
+    sourcePort: any,
+    targetPort: any,
+): boolean {
+    const sourceIsStruct = sourcePort.isStruct;
+    const targetIsStruct = targetPort.isStruct;
+
+    if (sourceIsStruct !== targetIsStruct) return false;
+
+    if (sourceIsStruct && targetIsStruct) {
+        return areStructPortsCompatible(sourcePort, targetPort);
+    } else {
+        return false;
+    }
 }
 
 
@@ -208,9 +245,6 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
                         return false;
                     }
 
-
-
-
                     function getPortGroup(magnet: Element | null): string | null {
                         if (!magnet) return null;
                         let group = magnet.getAttribute('port-group');
@@ -220,37 +254,46 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
                         return group;
                     }
 
-                    const sourcePortId = getPort(sourceMagnet);
+                    const sourcePortId = getPortId(sourceMagnet);
                     const sourcePortGroup = getPortGroup(sourceMagnet);
-                    const targetPortId = getPort(targetMagnet);
+                    const targetPortId = getPortId(targetMagnet);
                     const targetPortGroup = getPortGroup(targetMagnet);
+                    const sourcePort = getPort(sourceView.model, sourcePortId);
+                    const targetPort = getPort(targetView.model, targetPortId);
 
                     if (!sourcePortId || !targetPortId) {
                         return false;
                     }
 
-                    const sourceBw = getPortBandwidth(sourceView.model, sourcePortId);
-                    let targetBw = getPortBandwidth(targetView.model, targetPortId);
+                    if (!sourcePort.isStruct) {
+                        const sourceBw = getPortBandwidth(sourceView.model, sourcePortId);
+                        let targetBw = getPortBandwidth(targetView.model, targetPortId);
 
-                    if (targetView.model.attributes.elType === 'splitter') {
-                        const ports = targetView.model.get('ports')?.items ?? [];
-                        const outputPorts = ports.filter((p: any) => p.group === 'output');
-                        const maxEndBit = outputPorts.reduce((max: number, p: any) => {
-                            const bw = p.endBit ?? 0;
-                            return bw > max ? bw : max;
-                        }, 0);
-                        targetBw = maxEndBit + 1;
-                    }
+                        if (targetView.model.attributes.elType === 'splitter') {
+                            const ports = targetView.model.get('ports')?.items ?? [];
+                            const outputPorts = ports.filter((p: any) => p.group === 'output');
+                            const maxEndBit = outputPorts.reduce((max: number, p: any) => {
+                                const bw = p.endBit ?? 0;
+                                return bw > max ? bw : max;
+                            }, 0);
+                            targetBw = maxEndBit + 1;
+                        }
 
-                    if (sourceBw < 0 || targetBw < 0) {
-                        return false;
-                    }
+                        if (sourceBw < 0 || targetBw < 0) {
+                            return false;
+                        }
 
-                    if (targetView.model.attributes.elType === 'splitter' && sourceBw < targetBw){
-                        return false;
+                        if (targetView.model.attributes.elType === 'splitter' && sourceBw < targetBw){
+                            return false;
+                        }
+                        if (targetView.model.attributes.elType !== 'splitter' && sourceBw !== targetBw) {
+                            return false;
+                        }
                     }
-                    if (targetView.model.attributes.elType !== 'splitter' && sourceBw !== targetBw) {
-                        return false;
+                    else {
+                        if (!areStructPortsCompatible(sourcePort, targetPort)) {
+                            return false;
+                        }
                     }
 
                     if (sourcePortGroup !== 'output' || targetPortGroup !== 'input') {
@@ -423,13 +466,14 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
                 if (!magnet) return;
                 const sourcePortGroup = magnet.getAttribute('port-group');
                 if (sourcePortGroup === 'output') {
-                    const portId = getPort(magnet);
+                    const portId = getPortId(magnet);
+                    const sourcePort = getPort(elementView.model, portId);
                     if (!portId) return;
                     const sourceBw = getPortBandwidth(elementView.model, portId);
                     currentLinkBandwidthRef.current = (sourceBw === 1) ? 1 : 3;
                     isLinkingRef.current = true;
                     const sourceElemId = elementView.model.id;
-                    highlightAllInputPorts(graph, sourceBw, sourceElemId);
+                    highlightAllInputPorts(graph, sourceBw, sourceElemId, sourcePort);
                 }
             });
 

@@ -1,30 +1,60 @@
 import { Combiner } from "@/app/diagram-test/components/Shapes/classes/combiner";
 import { shapes } from "@joint/core";
+import { UnifiedPackage } from "@/app/diagram-test/components/PropertiesPanel/PropertiesPanel";
 
-export const JointJSCombiner = (combiner: Combiner) => {
+export const JointJSCombiner = (combiner: Combiner, parseResults: UnifiedPackage[]) => {
 
     const combineInPorts = combiner.inPorts || [];
     const inCount = combineInPorts.length;
-    const dimension = 100 + (inCount - 2) * 20;
+    let dimension = 100 + (inCount - 2) * 20;
     const totalBandwidth = combineInPorts.reduce((sum, port) => sum + port.dataBandwidth, 0);
-
+    const isStruct = combiner.structPackage ? combiner.structPackage.length > 0 : false;
 
     const portItems = [];
-    for (let i = 0; i < inCount; i++) {
-        const portY = (dimension / (inCount + 1)) * (i+1);
-        portItems.push({
-            id: `input${i}`,
-            bandwidth: combineInPorts[i].dataBandwidth,
-            name: combineInPorts[i].name,
-            group: 'input',
-            args: { x: 0, y: portY }
-        });
+
+    if (isStruct) {
+        const targetPackage = parseResults.find(pkg => pkg.name === combiner.structPackage);
+        const targetStruct = targetPackage?.structs.find(s => s.name === combiner.structTypeDef);
+
+        if (targetStruct) {
+            dimension = 100 + (targetStruct.fields.length - 2) * 20;
+            for (let i = 0; i < targetStruct.fields.length; i++) {
+                const field = targetStruct.fields[i];
+                const portY = (dimension / (targetStruct.fields.length + 1)) * (i+1);
+
+                portItems.push({
+                    id: `input${i}`,
+                    name: field.name,
+                    isStruct: false,
+                    group: 'input',
+                    bandwidth: field.bandwidth,
+                    args: { x: 0, y: portY }
+                });
+            }
+        }
     }
+    else {
+        for (let i = 0; i < inCount; i++) {
+            const portY = (dimension / (inCount + 1)) * (i+1);
+            portItems.push({
+                id: `input${i}`,
+                bandwidth: combineInPorts[i].dataBandwidth,
+                name: combineInPorts[i].name,
+                isStruct: false,
+                group: 'input',
+                args: { x: 0, y: portY }
+            });
+        }
+    }
+
 
     portItems.push({
         id: 'output1',
         group: 'output',
         bandwidth: totalBandwidth,
+        isStruct: isStruct,
+        structPackage: combiner.structPackage,
+        structTypeDef: combiner.structTypeDef,
         args: {
             x: dimension/2,
             y: dimension / 2
@@ -40,6 +70,7 @@ export const JointJSCombiner = (combiner: Combiner) => {
         combineInPorts: combineInPorts,
         structPackage: combiner.structPackage,
         structTypeDef: combiner.structTypeDef,
+        isStruct: isStruct,
         position: { x: combiner.position?.x || 100, y: combiner.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {

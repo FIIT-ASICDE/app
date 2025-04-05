@@ -17,10 +17,6 @@ export interface Package {
     structs: StructType[];
 }
 
-/**
- * Improved parser for SystemVerilog using regular expressions.
- * Handles packed structs and assigns correct startBit, endBit, and bandwidth.
- */
 export function parseSystemVerilogTextFromRegex(svText: string): Package[] {
     const packages: Package[] = [];
 

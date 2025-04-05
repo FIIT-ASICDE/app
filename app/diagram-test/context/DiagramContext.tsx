@@ -7,6 +7,25 @@ import { Repository, FileDisplayItem, RepositoryItem } from "@/lib/types/reposit
 
 export type LanguageOption = "SystemVerilog" | "VHDL";
 
+export interface UnifiedStructField {
+    name: string;
+    type: string;
+    startBit: number;
+    endBit: number;
+    bandwidth: number;
+}
+
+export interface UnifiedStructType {
+    name: string;
+    fields: UnifiedStructField[];
+    isPacked?: boolean;
+}
+
+export interface UnifiedPackage {
+    name: string;
+    structs: UnifiedStructType[];
+}
+
 interface DiagramContextProps {
     graph: dia.Graph;
     paper: dia.Paper | null;
@@ -26,6 +45,8 @@ interface DiagramContextProps {
     setTree: React.Dispatch<React.SetStateAction<RepositoryItem[]>>;
     selectedLanguage: LanguageOption;
     setSelectedLanguage: (lang: LanguageOption) => void;
+    parseResults:UnifiedPackage[];
+    setParseResults: (parseResults: UnifiedPackage[]) => void;
 }
 
 export const DiagramContext = createContext<DiagramContextProps | undefined>(undefined);
@@ -46,6 +67,8 @@ export const DiagramProvider = ({ children, repository, activeFile, tree, setTre
     const [selectedElement, setSelectedElement] = useState<dia.Cell | null>(null);
     const [hasFormErrors, setHasFormErrors] = useState<boolean>(false);
     const [selectedLanguage, setSelectedLanguage] = useState<LanguageOption>("SystemVerilog");
+    const [parseResults, setParseResults] = useState<UnifiedPackage[]>([]);
+
 
     const updateElement = (cell: dia.Cell) => {
         graph.addCell(cell);
@@ -104,7 +127,9 @@ export const DiagramProvider = ({ children, repository, activeFile, tree, setTre
                 tree,
                 setTree,
                 selectedLanguage,
-                setSelectedLanguage
+                setSelectedLanguage,
+                parseResults,
+                setParseResults
             }}
         >
             {children}

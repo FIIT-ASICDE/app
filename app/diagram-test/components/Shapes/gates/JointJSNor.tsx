@@ -39,6 +39,7 @@ export const JointJSNor = (nor: Nor) => {
             id: `input${i}`,
             group: 'input',
             bandwidth: nor.dataBandwidth,
+            isStruct: false,
             args: { x: finalX, y: finalY }
         });
     }
@@ -47,6 +48,7 @@ export const JointJSNor = (nor: Nor) => {
         id: 'output1',
         group: 'output',
         bandwidth: nor.dataBandwidth,
+        isStruct: false,
         args: {
             x: dimension,
             y: dimension / 2
