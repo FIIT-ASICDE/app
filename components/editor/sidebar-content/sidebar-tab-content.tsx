@@ -1,7 +1,7 @@
 "use client";
 
 import { commitSchema } from "@/lib/schemas/git-schemas";
-import type { SidebarContentTab } from "@/lib/types/editor";
+import type { Configuration, SidebarContentTab } from "@/lib/types/editor";
 import type {
     Repository,
     RepositoryItem,
@@ -13,6 +13,7 @@ import { z } from "zod";
 import { FileExplorerTabContent } from "@/components/editor/sidebar-content/file-explorer/file-explorer-tab-content";
 import { SearchTabContent } from "@/components/editor/sidebar-content/search/search-tab-content";
 import { SourceControlTabContent } from "@/components/editor/sidebar-content/source-control/source-control-tab-content";
+import { ConfigurationTabContent } from "@/components/editor/sidebar-content/configuration/configuration-tab-content";
 
 interface SidebarTabContentProps {
     activeSidebarContent: SidebarContentTab;
@@ -26,6 +27,8 @@ interface SidebarTabContentProps {
         action: (data: z.infer<typeof commitSchema>) => Promise<void>;
         isLoading: boolean;
     };
+    configuration: Configuration | undefined;
+    setConfigurationAction: Dispatch<SetStateAction<Configuration | undefined>>;
 }
 
 export const SidebarTabContent = ({
@@ -37,6 +40,8 @@ export const SidebarTabContent = ({
     handleCloseSidebarAction,
     onFileClick,
     onCommit,
+    configuration,
+    setConfigurationAction,
 }: SidebarTabContentProps) => {
     return (
         <div className="flex h-full">
@@ -62,6 +67,14 @@ export const SidebarTabContent = ({
                     handleCloseSidebarAction={handleCloseSidebarAction}
                     onCommitAction={onCommit.action}
                     isLoading={onCommit.isLoading}
+                />
+            )}
+            {activeSidebarContent === "configuration" && (
+                <ConfigurationTabContent
+                    repository={repository}
+                    handleCloseSidebarAction={handleCloseSidebarAction}
+                    configuration={configuration}
+                    setConfigurationAction={setConfigurationAction}
                 />
             )}
         </div>

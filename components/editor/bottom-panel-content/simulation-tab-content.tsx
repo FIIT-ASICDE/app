@@ -2,13 +2,16 @@ import { ChevronRight } from "lucide-react";
 
 import { CloseButton } from "@/components/editor/navigation/close-button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Configuration } from "@/lib/types/editor";
 
 interface SimulationTabContentProps {
     handleCloseBottomPanel: () => void;
+    configuration: Configuration | undefined;
 }
 
 export const SimulationTabContent = ({
     handleCloseBottomPanel,
+    configuration,
 }: SimulationTabContentProps) => {
     return (
         <div className="relative w-full text-nowrap p-4 pt-14">
@@ -26,6 +29,10 @@ export const SimulationTabContent = ({
                         <span className="text-sm">
                             Simulation output terminal
                         </span>
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="text-muted-foreground text-sm">Type: {configuration?.simulation.type}</span>
+                        <span className="text-muted-foreground text-sm">TestBench: {configuration?.simulation.testBench.absolutePath}</span>
                     </div>
                 </div>
             </ScrollArea>

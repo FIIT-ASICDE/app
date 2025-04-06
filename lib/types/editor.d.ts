@@ -1,6 +1,10 @@
 import { FileDisplayItem, FileItem } from "@/lib/types/repository";
 
-export type SidebarContentTab = "fileExplorer" | "search" | "sourceControl";
+export type SidebarContentTab =
+    | "fileExplorer"
+    | "search"
+    | "sourceControl"
+    | "configuration";
 
 export type BottomPanelContentTab =
     | "simulation"
@@ -13,7 +17,20 @@ export type SimulationType =
     | "verilatorSystemVerilog"
     | "icarusVerilog";
 
-export type SimulationConfiguration = {
-    simulationType: SimulationType;
-    testBenchFile: FileDisplayItem | FileItem;
+export type SynthesisType =
+    | "yosys";
+
+type SimulationConfiguration = {
+    type: SimulationType;
+    testBench: FileItem | FileDisplayItem;
+};
+
+type SynthesisConfiguration = {
+    type: SynthesisType;
+    file: FileItem | FileDisplayItem;
+};
+
+export type Configuration = {
+    simulation: SimulationConfiguration;
+    synthesis: SynthesisConfiguration;
 };
