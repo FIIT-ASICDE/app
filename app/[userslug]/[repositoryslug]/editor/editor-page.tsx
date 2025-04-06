@@ -3,10 +3,8 @@
 import { commitSchema } from "@/lib/schemas/git-schemas";
 import { api } from "@/lib/trpc/react";
 import type {
-    BottomPanelContentTab,
-    SidebarContentTab,
-    SimulationConfiguration,
-    SimulationType,
+    BottomPanelContentTab, Configuration,
+    SidebarContentTab
 } from "@/lib/types/editor";
 import type {
     FileDisplayItem,
@@ -60,9 +58,14 @@ export default function EditorPage({ repository }: EditorPageProps) {
     const [activeFile, setActiveFile] = useState<FileDisplayItem | null>(null);
     const [openFiles, setOpenFiles] = useState<Array<FileDisplayItem>>([]);
 
-    const [simulationConfiguration, setSimulationConfiguration] = useState<
-        SimulationConfiguration | undefined
-    >(undefined);
+    const [configuration, setConfiguration] = useState<Configuration | undefined>(undefined);
+
+    useEffect(() => {
+        const conf: string | null = localStorage.getItem('configuration');
+        if (conf) {
+            setConfiguration(JSON.parse(conf));
+        }
+    }, []);
 
     const [tree, setTree] = useState<Array<RepositoryItem>>(
         repository.tree ?? [],
@@ -114,16 +117,23 @@ export default function EditorPage({ repository }: EditorPageProps) {
         }
     };
 
-    const onStartSimulation = (
-        selectedType: SimulationType,
-        selectedFile: RepositoryItem,
-    ) => {
+    const onStartSimulation = () => {
         // TODO: adam start simulation
         console.log(
             "Starting simulation with type: " +
-                selectedType +
+                configuration?.simulation.type +
                 " and file: " +
-                selectedFile!.name,
+                configuration?.simulation.testBench.absolutePath,
+        );
+    };
+
+    const onStartSynthesis = () => {
+        // TODO: maxo start synthesis
+        console.log(
+            "Starting synthesis with type: " +
+                configuration?.synthesis.type +
+                " and file: " +
+                configuration?.synthesis.file.absolutePath
         );
     };
 
@@ -224,11 +234,10 @@ export default function EditorPage({ repository }: EditorPageProps) {
                     lastOpenedBottomPanelSize,
                     setLastOpenedBottomPanelSize,
                 }}
-                simulationProps={{
-                    onStartSimulation,
-                    simulationConfiguration,
-                    setSimulationConfiguration,
-                }}
+                onStartSimulation={onStartSimulation}
+                onStartSynthesis={onStartSynthesis}
+                configuration={configuration}
+                setConfiguration={setConfiguration}
                 isGitRepo={repository.isGitRepo}
                 repository={repository}
             />
@@ -271,6 +280,8 @@ export default function EditorPage({ repository }: EditorPageProps) {
                                     action: handleOnCommit,
                                     isLoading: commitMutation.isPending,
                                 }}
+                                configuration={configuration}
+                                setConfigurationAction={setConfiguration}
                             />
                         </ResizablePanel>
 
@@ -310,6 +321,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
                     <BottomPanelTabContent
                         activeBottomPanelContent={activeBottomPanelContent}
                         handleCloseBottomPanel={handleCloseBottomPanel}
+                        configuration={configuration}
                     />
                 </ResizablePanel>
             </ResizablePanelGroup>
