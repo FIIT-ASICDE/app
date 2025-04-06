@@ -1,7 +1,7 @@
 "use client";
 
 import { commitSchema } from "@/lib/schemas/git-schemas";
-import { api } from "@/lib/trpc/react";
+import { api, RouterInputs } from "@/lib/trpc/react";
 import type {
     BottomPanelContentTab, Configuration,
     SidebarContentTab
@@ -94,6 +94,70 @@ export default function EditorPage({ repository }: EditorPageProps) {
         },
     });
 
+    const [verilatorCppInput, setVerilatorCppInput] = useState<RouterInputs["simulation"]["simulateVerilatorCppStream"] | null>(null);
+
+    const resultVerilatorCpp = api.simulation.simulateVerilatorCppStream.useQuery(verilatorCppInput!, {
+        enabled: !!verilatorCppInput,
+    });
+
+
+    const [verilatorSvInput, setVerilatorSvInput] = useState<RouterInputs["simulation"]["simulateVerilatorSvStream"] | null>(null);
+
+    const resultVerilatorSv = api.simulation.simulateVerilatorSvStream.useQuery(verilatorSvInput!, {
+        enabled: !!verilatorSvInput,
+    });
+
+    const [icarusInput, setIcarusInput] = useState<RouterInputs["simulation"]["simulateIcarusVerilogStream"] | null>(null);
+
+    const resultIcarus = api.simulation.simulateIcarusVerilogStream.useQuery(icarusInput!, {
+        enabled: !!icarusInput,
+    });
+
+    const onStartSimulation = () => {
+        // TODO: adam start simulation
+        console.log(configuration?.simulation.type)
+        console.log(configuration?.simulation.testBench)
+
+        // simulateMutation.mutate({
+        //     repoId: repository.id,
+        //     testbenchPath: selectedTestbenchFile.absolutePath,
+        //     svPath: selectedSvFile.absolutePath
+        // });
+
+
+        console.log(
+            "Starting simulation with type: " +
+            configuration?.simulation.type +
+            " and file: " +
+            configuration?.simulation.testBench,
+        );
+
+        if(configuration?.simulation.type === "verilatorC++") {
+            const newInput = {
+                repoId: repository.id,
+                testbenchPath: configuration?.simulation.testBench.absolutePath,
+            };
+            setVerilatorCppInput(newInput); // <- toto spustí subscription
+        }
+
+
+        if(configuration?.simulation.type === "verilatorSystemVerilog") {
+            const newInput = {
+                repoId: repository.id,
+                testbenchPath: configuration?.simulation.testBench.absolutePath,
+            };
+            setVerilatorSvInput(newInput); // <- toto spustí subscription
+        }
+
+        if(configuration?.simulation.type === "icarusVerilog") {
+            const newInput = {
+                repoId: repository.id,
+                testbenchPath: configuration?.simulation.testBench.absolutePath,
+            };
+            setIcarusInput(newInput); // <- toto spustí subscription
+        }
+    };
+
     const handleOnCommit = async (data: z.infer<typeof commitSchema>) => {
         await commitMutation.mutateAsync(data);
         await changes.refetch();
@@ -115,16 +179,6 @@ export default function EditorPage({ repository }: EditorPageProps) {
             verticalGroupRef.current.setLayout([100, 0]);
             setVerticalCollapsed(true);
         }
-    };
-
-    const onStartSimulation = () => {
-        // TODO: adam start simulation
-        console.log(
-            "Starting simulation with type: " +
-                configuration?.simulation.type +
-                " and file: " +
-                configuration?.simulation.testBench.absolutePath,
-        );
     };
 
     const onStartSynthesis = () => {
@@ -322,6 +376,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
                         activeBottomPanelContent={activeBottomPanelContent}
                         handleCloseBottomPanel={handleCloseBottomPanel}
                         configuration={configuration}
+                        simulationOutput={resultVerilatorCpp.data ?? resultIcarus.data ?? resultVerilatorSv.data ?? []}
                     />
                 </ResizablePanel>
             </ResizablePanelGroup>
