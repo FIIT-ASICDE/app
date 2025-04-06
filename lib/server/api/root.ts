@@ -4,6 +4,7 @@ import { orgRouter } from "@/lib/server/api/routers/orgs";
 import { repoRouter } from "@/lib/server/api/routers/repos";
 import { userRouter } from "@/lib/server/api/routers/user";
 import { createCallerFactory, createTRPCRouter } from "@/lib/server/api/trpc";
+import { simulationRouter } from "@/lib/server/api/routers/simulation";
 
 /**
  * This is the primary router for your server.
@@ -16,6 +17,7 @@ export const appRouter = createTRPCRouter({
     repo: repoRouter,
     git: gitRouter,
     editor: editorRouter,
+    simulation: simulationRouter
 });
 
 // export type definition of API
