@@ -5,6 +5,8 @@ let languageCompletionProviders: { [key: string]: boolean } = {};
 
 const languageToSnippetFileMap: { [key: string]: string } = {
     systemverilog: "systemverilog.json",
+    vhdl: "vhdl.json",
+    verilog: "verilog.json",
 };
 
 export async function loadSnippets(language: string) {
@@ -15,8 +17,7 @@ export async function loadSnippets(language: string) {
     }
 
     try {
-        console.log(`Fetching snippets for ${language}`);
-        const response = await fetch(`/${snippetFile}`);
+        const response = await fetch(`/snippets/${snippetFile}`);
         const snippets = await response.json();
         snippetsCache[language] = snippets;
 

@@ -4,11 +4,11 @@ import { RoleOrganisationFilter } from "@/lib/types/organisation";
 import {
     DirectoryItem,
     FavoriteRepositoriesFilter,
-    FileDisplayItem,
+    FileDisplayItem, FileItem,
     PinnedRepositoriesFilter,
     PublicRepositoriesFilter,
     RepositoryItem,
-    RepositoryItemChange,
+    RepositoryItemChange
 } from "@/lib/types/repository";
 
 import { RepositoryItemChangeIcon } from "@/components/editor/changes/repository-item-change-icon";
@@ -481,4 +481,29 @@ export const handleToggle = (
             setExpandedItemsAction(filteredExpandedItems);
         }
     }
+};
+
+export const getFilesFromRepo = (
+    tree: Array<RepositoryItem> | undefined
+): Array<FileDisplayItem | FileItem> => {
+    if (!tree) return [];
+
+    const files: Array<FileDisplayItem | FileItem> = [];
+
+    const traverseRepository = (item: RepositoryItem): void => {
+        if (item.type === "file" || item.type === "file-display") {
+            files.push(item);
+        }
+
+        if (item.type === "directory" && item.children) {
+            for (const child of item.children) {
+                traverseRepository(child);
+            }
+        }
+    };
+
+    for (const item of tree) {
+        traverseRepository(item);
+    }
+    return files;
 };

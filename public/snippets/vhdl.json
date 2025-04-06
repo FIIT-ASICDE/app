@@ -1,0 +1,386 @@
+{
+	"as": {
+		"prefix": "as",
+		"body": "assert ${1:false}\n\treport \"${2:The expression is false}\";$0",
+		"description": "assert default severity",
+		"scope": "source.vhdl"
+	},
+	"asw": {
+		"prefix": "asw",
+		"body": "assert ${1:false}\n\treport \"${2:The expression is false}\"\n\tseverity warning;$0",
+		"description": "assert warning",
+		"scope": "source.vhdl"
+	},
+	"ase": {
+		"prefix": "ase",
+		"body": "assert ${1:false}\n\treport \"${2:The expression is false}\"\n\tseverity error;$0",
+		"description": "assert error",
+		"scope": "source.vhdl"
+	},
+	"asf": {
+		"prefix": "asf",
+		"body": "assert ${1:false}\n\treport \"${2:The expression is false}\"\n\tseverity failure;$0",
+		"description": "assert failure",
+		"scope": "source.vhdl"
+	},
+	"arch": {
+		"prefix": "arch",
+		"body": "architecture ${1:rtl} of ${2:ent} is\n\n\tsignal $0\n\nbegin\n\nend architecture;",
+		"description": "architecture",
+		"scope": "source.vhdl"
+	},
+	"c": {
+		"prefix": "c",
+		"body": "constant ${1:name} : ${2:integer} := ${3:0};$0",
+		"description": "constant",
+		"scope": "source.vhdl"
+	},
+	"ca": {
+		"prefix": "ca",
+		"body": "case ${1:sig} is\n\n\twhen ${2:IDLE} =>\n\t\t$0\n\n\twhen others =>\n\nend case;",
+		"description": "case",
+		"scope": "source.vhdl"
+	},
+	"el": {
+		"prefix": "el",
+		"body": "else\n\t$0",
+		"description": "else",
+		"scope": "source.vhdl"
+	},
+	"eli": {
+		"prefix": "eli",
+		"body": "elsif ${1:true} then\n\t$0",
+		"description": "elsif",
+		"scope": "source.vhdl"
+	},
+	"ent": {
+		"prefix": "ent",
+		"body": "entity ${1:ent} is\n\tport (\n\t\t${2:clk : in std_logic;\n\t\trst : in std_logic;}\n\t\t${0:sig}\n\t);\nend ${1:ent};",
+		"description": "entity",
+		"scope": "source.vhdl"
+	},
+	"entarch": {
+		"prefix": "entarch",
+		"body": "entity ${1:ent} is\n\tport (\n\t\t${3:clk : in std_logic;\n\t\trst : in std_logic;}\n\t\t${0:sig}\n\t);\nend ${1:ent};\n\narchitecture ${2:rtl} of ${1:ent} is\n\n\n\nbegin\n\n\n\nend architecture;",
+		"description": "entity architecture",
+		"scope": "source.vhdl"
+	},
+	"fa": {
+		"prefix": "fa",
+		"body": "falling_edge(${1:clk})$0",
+		"description": "falling_edge()",
+		"scope": "source.vhdl"
+	},
+	"fo": {
+		"prefix": "fo",
+		"body": "for ${1:i} in ${2:0} to ${3:7} loop\n\t$0\nend loop;",
+		"description": "for loop",
+		"scope": "source.vhdl"
+	},
+	"fun": {
+		"prefix": "fun",
+		"body": "function ${1:name}(${2:params}) return ${3:boolean} is\nbegin\n\t$0\nend function;",
+		"description": "function",
+		"scope": "source.vhdl"
+	},
+	"gen": {
+		"prefix": "gen",
+		"body": "${1/(.*)/${1:/upcase}/}_GEN : for ${2:i} in ${3:0} to ${4:7} generate\n\t$0\nend generate;",
+		"description": "for generate",
+		"scope": "source.vhdl"
+	},
+	"ift": {
+		"prefix": "ift",
+		"body": "if ${1:true} then\n\t$0\nend if;",
+		"description": "if else",
+		"scope": "source.vhdl"
+	},
+	"ifte": {
+		"prefix": "ifte",
+		"body": "if ${1:true} then\n\t$2\nelse\n\t$0\nend if;",
+		"description": "if else",
+		"scope": "source.vhdl"
+	},
+	"incr": {
+		"prefix": "incr",
+		"body": "${1:counter} <= ${1:counter} + 1;",
+		"description": "s <= s + 1;",
+		"scope": "source.vhdl"
+	},
+	"decr": {
+		"prefix": "decr",
+		"body": "${1:counter} <= ${1:counter} - 1;",
+		"description": "s <= s - 1;",
+		"scope": "source.vhdl"
+	},
+	"int": {
+		"prefix": "int",
+		"body": "integer",
+		"description": "integer",
+		"scope": "source.vhdl"
+	},
+	"intd": {
+		"prefix": "intd",
+		"body": "integer range ${1:255} downto ${2:0}",
+		"description": "integer range x downto y",
+		"scope": "source.vhdl"
+	},
+	"intt": {
+		"prefix": "intt",
+		"body": "integer range ${1:0} to ${2:255}",
+		"description": "integer range x to y",
+		"scope": "source.vhdl"
+	},
+	"o0": {
+		"prefix": "o0",
+		"body": "(others => '0')",
+		"description": "(others => '0')",
+		"scope": "source.vhdl"
+	},
+	"o1": {
+		"prefix": "o1",
+		"body": "(others => '1')",
+		"description": "(others => '1')",
+		"scope": "source.vhdl"
+	},
+	"ox": {
+		"prefix": "ox",
+		"body": "(others => 'X')",
+		"description": "(others => 'X')",
+		"scope": "source.vhdl"
+	},
+	"pack": {
+		"prefix": "pack",
+		"body": "package ${1:pkg} is\n\t$0\nend package;${2:\n\npackage body ${1:pck} is\n\nend package body;}",
+		"description": "package",
+		"scope": "source.vhdl"
+	},
+	"pro": {
+		"prefix": "pro",
+		"body": "${1/(.*)/${1:/upcase}/}_PROC : process${2:(${3:sensitivity_list})}\nbegin\n\t$0\nend process;",
+		"description": "process",
+		"scope": "source.vhdl"
+	},
+	"proar": {
+		"prefix": "proar",
+		"body": "${1/(.*)/${1:/upcase}/}_PROC : process(clk, rst)\nbegin\n\tif rst = '1' then\n\t\t$0\n\n\telsif rising_edge(clk) then\n\n\n\tend if;\nend process;",
+		"description": "asynch process with reset",
+		"scope": "source.vhdl"
+	},
+	"pros": {
+		"prefix": "pros",
+		"body": "${1/(.*)/${1:/upcase}/}_PROC : process(clk)\nbegin\n\tif rising_edge(clk) then\n\t\t$0\n\tend if;\nend process;",
+		"description": "synch process",
+		"scope": "source.vhdl"
+	},
+	"profsm": {
+		"prefix": "profsm",
+		"body": "FSM_PROC : process(clk)\nbegin\n\tif rising_edge(clk) then\n\t\tif rst = '1' then\n\t\t\t${1:state} <= ${2:IDLE};\n\n\t\telse\n\t\t\tcase ${1:state} is\n\n\t\t\t\twhen ${2:IDLE} =>\n\t\t\t\t\t$0\n\n\t\t\tend case;\n\n\t\tend if;\n\tend if;\nend process;",
+		"description": "FSM process",
+		"scope": "source.vhdl"
+	},
+	"prosr": {
+		"prefix": "prosr",
+		"body": "${1/(.*)/${1:/upcase}/}_PROC : process(clk)\nbegin\n\tif rising_edge(clk) then\n\t\tif rst = '1' then\n\t\t\t$0\n\t\t\t\n\t\telse\n\t\t\t\n\t\t\t\n\t\tend if;\n\tend if;\nend process;",
+		"description": "synch process with reset",
+		"scope": "source.vhdl"
+	},
+	"proc": {
+		"prefix": "proc",
+		"body": "procedure ${1:name}(${2:params}) is\nbegin\n\t$0\nend procedure;",
+		"description": "procedure",
+		"scope": "source.vhdl"
+	},
+	"rep": {
+		"prefix": "rep",
+		"body": "report \"${1:This is a message}\";$0",
+		"description": "report a message",
+		"scope": "source.vhdl"
+	},
+	"ri": {
+		"prefix": "ri",
+		"body": "rising_edge(${1:clk})$0",
+		"description": "rising_edge()",
+		"scope": "source.vhdl"
+	},
+	"s": {
+		"prefix": "s",
+		"body": "signal ${1:name} : ${0:std_logic};",
+		"description": "signal",
+		"scope": "source.vhdl"
+	},
+	"sh": {
+		"prefix": "sh",
+		"body": "shared variable ${1:name} : ${2:ptype};$0",
+		"description": "shared variable",
+		"scope": "source.vhdl"
+	},
+	"si": {
+		"prefix": "si",
+		"body": "signed",
+		"description": "signed",
+		"scope": "source.vhdl"
+	},
+	"sid": {
+		"prefix": "sid",
+		"body": "signed(${1:7} downto ${2:0})$0",
+		"description": "signed(x downto y)",
+		"scope": "source.vhdl"
+	},
+	"sit": {
+		"prefix": "sit",
+		"body": "signed(${1:0} to ${2:7})$0",
+		"description": "signed(x to y)",
+		"scope": "source.vhdl"
+	},
+	"sir": {
+		"prefix": "sir",
+		"body": "signed(${1:sig}'range)$0",
+		"description": "signed(sig'range)",
+		"scope": "source.vhdl"
+	},
+	"sl": {
+		"prefix": "sl",
+		"body": "std_logic",
+		"description": "std_logic",
+		"scope": "source.vhdl"
+	},
+	"slv": {
+		"prefix": "slv",
+		"body": "std_logic_vector",
+		"description": "std_logic_vector",
+		"scope": "source.vhdl"
+	},
+	"slvd": {
+		"prefix": "slvd",
+		"body": "std_logic_vector(${1:7} downto ${2:0})$0",
+		"description": "std_logic_vector(x downto y)",
+		"scope": "source.vhdl"
+	},
+	"slvt": {
+		"prefix": "slvt",
+		"body": "std_logic_vector(${1:0} to ${2:7})$0",
+		"description": "std_logic_vector(x downto y)",
+		"scope": "source.vhdl"
+	},
+	"slvr": {
+		"prefix": "slvr",
+		"body": "std_logic_vector(${1:sig}'range)$0",
+		"description": "std_logic_vector(sig'range)",
+		"scope": "source.vhdl"
+	},
+	"toi": {
+		"prefix": "toi",
+		"body": "to_integer(${1:sig})$0",
+		"description": "to_integer(sig)",
+		"scope": "source.vhdl"
+	},
+	"tos": {
+		"prefix": "tos",
+		"body": "to_signed(${1:-1}, ${2:sig}'length)$0",
+		"description": "to_signed(-1, sig'length)",
+		"scope": "source.vhdl"
+	},
+	"tou": {
+		"prefix": "tou",
+		"body": "to_unsigned(${0}, ${2:sig}'length)$0",
+		"description": "to_unsigned(0, sig'length)",
+		"scope": "source.vhdl"
+	},
+	"typarr": {
+		"prefix": "typarr",
+		"body": "type ${1:arr}_type is array (${2:0} to ${3: 255}) of ${4:std_logic_vector(${6:7} downto ${5:0})};",
+		"description": "array type",
+		"scope": "source.vhdl"
+	},
+	"typfsm": {
+		"prefix": "typfsm",
+		"body": "type ${1:state}_type is (${2:IDLE}, $0);\nsignal ${1:state} : ${1:state}_type;",
+		"description": "FSM type/signal",
+		"scope": "source.vhdl"
+	},
+	"typrec": {
+		"prefix": "typrec",
+		"body": "type ${1:rec}_type is record\n\t$0\nend record;",
+		"description": "record type",
+		"scope": "source.vhdl"
+	},
+	"un": {
+		"prefix": "un",
+		"body": "unsigned",
+		"description": "unsigned",
+		"scope": "source.vhdl"
+	},
+	"und": {
+		"prefix": "und",
+		"body": "unsigned(${1:7} downto ${2:0})$0",
+		"description": "unsigned(x downto y)",
+		"scope": "source.vhdl"
+	},
+	"unt": {
+		"prefix": "unt",
+		"body": "unsigned(${1:0} to ${2:7})$0",
+		"description": "unsigned(x to y)",
+		"scope": "source.vhdl"
+	},
+	"unr": {
+		"prefix": "unr",
+		"body": "unsigned(${1:sig}'range)$0",
+		"description": "unsigned(sig'range)",
+		"scope": "source.vhdl"
+	},
+	"v": {
+		"prefix": "v",
+		"body": "variable ${1:name} : ${2:std_logic};$0",
+		"description": "variable",
+		"scope": "source.vhdl"
+	},
+	"vhdl": {
+		"prefix": "vhdl",
+		"body": "library ieee;\nuse ieee.std_logic_1164.all;\nuse ieee.numeric_std.all;\n\nentity ${1:ent} is\n\tport (${3:\n\t\tclk : in std_logic;\n\t\trst : in std_logic;}\n\t\t${0:sig}\n\t);\nend ${1:ent};\n\narchitecture ${2:rtl} of ${1:ent} is\n\nbegin\n\nend architecture;",
+		"description": "VHDL template",
+		"scope": "source.vhdl"
+	},
+	"vhdltb": {
+		"prefix": "vhdltb",
+		"body": "library ieee;\nuse ieee.std_logic_1164.all;\nuse ieee.numeric_std.all;\n\nuse std.textio.all;\nuse std.env.finish;\n\nentity ${1:dutent}_tb is\nend ${1:dutent}_tb;\n\narchitecture sim of ${1:dutent}_tb is\n\n\tconstant clk_hz : integer := ${2:100e6};\n\tconstant clk_period : time := 1 sec / clk_hz;\n\n\tsignal clk : std_logic := '1';\n\tsignal rst : std_logic := '1';\n\nbegin\n\n\tclk <= not clk after clk_period / 2;\n\n\tDUT : entity work.${1:dutent}(rtl)\n\tport map (\n\t\tclk => clk,\n\t\trst => rst,\n\t\t$0\n\t);\n\n\tSEQUENCER_PROC : process\n\tbegin\n\t\twait for clk_period * 2;\n\n\t\trst <= '0';\n\n\t\twait for clk_period * 10;\n\t\tassert false\n\t\t\treport \"Replace this with your test cases\"\n\t\t\tseverity failure;\n\n\t\tfinish;\n\tend process;\n\nend architecture;",
+		"description": "VHDL testbench template",
+		"scope": "source.vhdl"
+	},
+	"vunittb": {
+		"prefix": "vunittb",
+		"body": "library ieee;\nuse ieee.std_logic_1164.all;\nuse ieee.numeric_std.all;\n\nlibrary vunit_lib;\ncontext vunit_lib.vunit_context;\n\nentity ${1:dutent}_tb is\n\tgeneric (runner_cfg : string);\nend ${1:dutent}_tb;\n\narchitecture sim of ${1:dutent}_tb is\n\n\tconstant tb_logger : logger_t := get_logger(\"tb\");\n\n\tconstant clk_hz : integer := 100e6;\n\tconstant clk_period : time := 1 sec / clk_hz;\n\n\tsignal clk : std_logic := '1';\n\tsignal rst : std_logic := '1';\n\nbegin\n\n\t-- DUT : entity work.${1:dutent}(rtl)\n\t-- port map (\n\t--   clk => clk,\n\t--   rst => rst,\n\n\t-- );$0\n\n\ttest_runner_watchdog(runner, 10 us);\n\n\t-- show_all(default_logger, display_handler);\n\t-- show_all(com_logger, display_handler);\n\tshow_all(tb_logger, display_handler);\n\n\tclk <= not clk after clk_period / 2;\n\n\tSEQUENCER_PROC : process\n\tbegin\n\n\t\ttest_runner_setup(runner, runner_cfg);\n\n\t\twait for clk_period * 2;\n\t\trst <= '0';\n\n\t\tif run(\"test_case_1\") then\n\n\t\t\terror(tb_logger, \"Implement your test case here\");\n\n\t\t-- elsif run(\"test_case_2\") then\n\n\t\tend if;\n\n\t\twait for clk_period * 3;\n\t\tinfo(tb_logger, \"Test sequence completed\");\n\t\ttest_runner_cleanup(runner);\n\tend process;\n\nend architecture;",
+		"description": "VUnit testbench template",
+		"scope": "source.vhdl"
+	},
+	"w": {
+		"prefix": "w",
+		"body": "when ${1:STATE} =>\n\t$0",
+		"description": "when STATE =>",
+		"scope": "source.vhdl"
+	},
+	"wh": {
+		"prefix": "wh",
+		"body": "while ${2:true} loop\n\t$0\nend loop;",
+		"description": "while",
+		"scope": "source.vhdl"
+	},
+	"wf": {
+		"prefix": "wf",
+		"body": "wait for ${1:clk_period * ${2:1}};$0",
+		"description": "wait for",
+		"scope": "source.vhdl"
+	},
+	"wo": {
+		"prefix": "wo",
+		"body": "wait on ${1:clk};$0",
+		"description": "wait on",
+		"scope": "source.vhdl"
+	},
+	"wu": {
+		"prefix": "wu",
+		"body": "wait until ${1:rising_edge(clk)};",
+		"description": "wait until",
+		"scope": "source.vhdl"
+	}
+}

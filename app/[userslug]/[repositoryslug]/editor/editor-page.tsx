@@ -1,21 +1,18 @@
 "use client";
 
 import { commitSchema } from "@/lib/schemas/git-schemas";
-import { api } from "@/lib/trpc/react";
+import { api, RouterInputs } from "@/lib/trpc/react";
 import type {
-    BottomPanelContentTab,
-    SidebarContentTab,
-    SimulationConfiguration,
-    SimulationType,
+    BottomPanelContentTab, Configuration,
+    SidebarContentTab
 } from "@/lib/types/editor";
 import type {
     FileDisplayItem,
     Repository,
     RepositoryItem,
 } from "@/lib/types/repository";
-import { X } from "lucide-react";
 import dynamic from "next/dynamic";
-import { type ElementRef, useEffect, useRef, useState } from "react";
+import { type ElementRef, RefObject, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
 import { z } from "zod";
@@ -28,6 +25,8 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { EditorTabs } from "@/components/editor/editor-tabs";
+import { ImperativePanelGroupHandle } from "react-resizable-panels";
 
 interface EditorPageProps {
     repository: Repository;
@@ -44,9 +43,9 @@ export default function EditorPage({ repository }: EditorPageProps) {
     const [activeBottomPanelContent, setActiveBottomPanelContent] =
         useState<BottomPanelContentTab>("simulation");
 
-    const verticalGroupRef =
+    const verticalGroupRef: RefObject<ImperativePanelGroupHandle> =
         useRef<ElementRef<typeof ResizablePanelGroup>>(null);
-    const horizontalGroupRef =
+    const horizontalGroupRef: RefObject<ImperativePanelGroupHandle> =
         useRef<ElementRef<typeof ResizablePanelGroup>>(null);
 
     const [verticalCollapsed, setVerticalCollapsed] = useState<boolean>(false);
@@ -57,11 +56,16 @@ export default function EditorPage({ repository }: EditorPageProps) {
     const [lastOpenedBottomPanelSize, setLastOpenedBottomPanelSize] =
         useState<number>(20);
     const [activeFile, setActiveFile] = useState<FileDisplayItem | null>(null);
-    const [openFiles, setOpenFiles] = useState<FileDisplayItem[]>([]);
+    const [openFiles, setOpenFiles] = useState<Array<FileDisplayItem>>([]);
 
-    const [simulationConfiguration, setSimulationConfiguration] = useState<
-        SimulationConfiguration | undefined
-    >(undefined);
+    const [configuration, setConfiguration] = useState<Configuration | undefined>(undefined);
+
+    useEffect(() => {
+        const conf: string | null = localStorage.getItem('configuration');
+        if (conf) {
+            setConfiguration(JSON.parse(conf));
+        }
+    }, []);
 
     const [tree, setTree] = useState<Array<RepositoryItem>>(
         repository.tree ?? [],
@@ -90,6 +94,70 @@ export default function EditorPage({ repository }: EditorPageProps) {
         },
     });
 
+    const [verilatorCppInput, setVerilatorCppInput] = useState<RouterInputs["simulation"]["simulateVerilatorCppStream"] | null>(null);
+
+    const resultVerilatorCpp = api.simulation.simulateVerilatorCppStream.useQuery(verilatorCppInput!, {
+        enabled: !!verilatorCppInput,
+    });
+
+
+    const [verilatorSvInput, setVerilatorSvInput] = useState<RouterInputs["simulation"]["simulateVerilatorSvStream"] | null>(null);
+
+    const resultVerilatorSv = api.simulation.simulateVerilatorSvStream.useQuery(verilatorSvInput!, {
+        enabled: !!verilatorSvInput,
+    });
+
+    const [icarusInput, setIcarusInput] = useState<RouterInputs["simulation"]["simulateIcarusVerilogStream"] | null>(null);
+
+    const resultIcarus = api.simulation.simulateIcarusVerilogStream.useQuery(icarusInput!, {
+        enabled: !!icarusInput,
+    });
+
+    const onStartSimulation = () => {
+        // TODO: adam start simulation
+        console.log(configuration?.simulation.type)
+        console.log(configuration?.simulation.testBench)
+
+        // simulateMutation.mutate({
+        //     repoId: repository.id,
+        //     testbenchPath: selectedTestbenchFile.absolutePath,
+        //     svPath: selectedSvFile.absolutePath
+        // });
+
+
+        console.log(
+            "Starting simulation with type: " +
+            configuration?.simulation.type +
+            " and file: " +
+            configuration?.simulation.testBench,
+        );
+
+        if(configuration?.simulation.type === "verilatorC++") {
+            const newInput = {
+                repoId: repository.id,
+                testbenchPath: configuration?.simulation.testBench.absolutePath,
+            };
+            setVerilatorCppInput(newInput); // <- toto spustí subscription
+        }
+
+
+        if(configuration?.simulation.type === "verilatorSystemVerilog") {
+            const newInput = {
+                repoId: repository.id,
+                testbenchPath: configuration?.simulation.testBench.absolutePath,
+            };
+            setVerilatorSvInput(newInput); // <- toto spustí subscription
+        }
+
+        if(configuration?.simulation.type === "icarusVerilog") {
+            const newInput = {
+                repoId: repository.id,
+                testbenchPath: configuration?.simulation.testBench.absolutePath,
+            };
+            setIcarusInput(newInput); // <- toto spustí subscription
+        }
+    };
+
     const handleOnCommit = async (data: z.infer<typeof commitSchema>) => {
         await commitMutation.mutateAsync(data);
         await changes.refetch();
@@ -113,16 +181,13 @@ export default function EditorPage({ repository }: EditorPageProps) {
         }
     };
 
-    const onStartSimulation = (
-        selectedType: SimulationType,
-        selectedFile: RepositoryItem,
-    ) => {
-        // TODO: adam start simulation
+    const onStartSynthesis = () => {
+        // TODO: maxo start synthesis
         console.log(
-            "Starting simulation with type: " +
-                selectedType +
+            "Starting synthesis with type: " +
+                configuration?.synthesis.type +
                 " and file: " +
-                selectedFile!.name,
+                configuration?.synthesis.file.absolutePath
         );
     };
 
@@ -223,11 +288,10 @@ export default function EditorPage({ repository }: EditorPageProps) {
                     lastOpenedBottomPanelSize,
                     setLastOpenedBottomPanelSize,
                 }}
-                simulationProps={{
-                    onStartSimulation,
-                    simulationConfiguration,
-                    setSimulationConfiguration,
-                }}
+                onStartSimulation={onStartSimulation}
+                onStartSynthesis={onStartSynthesis}
+                configuration={configuration}
+                setConfiguration={setConfiguration}
                 isGitRepo={repository.isGitRepo}
                 repository={repository}
             />
@@ -270,39 +334,22 @@ export default function EditorPage({ repository }: EditorPageProps) {
                                     action: handleOnCommit,
                                     isLoading: commitMutation.isPending,
                                 }}
+                                configuration={configuration}
+                                setConfigurationAction={setConfiguration}
                             />
                         </ResizablePanel>
 
                         <ResizableHandle />
 
                         <ResizablePanel defaultSize={80}>
-                            <div className="flex bg-background text-white">
-                                {openFiles.map((file) => (
-                                    <div key={file.name}>
-                                        <span
-                                            className={`flex cursor-pointer items-center justify-center px-2 py-2 text-sm font-semibold ${
-                                                activeFile?.name === file.name
-                                                    ? "bg-[#1e1e1e] text-white"
-                                                    : "text-gray-400 hover:bg-[#444444]"
-                                            }`}
-                                            onClick={() =>
-                                                handleTabSwitch(file)
-                                            }
-                                        >
-                                            {file.name}
-                                            <button
-                                                className="ml-2 hover:text-white"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleCloseTab(file);
-                                                }}
-                                            >
-                                                <X className="h-4 w-4" />
-                                            </button>
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
+                            <EditorTabs
+                                openFiles={openFiles}
+                                setOpenFilesAction={setOpenFiles}
+                                activeFile={activeFile}
+                                setActiveFileAction={setActiveFile}
+                                handleTabSwitchAction={handleTabSwitch}
+                                handleCloseTabAction={handleCloseTab}
+                            />
                             {activeFile ? (
                                 <DynamicEditor
                                     filePath={
@@ -315,7 +362,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
                                     language={activeFile.language}
                                 />
                             ) : (
-                                <div className="flex h-full w-full items-center justify-center text-gray-400">
+                                <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                                     No file open
                                 </div>
                             )}
@@ -329,6 +376,8 @@ export default function EditorPage({ repository }: EditorPageProps) {
                     <BottomPanelTabContent
                         activeBottomPanelContent={activeBottomPanelContent}
                         handleCloseBottomPanel={handleCloseBottomPanel}
+                        configuration={configuration}
+                        simulationOutput={resultVerilatorCpp.data ?? resultIcarus.data ?? resultVerilatorSv.data ?? []}
                     />
                 </ResizablePanel>
             </ResizablePanelGroup>
