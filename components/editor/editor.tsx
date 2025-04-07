@@ -5,51 +5,104 @@ import { useEffect, useRef } from "react";
 import { MonacoBinding } from "y-monaco";
 import { WebsocketProvider } from "y-websocket";
 import * as Y from "yjs";
-import { loadSnippets } from "./editor-config/snippets";
+import { registerLanguageSupport } from "./editor-config/registerLanguage";
+import { parseAndCollectSymbols } from "@/app/antlr/SystemVerilog/parseAndCollectSymbols";
+import { FileItem, FileDisplayItem } from "@/lib/types/repository";
+import { on } from "events";
 
 interface EditorProps {
     filePath: string;
     language?: string;
     theme?: string;
+    onOpenFile?: (item: FileDisplayItem) => void;
 }
 
 export default function Editor({
     filePath,
     language,
     theme = "vs-dark",
+    onOpenFile,
 }: EditorProps) {
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
     const monacoEl = useRef<HTMLElement | null>(null);
     const providerRef = useRef<WebsocketProvider | null>(null);
     const ydocRef = useRef<Y.Doc | null>(null);
+    const pendingNavigationRef = useRef<{
+      uri: monaco.Uri;
+      range: monaco.IRange;
+    } | null>(null);
 
     const loadedLanguages = useRef<Set<string>>(new Set());
 
     useEffect(() => {
         if (!monacoEl.current) return;
-
+        const uri = monaco.Uri.parse(`inmemory://${filePath}`);
+        const model =
+          monaco.editor.getModel(uri) ||
+          monaco.editor.createModel("", language, uri);
+        
+        // ✅ Only update model if different
         if (editorRef.current) {
-            editorRef.current.dispose();
-            editorRef.current = null;
-        }
-
-        if (providerRef.current) {
-            providerRef.current.destroy();
-            providerRef.current = null;
-        }
-
-        if (ydocRef.current) {
-            ydocRef.current.destroy();
-            ydocRef.current = null;
-        }
-
-        const model = monaco.editor.createModel("", language);
-        editorRef.current = monaco.editor.create(monacoEl.current, {
+          const currentModel = editorRef.current.getModel();
+          if (!currentModel || currentModel.uri.toString() !== model.uri.toString()) {
+            editorRef.current.setModel(model);
+          }
+        } else {
+          editorRef.current = monaco.editor.create(monacoEl.current, {
             model,
             language,
             theme,
             automaticLayout: true,
-        });
+          });
+
+          editorRef.current?.onMouseDown((event) => {
+            if (
+              event.event.ctrlKey &&
+              pendingNavigationRef.current &&
+              event.target.type === monaco.editor.MouseTargetType.CONTENT_TEXT
+            ) {
+              const { uri, range } = pendingNavigationRef.current;
+              const model = monaco.editor.getModel(uri);
+          
+              if (model) {
+                editorRef.current!.setModel(model);
+                editorRef.current!.revealRangeInCenter(range);
+                editorRef.current!.setPosition({
+                  lineNumber: range.startLineNumber,
+                  column: range.startColumn,
+                });
+                editorRef.current!.focus();
+              }else if (onOpenFile) {
+                const fileName = uri.path.split("/").pop() || "untitled";
+                onOpenFile({
+                  type: "file-display",
+                  name: fileName,
+                  absolutePath: fileName,
+                  language: "systemverilog", // fallback
+                  lastActivity: new Date(),
+                });
+              }
+          
+              pendingNavigationRef.current = null;
+            }
+          });
+          
+          
+    
+          if (language && !loadedLanguages.current.has(language)) {
+            registerLanguageSupport(language, pendingNavigationRef);
+            loadedLanguages.current.add(language);
+          }
+          
+        }
+
+        if (providerRef.current) {
+          providerRef.current.destroy();
+        }
+    
+        if (ydocRef.current) {
+          ydocRef.current.destroy();
+        }
 
        // if (process.env.NODE_ENV !== "production") {
             const ydoc = new Y.Doc();
@@ -74,26 +127,24 @@ export default function Editor({
             }
        // }
 
-       if (language && !loadedLanguages.current.has(language)) {
-        loadSnippets(language);
-        loadedLanguages.current.add(language); 
-    }
+       model.onDidChangeContent(() => {
+        const code = model.getValue();
+        parseAndCollectSymbols(code, model.uri.toString());
+      });
 
-        return () => {
-            if (editorRef.current) {
-                editorRef.current.dispose();
-                editorRef.current = null;
-            }
-            if (providerRef.current) {
-                providerRef.current.destroy();
-                providerRef.current = null;
-            }
-            if (ydocRef.current) {
-                ydocRef.current.destroy();
-                ydocRef.current = null;
-            }
-        };
-    }, [filePath, language, theme]);
+
+      return () => {
+        providerRef.current?.destroy();
+        ydocRef.current?.destroy();
+      };
+    }, [filePath, language, theme, onOpenFile]);
+
+    useEffect(() => {
+      return () => {
+        editorRef.current?.dispose();
+        editorRef.current = null;
+      };
+    }, []);
 
     return <main className="h-full w-full" ref={monacoEl}></main>;
 }

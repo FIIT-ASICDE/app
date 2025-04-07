@@ -46,7 +46,7 @@ const server = Bun.serve<EditorSocketData>({
         }
 
         // url looks like http://localhost:3001/connect?filePath=placeholder
-        let filePath = req.url.split("?").at(1)?.split("=").at(1);
+        let filePath = req.url.split("?").at(1)?.split("=").at(1)?.toLowerCase();
         if (filePath) {
             filePath = absoluteFilePath(
                 decodeURIComponent(filePath).replaceAll("\\", "/"),

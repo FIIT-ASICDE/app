@@ -8,6 +8,7 @@ import type {
 } from "@/lib/types/editor";
 import type {
     FileDisplayItem,
+    FileItem,
     Repository,
     RepositoryItem,
 } from "@/lib/types/repository";
@@ -192,23 +193,70 @@ export default function EditorPage({ repository }: EditorPageProps) {
     };
 
     const handleFileClick = (item: RepositoryItem) => {
-        if (item.type !== "file-display" && item.type !== "file") {
-            return;
+        if (item.type === "file" || item.type === "file-display") {
+          openFileByPath(item);
         }
+      };
 
-        const fileDisplay: FileDisplayItem = {
-            type: "file-display",
-            name: item.name,
-            absolutePath: item.absolutePath,
-            lastActivity: item.lastActivity,
-            language: item.language,
+      const openFileByPath = (item: FileDisplayItem | FileItem) => {
+        const absolutePath = item.absolutePath.toLowerCase();
+      
+        const existingFile = openFiles.find(
+          (f) => f.absolutePath.toLowerCase() === absolutePath
+        );
+      
+        if (existingFile) {
+          setActiveFile(existingFile);
+          return;
+        }
+      
+        const newFile: FileDisplayItem = {
+          type: "file-display",
+          name: item.name,
+          absolutePath: item.absolutePath,
+          language: item.language,
+          lastActivity: item.lastActivity,
         };
+      
+        setOpenFiles((prev) => {
+            const exists = prev.some((f) => f.absolutePath.toLowerCase() === newFile.absolutePath.toLowerCase());
+            return exists ? prev : [...prev, newFile];
+          });
+        setActiveFile(newFile);
+      };
 
-        if (!openFiles.some((file: FileDisplayItem) => file.absolutePath === item.absolutePath)) {
-            setOpenFiles((prevFiles: Array<FileDisplayItem>) => [...prevFiles, fileDisplay]);
+      const handleUriChange = (uriStr: string) => {
+        const decodedPath = decodeURIComponent(uriStr.replace("inmemory://", ""));
+        
+        // 🧠 Already active? Don't do anything
+        if (activeFile?.absolutePath.toLowerCase() === decodedPath.toLowerCase()) {
+          return;
         }
-        setActiveFile(fileDisplay);
-    };
+      
+        const file = openFiles.find(
+          (f) => f.absolutePath.toLowerCase() === decodedPath.toLowerCase()
+        );
+      
+        if (file) {
+          setActiveFile(file);
+          return;
+        }
+      
+        const name = decodedPath.split("/").pop() || "untitled";
+        const language = name.endsWith(".vhd") ? "vhdl" : name.endsWith(".v") ? "verilog" : "systemverilog";
+      
+        const newFile: FileDisplayItem = {
+          type: "file-display",
+          name,
+          absolutePath: decodedPath,
+          language,
+          lastActivity: new Date(),
+        };
+      
+        setOpenFiles((prev) => [...prev, newFile]);
+        setActiveFile(newFile);
+      };
+      
 
     const handleTabSwitch = (item: FileDisplayItem) => {
         setActiveFile(item);
@@ -360,6 +408,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
                                         activeFile.absolutePath
                                     }
                                     language={activeFile.language}
+                                    onOpenFile={openFileByPath}
                                 />
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center text-muted-foreground">
