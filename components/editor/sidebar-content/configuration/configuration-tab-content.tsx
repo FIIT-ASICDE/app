@@ -99,12 +99,12 @@ export const ConfigurationTabContent = ({
         if (selectedSimulationType === "verilatorC++") {
             return files.filter(
                 (fileItem: FileItem | FileDisplayItem) =>
-                    fileItem.language === "cpp",
+                    fileItem.language === "c++",
             );
         } else if (selectedSimulationType === "verilatorSystemVerilog") {
             return files.filter(
                 (fileItem: FileItem | FileDisplayItem) =>
-                    fileItem.language === "systemVerilog",
+                    fileItem.language === "system verilog",
             );
         } else {
             return files.filter(
