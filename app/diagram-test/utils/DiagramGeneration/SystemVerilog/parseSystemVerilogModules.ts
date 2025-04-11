@@ -1,13 +1,4 @@
-export interface ModulePort {
-    direction: 'input' | 'output' | 'inout';
-    name: string;
-    width?: number;
-}
-
-export interface ParsedModule {
-    name: string;
-    ports: ModulePort[];
-}
+import { ParsedModule, ModulePort } from "@/app/diagram-test/utils/DiagramGeneration/interfaces";
 
 
 export function parseSystemVerilogModules(text: string): ParsedModule[] {
@@ -18,7 +9,6 @@ export function parseSystemVerilogModules(text: string): ParsedModule[] {
 
     while ((match = moduleRegex.exec(text)) !== null) {
         const [, moduleName, portBlock] = match;
-
         const ports: ModulePort[] = [];
 
         const portLineRegex = /(input|output|inout)\s+(?:logic|bit)?\s*(?:\[(\d+):(\d+)\])?\s*(\w+)/g;
@@ -29,16 +19,13 @@ export function parseSystemVerilogModules(text: string): ParsedModule[] {
             const width = msb && lsb ? Math.abs(parseInt(msb) - parseInt(lsb)) + 1 : 1;
 
             ports.push({
-                direction: dir as 'input' | 'output' | 'inout',
+                direction: dir as ModulePort['direction'],
                 name,
-                width,
+                width
             });
         }
 
-        modules.push({
-            name: moduleName,
-            ports,
-        });
+        modules.push({ name: moduleName, ports });
     }
 
     return modules;

@@ -9,4 +9,5 @@ export class Multiplexer {
     };
     public structPackage: string;
     public structTypeDef: string;
+    public language: string;
 }

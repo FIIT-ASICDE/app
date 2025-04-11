@@ -10,5 +10,6 @@ export class Sram {
     clkEdge?: 'rising' | 'falling';
     public structPackage: string;
     public structTypeDef: string;
+    public language: string;
 
 }

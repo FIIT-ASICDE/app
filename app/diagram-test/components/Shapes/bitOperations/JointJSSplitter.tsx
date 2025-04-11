@@ -1,6 +1,6 @@
 import { Splitter } from "@/app/diagram-test/components/Shapes/classes/splitter";
 import { shapes } from "@joint/core";
-import { UnifiedPackage } from "@/app/diagram-test/components/PropertiesPanel/PropertiesPanel";
+import { UnifiedPackage } from "@/app/diagram-test/utils/DiagramGeneration/interfaces";
 
 export const JointJSSplitter = (splitter: Splitter, parseResults: UnifiedPackage[]) => {
 
@@ -76,6 +76,7 @@ export const JointJSSplitter = (splitter: Splitter, parseResults: UnifiedPackage
         structPackage: splitter.structPackage,
         structTypeDef: splitter.structTypeDef,
         isStruct: isStruct,
+        language: splitter.language,
         position: { x: splitter.position?.x || 100, y: splitter.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {

@@ -10,4 +10,5 @@ export class Port {
     };
     public structPackage: string;
     public structTypeDef: string;
+    public language: string;
 }

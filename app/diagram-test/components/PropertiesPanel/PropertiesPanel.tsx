@@ -18,7 +18,7 @@ import {JointJSNor} from "@/app/diagram-test/components/Shapes/gates/JointJSNor"
 import {Nor} from "@/app/diagram-test/components/Shapes/classes/nor";
 import {JointJSNot} from "@/app/diagram-test/components/Shapes/gates/JointJSNot";
 import { Not } from "@/app/diagram-test/components/Shapes/classes/not";
-import {JointJSNewModule} from "@/app/diagram-test/components/Shapes/modules/JointJSNewModule";
+import {JointJSModule} from "@/app/diagram-test/components/Shapes/modules/JointJSModule";
 import {Module} from "@/app/diagram-test/components/Shapes/classes/module";
 import {JointJSRegister} from "@/app/diagram-test/components/Shapes/memory/JointJSRegister";
 import {Register} from "@/app/diagram-test/components/Shapes/classes/register";
@@ -57,6 +57,11 @@ import {
 import {Label} from "@/components/ui/label";
 import { parseVHDLTextFromRegex } from "@/app/diagram-test/utils/DiagramGeneration/VHDL/parseVHDLTextFromRegex";
 import { parseSystemVerilogTextFromRegex } from "@/app/diagram-test/utils/DiagramGeneration/SystemVerilog/parseSystemVerilogTextFromRegex";
+import { parseSystemVerilogModules } from "@/app/diagram-test/utils/DiagramGeneration/SystemVerilog/parseSystemVerilogModules";
+import { parseVhdlEntities } from "@/app/diagram-test/utils/DiagramGeneration/VHDL/parseVHDLEntities";
+import { UnifiedPackage, ParsedModule } from "@/app/diagram-test/utils/DiagramGeneration/interfaces";
+import { toast } from "sonner";
+
 
 
 interface Properties {
@@ -79,32 +84,12 @@ interface Properties {
     bitPortType?: string;
     structPackage?: string;
     structTypeDef?: string;
+    moduleType?: 'new' | 'existing';
+    existingModule?: string;
 }
-
-
-export interface UnifiedStructField {
-    name: string;
-    type: string;
-    startBit: number;
-    endBit: number;
-    bandwidth: number;
-}
-
-export interface UnifiedStructType {
-    name: string;
-    fields: UnifiedStructField[];
-    isPacked?: boolean;
-}
-
-export interface UnifiedPackage {
-    name: string;
-    structs: UnifiedStructType[];
-}
-
-
 
 const PropertiesPanel = () => {
-    const { selectedElement, graph, setSelectedElement, setHasFormErrors, selectedLanguage, setSelectedLanguage, parseResults, setParseResults } = useDiagramContext();
+    const { selectedElement, graph, setSelectedElement, setHasFormErrors, selectedLanguage, setSelectedLanguage, parseResults, setParseResults, repository, parseModulesResults, setParseModulesResults, checkLanguageLock } = useDiagramContext();
     const [properties, setProperties] = useState<Properties>({
         label: '',
         instance: '',
@@ -125,6 +110,8 @@ const PropertiesPanel = () => {
         bitPortType: 'custom',
         structPackage: '',
         structTypeDef: '',
+        moduleType: 'new',
+        existingModule: '',
     });
     const [errorMessage, setErrorMessage] = useState('');
     const [showAddPortDialog, setShowAddPortDialog] = useState(false);
@@ -157,7 +144,7 @@ const PropertiesPanel = () => {
         'combiner': { class: Combiner, create: JointJSCombiner },
         'sram': { class: Sram, create: JointJSSRam },
         'register': { class: Register, create: JointJSRegister },
-        'newModule': { class: Module, create: JointJSNewModule}
+        'module': { class: Module, create: JointJSModule}
 
     };
 
@@ -184,6 +171,8 @@ const PropertiesPanel = () => {
                 bitPortType: selectedElement.attributes.bitPortType || 'custom',
                 structPackage: selectedElement.attributes.structPackage || '',
                 structTypeDef: selectedElement.attributes.structTypeDef || '',
+                moduleType: selectedElement.attributes.moduleType || 'new',
+                existingModule: selectedElement.attributes.existingModule || ''
             };
 
             setProperties(props);
@@ -208,14 +197,14 @@ const PropertiesPanel = () => {
                 bitPortType: 'custom',
                 structPackage: '',
                 structTypeDef: '',
+                moduleType: 'new',
+                existingModule: '',
 
             });
         }
     }, [selectedElement]);
 
 
-    const { repository } = useDiagramContext();
-    console.log(repository.name, repository.ownerName);
     const { data: allFiles } = api.repo.loadAllFilesInRepo.useQuery({
         ownerSlug: repository.ownerName,
         repositorySlug: repository.name,
@@ -231,13 +220,20 @@ const PropertiesPanel = () => {
 
         let parsedPackages: UnifiedPackage[] = [];
 
+        const svFiles = allFiles.filter(
+            (file) =>
+                file.type === "file" &&
+                file.name.toLowerCase().endsWith(".sv") &&
+                file.content
+        );
+        const vhdlFiles = allFiles.filter(
+            (file) =>
+                file.type === "file" &&
+                file.name.toLowerCase().endsWith(".vhd") &&
+                file.content
+        );
+
         if (selectedLanguage === "SystemVerilog") {
-            const svFiles = allFiles.filter(
-                (file) =>
-                    file.type === "file" &&
-                    file.name.toLowerCase().endsWith(".sv") &&
-                    file.content
-            );
             parsedPackages = svFiles.flatMap((file) => {
                 try {
                     return parseSystemVerilogTextFromRegex(file.content);
@@ -247,9 +243,6 @@ const PropertiesPanel = () => {
                 }
             });
         } else if (selectedLanguage === "VHDL") {
-            const vhdlFiles = allFiles.filter(file =>
-                file.name.toLowerCase().endsWith(".vhd")
-            );
             parsedPackages = vhdlFiles.flatMap((file) => {
                 try {
                     return parseVHDLTextFromRegex(file.content);
@@ -261,6 +254,32 @@ const PropertiesPanel = () => {
         }
 
         setParseResults(parsedPackages);
+
+        let parsedModules: ParsedModule[] = [];
+
+        if (selectedLanguage === "SystemVerilog") {
+            parsedModules = svFiles.flatMap((file) => {
+                try {
+                    return parseSystemVerilogModules(file.content);
+                } catch (err) {
+                    console.warn(`Failed to parse modules in ${file.name}`, err);
+                    return [];
+                }
+            });
+        } else if (selectedLanguage === "VHDL") {
+            parsedModules = vhdlFiles.flatMap((file) => {
+                try {
+                    return parseVhdlEntities(file.content);
+                } catch (err) {
+                    console.warn(`Failed to parse entities in ${file.name}`, err);
+                    return [];
+                }
+            });
+        }
+
+        setParseModulesResults(parsedModules);
+
+        console.log("📦 Parsed modules:", parsedModules);
     }, [allFiles, selectedLanguage]);
 
 
@@ -377,7 +396,7 @@ const PropertiesPanel = () => {
             setErrorMessage('Port Name is mandatory');
             return;
         }
-        if (['combiner', 'newModule'].includes(selectedElement.attributes.elType) && newPortData.bandwidth < 1) {
+        if (['combiner', 'module'].includes(selectedElement.attributes.elType) && newPortData.bandwidth < 1) {
             setErrorMessage('Bandwidth must be > 0');
             return;
         }
@@ -492,7 +511,7 @@ const PropertiesPanel = () => {
             elementData.name = properties.label || ''; //TODO: handle that splitter do not have name
             elementData.position = { x, y };
 
-            if (!['splitter', 'combiner', 'newModule', ].includes(elType)) {
+            if (!['splitter', 'combiner', 'module', ].includes(elType)) {
                 elementData.dataBandwidth = properties.bandwidth; //TODO: handle that decoder and encoder will have min 2 width of bandwidth
             }
             if (elType === 'comparator') {
@@ -505,20 +524,24 @@ const PropertiesPanel = () => {
                 if (properties.bandwidthType === 'struct') {
                     elementData.structPackage = properties.structPackage || '';
                     elementData.structTypeDef = properties.structTypeDef || '';
+                    elementData.language = selectedLanguage;
                 }
                 else {
                     elementData.structPackage = '';
                     elementData.structTypeDef = '';
+                    elementData.language = '';
                 }
             }
             if (['combiner', 'splitter'].includes(elType)) {
                 if (properties.bitPortType === 'struct') {
                     elementData.structPackage = properties.structPackage || '';
                     elementData.structTypeDef = properties.structTypeDef || '';
+                    elementData.language = selectedLanguage;
                 }
                 else {
                     elementData.structPackage = '';
                     elementData.structTypeDef = '';
+                    elementData.language = '';
                 }
 
             }
@@ -527,12 +550,10 @@ const PropertiesPanel = () => {
             }
             if (elType === 'multiplexer') {
                 elementData.dataPorts = properties.inputPorts || 2;
-                // TODO: handle structs
             }
             if (elType === 'sram') {
                 elementData.addressBandwidth = properties.addressBandwidth || 8;
                 elementData.clkEdge = properties.clkEdge;
-                // TODO: handle structs
             }
             if (elType === 'register') {
                 elementData.resetPort = properties.resetPort || false;
@@ -541,7 +562,6 @@ const PropertiesPanel = () => {
                 elementData.rstEdge = properties.rstEdge;
                 elementData.qInverted = properties.qInverted;
                 elementData.rstType = properties.rstType;
-                // TODO: handle structs
             }
             if (elType === 'combiner') {
                 elementData.bitPortType = properties.bitPortType || 'custom';
@@ -569,7 +589,11 @@ const PropertiesPanel = () => {
                     // TODO: handle structs
                 }
             }
-            if (elType === 'newModule') {
+            if (elType === 'module') {
+                elementData.moduleType = properties.moduleType;
+
+                elementData.existingModule = properties.moduleType === 'existing' ? properties.existingModule : '';
+
                 elementData.instance = properties.instance || '';
 
                 elementData.inPorts = properties.createdInPorts.map((p, i) => ({
@@ -586,6 +610,9 @@ const PropertiesPanel = () => {
             let newElement;
             if (elType === 'splitter' || elType === 'combiner') {
                 newElement = elementType.create(elementData, parseResults);
+            }
+            else if (elType === 'module') {
+                newElement = elementType.create(elementData, parseModulesResults);
             }
             else {
                 newElement = elementType.create(elementData);
@@ -673,9 +700,14 @@ const PropertiesPanel = () => {
                     <Label>Select language for packages</Label>
                     <Select
                         value={selectedLanguage}
-                        onValueChange={(value) =>
-                            setSelectedLanguage(value as "SystemVerilog" | "VHDL")
-                        }
+                        onValueChange={(value) => {
+                            const isLocked = checkLanguageLock();
+                            if (!isLocked) {
+                                setSelectedLanguage(value as "SystemVerilog" | "VHDL");
+                            } else {
+                                toast.error("You can't change language because there are elements with assigned language.");
+                            }
+                        }}
                     >
                         <SelectTrigger>
                             <SelectValue placeholder="Choose a language" />
@@ -697,7 +729,7 @@ const PropertiesPanel = () => {
             </h3>
 
             <div className="p-4 space-y-4">
-                {(['output', 'input', 'and', 'nand', 'xor', 'or', 'nor', 'not', 'xnor', 'multiplexer', 'decoder', 'encoder', 'alu', 'comparator', 'newModule', 'sram', 'register', 'combiner'].includes(selectedElement.attributes.elType)) && (
+                {(['output', 'input', 'and', 'nand', 'xor', 'or', 'nor', 'not', 'xnor', 'multiplexer', 'decoder', 'encoder', 'alu', 'comparator', 'module', 'sram', 'register', 'combiner'].includes(selectedElement.attributes.elType)) && (
                     <div className="space-y-1">
                         <label className="block text-sm font-medium text-gray-700">
                             {toTitleCase(selectedElement.attributes.elType)} name:
@@ -911,96 +943,144 @@ const PropertiesPanel = () => {
                     </div>
                 )}
 
-                {(['newModule'].includes(selectedElement.attributes.elType)) && (
+                {(['module'].includes(selectedElement.attributes.elType)) && (
                     <>
                         <div className="space-y-1">
                             <Label>
-                                Instance name:
+                                Module Type:
                             </Label>
-                            <Input
-                                type="text"
-                                name="instance"
-                                placeholder="Insert instance..."
-                                value={properties.instance || ''}
-                                onChange={handleChange}
-                            />
-                            {errors.instance && (
-                                <div className="text-red-500 text-sm mt-1 flex items-center">
-                                    <CircleAlert className="w-4 h-4 mr-1" />
-                                    {errors.instance}
+                            <Select
+                                name="moduleType"
+                                value={properties.moduleType}
+                                onValueChange={(value) => {
+                                    handleChange({ target: { name: 'moduleType', type: 'select', value } });
+                                }}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Module Type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="new">New Module</SelectItem>
+                                    <SelectItem value="existing">Existing Module</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        {properties.moduleType === 'existing' && (
+                            <div className="space-y-1">
+                                <Label>
+                                    Choose Existing Module:
+                                </Label>
+                                <Select
+                                    name="existingModule"
+                                    value={properties.existingModule}
+                                    onValueChange={(value) => {
+                                        handleChange({ target: { name: 'existingModule', type: 'select', value } });
+                                    }}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Choose Existing Module" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {parseModulesResults.map((module, idx) => (
+                                            <SelectItem key={idx} value={module.name}>
+                                                {module.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+
+                        {properties.moduleType === 'new' && (
+                        <>
+                            <div className="space-y-1">
+                                <Label>
+                                    Instance name:
+                                </Label>
+                                <Input
+                                    type="text"
+                                    name="instance"
+                                    placeholder="Insert instance..."
+                                    value={properties.instance || ''}
+                                    onChange={handleChange}
+                                />
+                                {errors.instance && (
+                                    <div className="text-red-500 text-sm mt-1 flex items-center">
+                                        <CircleAlert className="w-4 h-4 mr-1" />
+                                        {errors.instance}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="mt-6 border-t border-gray-200 pt-4">
+                                <h4 className="font-medium text-gray-800 mb-2">Input Ports</h4>
+                                <div className="space-y-1 max-h-40 overflow-y-auto">
+                                    {properties.createdInPorts.map((p, idx) => (
+                                        <div key={idx} className="flex items-center justify-between p-2 border-b border-gray-100">
+                                            <span className="text-sm">{p.name} (bw={p.bandwidth})</span>
+                                            <div className="flex space-x-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleEditPort('input', idx)}
+                                                    className="text-blue-500 hover:text-blue-700"
+                                                >
+                                                    <Pencil className="w-4 h-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => handleDeletePort('input', idx)}
+                                                    className="text-red-500 hover:text-red-700"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                            )}
-                        </div>
-
-                        <div className="mt-6 border-t border-gray-200 pt-4">
-                            <h4 className="font-medium text-gray-800 mb-2">Input Ports</h4>
-                            <div className="space-y-1 max-h-40 overflow-y-auto">
-                                {properties.createdInPorts.map((p, idx) => (
-                                    <div key={idx} className="flex items-center justify-between p-2 border-b border-gray-100">
-                                        <span className="text-sm">{p.name} (bw={p.bandwidth})</span>
-                                        <div className="flex space-x-2">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => handleEditPort('input', idx)}
-                                                className="text-blue-500 hover:text-blue-700"
-                                            >
-                                                <Pencil className="w-4 h-4" />
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => handleDeletePort('input', idx)}
-                                                className="text-red-500 hover:text-red-700"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
+                                <Button
+                                    size="sm"
+                                    onClick={handleAddInputPort}
+                                >
+                                    Add Input Port
+                                </Button>
                             </div>
-                            <Button
-                                size="sm"
-                                onClick={handleAddInputPort}
-                            >
-                                Add Input Port
-                            </Button>
-                        </div>
 
-                        <div className="mt-4 border-t border-gray-200 pt-4">
-                            <h4 className="font-medium text-gray-800 mb-2">Output Ports</h4>
-                            <div className="space-y-1 max-h-40 overflow-y-auto">
-                                {properties.createdOutPorts.map((p, idx) => (
-                                    <div key={idx} className="flex items-center justify-between p-2 border-b border-gray-100">
-                                        <span className="text-sm">{p.name} (bw={p.bandwidth})</span>
-                                        <div className="flex space-x-2">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => handleEditPort('output', idx)}
-                                                className="text-blue-500 hover:text-blue-700"
-                                            >
-                                                <Pencil className="w-4 h-4" />
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => handleDeletePort('output', idx)}
-                                                className="text-red-500 hover:text-red-700"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
+                            <div className="mt-4 border-t border-gray-200 pt-4">
+                                <h4 className="font-medium text-gray-800 mb-2">Output Ports</h4>
+                                <div className="space-y-1 max-h-40 overflow-y-auto">
+                                    {properties.createdOutPorts.map((p, idx) => (
+                                        <div key={idx} className="flex items-center justify-between p-2 border-b border-gray-100">
+                                            <span className="text-sm">{p.name} (bw={p.bandwidth})</span>
+                                            <div className="flex space-x-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleEditPort('output', idx)}
+                                                    className="text-blue-500 hover:text-blue-700"
+                                                >
+                                                    <Pencil className="w-4 h-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleDeletePort('output', idx)}
+                                                    className="text-red-500 hover:text-red-700"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
+                                <Button
+                                    size="sm"
+                                    onClick={handleAddOutputPort}
+                                >
+                                    Add Output Port
+                                </Button>
                             </div>
-                            <Button
-                                size="sm"
-                                onClick={handleAddOutputPort}
-                            >
-                                Add Output Port
-                            </Button>
-                        </div>
+                        </>
+                        )}
                     </>
                 )}
 
@@ -1143,13 +1223,9 @@ const PropertiesPanel = () => {
                 {(['combiner', 'splitter'].includes(selectedElement.attributes.elType)) && (
                     <>
                     <div className="space-y-1">
-
-
-
                         <Label>
                             {selectedElement.attributes.elType === 'combiner' ? 'Output' : 'Input'} Ports Type
                         </Label>
-
                         <Select
                             name="bitPortType"
                             value={properties.bitPortType}
@@ -1340,7 +1416,7 @@ const PropertiesPanel = () => {
                                     onChange={handleNewPortDataChange}
                                 />
                             </div>
-                            {(['combiner', 'newModule'].includes(selectedElement.attributes.elType)) && (
+                            {(['combiner', 'module'].includes(selectedElement.attributes.elType)) && (
                                 <div className="space-y-1">
                                     <Label>
                                         Bandwidth:

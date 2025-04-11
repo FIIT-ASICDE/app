@@ -10,14 +10,15 @@ import {
 import { generateVHDLCode } from "@/app/diagram-test/utils/CodeGeneration/VHDLGeneration/VDHLCodeGenerator";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 
 
 const PaperToolbar: React.FC = () => {
     const [zoomValue, setZoomValue] = useState(0);
     const { paper, fitToView, graph, repository, activeFile, tree, setTree, selectedLanguage } = useDiagramContext();
 
-    const handleZoomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const sliderValue = parseInt(e.target.value);
+    const handleZoomChange = (values: number[]) => {
+        const sliderValue = values[0];
         setZoomValue(sliderValue);
 
         if (paper) {
@@ -45,12 +46,8 @@ const PaperToolbar: React.FC = () => {
         const scale = zoomValue <= 0
             ? 1 + (zoomValue / 125)
             : 1 + (zoomValue / 25);
-        if (scale < 1) {
-            const percentDecrease = Math.round((1 - scale) * 100);
-            return `-${percentDecrease}%`;
-        } else {
-            return `${Math.round(scale * 100)}%`;
-        }
+        
+        return `${Math.round(scale * 100)}%`;
     };
 
     const saveFileMutation = api.repo.saveFileContent.useMutation();
@@ -72,9 +69,10 @@ const PaperToolbar: React.FC = () => {
     const saveCodeToRepo = (ext: string, generator: typeof generateSystemVerilogCode | typeof generateVHDLCode, language: string) => {
         if (!repository || !activeFile) return;
 
-        const code = generator(graph);
         const fileName = activeFile.name.replace(/\.bd$/, `.${ext}`);
+        const moduleName = activeFile.name.replace(/\.bd$/, '');
         const filePath = activeFile.absolutePath.replace(/[^/]+$/, fileName);
+        const code = generator(graph, moduleName);
 
         saveFileMutation.mutate({
             repoId: repository.id,
@@ -105,14 +103,13 @@ const PaperToolbar: React.FC = () => {
         <div className="flex items-center gap-2 px-2 py-1 h-10 border-b bg-white dark:bg-black shadow-sm">
             <div className="flex items-center gap-2 min-w-[140px]">
                 <span className="text-xs text-muted-foreground w-[40px] text-right">{displayZoom()}</span>
-                <input
-                    type="range"
-                    min="-100"
-                    max="100"
-                    step="5"
-                    value={zoomValue}
-                    onChange={handleZoomChange}
-                    className="flex-1 h-1 bg-gray-300 rounded-lg appearance-none cursor-pointer"
+                <Slider
+                    value={[zoomValue]}
+                    min={-100}
+                    max={100}
+                    step={5}
+                    onValueChange={handleZoomChange}
+                    className="flex-1"
                 />
             </div>
 

@@ -150,6 +150,7 @@ export const JointJSRegister = (register: Register) => {
         structPackage: register.structPackage,
         structTypeDef: register.structTypeDef,
         isStruct: isStruct,
+        language: register.language,
         position: { x: register.position?.x || 100, y: register.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {

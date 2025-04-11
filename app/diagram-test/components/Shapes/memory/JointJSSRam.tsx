@@ -104,6 +104,7 @@ export const JointJSSRam = (sram: Sram) => {
         structPackage: sram.structPackage,
         structTypeDef: sram.structTypeDef,
         isStruct: isStruct,
+        language: sram.language,
         position: { x: sram.position?.x || 100, y: sram.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {

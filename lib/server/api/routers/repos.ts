@@ -52,6 +52,7 @@ export const repoRouter = createTRPCRouter({
     removeContributor: removeContributor(),
     loadAllFilesInRepo: loadAllFilesInRepo(),
     saveFileContent: saveFileContent(),
+    loadOwnerAndRepoById: loadOwnerAndRepoById(),
 });
 
 function create() {
@@ -2087,3 +2088,20 @@ function saveFileContent() {
             return { success: true };
         });
 }
+function loadOwnerAndRepoById() {
+    return protectedProcedure
+        .input(z.object({ repositoryId: z.string() }))
+        .query(async ({ ctx, input }) => {
+            const result = await resolveRepoOwnerAndName(ctx.prisma, input.repositoryId);
+
+            if (!result) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Repository not found",
+                });
+            }
+
+            return result; // { ownerName, repoName }
+        });
+}
+

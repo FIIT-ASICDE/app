@@ -27,6 +27,7 @@ export const JointJSOutputPort = (output: Port) => {
         structPackage: output.structPackage,
         structTypeDef: output.structTypeDef,
         isStruct: isStruct,
+        language: output.language,
         position: { x: output.position?.x || 100, y: output.position?.y || 100 },
         size: { width: dimension, height: dimension/2},
         attrs: {

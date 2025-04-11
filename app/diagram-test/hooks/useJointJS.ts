@@ -44,7 +44,10 @@ function highlightAllInputPorts(
                         }, 0);
                         portBw = maxEndBit + 1;
                     }
-                    if (elem.attributes.elType === 'splitter' && portBw <= neededBw){
+                    if (p.isStruct) {
+                        elem.portProp(p.id, 'attrs/portCircle/fill', 'red');
+                    }
+                    else if (elem.attributes.elType === 'splitter' && portBw <= neededBw){
                         elem.portProp(p.id, 'attrs/portCircle/fill', 'green');
                     }
                     else if (elem.attributes.elType !== 'splitter' && portBw === neededBw) {
@@ -97,26 +100,10 @@ function areStructPortsCompatible(sourcePort: any, targetPort: any): boolean {
     );
 }
 
-function validateStructOrBandwidthConnection(
-    sourcePort: any,
-    targetPort: any,
-): boolean {
-    const sourceIsStruct = sourcePort.isStruct;
-    const targetIsStruct = targetPort.isStruct;
-
-    if (sourceIsStruct !== targetIsStruct) return false;
-
-    if (sourceIsStruct && targetIsStruct) {
-        return areStructPortsCompatible(sourcePort, targetPort);
-    } else {
-        return false;
-    }
-}
 
 
 const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: boolean) => {
     const { graph, setSelectedElement, setPaper, hasFormErrors } = useDiagramContext();
-    console.log(hasFormErrors);
     const paperRef = useRef<dia.Paper | null>(null);
     const selectedCellViewRef = useRef<dia.CellView | null>(null);
     const isLinkingRef = useRef<boolean>(false);
@@ -264,8 +251,9 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
                     if (!sourcePortId || !targetPortId) {
                         return false;
                     }
+                    console.log("Ports")
 
-                    if (!sourcePort.isStruct) {
+                    if (!sourcePort.isStruct && !targetPort.isStruct) {
                         const sourceBw = getPortBandwidth(sourceView.model, sourcePortId);
                         let targetBw = getPortBandwidth(targetView.model, targetPortId);
 
@@ -324,7 +312,6 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
                 selectedElementsRef.current.forEach((el) => {
                     const view = paper.findViewByModel(el);
                     if (view) {
-                        // Используем специфичный highlighter для выделения группы
                         view.unhighlight(null, {
                             name: 'stroke',
                             options: {
@@ -564,7 +551,6 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
             let origin = { x: 0, y: 0 };
 
             paper.on('blank:pointerdown', (evt: dia.Event, x: number, y: number) => {
-                // Очищаем предыдущее выделение при начале нового
                 clearSelection();
 
                 selectionOriginRef.current = { x, y };
@@ -602,22 +588,18 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
                 paper.svg.removeChild(selectionRectRef.current);
                 selectionRectRef.current = null;
 
-                // Находим элементы, которые пересекаются с областью выделения
                 selectedElementsRef.current = graph.getElements().filter((el) => {
                     return el.getBBox().intersect(bbox);
                 });
 
-                // Если выбран только один элемент, обрабатываем его как обычный выбор элемента
                 if (selectedElementsRef.current.length === 1) {
                     const singleElement = selectedElementsRef.current[0];
                     const view = paper.findViewByModel(singleElement);
 
-                    // Устанавливаем новый выбранный элемент
                     if (view) {
                         view.highlight('image', { highlighter: highlightSettings });
                         selectedCellViewRef.current = view;
 
-                        // Добавляем инструмент удаления
                         const elementTool = new dia.ToolsView({
                             tools: [
                                 new elementTools.Remove({
@@ -657,9 +639,8 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
                     }
 
                     setSelectedElement(singleElement);
-                    selectedElementsRef.current = []; // Очищаем групповое выделение
+                    selectedElementsRef.current = [];
                 } else if (selectedElementsRef.current.length > 1) {
-                    // Подсвечиваем выбранные элементы специфичным стилем для группового выделения
                     selectedElementsRef.current.forEach((el) => {
                         const view = paper.findViewByModel(el);
                         if (view) {
@@ -683,28 +664,21 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
             paper.on('element:pointerdown', (elementView, evt, x, y) => {
                 const model = elementView.model as dia.Element;
 
-                // Проверяем, является ли элемент частью текущего выделения
                 const isSelected = selectedElementsRef.current.some(el => el.id === model.id);
 
-                // Если элемент не выбран и не используется множественное выделение (Ctrl/Cmd)
                 if (!isSelected && !(evt.ctrlKey || evt.metaKey)) {
-                    // Очищаем все инструменты
                     removeAllTools(paper);
 
-                    // Очищаем предыдущее выделение
                     clearSelection(paper);
 
-                    // Снимаем подсветку с предыдущего выбранного элемента
                     if (selectedCellViewRef.current) {
                         selectedCellViewRef.current.unhighlight('image', { highlighter: highlightSettings });
                     }
 
-                    // Подсвечиваем новый выбранный элемент
                     elementView.highlight('image', { highlighter: highlightSettings });
                     selectedCellViewRef.current = elementView;
                     setSelectedElement(model);
 
-                    // Добавляем инструмент удаления
                     const elementTool = new dia.ToolsView({
                         tools: [
                             new elementTools.Remove({
@@ -742,9 +716,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
                     });
                     elementView.addTools(elementTool);
                 }
-                // Если используется Ctrl/Cmd для множественного выделения
                 else if (!isSelected && (evt.ctrlKey || evt.metaKey)) {
-                    // Добавляем элемент к существующему выделению
                     selectedElementsRef.current.push(model);
                     elementView.highlight(null, {
                         name: 'stroke',
@@ -758,7 +730,6 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
                     });
                 }
 
-                // Запоминаем начальную точку для перетаскивания
                 dragStartPointRef.current = { x, y };
                 isDraggingSelectionRef.current = true;
             });
@@ -769,20 +740,17 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
                 const dx = x - dragStartPointRef.current.x;
                 const dy = y - dragStartPointRef.current.y;
 
-                // Если есть групповое выделение, перемещаем все выбранные элементы
                 if (selectedElementsRef.current.length > 0) {
                     selectedElementsRef.current.forEach((el) => {
                         const pos = el.position();
                         el.position(pos.x + dx, pos.y + dy);
                     });
                 }
-                // Иначе перемещаем только текущий элемент
                 else {
                     const pos = elementView.model.position();
                     elementView.model.position(pos.x + dx, pos.y + dy);
                 }
 
-                // Обновляем начальную точку для следующего движения
                 dragStartPointRef.current = { x, y };
             });
 

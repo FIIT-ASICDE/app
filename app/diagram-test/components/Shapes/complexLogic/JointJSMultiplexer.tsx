@@ -62,6 +62,7 @@ export const JointJSMultiplexer = (multiplexer: Multiplexer) => {
         structTypeDef: multiplexer.structTypeDef,
         isStruct: isStruct,
         inPorts: inCount,
+        language: multiplexer.language,
         position: { x: multiplexer.position?.x || 100, y: multiplexer.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {

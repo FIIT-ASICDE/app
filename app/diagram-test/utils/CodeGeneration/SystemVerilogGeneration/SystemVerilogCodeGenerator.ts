@@ -16,7 +16,7 @@ const complexLogicMap: { [key: string]: string } = {
 };
 
 
-export function generateSystemVerilogCode(graph: dia.Graph): string {
+export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: string): string {
     const cells = graph.getCells();
 
     const inputCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'input');
@@ -38,7 +38,7 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         !cell.isLink() &&
         ['splitter', 'combiner'].includes(cell.attributes.elType)
     );
-    const moduleCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'newModule');
+    const moduleCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'module');
     const sramCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'sram');
     const registerCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'register');
     const links = cells.filter(cell => cell.isLink());
@@ -113,9 +113,7 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
         }
     });
 
-    const moduleName = 'new_module';
-
-    let code = `module ${moduleName} (\n${portDeclarations.join(',\n')}\n);\n\n`;
+    let code = `module ${topModuleName} (\n${portDeclarations.join(',\n')}\n);\n\n`;
 
     const elementNames: { [key: string]: string } = {};
     logicCells.forEach(cell => {
@@ -486,6 +484,8 @@ export function generateSystemVerilogCode(graph: dia.Graph): string {
             });
         }
     });
+
+    code += `endmodule`;
 
 
     return code;

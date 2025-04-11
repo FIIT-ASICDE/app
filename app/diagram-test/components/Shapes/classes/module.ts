@@ -10,4 +10,7 @@ export class Module {
     };
     public inPorts: Port[];
     public outPorts: Port[];
+    public moduleType: string;
+    public existingModule: string;
+    public language: string;
 }

@@ -16,7 +16,7 @@ const complexLogicMapVHDL: { [key: string]: string } = {
 };
 
 
-export function generateVHDLCode(graph: dia.Graph): string {
+export function generateVHDLCode(graph: dia.Graph, topModuleName: string): string {
     const cells = graph.getCells();
 
     const inputCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'input');
@@ -38,7 +38,7 @@ export function generateVHDLCode(graph: dia.Graph): string {
         !cell.isLink() &&
         ['splitter', 'combiner'].includes(cell.attributes.elType)
     );
-    const moduleCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'newModule');
+    const moduleCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'module');
     const sramCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'sram');
     const registerCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'register');
     const links = cells.filter(cell => cell.isLink());
@@ -120,13 +120,11 @@ export function generateVHDLCode(graph: dia.Graph): string {
         }
     });
 
-    const moduleName = 'new_module';
-
-    let code = `ENTITY ${moduleName} IS\n`;
+    let code = `ENTITY ${topModuleName} IS\n`;
     code += `    PORT (\n${portDeclarations.join(";\n")}\n    );\n`;
-    code += `END ENTITY ${moduleName};\n\n`;
+    code += `END ENTITY ${topModuleName};\n\n`;
 
-    code += `ARCHITECTURE Behavioral OF ${moduleName} IS\n`;
+    code += `ARCHITECTURE Behavioral OF ${topModuleName} IS\n`;
 
 
     const elementNames: { [key: string]: string } = {};

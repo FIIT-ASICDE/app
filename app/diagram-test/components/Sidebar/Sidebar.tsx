@@ -1,15 +1,10 @@
 // pages/diagram-test/components/Sidebar/Sidebar.tsx
 import Image from 'next/image';
-import React, { useRef, useState } from "react";
-import {ArrowDownToLine, FolderOpen, Menu, FileCode} from 'lucide-react'
+import React, { useState } from "react";
 import {Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { useDiagramContext } from "@/app/diagram-test/context/useDiagramContext";
-
 
 const Sidebar = () => {
-    const { graph} = useDiagramContext();
-    const [isSaveLoadCollapsed, setIsSaveLoadCollapsed] = useState(true);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+
     const [gridColumns, setGridColumns] = useState(3);
 
     const getGridColsClass = (cols: number) => {
@@ -50,28 +45,13 @@ const Sidebar = () => {
         { type: 'comp', label: 'Comparator', img: 'comparatorIcon.svg' },
         { type: 'input', label: 'Input Port', img: 'inputPort.svg' },
         { type: 'output', label: 'Output Port', img: 'outputPort.svg' },
-        { type: 'newModule', label: 'New Module', img: 'NewModule.svg' },
-        { type: 'newModule', label: 'Existing Module', img: 'ExistingModule.svg' },
+        { type: 'module', label: 'Module', img: 'module.svg' },
         { type: 'sram', label: 'SRAM', img: 'Sram.svg' },
         { type: 'register', label: 'REGISTER', img: 'Register.svg' },
         { type: 'splitter', label: 'Splitter', img: 'Splitter.svg' },
         { type: 'combiner', label: 'Combiner', img: 'Combiner.svg' },
     ];
 
-    const saveLoadActions = [
-        {
-            icon: <ArrowDownToLine size={24} />,
-            label: "Save Diagram",
-            action: () => handleSaveDiagram(),
-            text: "Save Diagram"
-        },
-        {
-            icon: <FolderOpen size={24} />,
-            label: "Load Diagram",
-            action: () => triggerLoadDiagram(),
-            text: "Load Diagram"
-        },
-    ];
     const iconItemClass = "flex items-center justify-center p-1.5 min-h-[60px] bg-white border border-gray-300 rounded cursor-grab hover:bg-blue-50 hover:shadow-md transition-transform active:cursor-grabbing";
     const svgIconClass = "w-10 h-auto";
 
@@ -101,22 +81,6 @@ const Sidebar = () => {
     // Button - onDragStart, onClick{() => createSpecificShape}
 
 
-    const SaveLoadIcon = ({ icon, label, action, text }: { icon: React.JSX.Element; label: string; action: () => void, text: string }) => (
-        <Tooltip>
-            <TooltipTrigger asChild>
-                <div
-                    className={`${iconItemClass} space-x-2`}
-                    onClick={action}
-                >
-                    {icon}
-                    <span className="text-sm text-gray-800">{text}</span>
-                </div>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-                {label}
-            </TooltipContent>
-        </Tooltip>
-    );
 
 
 
@@ -168,39 +132,11 @@ const Sidebar = () => {
 
 
     return (
-        <>
-            {/* Logic Elements Group */}
-            <div className={iconListStyle}>
-                {elements.map((el) => (
-                    <ElementIcon key={`${el.type}-${el.label}`} {...el} />
-                ))}
-            </div>
-
-            {/* Save & Load Group */}
-            <div>
-                <div className="flex items-center justify-between p-2 bg-blue-100 border border-blue-200 rounded hover:bg-blue-200 cursor-pointer" onClick={() => setIsSaveLoadCollapsed(!isSaveLoadCollapsed)}>
-                    <FileCode className="flex items-center gap-2" />
-                    <h3>Generate</h3>
-                    <Menu className="flex items-center gap-2" />
-                </div>
-                {!isSaveLoadCollapsed && (
-                    <div className={iconListStyle}>
-                        {saveLoadActions.map((el) => (
-                            <SaveLoadIcon key={el.label} {...el} />
-                        ))}
-                        {/* Hidder input for loading */}
-                        <input
-                            type="file"
-                            accept=".json"
-                            ref={fileInputRef}
-                            style={{ display: 'none' }}
-                            onChange={handleLoadDiagram}
-                        />
-                    </div>
-                )}
-            </div>
-        </>
-
+        <div className={iconListStyle}>
+            {elements.map((el) => (
+                <ElementIcon key={`${el.type}-${el.label}`} {...el} />
+            ))}
+        </div>
     );
 
 };

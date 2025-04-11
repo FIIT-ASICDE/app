@@ -1,7 +1,8 @@
 import { Module } from "@/app/diagram-test/components/Shapes/classes/module";
 import { shapes } from "@joint/core";
+import { ParsedModule } from "@/app/diagram-test/utils/DiagramGeneration/interfaces";
 
-export const JointJSNewModule = (module: Module) => {
+export const JointJSModule = (module: Module, parseModulesResults: ParsedModule[]) => {
 
     const moduleInPorts = module.inPorts || [];
     const moduleOutPorts = module.outPorts || [];
@@ -18,35 +19,72 @@ export const JointJSNewModule = (module: Module) => {
     const width = baseWidth + stepWidth * (maxPorts - 2);
     const height = baseHeight + stepHeight * (maxPorts - 2);
 
-    const portItems = [];
+    const instanceName = module.moduleType === 'existing' ? module.existingModule : module.instance;
 
-    for (let i = 0; i < inCount; i++) {
-        const portY = (height / (inCount + 1)) * (i + 1);
-        portItems.push({
-            id: `input${i}`,
-            bandwidth: moduleInPorts[i].dataBandwidth,
-            name: moduleInPorts[i].name,
-            group: 'input',
-            args: { x: 0, y: portY },
-        });
+    const portItems = [];
+    if (module.moduleType === 'existing') {
+        const targetModule = parseModulesResults.find(m => m.name === module.existingModule);
+
+        if (targetModule) {
+            const inputPorts = targetModule.ports.filter(p => p.direction === 'input' || p.direction === 'in');
+            const outputPorts = targetModule.ports.filter(p => p.direction === 'output' || p.direction === 'out');
+
+            inputPorts.forEach((port, idx) => {
+                const portY = (height / (inputPorts.length + 1)) * (idx + 1);
+                portItems.push({
+                    id: `input${idx}`,
+                    bandwidth: port.width || 1,
+                    name: port.name,
+                    group: 'input',
+                    args: { x: 0, y: portY },
+                });
+            });
+
+            outputPorts.forEach((port, idx) => {
+                const portY = (height / (outputPorts.length + 1)) * (idx + 1);
+                portItems.push({
+                    id: `output${idx}`,
+                    bandwidth: port.width || 1,
+                    name: port.name,
+                    group: 'output',
+                    args: { x: width, y: portY },
+                });
+            });
+        }
     }
-    for (let i = 0; i < outCount; i++) {
-        const portY = (height / (outCount + 1)) * (i + 1);
-        portItems.push({
-            id: `output${i}`,
-            bandwidth: moduleOutPorts[i].dataBandwidth,
-            name: moduleOutPorts[i].name,
-            group: 'output',
-            args: { x: width, y: portY },
-        });
+    else {
+        for (let i = 0; i < inCount; i++) {
+            const portY = (height / (inCount + 1)) * (i + 1);
+            portItems.push({
+                id: `input${i}`,
+                bandwidth: moduleInPorts[i].dataBandwidth,
+                name: moduleInPorts[i].name,
+                group: 'input',
+                args: { x: 0, y: portY },
+            });
+        }
+        for (let i = 0; i < outCount; i++) {
+            const portY = (height / (outCount + 1)) * (i + 1);
+            portItems.push({
+                id: `output${i}`,
+                bandwidth: moduleOutPorts[i].dataBandwidth,
+                name: moduleOutPorts[i].name,
+                group: 'output',
+                args: { x: width, y: portY },
+            });
+        }
     }
+
 
     return new shapes.standard.Path({
-        elType: 'newModule',
+        elType: 'module',
         name: module.name,
         instance: module.instance,
         moduleInPorts: moduleInPorts,
         moduleOutPorts: moduleOutPorts,
+        moduleType: module.moduleType,
+        existingModule: module.existingModule,
+        language: module.language,
         position: { x: module.position?.x || 100, y: module.position?.y || 100 },
         size: {
             width,
@@ -60,7 +98,7 @@ export const JointJSNewModule = (module: Module) => {
                 strokeWidth: 2,
             },
             label: {
-                text: `${module.name}\n${module.instance}`,
+                text: `${module.name}\n${instanceName}`,
                 fontSize: 14,
                 fontFamily: 'Arial',
                 fontWeight: 'bold',

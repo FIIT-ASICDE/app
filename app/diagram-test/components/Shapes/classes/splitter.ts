@@ -12,4 +12,5 @@ export class Splitter {
     public bitPortType: string;
     public structPackage: string;
     public structTypeDef: string;
+    public language: string;
 }

@@ -14,4 +14,5 @@ export class Register {
     public rstType?: 'async' | 'sync';
     public structPackage: string;
     public structTypeDef: string;
+    public language: string;
 }

@@ -1,6 +1,7 @@
 import { Combiner } from "@/app/diagram-test/components/Shapes/classes/combiner";
 import { shapes } from "@joint/core";
-import { UnifiedPackage } from "@/app/diagram-test/components/PropertiesPanel/PropertiesPanel";
+import { UnifiedPackage } from "@/app/diagram-test/utils/DiagramGeneration/interfaces";
+
 
 export const JointJSCombiner = (combiner: Combiner, parseResults: UnifiedPackage[]) => {
 
@@ -71,6 +72,7 @@ export const JointJSCombiner = (combiner: Combiner, parseResults: UnifiedPackage
         structPackage: combiner.structPackage,
         structTypeDef: combiner.structTypeDef,
         isStruct: isStruct,
+        language: combiner.language,
         position: { x: combiner.position?.x || 100, y: combiner.position?.y || 100 },
         size: { width: dimension/2, height: dimension},
         attrs: {

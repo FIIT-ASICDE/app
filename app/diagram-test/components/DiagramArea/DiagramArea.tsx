@@ -29,7 +29,7 @@ import {JointJSAlu} from "@/app/diagram-test/components/Shapes/complexLogic/Join
 import { Alu } from "@/app/diagram-test/components/Shapes/classes/alu";
 import { JointJSComparator } from "@/app/diagram-test/components/Shapes/complexLogic/JointJSComparator";
 import { Comparator } from "@/app/diagram-test/components/Shapes/classes/comparator";
-import { JointJSNewModule } from "@/app/diagram-test/components/Shapes/modules/JointJSNewModule";
+import { JointJSModule } from "@/app/diagram-test/components/Shapes/modules/JointJSModule";
 import { Module } from "@/app/diagram-test/components/Shapes/classes/module";
 import { JointJSSRam } from "@/app/diagram-test/components/Shapes/memory/JointJSSRam";
 import { Sram } from "@/app/diagram-test/components/Shapes/classes/sram";
@@ -46,9 +46,8 @@ import { api } from "@/lib/trpc/react";
 
 const DiagramArea = () => {
     const paperElement = useRef<HTMLDivElement>(null);
-    const { graph, repository, activeFile, parseResults } = useDiagramContext();
+    const { graph, repository, activeFile, parseResults, parseModulesResults, selectedLanguage, setSelectedLanguage, checkLanguageLock } = useDiagramContext();
     const [isReady, setIsReady] = useState(false);
-
 
     const { data: fileData } = api.repo.loadRepoItem.useQuery(
         {
@@ -66,6 +65,7 @@ const DiagramArea = () => {
             try {
                 const json = JSON.parse(fileData.content);
                 graph.fromJSON(json);
+                const isLocked = checkLanguageLock();
             } catch (err) {
                 console.error("Failed to parse diagram JSON:", err);
             }
@@ -126,7 +126,7 @@ const DiagramArea = () => {
             path: activeFile.absolutePath,
             content: diagramJSON,
         });
-    }, 3000);
+    }, 1000);
 
     useEffect(() => {
         const onChange = () => {
@@ -169,7 +169,7 @@ const DiagramArea = () => {
         case 'encoder':    return 'encoder';
         case 'alu':        return 'alu';
         case 'comp':       return 'comparator';
-        case 'newModule':  return 'newModule';
+        case 'module':     return 'module';
         case 'sram':       return 'sram';
         case 'register':   return 'register';
         case 'splitter':   return 'splitter';
@@ -305,11 +305,11 @@ const DiagramArea = () => {
             comparator.type = ">";
             element = JointJSComparator(comparator);
             break;
-        case 'newModule':
-            const newModule = new Module();
-            newModule.name = elementName;
-            newModule.instance = `instance_${elementName}`;
-            element = JointJSNewModule(newModule);
+        case 'module':
+            const moduleElement = new Module();
+            moduleElement.name = elementName;
+            moduleElement.instance = `instance_${elementName}`;
+            element = JointJSModule(moduleElement, parseModulesResults);
             break;
         case 'sram':
             const sram = new Sram();

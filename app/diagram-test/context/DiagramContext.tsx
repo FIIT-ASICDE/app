@@ -1,30 +1,12 @@
 // pages/diagram-test/context/DiagramContext.tsx
 
-import React, { createContext, useState, ReactNode } from 'react';
+import React, { createContext, useState, ReactNode, useEffect } from "react";
 import { dia, shapes } from "@joint/core";
 import { Repository, FileDisplayItem, RepositoryItem } from "@/lib/types/repository";
+import { UnifiedPackage, ParsedModule } from "@/app/diagram-test/utils/DiagramGeneration/interfaces";
 
 
 export type LanguageOption = "SystemVerilog" | "VHDL";
-
-export interface UnifiedStructField {
-    name: string;
-    type: string;
-    startBit: number;
-    endBit: number;
-    bandwidth: number;
-}
-
-export interface UnifiedStructType {
-    name: string;
-    fields: UnifiedStructField[];
-    isPacked?: boolean;
-}
-
-export interface UnifiedPackage {
-    name: string;
-    structs: UnifiedStructType[];
-}
 
 interface DiagramContextProps {
     graph: dia.Graph;
@@ -47,6 +29,10 @@ interface DiagramContextProps {
     setSelectedLanguage: (lang: LanguageOption) => void;
     parseResults:UnifiedPackage[];
     setParseResults: (parseResults: UnifiedPackage[]) => void;
+    parseModulesResults: ParsedModule[];
+    setParseModulesResults: (parseModulesResults: ParsedModule[]) => void;
+    checkLanguageLock: () => boolean;
+
 }
 
 export const DiagramContext = createContext<DiagramContextProps | undefined>(undefined);
@@ -68,7 +54,7 @@ export const DiagramProvider = ({ children, repository, activeFile, tree, setTre
     const [hasFormErrors, setHasFormErrors] = useState<boolean>(false);
     const [selectedLanguage, setSelectedLanguage] = useState<LanguageOption>("SystemVerilog");
     const [parseResults, setParseResults] = useState<UnifiedPackage[]>([]);
-
+    const [parseModulesResults, setParseModulesResults] = useState<ParsedModule[]>([]);
 
     const updateElement = (cell: dia.Cell) => {
         graph.addCell(cell);
@@ -107,6 +93,44 @@ export const DiagramProvider = ({ children, repository, activeFile, tree, setTre
         }
     };
 
+    const checkLanguageLock = (): boolean => {
+        const cells = graph.getCells();
+        const languageSet = new Set<string>();
+
+        cells.forEach((cell) => {
+            const elType = cell.attributes?.elType;
+            if (
+                elType &&
+                ["module", "sram", "register", "input", "output", "splitter", "combiner", "multiplexer"].includes(elType)
+            ) {
+                const language = cell.attributes?.language;
+                if (language) {
+                    languageSet.add(language);
+                }
+            }
+        });
+
+        console.log(languageSet);
+
+        if (languageSet.size === 1) {
+            const lang = languageSet.has("VHDL") ? "VHDL" : "SystemVerilog";
+            setSelectedLanguage(lang);
+            return true; // locked
+        } else if (languageSet.size > 1) {
+            const lang = languageSet.has("SystemVerilog") ? "SystemVerilog" : "VHDL";
+            setSelectedLanguage(lang);
+            return true; // locked
+        } else {
+            setSelectedLanguage("SystemVerilog");
+            return false; // not locked
+        }
+    }
+
+    useEffect(() => {
+        checkLanguageLock();
+    }, [graph]);
+
+
     return (
         <DiagramContext.Provider
             value={{
@@ -129,7 +153,10 @@ export const DiagramProvider = ({ children, repository, activeFile, tree, setTre
                 selectedLanguage,
                 setSelectedLanguage,
                 parseResults,
-                setParseResults
+                setParseResults,
+                parseModulesResults,
+                setParseModulesResults,
+                checkLanguageLock
             }}
         >
             {children}

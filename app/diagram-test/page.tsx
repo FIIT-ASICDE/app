@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import Layout from "./components/Layout/Layout";
+import Layout from "@/app/diagram-test/components/Layout/Layout";
 import { DiagramProvider } from "@/app/diagram-test/context/DiagramContext";
 import type { Repository, FileDisplayItem, RepositoryItem } from "@/lib/types/repository";
 

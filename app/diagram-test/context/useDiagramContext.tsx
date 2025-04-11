@@ -6,7 +6,7 @@ import { DiagramContext } from "@/app/diagram-test/context/DiagramContext";
 export const useDiagramContext = () => {
     const context = useContext(DiagramContext);
     if (!context) {
-        throw new Error('useDiagramContext должен использоваться внутри DiagramProvider');
+        throw new Error('useDiagramContext will be inside DiagramProvider');
     }
     return context;
 };

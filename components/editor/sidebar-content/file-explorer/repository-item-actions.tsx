@@ -14,6 +14,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { GenerateCodeDialog } from "@/components/editor/file/generate-code-dialog";
 
 interface RepositoryItemActionsProps {
     repositoryId: string;
@@ -77,6 +78,10 @@ export const RepositoryItemActions = ({
                 toast.error("Unable to copy path to clipboard");
             });
     };
+
+    const isDiagramFile =
+        (parentItem.type === "file-display" || parentItem.type === "file") &&
+        parentItem.name.endsWith(".bd");
 
     return (
         <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
@@ -145,7 +150,6 @@ export const RepositoryItemActions = ({
                     setTree={setTree}
                     onAction={onAction}
                 />
-
                 <DeleteItemDialog
                     repositoryId={repositoryId}
                     repositoryItem={parentItem}
@@ -153,6 +157,19 @@ export const RepositoryItemActions = ({
                     setTree={setTree}
                     onAction={onAction}
                 />
+
+                {isDiagramFile && (
+                    <>
+                        <DropdownMenuSeparator />
+                        <GenerateCodeDialog
+                            repositoryId={repositoryId}
+                            diagramFile={parentItem}
+                            tree={tree}
+                            setTree={setTree}
+                        />
+                    </>
+                )}
+
             </DropdownMenuContent>
         </DropdownMenu>
     );
