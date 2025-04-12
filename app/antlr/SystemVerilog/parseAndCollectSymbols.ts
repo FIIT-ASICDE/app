@@ -14,7 +14,8 @@ export function parseAndCollectSymbols(code: string, uri: string) {
         const tree = parser.source_text();
         const visitor = new SymbolCollectorVisitor(uri);
         visitor.visit(tree);
-
+        console.log("[parseAndCollectSymbols] visitor.symbolTable");
+        console.log(visitor.symbolTable);
         symbolIndex[uri] = visitor.symbolTable;
 
     } catch (err) {

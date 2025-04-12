@@ -10,6 +10,18 @@ import { parseAndCollectSymbols } from "@/app/antlr/SystemVerilog/parseAndCollec
 import { FileItem, FileDisplayItem } from "@/lib/types/repository";
 import { on } from "events";
 
+// Add debounce utility
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: number | null = null;
+  return (...args: Parameters<T>) => {
+    if (timeout) window.clearTimeout(timeout);
+    timeout = window.setTimeout(() => func(...args), wait);
+  };
+}
+
 interface EditorProps {
     filePath: string;
     language?: string;
@@ -31,8 +43,16 @@ export default function Editor({
       uri: monaco.Uri;
       range: monaco.IRange;
     } | null>(null);
+    const debouncedParseRef = useRef<((code: string, uri: string) => void) | null>(null);
 
     const loadedLanguages = useRef<Set<string>>(new Set());
+
+    // Initialize debounced function once
+    if (!debouncedParseRef.current) {
+      debouncedParseRef.current = debounce((code: string, uri: string) => {
+        parseAndCollectSymbols(code, uri);
+      }, 1000); // Increased to 1 second
+    }
 
     useEffect(() => {
         if (!monacoEl.current) return;
@@ -62,28 +82,43 @@ export default function Editor({
               event.target.type === monaco.editor.MouseTargetType.CONTENT_TEXT
             ) {
               const { uri, range } = pendingNavigationRef.current;
-              const model = monaco.editor.getModel(uri);
-          
-              if (model) {
-                editorRef.current!.setModel(model);
-                editorRef.current!.revealRangeInCenter(range);
-                editorRef.current!.setPosition({
-                  lineNumber: range.startLineNumber,
-                  column: range.startColumn,
-                });
-                editorRef.current!.focus();
-              }else if (onOpenFile) {
+              
+              if (onOpenFile) {
+                // Get just the file name from the path
                 const fileName = uri.path.split("/").pop() || "untitled";
+                
+                // Store the range for later use
+                const targetRange = range;
+                
+                // Call onOpenFile with the target file
                 onOpenFile({
                   type: "file-display",
                   name: fileName,
                   absolutePath: fileName,
-                  language: "systemverilog", // fallback
+                  language: "systemverilog",
                   lastActivity: new Date(),
                 });
+                
+                // Set up a one-time effect to handle the position after the file is opened
+                const disposable = monaco.editor.onDidCreateEditor((editor) => {
+                  if (editor.getModel()?.uri.toString() === uri.toString()) {
+                    editor.setPosition({
+                      lineNumber: targetRange.startLineNumber,
+                      column: targetRange.startColumn,
+                    });
+                    editor.revealRangeInCenter(targetRange);
+                    editor.focus();
+                    disposable.dispose();
+                  }
+                });
+                
+                // Clear navigation state
+                pendingNavigationRef.current = null;
+                
+                // Prevent default behavior
+                event.event.preventDefault();
+                event.event.stopPropagation();
               }
-          
-              pendingNavigationRef.current = null;
             }
           });
           
@@ -128,10 +163,11 @@ export default function Editor({
        // }
 
        model.onDidChangeContent(() => {
-        const code = model.getValue();
-        parseAndCollectSymbols(code, model.uri.toString());
-      });
-
+         const code = model.getValue();
+         if (debouncedParseRef.current) {
+           debouncedParseRef.current(code, model.uri.toString());
+         }
+       });
 
       return () => {
         providerRef.current?.destroy();

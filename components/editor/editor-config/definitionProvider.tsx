@@ -1,5 +1,4 @@
-
-  import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
+import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { symbolIndex } from "@/app/antlr/SystemVerilog/symbolTable";
 import { FileItem, FileDisplayItem } from "@/lib/types/repository";
 
@@ -30,11 +29,10 @@ export function registerDefinitionProvider(
         symbol.column + symbol.name.length
       );
 
-      const isSameFile = symbol.uri === model.uri.toString();
-
-      if (!isSameFile && pendingNavigationRef) {
+      // Always set navigation state and return null to prevent auto navigation
+      if (pendingNavigationRef) {
         pendingNavigationRef.current = { uri: targetUri, range };
-        return null; // 👈 prevent auto jump on hover
+        return null;
       }
 
       return { uri: targetUri, range };
