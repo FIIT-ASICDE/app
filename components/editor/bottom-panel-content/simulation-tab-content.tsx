@@ -1,14 +1,16 @@
-import { ChevronRight } from "lucide-react";
-
 import { CloseButton } from "@/components/editor/navigation/close-button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Configuration } from "@/lib/types/editor";
 
 interface SimulationTabContentProps {
     handleCloseBottomPanel: () => void;
+    configuration: Configuration | undefined;
+    simulationOutput: string[];
 }
 
 export const SimulationTabContent = ({
     handleCloseBottomPanel,
+    simulationOutput
 }: SimulationTabContentProps) => {
     return (
         <div className="relative w-full text-nowrap p-4 pt-14">
@@ -19,14 +21,11 @@ export const SimulationTabContent = ({
                     tooltip="Close panel"
                 />
             </header>
-            <ScrollArea className="h-full w-full">
-                <div className="space-y-0">
-                    <div className="flex flex-row items-center gap-x-2 text-muted-foreground">
-                        <ChevronRight className="h-4 w-4" />
-                        <span className="text-sm">
-                            Simulation output terminal
-                        </span>
-                    </div>
+            <ScrollArea className="h-full w-full mt-4">
+                <div className="space-y-0 font-mono text-black-400 text-sm">
+                    {simulationOutput.map((line, i) => (
+                        <div key={i}>{line}</div>
+                    ))}
                 </div>
             </ScrollArea>
         </div>
