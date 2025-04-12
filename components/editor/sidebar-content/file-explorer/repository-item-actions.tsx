@@ -15,7 +15,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GenerateCodeDialog } from "@/components/editor/file/generate-code-dialog";
-
+import { GenerateDiagramDialog } from "@/components/editor/file/generate-diagram-dialog";
 interface RepositoryItemActionsProps {
     repositoryId: string;
     parentItem: RepositoryItem;
@@ -156,6 +156,13 @@ export const RepositoryItemActions = ({
                     tree={tree}
                     setTree={setTree}
                     onAction={onAction}
+                />
+                <DropdownMenuSeparator />
+                <GenerateDiagramDialog
+                    repositoryId={repositoryId}
+                    diagramFile={parentItem}
+                    tree={tree}
+                    setTree={setTree}
                 />
 
                 {isDiagramFile && (

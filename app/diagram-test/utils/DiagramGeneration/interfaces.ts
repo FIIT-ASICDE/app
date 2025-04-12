@@ -28,3 +28,22 @@ export interface UnifiedPackage {
     name: string;
     structs: UnifiedStructType[];
 }
+
+
+export interface TopModulePort {
+    direction: 'input' | 'output' | 'inout';
+    name: string;
+    width: number;
+}
+
+export interface SubModule {
+    moduleName: string;
+    instanceName: string;
+    portConnections: { portName: string; connectedTo: string; width: number }[];
+}
+
+export interface ParsedTopModule {
+    name: string;
+    ports: TopModulePort[];
+    subModules: SubModule[];
+}
