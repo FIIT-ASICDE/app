@@ -1,24 +1,26 @@
-import { TableCell, TableRow } from "@/components/ui/table";
-import { Check, ChevronDown, ChevronRight, Copy } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { PushDialog } from "@/components/editor/sidebar-content/source-control/push-dialog";
-import { ChangesTable } from "@/components/editor/sidebar-content/source-control/changes-table";
-import { Fragment } from "react";
 import { GitCommit } from "@/lib/types/repository";
+import { Check, ChevronDown, ChevronRight, Copy, X } from "lucide-react";
+import { Fragment } from "react";
 import { toast } from "sonner";
+
+import { ChangesTable } from "@/components/editor/sidebar-content/source-control/changes-table";
+import { TableCell, TableRow } from "@/components/ui/table";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface CommitTableRowProps {
     commit: GitCommit;
     expandedRowHash: string | undefined;
     toggleRow: (commitHash: string) => void;
-    handlePush: (commits: Array<GitCommit>) => void;
 }
 
 export const CommitTableRow = ({
     commit,
     expandedRowHash,
     toggleRow,
-    handlePush,
 }: CommitTableRowProps) => {
     const handleCopyCommitHash = (commitHash: string) => {
         navigator.clipboard
@@ -58,7 +60,9 @@ export const CommitTableRow = ({
                             <TooltipTrigger asChild>
                                 <button
                                     className="rounded border border-transparent p-1.5 hover:border-accent"
-                                    onClick={() => handleCopyCommitHash(commit.hash)}
+                                    onClick={() =>
+                                        handleCopyCommitHash(commit.hash)
+                                    }
                                 >
                                     <Copy className="h-3.5 w-3.5 text-muted-foreground" />
                                 </button>
@@ -76,11 +80,14 @@ export const CommitTableRow = ({
                                     {commit.message}
                                 </div>
                             </TooltipTrigger>
-                            <TooltipContent className="flex flex-col gap-y-1 text-wrap max-w-96">
-                                <div className="flex flex-row gap-x-3 items-baseline">
-                                    <span className="w-full">{commit.message}</span>
-                                    <span className="text-xs text-muted-foreground min-w-16 text-right">
-                                        {commit.changes.length}{" "}change{commit.changes.length !== 1 && "s"}
+                            <TooltipContent className="flex max-w-96 flex-col gap-y-1 text-wrap">
+                                <div className="flex flex-row items-baseline gap-x-3">
+                                    <span className="w-full">
+                                        {commit.message}
+                                    </span>
+                                    <span className="min-w-16 text-right text-xs text-muted-foreground">
+                                        {commit.changes.length} change
+                                        {commit.changes.length !== 1 && "s"}
                                     </span>
                                 </div>
                                 <span className="text-sm text-muted-foreground">
@@ -107,17 +114,13 @@ export const CommitTableRow = ({
 
                 <TableCell className="p-3 pr-8 text-center">
                     <div className="flex justify-end">
-                        {commit.pushed ? (
-                            <button className="flex cursor-default items-center justify-center rounded p-2">
+                        <button className="flex cursor-default items-center justify-center rounded p-2">
+                            {commit.pushed ? (
                                 <Check className="h-4 w-4 text-green-600" />
-                            </button>
-                        ) : (
-                            <PushDialog
-                                singleCommit
-                                commits={[commit]}
-                                onPushAction={handlePush}
-                            />
-                        )}
+                            ) : (
+                                <X className="h-4 w-4 text-red-600" />
+                            )}
+                        </button>
                     </div>
                 </TableCell>
             </TableRow>
