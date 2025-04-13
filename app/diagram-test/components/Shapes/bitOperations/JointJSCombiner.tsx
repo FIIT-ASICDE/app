@@ -39,7 +39,7 @@ export const JointJSCombiner = (combiner: Combiner, parseResults: UnifiedPackage
             const portY = (dimension / (inCount + 1)) * (i+1);
             portItems.push({
                 id: `input${i}`,
-                bandwidth: combineInPorts[i].dataBandwidth,
+                bandwidth: combineInPorts[i].bandwidth,
                 name: combineInPorts[i].name,
                 isStruct: false,
                 group: 'input',

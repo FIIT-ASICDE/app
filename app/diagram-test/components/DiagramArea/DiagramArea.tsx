@@ -46,7 +46,7 @@ import { api } from "@/lib/trpc/react";
 
 const DiagramArea = () => {
     const paperElement = useRef<HTMLDivElement>(null);
-    const { graph, repository, activeFile, parseResults, parseModulesResults, selectedLanguage, setSelectedLanguage, checkLanguageLock } = useDiagramContext();
+    const { graph, repository, activeFile, parseResults, parseModulesResults } = useDiagramContext();
     const [isReady, setIsReady] = useState(false);
 
     const { data: fileData } = api.repo.loadRepoItem.useQuery(
@@ -65,12 +65,11 @@ const DiagramArea = () => {
             try {
                 const json = JSON.parse(fileData.content);
                 graph.fromJSON(json);
-                const isLocked = checkLanguageLock();
             } catch (err) {
                 console.error("Failed to parse diagram JSON:", err);
             }
         }
-    }, [fileData]);
+    }, [fileData, graph]);
 
 
     useEffect(() => {
@@ -286,7 +285,7 @@ const DiagramArea = () => {
         case 'encoder':
             const encoder = new Encoder();
             encoder.name = elementName;
-            encoder.dataBandwidth = 1;
+            encoder.dataBandwidth = 2;
             encoder.position = {x, y};
             element = JointJSEncoder(encoder);
             break;

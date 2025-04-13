@@ -1,5 +1,5 @@
 import { dia } from "@joint/core";
-
+import {CustomPort} from '@/app/diagram-test/utils/DiagramGeneration/interfaces'
 
 const operatorMapVHDL: { [key: string]: string } = {
     and: 'AND',
@@ -515,6 +515,7 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
                 code += `            END IF;\n`;
             }
         }
+        code += `    END PROCESS;\n`;
 
     });
     sramCells.forEach(cell => {
@@ -547,6 +548,7 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
             code += `                ${sramName}(to_integer(unsigned(${addrSignal}))) <= ${dataInSignal};\n`;
             code += `            END IF;\n`;
         }
+        code += `    END PROCESS;\n`;
 
         code += `    ${dataOutSignal} <= ${sramName}(to_integer(unsigned(${addrSignal})));\n`;
     });
@@ -561,6 +563,8 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
             });
         }
     });
+
+    code += `END Behavioral;\n`;
 
     return code;
 }

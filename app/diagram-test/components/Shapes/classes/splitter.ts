@@ -1,5 +1,3 @@
-import { Port } from '@/app/diagram-test/components/Shapes/classes/port';
-
 export class Splitter {
     public name: string;
     public id: string;
@@ -8,9 +6,16 @@ export class Splitter {
         x: number,
         y: number
     };
-    public outPorts: Port[];
+    public outPorts: ModulePort[];
     public bitPortType: string;
     public structPackage: string;
     public structTypeDef: string;
     public language: string;
+}
+
+export interface ModulePort {
+    name?: string;
+    bandwidth?: number;
+    startBit?: number;
+    endBit?: number;
 }

@@ -57,7 +57,7 @@ export const JointJSModule = (module: Module, parseModulesResults: ParsedModule[
             const portY = (height / (inCount + 1)) * (i + 1);
             portItems.push({
                 id: `input${i}`,
-                bandwidth: moduleInPorts[i].dataBandwidth,
+                bandwidth: moduleInPorts[i].bandwidth,
                 name: moduleInPorts[i].name,
                 group: 'input',
                 args: { x: 0, y: portY },
@@ -67,7 +67,7 @@ export const JointJSModule = (module: Module, parseModulesResults: ParsedModule[
             const portY = (height / (outCount + 1)) * (i + 1);
             portItems.push({
                 id: `output${i}`,
-                bandwidth: moduleOutPorts[i].dataBandwidth,
+                bandwidth: moduleOutPorts[i].bandwidth,
                 name: moduleOutPorts[i].name,
                 group: 'output',
                 args: { x: width, y: portY },

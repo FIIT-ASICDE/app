@@ -1,6 +1,8 @@
-import { useEffect, useRef } from 'react';
-import { dia, shapes, linkTools, elementTools, V } from "@joint/core";
 import { useDiagramContext } from "@/app/diagram-test/context/useDiagramContext";
+import { V, dia, elementTools, linkTools, shapes } from "@joint/core";
+import { useEffect, useRef } from 'react';
+import { CustomPort } from "@/app/diagram-test/utils/DiagramGeneration/interfaces";
+
 
 const highlightSettings = {
     name: 'stroke',
@@ -12,18 +14,20 @@ const highlightSettings = {
         }
     }
 };
+
+
 function highlightAllInputPorts(
     graph: dia.Graph,
     neededBw: number,
     sourceElemId: string,
-    sourcePort: any
+    sourcePort: CustomPort
 ) {
     const elements = graph.getElements();
     elements.forEach((elem) => {
         if (elem.id === sourceElemId) return;
 
-        const ports = elem.get('ports')?.items || [];
-        ports.forEach((p) => {
+        const ports: CustomPort[] = elem.get('ports')?.items || [];
+        ports.forEach((p: CustomPort) => {
             if (p.group === 'input') {
                 if (sourcePort.isStruct) {
                     if (areStructPortsCompatible(sourcePort, p)) {
@@ -36,9 +40,9 @@ function highlightAllInputPorts(
                 else {
                     let portBw = p.bandwidth ?? -1;
                     if (elem.attributes.elType === 'splitter') {
-                        const ports = elem.get('ports')?.items ?? [];
-                        const outputPorts = ports.filter((p: any) => p.group === 'output');
-                        const maxEndBit = outputPorts.reduce((max: number, p: any) => {
+                        const ports: CustomPort[] = elem.get('ports')?.items ?? [];
+                        const outputPorts: CustomPort[] = ports.filter((p: CustomPort) => p.group === 'output');
+                        const maxEndBit = outputPorts.reduce((max: number, p: CustomPort) => {
                             const bw = p.endBit ?? 0;
                             return bw > max ? bw : max;
                         }, 0);
@@ -62,7 +66,7 @@ function highlightAllInputPorts(
 }
 function getPortBandwidth(cell: dia.Cell, portId: string): number {
     const ports = cell.get('ports')?.items ?? [];
-    const found = ports.find((p: any) => p.id === portId);
+    const found = ports.find((p: CustomPort) => p.id === portId);
     return found?.bandwidth ?? -1;
 }
 
@@ -70,7 +74,7 @@ function resetAllPortsColor(graph: dia.Graph) {
 
     const elements = graph.getElements();
     elements.forEach((elem) => {
-        const ports = elem.get('ports')?.items || [];
+        const ports: CustomPort[] = elem.get('ports')?.items || [];
         ports.forEach((p) => {
             if (p.group === 'input') {
                 elem.portProp(p.id, 'attrs/portCircle/fill', '#fff');
@@ -90,10 +94,10 @@ function getPortId(magnet: Element | null): string | null {
     return port;
 }
 function getPort(cell: dia.Cell, portId: string| null) {
-    return cell.get('ports')?.items?.find((p: any) => p.id === portId);
+    return cell.get('ports')?.items?.find((p: CustomPort) => p.id === portId);
 }
 
-function areStructPortsCompatible(sourcePort: any, targetPort: any): boolean {
+function areStructPortsCompatible(sourcePort: CustomPort, targetPort: CustomPort): boolean {
     return (
         sourcePort.structPackage === targetPort.structPackage &&
         sourcePort.structTypeDef === targetPort.structTypeDef
@@ -115,9 +119,6 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
     const selectionOriginRef = useRef({ x: 0, y: 0 });
     const isDraggingSelectionRef = useRef(false);
     const dragStartPointRef = useRef<{ x: number; y: number } | null>(null);
-
-
-
 
 
     const removeAllTools = (paper: dia.Paper) => {
@@ -259,8 +260,8 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
 
                         if (targetView.model.attributes.elType === 'splitter') {
                             const ports = targetView.model.get('ports')?.items ?? [];
-                            const outputPorts = ports.filter((p: any) => p.group === 'output');
-                            const maxEndBit = outputPorts.reduce((max: number, p: any) => {
+                            const outputPorts = ports.filter((p: CustomPort) => p.group === 'output');
+                            const maxEndBit = outputPorts.reduce((max: number, p: CustomPort) => {
                                 const bw = p.endBit ?? 0;
                                 return bw > max ? bw : max;
                             }, 0);
@@ -363,7 +364,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
                 linkView.addTools(linkTool);
             });
 
-            paper.on('link:pointerup', (linkView, evt, x, y) => {
+            paper.on('link:pointerup', (linkView) => {
 
                 const link = linkView.model;
                 const target = link.get('target');
@@ -418,7 +419,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
                                     }
                                 }
                             ],
-                            action: function(evt) {
+                            action: function() {
                                 graph.removeCells([elementModel]);
                                 setSelectedElement(null);
                             }
@@ -449,7 +450,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
             });
 
 
-            paper.on('element:magnet:pointerdown', (elementView, evt, magnet, x, y) => {
+            paper.on('element:magnet:pointerdown', (elementView, evt, magnet) => {
                 if (!magnet) return;
                 const sourcePortGroup = magnet.getAttribute('port-group');
                 if (sourcePortGroup === 'output') {
@@ -547,8 +548,6 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
                 }
             });
 
-            let selectionRect: SVGRectElement | null = null;
-            let origin = { x: 0, y: 0 };
 
             paper.on('blank:pointerdown', (evt: dia.Event, x: number, y: number) => {
                 clearSelection();
@@ -628,7 +627,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
                                             }
                                         }
                                     ],
-                                    action: function(evt) {
+                                    action: function() {
                                         graph.removeCells([singleElement]);
                                         setSelectedElement(null);
                                     }
@@ -658,8 +657,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
                     });
                 }
             });
-            let dragStartPoint: { x: number; y: number } | null = null;
-            let isDraggingSelection = false;
+
 
             paper.on('element:pointerdown', (elementView, evt, x, y) => {
                 const model = elementView.model as dia.Element;
@@ -669,7 +667,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
                 if (!isSelected && !(evt.ctrlKey || evt.metaKey)) {
                     removeAllTools(paper);
 
-                    clearSelection(paper);
+                    clearSelection();
 
                     if (selectedCellViewRef.current) {
                         selectedCellViewRef.current.unhighlight('image', { highlighter: highlightSettings });
@@ -707,7 +705,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
                                         }
                                     }
                                 ],
-                                action: function(evt) {
+                                action: function() {
                                     graph.removeCells([model]);
                                     setSelectedElement(null);
                                 }
@@ -756,8 +754,6 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
 
             paper.on('element:pointerup', () => {
                 dragStartPointRef.current = null;
-                dragStartPoint = null;
-                isDraggingSelection = false;
             });
 
 

@@ -370,7 +370,6 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
 
     registerCells.forEach(cell => {
         const regName = getPortName(cell);
-        const bw = cell.attributes.bandwidth;
 
         const clkKey = `${cell.id}:clk`;
         const rstKey = `${cell.id}:rst`;

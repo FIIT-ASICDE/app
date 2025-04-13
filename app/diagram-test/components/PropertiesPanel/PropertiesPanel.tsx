@@ -1,5 +1,5 @@
 // pages/diagram-test/components/PropertiesPanel/PropertiesPanel.tsx
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useHotkeys } from "@/app/diagram-test/hooks/useHotkeys";
 import { useDiagramContext } from "@/app/diagram-test/context/useDiagramContext";
 import {Multiplexer} from "@/app/diagram-test/components/Shapes/classes/multiplexer";
@@ -61,6 +61,7 @@ import { parseSystemVerilogModules } from "@/app/diagram-test/utils/DiagramGener
 import { parseVhdlEntities } from "@/app/diagram-test/utils/DiagramGeneration/VHDL/parseVHDLEntities";
 import { UnifiedPackage, ParsedModule } from "@/app/diagram-test/utils/DiagramGeneration/interfaces";
 import { toast } from "sonner";
+import { fi } from "@faker-js/faker";
 
 
 
@@ -124,7 +125,6 @@ const PropertiesPanel = () => {
     const [showErrorNotification, setShowErrorNotification] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [clipboardCell, setClipboardCell] = useState<dia.Cell | null>(null);
-    const panelRef = useRef<HTMLDivElement | null>(null);
     const elementTypes = {
         'input': { class: Port, create: JointJSInputPort },
         'output': { class: Port, create: JointJSOutputPort },
@@ -280,10 +280,10 @@ const PropertiesPanel = () => {
         setParseModulesResults(parsedModules);
 
         console.log("📦 Parsed modules:", parsedModules);
-    }, [allFiles, selectedLanguage]);
+    }, [allFiles, selectedLanguage, setParseResults, setParseModulesResults]);
 
 
-    function validateField(fieldName: string, fieldValue: any): string {
+    function validateField(fieldName: string, fieldValue: string | number | boolean | undefined): string {
         if (typeof fieldValue === 'string') {
             const trimmedValue = fieldValue.trim();
             if (!trimmedValue) {
@@ -293,6 +293,7 @@ const PropertiesPanel = () => {
             if (fieldName === 'label' && !nameRegex.test(trimmedValue)) {
                 return "Invalid name. Use only letters, digits and underscores. Must start with a letter or underscore.";
             }
+
             if (fieldName === 'label') {
                 const allElements = graph.getElements();
                 const duplicate = allElements.find(cell =>
@@ -305,6 +306,9 @@ const PropertiesPanel = () => {
         }
 
         if (typeof fieldValue === 'number') {
+            if (fieldName === 'bandwidth' && fieldValue === 1) {
+                return "The value must be > 1";
+            }
             if (fieldValue <= 0) {
                 return "The value must be > 0";
             }
@@ -323,6 +327,9 @@ const PropertiesPanel = () => {
             newValue = Number(value);
         }
 
+        if (name === 'bandwidthType') {
+            setErrors({});
+        }
 
         const errorMsg = validateField(name, newValue);
 
@@ -566,7 +573,7 @@ const PropertiesPanel = () => {
             if (elType === 'combiner') {
                 elementData.bitPortType = properties.bitPortType || 'custom';
                 if (properties.bitPortType === 'custom') {
-                    elementData.inPorts = properties.createdInPorts.map((p, i) => ({
+                    elementData.inPorts = properties.createdInPorts.map((p) => ({
                         name: p.name,
                         bandwidth: p.bandwidth,
                     }));
@@ -578,7 +585,7 @@ const PropertiesPanel = () => {
             if (elType === 'splitter') {
                 elementData.bitPortType = properties.bitPortType || 'custom';
                 if (properties.bitPortType === 'custom') {
-                    elementData.outPorts = properties.createdOutPorts.map((p, i) => ({
+                    elementData.outPorts = properties.createdOutPorts.map((p) => ({
                         name: p.name,
                         bandwidth: p.bandwidth,
                         startBit: p.startBit,
@@ -596,11 +603,11 @@ const PropertiesPanel = () => {
 
                 elementData.instance = properties.instance || '';
 
-                elementData.inPorts = properties.createdInPorts.map((p, i) => ({
+                elementData.inPorts = properties.createdInPorts.map((p) => ({
                     name: p.name,
                     bandwidth: p.bandwidth,
                 }));
-                elementData.outPorts = properties.createdOutPorts.map((p, i) => ({
+                elementData.outPorts = properties.createdOutPorts.map((p) => ({
                     name: p.name,
                     bandwidth: p.bandwidth,
                 }));
@@ -626,9 +633,6 @@ const PropertiesPanel = () => {
 
 
 
-
-
-
     const handleSave = () => {
         if (!selectedElement) return;
 
@@ -643,18 +647,6 @@ const PropertiesPanel = () => {
         handleElementChange();
     };
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
-                handleSave();
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [handleSave]);
 
     function handleCopy() {
         if (!selectedElement) return;
@@ -766,7 +758,9 @@ const PropertiesPanel = () => {
                                 <SelectValue placeholder="Select Data width" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="bit">Bit</SelectItem>
+                                {!(['encoder'].includes(selectedElement.attributes.elType)) && (
+                                    <SelectItem value="bit">Bit</SelectItem>
+                                )}
                                 <SelectItem value="vector">Vector</SelectItem>
                                 {(['output', 'input', 'multiplexer', 'sram', 'register'].includes(selectedElement.attributes.elType)) && (
                                     <SelectItem value="struct">Structure from package</SelectItem>

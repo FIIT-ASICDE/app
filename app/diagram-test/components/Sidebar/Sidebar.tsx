@@ -1,34 +1,8 @@
 // pages/diagram-test/components/Sidebar/Sidebar.tsx
 import Image from 'next/image';
-import React, { useState } from "react";
 import {Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 const Sidebar = () => {
-
-    const [gridColumns, setGridColumns] = useState(3);
-
-    const getGridColsClass = (cols: number) => {
-        switch (cols) {
-            case 1:
-                return "grid-cols-1";
-            case 2:
-                return "grid-cols-2";
-            case 3:
-                return "grid-cols-3";
-            case 4:
-                return "grid-cols-4";
-            default:
-                return "grid-cols-3"; // fallback
-        }
-    };
-    const calculateGridColumns = (width: number) => {
-        if (width < 200) return 1;
-        if (width < 350) return 2;
-        if (width < 450) return 3;
-        return 4;
-    };
-
-    const iconListStyle = `grid ${getGridColsClass(gridColumns)} gap-2 p-1`;
 
     const elements = [
         { type: 'and', label: 'AND Gate', img: 'andIcon.svg' },
@@ -81,58 +55,14 @@ const Sidebar = () => {
     // Button - onDragStart, onClick{() => createSpecificShape}
 
 
-
-
-
-    const handleWidthChange = (newWidth: number) => {
-        setGridColumns(calculateGridColumns(newWidth));
-    };
-
     const handleDragStart = (event: React.DragEvent, toolType: string) => {
         event.dataTransfer.setData('toolType', toolType);
     };
 
 
 
-
-
-    const handleSaveDiagram = () => {
-        const diagramJSON = JSON.stringify(graph.toJSON(), null, 2);
-        const blob = new Blob([diagramJSON], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'diagram.json';
-        a.click();
-        URL.revokeObjectURL(url);
-    };
-
-    const handleLoadDiagram = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                try {
-                    const json = JSON.parse(event.target?.result as string);
-                    graph.fromJSON(json);
-                } catch(e) {
-                    alert("Error parsing file");
-                    console.log(e);
-                }
-            };
-            reader.readAsText(file);
-        }
-    };
-
-    const triggerLoadDiagram = () => {
-        if (fileInputRef.current) {
-            fileInputRef.current.click();
-        }
-    };
-
-
     return (
-        <div className={iconListStyle}>
+        <div className='grid grid-cols-3 gap-2 p-1'>
             {elements.map((el) => (
                 <ElementIcon key={`${el.type}-${el.label}`} {...el} />
             ))}

@@ -9,7 +9,7 @@ import { createDiagramFromParsedModule } from "@/app/diagram-test/utils/DiagramG
 import {
     parseSystemVerilogModules
 } from "@/app/diagram-test/utils/DiagramGeneration/SystemVerilog/parseSystemVerilogModules";
-import { ParsedModule } from "@/app/diagram-test/utils/DiagramGeneration/interfaces"; // это ты создашь
+import { ParsedModule } from "@/app/diagram-test/utils/DiagramGeneration/interfaces";
 
 interface GenerateDiagramDialogProps {
     repositoryId: string;
@@ -46,6 +46,7 @@ export const GenerateDiagramDialog = ({
     }, {
         enabled: open && !!ownerName && !!repoName,
     });
+
 
 
 

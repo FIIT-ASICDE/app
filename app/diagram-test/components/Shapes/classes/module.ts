@@ -1,5 +1,3 @@
-import { Port } from '@/app/diagram-test/components/Shapes/classes/port';
-
 export class Module {
     public name: string;
     public id: string;
@@ -8,9 +6,16 @@ export class Module {
         x: number,
         y: number
     };
-    public inPorts: Port[];
-    public outPorts: Port[];
+    public inPorts: ModulePort[];
+    public outPorts: ModulePort[];
     public moduleType: string;
     public existingModule: string;
     public language: string;
+}
+
+export interface ModulePort {
+    name?: string;
+    bandwidth?: number;
+    startBit?: number;
+    endBit?: number;
 }

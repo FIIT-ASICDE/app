@@ -47,3 +47,14 @@ export interface ParsedTopModule {
     ports: TopModulePort[];
     subModules: SubModule[];
 }
+export interface CustomPort {
+    id: string;
+    group: 'input' | 'output';
+    name: string;
+    bandwidth?: number;
+    isStruct?: boolean;
+    structPackage?: string;
+    structTypeDef?: string;
+    endBit?: number;
+    startBit?: number;
+}
