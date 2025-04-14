@@ -14,7 +14,6 @@ import { createTRPCRouter, protectedProcedure } from "@/lib/server/api/trpc";
 import {
     CommitHistory,
     GitCommit,
-    GitPushResult,
     RepositoryItemChange,
 } from "@/lib/types/repository";
 import { ReturnTypeOf } from "@octokit/core/dist-types/types";
@@ -732,13 +731,8 @@ function showCommits() {
 
 function gitPush() {
     return protectedProcedure
-        .input(
-            z.object({
-                repoId: z.string().uuid(),
-                commits: z.array(z.string()).min(1),
-            }),
-        )
-        .mutation(async ({ ctx, input }): Promise<GitPushResult> => {
+        .input(z.object({ repoId: z.string().uuid() }))
+        .mutation(async ({ ctx, input }): Promise<void> => {
             await hasUserRole(ctx.prisma, input.repoId, ctx.session.user.id, [
                 "OWNER",
                 "ADMIN",
@@ -751,7 +745,7 @@ function gitPush() {
             );
 
             try {
-                // check if the repository has any remotes
+                // Check if the repository has any remotes
                 const { stdout: remoteOutput } = await execPromise(
                     `git -C "${repoPath}" remote`,
                 ).catch(() => ({ stdout: "" }));
@@ -763,111 +757,26 @@ function gitPush() {
                     });
                 }
 
+                // Get the default remote
                 const remote = remoteOutput.trim().split("\n")[0];
 
+                // Get the current branch
                 const { stdout: branchOutput } = await execPromise(
                     `git -C "${repoPath}" branch --show-current`,
                 ).catch(() => ({ stdout: "" }));
 
-                const currentBranch = branchOutput.trim() || "master"; // Default to master if no branch is found
+                const currentBranch = branchOutput.trim() || "master";
 
-                // Set up git user configuration for the push operation
                 await execPromise(
-                    `git -C "${repoPath}" config user.email "${ctx.session.user.email || "user@asicde.com"}"`,
+                    `git -C "${repoPath}" config user.email "${ctx.session.user.email || "user@asicde.sk"}"`,
                 );
                 await execPromise(
                     `git -C "${repoPath}" config user.name "${ctx.session.user.name || "ASICDE"}"`,
                 );
 
-                const pushedCommits: string[] = [];
-                const failedCommits: { hash: string; error: string }[] = [];
-
-                for (const commitHash of input.commits) {
-                    try {
-                        await execPromise(
-                            `git -C "${repoPath}" cat-file -e ${commitHash}`,
-                        );
-                    } catch {
-                        failedCommits.push({
-                            hash: commitHash,
-                            error: "Commit does not exist",
-                        });
-                    }
-                }
-
-                if (failedCommits.length > 0) {
-                    return {
-                        success: false,
-                        pushedCommits,
-                        failedCommits,
-                        message: "Some commits do not exist in the repository",
-                    };
-                }
-
-                const commitsToPush = [];
-                for (const commitHash of input.commits) {
-                    try {
-                        const { stdout } = await execPromise(
-                            `git -C "${repoPath}" branch -r --contains ${commitHash}`,
-                        );
-
-                        if (!stdout.trim()) {
-                            // commit is not pushed yet
-                            commitsToPush.push(commitHash);
-                        } else {
-                            // commit is already pushed
-                            pushedCommits.push(commitHash);
-                        }
-                    } catch {
-                        failedCommits.push({
-                            hash: commitHash,
-                            error: "Failed to check if commit is pushed",
-                        });
-                    }
-                }
-
-                if (commitsToPush.length === 0) {
-                    return {
-                        success: true,
-                        pushedCommits,
-                        failedCommits,
-                        message: "All commits are already pushed",
-                    };
-                }
-
-                try {
-                    await execPromise(`git -C "${repoPath}" fetch ${remote}`);
-                } catch (error) {
-                    // continue even if fetch fails
-                    console.error("Failed to fetch from remote:", error);
-                }
-
-                // Try to push the current branch if it contains all the commits
-                try {
-                    // Check if all commits are in the current branch
-                    let allCommitsInCurrentBranch = true;
-                    for (const commitHash of commitsToPush) {
-                        try {
-                            await execPromise(
-                                `git -C "${repoPath}" branch --contains ${commitHash} | grep "\\* ${currentBranch}"`,
-                            );
-                        } catch {
-                            allCommitsInCurrentBranch = false;
-                            break;
-                        }
-                    }
-
-                    if (allCommitsInCurrentBranch) {
-                        await execPromise(
-                            `git -C "${repoPath}" push ${remote} ${currentBranch}`,
-                        );
-                        pushedCommits.push(...commitsToPush);
-                        commitsToPush.length = 0;
-                    }
-                } catch (error) {
-                    console.error("Failed to push current branch:", error);
-                    // continue with individual commit pushing
-                }
+                await execPromise(
+                    `git -C "${repoPath}" push ${remote} ${currentBranch}`,
+                );
 
                 // Reset git user configuration
                 await execPromise(
@@ -876,20 +785,10 @@ function gitPush() {
                 await execPromise(
                     `git -C "${repoPath}" config --unset user.name`,
                 ).catch(() => {});
-
-                const success = failedCommits.length === 0;
-
-                return {
-                    success,
-                    pushedCommits,
-                    failedCommits,
-                    message: success
-                        ? "All commits pushed successfully"
-                        : `Pushed ${pushedCommits.length} commits, ${failedCommits.length} failed`,
-                };
             } catch (error) {
                 console.error("Error pushing commits:", error);
 
+                // Clean up git config in case of error
                 try {
                     await execPromise(
                         `git -C "${repoPath}" config --unset user.email`,
@@ -908,9 +807,33 @@ function gitPush() {
                     throw error;
                 }
 
+                const errorMessage =
+                    error instanceof Error ? error.message : String(error);
+
+                if (
+                    errorMessage.includes("rejected") &&
+                    errorMessage.includes("non-fast-forward")
+                ) {
+                    throw new TRPCError({
+                        code: "CONFLICT",
+                        message:
+                            "Push rejected. Remote contains work that you don't have locally. Pull first before pushing.",
+                        cause: error,
+                    });
+                }
+
+                if (errorMessage.includes("Permission denied")) {
+                    throw new TRPCError({
+                        code: "FORBIDDEN",
+                        message:
+                            "Permission denied when pushing to remote repository.",
+                        cause: error,
+                    });
+                }
+
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
-                    message: "Failed to push commits",
+                    message: "Failed to push to remote repository",
                     cause: error,
                 });
             }

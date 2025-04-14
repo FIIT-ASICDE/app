@@ -77,15 +77,10 @@ export const CommitHistoryDialog = ({
     const handlePush = (commits: Array<GitCommit>) => {
         if (commits.length === 0) return;
 
-        pushMutation
-            .mutateAsync({
-                repoId: repositoryId,
-                commits: commits.map((c) => c.hash),
-            })
-            .then(() => {
-                commitHistoryNotPushed.refetch();
-                commitHistory.refetch();
-            });
+        pushMutation.mutateAsync({ repoId: repositoryId }).then(() => {
+            commitHistoryNotPushed.refetch();
+            commitHistory.refetch();
+        });
     };
 
     return (
