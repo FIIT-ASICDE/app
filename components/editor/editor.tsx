@@ -48,7 +48,6 @@ export default function Editor({
   const debouncedParseRef = useRef<((code: string, uri: string) => void) | null>(null);
   const loadedLanguages = useRef<Set<string>>(new Set());
 
-  // Create debounced parser once
   if (!debouncedParseRef.current) {
     debouncedParseRef.current = debounce((code: string, uri: string) => {
       parseAndCollectSymbols(code, uri);
@@ -61,18 +60,9 @@ export default function Editor({
     const uri = monaco.Uri.parse(`inmemory://${filePath}`);
     console.log("[Editor] Opening file:", uri);
 
-    // Initialize symbol table if needed
-    symbolTableManager.initialize();
-    
-    // Wait for next tick to ensure symbol table is initialized
-    setTimeout(() => {
-      console.log("[Editor] Current symbol table state:", symbolTableManager.debug());
-    }, 0);
-
     const model =
       monaco.editor.getModel(uri) || monaco.editor.createModel("", language, uri);
 
-    // ✅ Avoid unnecessary model resets
     if (editorRef.current) {
       const currentModel = editorRef.current.getModel();
       if (!currentModel || currentModel.uri.toString() !== model.uri.toString()) {
@@ -86,7 +76,6 @@ export default function Editor({
         automaticLayout: true,
       });
 
-      // Call onReady when the editor is fully initialized
       if (onReady) {
         onReady();
       }
@@ -135,7 +124,6 @@ export default function Editor({
       }
     }
 
-    // 🔁 Rebind Yjs collaboration if enabled
     if (providerRef.current) providerRef.current.destroy();
     if (ydocRef.current) ydocRef.current.destroy();
 
@@ -162,13 +150,11 @@ export default function Editor({
       }
     }
 
-    // Initial parse of the file content
     const initialCode = model.getValue();
     if (initialCode) {
       parseAndCollectSymbols(initialCode, uri.toString());
     }
 
-    // Set up content change listener
     const contentChangeDisposable = model.onDidChangeContent(() => {
       const code = model.getValue();
       if (debouncedParseRef.current) {
@@ -180,8 +166,6 @@ export default function Editor({
       contentChangeDisposable.dispose();
       providerRef.current?.destroy();
       ydocRef.current?.destroy();
-      // // Clean up symbols when component unmounts
-      // symbolTableManager.removeSymbols(uri.toString());
     };
   }, [filePath, language, theme, onOpenFile, onReady]);
 

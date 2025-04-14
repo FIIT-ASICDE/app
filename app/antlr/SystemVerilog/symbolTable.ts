@@ -3,8 +3,17 @@ export type SymbolInfo = {
     line: number;
     column: number;
     uri: string;
-    type: 'module' | 'interface' | 'class' | 'program' | 'package';
-};
+    type:
+      | 'module'
+      | 'interface'
+      | 'class'
+      | 'program'
+      | 'package'
+      | 'function'
+      | 'task'
+      | 'typedef';
+  };
+  
 
 export type SymbolTable = Record<string, SymbolInfo>;
 

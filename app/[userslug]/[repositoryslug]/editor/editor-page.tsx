@@ -225,38 +225,6 @@ export default function EditorPage({ repository }: EditorPageProps) {
           });
         setActiveFile(newFile);
       };
-
-      const handleUriChange = (uriStr: string) => {
-        const decodedPath = decodeURIComponent(uriStr.replace("inmemory://", ""));
-        
-        // 🧠 Already active? Don't do anything
-        if (activeFile?.absolutePath.toLowerCase() === decodedPath.toLowerCase()) {
-          return;
-        }
-      
-        const file = openFiles.find(
-          (f) => f.absolutePath.toLowerCase() === decodedPath.toLowerCase()
-        );
-      
-        if (file) {
-          setActiveFile(file);
-          return;
-        }
-      
-        const name = decodedPath.split("/").pop() || "untitled";
-        const language = name.endsWith(".vhd") ? "vhdl" : name.endsWith(".v") ? "verilog" : "systemverilog";
-      
-        const newFile: FileDisplayItem = {
-          type: "file-display",
-          name,
-          absolutePath: decodedPath,
-          language,
-          lastActivity: new Date(),
-        };
-      
-        setOpenFiles((prev) => [...prev, newFile]);
-        setActiveFile(newFile);
-      };
       
 
     const handleTabSwitch = (item: FileDisplayItem) => {

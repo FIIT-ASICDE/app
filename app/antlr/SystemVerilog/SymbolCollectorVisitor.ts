@@ -4,14 +4,22 @@ import {
   Interface_declarationContext,
   Package_declarationContext,
   Class_declarationContext,
+  Function_declarationContext,
+  Task_declarationContext,
+  Type_declarationContext,
+  DescriptionContext,
+  Source_textContext,
+  Function_identifierContext,
+  IdentifierContext,
+  Package_item_declarationContext,
+  Function_body_declarationContext,
+  Task_body_declarationContext,
 } from "./generated/SystemVerilogParser";
 
 import { AbstractParseTreeVisitor } from "antlr4ts/tree";
 import { SystemVerilogParserVisitor } from "./generated/SystemVerilogParserVisitor";
 import { SymbolInfo, SymbolTable } from "./symbolTable";
-import { DescriptionContext, Source_textContext } from "./generated/SystemVerilogParser";
 
-// Track last visit time for each file
 const lastVisitTime: Record<string, number> = {};
 
 export class SymbolCollectorVisitor
@@ -21,108 +29,92 @@ export class SymbolCollectorVisitor
   constructor(private readonly uri: string) {
     super();
   }
+
   public symbolTable: SymbolTable = {};
 
+  private addSymbol(type: SymbolInfo["type"], ident?: { text: string; start: any }) {
+    if (!ident || !ident.start) return;
+    const { text: name, start } = ident;
+    this.symbolTable[name] = {
+      name,
+      line: start.line,
+      column: start.charPositionInLine,
+      uri: this.uri,
+      type,
+    };
+  }
+
   visitModule_declaration(ctx: Module_declarationContext): void {
-    const header = ctx.module_header?.();
-    const modIdent = header?.module_identifier?.();
-    const ident = modIdent?.identifier?.();
-    const simple = ident?.simple_identifier?.();
-    const token = simple?.start;
-  
-    if (simple && token) {
-      const name = simple.text;
-      this.symbolTable[name] = {
-        name,
-        line: token.line,
-        column: token.charPositionInLine,
-        uri: this.uri,
-        type: 'module'
-      };
-    }
-  
+    const ident = ctx.module_header?.()
+      ?.module_identifier?.()
+      ?.identifier?.()
+      ?.simple_identifier?.();
+    this.addSymbol("module", ident);
     this.visitChildren(ctx);
   }
 
   visitProgram_declaration(ctx: Program_declarationContext): void {
-    const ident = ctx.program_identifier()?.identifier()?.simple_identifier();
-    const token = ident?.start;
-  
-    if (ident && token) {
-      const name = ident.text;
-      this.symbolTable[name] = {
-        name,
-        line: token.line,
-        column: token.charPositionInLine,
-        uri: this.uri,
-        type: 'program'
-      };
-    }
-  
+    const ident = ctx.program_identifier?.()
+      ?.identifier?.()
+      ?.simple_identifier?.();
+    this.addSymbol("program", ident);
     this.visitChildren(ctx);
   }
-  
+
   visitInterface_declaration(ctx: Interface_declarationContext): void {
-    const header = ctx.interface_header?.();
-    const intfIdent = header?.interface_identifier?.();
-    const ident = intfIdent?.identifier?.();
-    const simple = ident?.simple_identifier?.();
-    const token = simple?.start;
-  
-    if (simple && token) {
-      const name = simple.text;
-      this.symbolTable[name] = {
-        name,
-        line: token.line,
-        column: token.charPositionInLine,
-        uri: this.uri,
-        type: 'interface'
-      };
-    }
-  
+    const ident = ctx.interface_header?.()
+      ?.interface_identifier?.()
+      ?.identifier?.()
+      ?.simple_identifier?.();
+    this.addSymbol("interface", ident);
     this.visitChildren(ctx);
   }
-  
+
   visitPackage_declaration(ctx: Package_declarationContext): void {
-    const ident = ctx.package_identifier()?.identifier()?.simple_identifier();
-    const token = ident?.start;
-  
-    if (ident && token) {
-      const name = ident.text;
-      this.symbolTable[name] = {
-        name,
-        line: token.line,
-        column: token.charPositionInLine,
-        uri: this.uri,
-        type: 'package'
-      };
-    }
-  
+    const ident = ctx.package_identifier?.()
+      ?.identifier?.()
+      ?.simple_identifier?.();
+    this.addSymbol("package", ident);
+    this.visitChildren(ctx);
+  }
+
+  visitClass_declaration(ctx: Class_declarationContext): void {
+    const ident = ctx.class_identifier?.()
+      ?.identifier?.()
+      ?.simple_identifier?.();
+    this.addSymbol("class", ident);
+    this.visitChildren(ctx);
+  }
+
+  visitFunction_body_declaration(ctx: Function_body_declarationContext): void {
+    const identCtx = ctx.function_identifier()?.identifier?.();
+    const simple = identCtx?.simple_identifier?.();
+    this.addSymbol("function", simple);
     this.visitChildren(ctx);
   }
   
-  visitClass_declaration(ctx: Class_declarationContext): void {
-    const ident = ctx.class_identifier()?.identifier()?.simple_identifier();
-    const token = ident?.start;
-  
-    if (ident && token) {
-      const name = ident.text;
-      this.symbolTable[name] = {
-        name,
-        line: token.line,
-        column: token.charPositionInLine,
-        uri: this.uri,
-        type: 'class'
-      };
-    }
-  
+
+  visitTask_body_declaration(ctx: Task_body_declarationContext): void {
+    const identCtx = ctx.task_identifier()?.identifier?.();
+    const simple = identCtx?.simple_identifier?.();
+    this.addSymbol("task", simple);
+    this.visitChildren(ctx);
+  }
+
+  visitType_declaration(ctx: Type_declarationContext): void {
+    const typedef = ctx.TYPEDEF();
+    const ident = ctx.data_type?.()
+      ?.type_identifier?.()
+      ?.identifier?.()
+      ?.simple_identifier?.();
+    if (typedef) this.addSymbol("typedef", ident);
     this.visitChildren(ctx);
   }
 
   visitSource_text(ctx: Source_textContext): void {
     return this.visitChildren(ctx);
   }
-  
+
   visitDescription(ctx: DescriptionContext): void {
     return this.visitChildren(ctx);
   }
@@ -130,13 +122,12 @@ export class SymbolCollectorVisitor
   protected defaultResult(): void {
     const now = Date.now();
     const lastVisit = lastVisitTime[this.uri] || 0;
-    
-    // Only log if it's been more than 1 second since last visit
     if (now - lastVisit > 1000 && Object.keys(this.symbolTable).length > 0) {
-      console.log(`[SymbolCollectorVisitor] Found ${Object.keys(this.symbolTable).length} symbols in ${this.uri}`);
+      console.log(
+        `[SymbolCollectorVisitor] Found ${Object.keys(this.symbolTable).length} symbols in ${this.uri}`
+      );
       lastVisitTime[this.uri] = now;
     }
     return;
   }
 }
-  
