@@ -145,10 +145,3 @@ export type GitCommit = {
     changes: RepositoryItemChange[];
     pushed: boolean;
 };
-
-export type GitPushResult = {
-    success: boolean;
-    pushedCommits: string[];
-    failedCommits: { hash: string; error: string }[];
-    message: string;
-};
