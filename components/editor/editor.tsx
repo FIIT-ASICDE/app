@@ -8,9 +8,8 @@ import * as Y from "yjs";
 import { registerLanguageSupport } from "./editor-config/registerLanguage";
 import { parseAndCollectSymbols } from "@/app/antlr/SystemVerilog/parseAndCollectSymbols";
 import { FileItem, FileDisplayItem } from "@/lib/types/repository";
-import { on } from "events";
+import { symbolTableManager } from "@/app/antlr/SystemVerilog/symbolTable";
 
-// Add debounce utility
 function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
@@ -23,164 +22,175 @@ function debounce<T extends (...args: any[]) => any>(
 }
 
 interface EditorProps {
-    filePath: string;
-    language?: string;
-    theme?: string;
-    onOpenFile?: (item: FileDisplayItem) => void;
+  filePath: string;
+  language?: string;
+  theme?: string;
+  onOpenFile?: (item: FileDisplayItem) => void;
+  onReady?: () => void;
 }
 
 export default function Editor({
-    filePath,
-    language,
-    theme = "vs-dark",
-    onOpenFile,
+  filePath,
+  language,
+  theme = "vs-dark",
+  onOpenFile,
+  onReady,
 }: EditorProps) {
-    const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-    const monacoEl = useRef<HTMLElement | null>(null);
-    const providerRef = useRef<WebsocketProvider | null>(null);
-    const ydocRef = useRef<Y.Doc | null>(null);
-    const pendingNavigationRef = useRef<{
-      uri: monaco.Uri;
-      range: monaco.IRange;
-    } | null>(null);
-    const debouncedParseRef = useRef<((code: string, uri: string) => void) | null>(null);
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const monacoEl = useRef<HTMLElement | null>(null);
+  const providerRef = useRef<WebsocketProvider | null>(null);
+  const ydocRef = useRef<Y.Doc | null>(null);
+  const pendingNavigationRef = useRef<{
+    uri: monaco.Uri;
+    range: monaco.IRange;
+  } | null>(null);
 
-    const loadedLanguages = useRef<Set<string>>(new Set());
+  const debouncedParseRef = useRef<((code: string, uri: string) => void) | null>(null);
+  const loadedLanguages = useRef<Set<string>>(new Set());
 
-    // Initialize debounced function once
-    if (!debouncedParseRef.current) {
-      debouncedParseRef.current = debounce((code: string, uri: string) => {
-        parseAndCollectSymbols(code, uri);
-      }, 1000); // Increased to 1 second
+  // Create debounced parser once
+  if (!debouncedParseRef.current) {
+    debouncedParseRef.current = debounce((code: string, uri: string) => {
+      parseAndCollectSymbols(code, uri);
+    }, 2000);
+  }
+
+  useEffect(() => {
+    if (!monacoEl.current) return;
+
+    const uri = monaco.Uri.parse(`inmemory://${filePath}`);
+    console.log("[Editor] Opening file:", uri);
+
+    // Initialize symbol table if needed
+    symbolTableManager.initialize();
+    
+    // Wait for next tick to ensure symbol table is initialized
+    setTimeout(() => {
+      console.log("[Editor] Current symbol table state:", symbolTableManager.debug());
+    }, 0);
+
+    const model =
+      monaco.editor.getModel(uri) || monaco.editor.createModel("", language, uri);
+
+    // ✅ Avoid unnecessary model resets
+    if (editorRef.current) {
+      const currentModel = editorRef.current.getModel();
+      if (!currentModel || currentModel.uri.toString() !== model.uri.toString()) {
+        editorRef.current.setModel(model);
+      }
+    } else {
+      editorRef.current = monaco.editor.create(monacoEl.current, {
+        model,
+        language,
+        theme,
+        automaticLayout: true,
+      });
+
+      // Call onReady when the editor is fully initialized
+      if (onReady) {
+        onReady();
+      }
+
+      editorRef.current.onMouseDown((event) => {
+        if (
+          event.event.ctrlKey &&
+          pendingNavigationRef.current &&
+          event.target.type === monaco.editor.MouseTargetType.CONTENT_TEXT
+        ) {
+          const { uri, range } = pendingNavigationRef.current;
+
+          if (onOpenFile) {
+            const fileName = uri.path.split("/").pop() || "untitled";
+
+            onOpenFile({
+              type: "file-display",
+              name: fileName,
+              absolutePath: fileName,
+              language: "systemverilog",
+              lastActivity: new Date(),
+            });
+
+            const disposable = monaco.editor.onDidCreateEditor((editor) => {
+              if (editor.getModel()?.uri.toString() === uri.toString()) {
+                editor.setPosition({
+                  lineNumber: range.startLineNumber,
+                  column: range.startColumn,
+                });
+                editor.revealRangeInCenter(range);
+                editor.focus();
+                disposable.dispose();
+              }
+            });
+
+            pendingNavigationRef.current = null;
+            event.event.preventDefault();
+            event.event.stopPropagation();
+          }
+        }
+      });
+
+      if (language && !loadedLanguages.current.has(language)) {
+        registerLanguageSupport(language, pendingNavigationRef);
+        loadedLanguages.current.add(language);
+      }
     }
 
-    useEffect(() => {
-        if (!monacoEl.current) return;
-        const uri = monaco.Uri.parse(`inmemory://${filePath}`);
-        const model =
-          monaco.editor.getModel(uri) ||
-          monaco.editor.createModel("", language, uri);
-        
-        // ✅ Only update model if different
-        if (editorRef.current) {
-          const currentModel = editorRef.current.getModel();
-          if (!currentModel || currentModel.uri.toString() !== model.uri.toString()) {
-            editorRef.current.setModel(model);
-          }
-        } else {
-          editorRef.current = monaco.editor.create(monacoEl.current, {
-            model,
-            language,
-            theme,
-            automaticLayout: true,
-          });
+    // 🔁 Rebind Yjs collaboration if enabled
+    if (providerRef.current) providerRef.current.destroy();
+    if (ydocRef.current) ydocRef.current.destroy();
 
-          editorRef.current?.onMouseDown((event) => {
-            if (
-              event.event.ctrlKey &&
-              pendingNavigationRef.current &&
-              event.target.type === monaco.editor.MouseTargetType.CONTENT_TEXT
-            ) {
-              const { uri, range } = pendingNavigationRef.current;
-              
-              if (onOpenFile) {
-                // Get just the file name from the path
-                const fileName = uri.path.split("/").pop() || "untitled";
-                
-                // Store the range for later use
-                const targetRange = range;
-                
-                // Call onOpenFile with the target file
-                onOpenFile({
-                  type: "file-display",
-                  name: fileName,
-                  absolutePath: fileName,
-                  language: "systemverilog",
-                  lastActivity: new Date(),
-                });
-                
-                // Set up a one-time effect to handle the position after the file is opened
-                const disposable = monaco.editor.onDidCreateEditor((editor) => {
-                  if (editor.getModel()?.uri.toString() === uri.toString()) {
-                    editor.setPosition({
-                      lineNumber: targetRange.startLineNumber,
-                      column: targetRange.startColumn,
-                    });
-                    editor.revealRangeInCenter(targetRange);
-                    editor.focus();
-                    disposable.dispose();
-                  }
-                });
-                
-                // Clear navigation state
-                pendingNavigationRef.current = null;
-                
-                // Prevent default behavior
-                event.event.preventDefault();
-                event.event.stopPropagation();
-              }
-            }
-          });
-          
-          
-    
-          if (language && !loadedLanguages.current.has(language)) {
-            registerLanguageSupport(language, pendingNavigationRef);
-            loadedLanguages.current.add(language);
-          }
-          
-        }
+    if (process.env.NODE_ENV !== "production") {
+      const ydoc = new Y.Doc();
+      ydocRef.current = ydoc;
 
-        if (providerRef.current) {
-          providerRef.current.destroy();
-        }
-    
-        if (ydocRef.current) {
-          ydocRef.current.destroy();
-        }
+      const provider = new WebsocketProvider(
+        process.env.NEXT_PUBLIC_EDITOR_SERVER_URL ?? "wss://ide.drasic.com/ws",
+        "connect",
+        ydoc,
+        { params: { filePath } }
+      );
+      providerRef.current = provider;
 
-       // if (process.env.NODE_ENV !== "production") {
-            const ydoc = new Y.Doc();
-            ydocRef.current = ydoc;
+      if (editorRef.current) {
+        const type = ydoc.getText("monaco");
+        new MonacoBinding(
+          type,
+          editorRef.current.getModel()!,
+          new Set([editorRef.current]),
+          provider.awareness
+        );
+      }
+    }
 
-            const provider = new WebsocketProvider(
-                process.env.NEXT_PUBLIC_EDITOR_SERVER_URL ?? "wss://ide.drasic.com/ws",
-                "connect",
-                ydoc,
-                { params: { filePath } }
-            );
-            providerRef.current = provider;
+    // Initial parse of the file content
+    const initialCode = model.getValue();
+    if (initialCode) {
+      parseAndCollectSymbols(initialCode, uri.toString());
+    }
 
-            if (editorRef.current) {
-                const type = ydoc.getText("monaco");
-                new MonacoBinding(
-                    type,
-                    editorRef.current.getModel()!,
-                    new Set([editorRef.current]),
-                    provider.awareness
-                );
-            }
-       // }
+    // Set up content change listener
+    const contentChangeDisposable = model.onDidChangeContent(() => {
+      const code = model.getValue();
+      if (debouncedParseRef.current) {
+        debouncedParseRef.current(code, uri.toString());
+      }
+    });
 
-       model.onDidChangeContent(() => {
-         const code = model.getValue();
-         if (debouncedParseRef.current) {
-           debouncedParseRef.current(code, model.uri.toString());
-         }
-       });
+    return () => {
+      contentChangeDisposable.dispose();
+      providerRef.current?.destroy();
+      ydocRef.current?.destroy();
+      // // Clean up symbols when component unmounts
+      // symbolTableManager.removeSymbols(uri.toString());
+    };
+  }, [filePath, language, theme, onOpenFile, onReady]);
 
-      return () => {
-        providerRef.current?.destroy();
-        ydocRef.current?.destroy();
-      };
-    }, [filePath, language, theme, onOpenFile]);
+  useEffect(() => {
+    return () => {
+      editorRef.current?.dispose();
+      editorRef.current = null;
+    };
+  }, []);
 
-    useEffect(() => {
-      return () => {
-        editorRef.current?.dispose();
-        editorRef.current = null;
-      };
-    }, []);
-
-    return <main className="h-full w-full" ref={monacoEl}></main>;
+  return <main className="h-full w-full" ref={monacoEl}></main>;
 }

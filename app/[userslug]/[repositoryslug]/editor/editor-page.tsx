@@ -13,7 +13,7 @@ import type {
     RepositoryItem,
 } from "@/lib/types/repository";
 import dynamic from "next/dynamic";
-import { type ElementRef, RefObject, useEffect, useRef, useState } from "react";
+import { type ElementRef, RefObject, useEffect, useRef, useState, useCallback } from "react";
 import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
 import { z } from "zod";
@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/resizable";
 import { EditorTabs } from "@/components/editor/editor-tabs";
 import { ImperativePanelGroupHandle } from "react-resizable-panels";
+import { symbolTableManager } from "@/app/antlr/SystemVerilog/symbolTable";
 
 interface EditorPageProps {
     repository: Repository;
@@ -315,6 +316,17 @@ export default function EditorPage({ repository }: EditorPageProps) {
         saveSessionDebounced();
     }, [openFiles, activeFile, repository.id, saveSessionDebounced]);
 
+    // Add a callback to handle editor ready state
+    const handleEditorReady = useCallback(() => {
+        console.log("[EditorPage] Editor is ready, initializing symbol table");
+        if (repository.symbolTable) {
+            // Initialize with data from the repository
+            symbolTableManager.initializeWithData(repository.symbolTable);
+        } else {
+            symbolTableManager.initialize();
+        }
+    }, [repository]);
+
     return (
         <div className="flex h-screen flex-row">
             <EditorNavigation
@@ -409,6 +421,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
                                     }
                                     language={activeFile.language}
                                     onOpenFile={openFileByPath}
+                                    onReady={handleEditorReady}
                                 />
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center text-muted-foreground">

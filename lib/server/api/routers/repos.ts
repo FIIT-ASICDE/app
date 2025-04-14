@@ -31,6 +31,8 @@ import { Session } from "next-auth";
 import path from "path";
 import util from "util";
 import { z } from "zod";
+import { indexRepositorySymbols } from "../../utils/indexRepositorySymbols";
+import { symbolTableManager } from "@/app/antlr/SystemVerilog/symbolTable";
 
 const execPromise = util.promisify(exec);
 
@@ -222,6 +224,10 @@ function searchByOwnerAndRepoSlug() {
 
             const userRepoRelation = repo.userOrganizationRepo.at(0);
             const repoPath = absoluteRepoPath(owner.name!, repo.name);
+
+            const virtualPrefix = `${owner.name}/${repo.name}`;
+            await indexRepositorySymbols(repoPath, virtualPrefix);
+            
             const contentsTree = loadRepoItems(
                 repoPath,
                 input.loadItemsDisplaysDepth,
@@ -250,6 +256,10 @@ function searchByOwnerAndRepoSlug() {
                 userRole: userRepoRelation?.repoRole ?? "GUEST",
                 tree: contentsTree,
                 isGitRepo,
+                symbolTable: {
+                    globalSymbols: symbolTableManager.getAllSymbols(),
+                    fileSymbols: symbolTableManager.debug()
+                }
             } satisfies Repository;
         });
 }

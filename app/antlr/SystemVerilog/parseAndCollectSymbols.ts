@@ -1,25 +1,39 @@
-import { ANTLRInputStream, CommonTokenStream } from "antlr4ts";
+import { CharStreams, CommonTokenStream } from "antlr4ts";
 import { SystemVerilogLexer } from "./generated/SystemVerilogLexer";
 import { SystemVerilogParser } from "./generated/SystemVerilogParser";
 import { SymbolCollectorVisitor } from "./SymbolCollectorVisitor";
-import { symbolIndex } from "./symbolTable";
+import { symbolTableManager } from "./symbolTable";
 
-export function parseAndCollectSymbols(code: string, uri: string) {
+export function parseAndCollectSymbols(input: string, uri: string): void {
     try {
-        const inputStream = new ANTLRInputStream(code);
+        // Create the lexer and parser
+        const inputStream = CharStreams.fromString(input);
         const lexer = new SystemVerilogLexer(inputStream);
         const tokenStream = new CommonTokenStream(lexer);
         const parser = new SystemVerilogParser(tokenStream);
 
+        // Parse the input
         const tree = parser.source_text();
+
+        // Create and run the visitor
         const visitor = new SymbolCollectorVisitor(uri);
         visitor.visit(tree);
-        console.log("[parseAndCollectSymbols] visitor.symbolTable");
-        console.log(visitor.symbolTable);
-        symbolIndex[uri] = visitor.symbolTable;
 
-    } catch (err) {
-        console.error("Error parsing SystemVerilog:", err);
+        // Get the symbols from the visitor
+        const symbols = visitor.symbolTable;
+
+        // Get existing symbols for this file
+        const existingSymbols = symbolTableManager.getFileSymbols(uri);
+        
+        // Merge new symbols with existing ones
+        const mergedSymbols = { ...existingSymbols, ...symbols };
+
+        // Update the symbol table using the manager
+        symbolTableManager.addSymbols(uri, mergedSymbols);
+
+    } catch (error) {
+        console.error("[parseAndCollectSymbols] Error parsing SystemVerilog:", error);
+        // If there's an error, remove any existing symbols for this file
+        symbolTableManager.removeSymbols(uri);
     }
 }
-  
