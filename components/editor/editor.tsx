@@ -8,7 +8,6 @@ import * as Y from "yjs";
 import { registerLanguageSupport } from "./editor-config/registerLanguage";
 import { parseAndCollectSymbols } from "@/app/antlr/SystemVerilog/parseAndCollectSymbols";
 import { FileItem, FileDisplayItem } from "@/lib/types/repository";
-import { symbolTableManager } from "@/app/antlr/SystemVerilog/symbolTable";
 
 function debounce<T extends (...args: any[]) => any>(
   func: T,
@@ -58,7 +57,6 @@ export default function Editor({
     if (!monacoEl.current) return;
 
     const uri = monaco.Uri.parse(`inmemory://${filePath}`);
-    console.log("[Editor] Opening file:", uri);
 
     const model =
       monaco.editor.getModel(uri) || monaco.editor.createModel("", language, uri);

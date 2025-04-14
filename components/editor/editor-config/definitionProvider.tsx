@@ -19,7 +19,8 @@ export function registerDefinitionProvider(
       const symbol = allSymbols.find((s) => s.name === word.word);
       if (!symbol) return;
 
-      const targetUri = monaco.Uri.parse(symbol.uri);
+      // Create a proper URI for the target file
+      const targetUri = monaco.Uri.parse(`inmemory://${symbol.uri}`);
       const range = new monaco.Range(
         symbol.line,
         symbol.column,
@@ -27,12 +28,12 @@ export function registerDefinitionProvider(
         symbol.column + symbol.name.length
       );
 
-      // Always set navigation state and return null to prevent auto navigation
+      // Store the navigation state for potential custom handling
       if (pendingNavigationRef) {
         pendingNavigationRef.current = { uri: targetUri, range };
-        return null;
       }
 
+      // Return the location to allow editor navigation
       return { uri: targetUri, range };
     },
   });

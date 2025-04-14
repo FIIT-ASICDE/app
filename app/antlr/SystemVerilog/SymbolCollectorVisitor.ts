@@ -123,9 +123,6 @@ export class SymbolCollectorVisitor
     const now = Date.now();
     const lastVisit = lastVisitTime[this.uri] || 0;
     if (now - lastVisit > 1000 && Object.keys(this.symbolTable).length > 0) {
-      console.log(
-        `[SymbolCollectorVisitor] Found ${Object.keys(this.symbolTable).length} symbols in ${this.uri}`
-      );
       lastVisitTime[this.uri] = now;
     }
     return;

@@ -21,12 +21,9 @@ export async function indexRepositorySymbols(repoPath: string, virtualPrefix: st
             const virtualPath = `${virtualPrefix}/${relativePath}`;
             const uri = encodeURI(`inmemory://${virtualPath}`).toLowerCase();
             
-            // Parse and collect symbols without removing existing ones
             parseAndCollectSymbols(code, uri);
-            
-            // Log the current state of the symbol table after each file
-            console.log(`[SymbolIndex] Processed ${uri}`);
-            symbolTableManager.debug();
+
+            //symbolTableManager.debug();
           } catch (err) {
             console.warn(`[SymbolIndex] Failed to parse ${fullPath}:`, err);
           }
@@ -34,10 +31,7 @@ export async function indexRepositorySymbols(repoPath: string, virtualPrefix: st
       }
     }
   
-    // Clear all existing symbols before starting the indexing
-    console.log('[SymbolIndex] Starting repository symbol indexing...');
     await walk(repoPath);
-    console.log('[SymbolIndex] Repository symbol indexing completed');
-    symbolTableManager.debug();
+    //symbolTableManager.debug();
   }
   
