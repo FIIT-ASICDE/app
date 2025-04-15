@@ -75,6 +75,7 @@ integration-test:
     script:
         - bun install
         - bun test
+
 # deploy-dev:
 #     stage: deploy
 #     environment:
