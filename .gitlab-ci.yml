@@ -1,7 +1,7 @@
 stages:
     - code-quality
     - build
-    # - test
+    - test
     # - deploy
 
 lint:
