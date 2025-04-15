@@ -45,7 +45,7 @@ const server = Bun.serve<EditorSocketData>({
             return Response.json({ message: "unauthorized" }, { status: 401 });
         }
 
-        // url looks like this http://localhost:3001/connect?filePath=placeholder
+        // url looks like http://localhost:3001/connect?filePath=placeholder
         let filePath = req.url.split("?").at(1)?.split("=").at(1);
 
         if (filePath) {

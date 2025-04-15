@@ -1,6 +1,6 @@
 stages:
     - code-quality
-    # - build
+    - build
     # - test
     # - deploy
 
@@ -17,39 +17,39 @@ lint:
             - bun.lock
             - node_modules
             - .next/cache/
-# build-app:
-#     stage: build
-#     tags:
-#         - bun
-#     artifacts:
-#         paths:
-#             - .next
-#         expire_in: 24 hours
-#     script:
-#         - bun install
-#         - bun run build
-#     cache:
-#         key: $CI_COMMIT_REF_SLUG
-#         paths:
-#             - bun.lock
-#             - node_modules
-#             - .next/cache/
-#
-# build-editor-server:
-#     stage: build
-#     tags:
-#         - bun
-#     artifacts:
-#         paths:
-#             - editor-server/build
-#         expire_in: 24 hours
-#     script:
-#         - cd editor-server
-#         - bun install
-#         - bun build server.ts --compile --minify --outfile ./build/editor-server
-#     only:
-#         changes:
-#             - editor-server/**
+build-app:
+    stage: build
+    tags:
+        - bun
+    artifacts:
+        paths:
+            - .next
+        expire_in: 24 hours
+    script:
+        - bun install
+        - bun run build
+    cache:
+        key: $CI_COMMIT_REF_SLUG
+        paths:
+            - bun.lock
+            - node_modules
+            - .next/cache/
+
+build-editor-server:
+    stage: build
+    tags:
+        - bun
+    artifacts:
+        paths:
+            - editor-server/build
+        expire_in: 24 hours
+    script:
+        - cd editor-server
+        - bun install
+        - bun build server.ts --compile --minify --outfile ./build/editor-server
+    only:
+        changes:
+            - editor-server/**
 # integration-test:
 #     stage: test
 #     tags:
