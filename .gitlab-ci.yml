@@ -74,6 +74,7 @@ integration-test:
         - apt-get update && apt-get install -y git
     script:
         - bun install
+        - bunx prisma generate
         - bun test
 
 # deploy-dev:
