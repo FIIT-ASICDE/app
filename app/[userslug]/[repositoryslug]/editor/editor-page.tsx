@@ -13,7 +13,7 @@ import type {
     RepositoryItem,
 } from "@/lib/types/repository";
 import dynamic from "next/dynamic";
-import { type ElementRef, RefObject, useEffect, useRef, useState, useCallback } from "react";
+import { type ElementRef, RefObject, useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
 import { z } from "zod";
@@ -195,36 +195,36 @@ export default function EditorPage({ repository }: EditorPageProps) {
 
     const handleFileClick = (item: RepositoryItem) => {
         if (item.type === "file" || item.type === "file-display") {
-          openFileByPath(item);
+            handleOpenFile(item);
         }
-      };
+    };
 
-      const openFileByPath = (item: FileDisplayItem | FileItem) => {
-        const absolutePath = item.absolutePath.toLowerCase();
+    //   const openFileByPath = (item: FileDisplayItem | FileItem) => {
+    //     const absolutePath = item.absolutePath.toLowerCase();
       
-        const existingFile = openFiles.find(
-          (f) => f.absolutePath.toLowerCase() === absolutePath
-        );
+    //     const existingFile = openFiles.find(
+    //       (f) => f.absolutePath.toLowerCase() === absolutePath
+    //     );
       
-        if (existingFile) {
-          setActiveFile(existingFile);
-          return;
-        }
+    //     if (existingFile) {
+    //       setActiveFile(existingFile);
+    //       return;
+    //     }
       
-        const newFile: FileDisplayItem = {
-          type: "file-display",
-          name: item.name,
-          absolutePath: item.absolutePath,
-          language: item.language,
-          lastActivity: item.lastActivity,
-        };
+    //     const newFile: FileDisplayItem = {
+    //       type: "file-display",
+    //       name: item.name,
+    //       absolutePath: item.absolutePath,
+    //       language: item.language,
+    //       lastActivity: item.lastActivity,
+    //     };
       
-        setOpenFiles((prev) => {
-            const exists = prev.some((f) => f.absolutePath.toLowerCase() === newFile.absolutePath.toLowerCase());
-            return exists ? prev : [...prev, newFile];
-          });
-        setActiveFile(newFile);
-      };
+    //     setOpenFiles((prev) => {
+    //         const exists = prev.some((f) => f.absolutePath.toLowerCase() === newFile.absolutePath.toLowerCase());
+    //         return exists ? prev : [...prev, newFile];
+    //       });
+    //     setActiveFile(newFile);
+    //   };
       
 
     const handleTabSwitch = (item: FileDisplayItem) => {
@@ -254,46 +254,66 @@ export default function EditorPage({ repository }: EditorPageProps) {
         }
     }, [session]);
 
-    const saveSessionDebounced = useDebouncedCallback(() => {
-        const transformedOpenFiles = openFiles.map((file) => ({
-            name: file.name,
-            type: file.type,
-            lastActivity: new Date(file.lastActivity),
-            language: file.language,
-            absolutePath: file.absolutePath,
-        }));
+    const serializeFile = (file: FileDisplayItem) => ({
+        name: file.name,
+        type: file.type,
+        lastActivity: new Date(file.lastActivity),
+        language: file.language,
+        absolutePath: file.absolutePath,
+    });
 
-        const transformedActiveFile = activeFile
-            ? {
-                  name: activeFile.name,
-                  type: activeFile.type,
-                  lastActivity: new Date(activeFile.lastActivity),
-                  language: activeFile.language,
-                  absolutePath: activeFile.absolutePath,
-              }
-            : null;
+    const saveSessionDebounced = useDebouncedCallback(() => {
+        const transformedOpenFiles = openFiles.map(serializeFile);
+
+        const transformedActiveFile = activeFile ? serializeFile(activeFile) : null;
 
         saveSession.mutate({
             activeFile: transformedActiveFile,
             openFiles: transformedOpenFiles,
             repoId: repository.id,
         });
-    }, 3000);
+    }, 2000);
 
     useEffect(() => {
         saveSessionDebounced();
-    }, [openFiles, activeFile, repository.id, saveSessionDebounced]);
+    }, [openFiles, activeFile]);
 
-    // Add a callback to handle editor ready state
+    const handleOpenFile = useCallback((item: FileDisplayItem | FileItem) => {
+        const absolutePath = item.absolutePath.toLowerCase();
+    
+        setOpenFiles((prev) => {
+            const exists = prev.some((f) => f.absolutePath.toLowerCase() === absolutePath);
+            if (!exists) {
+                const newFile: FileDisplayItem = {
+                    type: "file-display",
+                    name: item.name,
+                    absolutePath: item.absolutePath,
+                    language: item.language,
+                    lastActivity: item.lastActivity,
+                };
+                setActiveFile(newFile);
+                return [...prev, newFile];
+            } else {
+                const file = prev.find((f) => f.absolutePath.toLowerCase() === absolutePath)!;
+                setActiveFile(file);
+                return prev;
+            }
+        });
+    }, []);
+
     const handleEditorReady = useCallback(() => {
         console.log("[EditorPage] Editor is ready, initializing symbol table");
         if (repository.symbolTable) {
-            // Initialize with data from the repository
             symbolTableManager.initializeWithData(repository.symbolTable);
         } else {
             symbolTableManager.initialize();
         }
     }, [repository]);
+
+    const editorFilePath = useMemo(() => {
+        if (!activeFile) return "";
+        return `${repository.ownerName}/${repository.name}/${activeFile.absolutePath}`;
+    }, [activeFile, repository]);
 
     return (
         <div className="flex h-screen flex-row">
@@ -380,17 +400,11 @@ export default function EditorPage({ repository }: EditorPageProps) {
                             />
                             {activeFile ? (
                                 <DynamicEditor
-                                    filePath={
-                                        repository.ownerName +
-                                        "/" +
-                                        repository.name +
-                                        "/" +
-                                        activeFile.absolutePath
-                                    }
-                                    language={activeFile.language}
-                                    onOpenFile={openFileByPath}
-                                    onReady={handleEditorReady}
-                                />
+                                filePath={editorFilePath}
+                                language={activeFile.language}
+                                onOpenFile={handleOpenFile}
+                                onReady={handleEditorReady}
+                            />
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                                     No file open
