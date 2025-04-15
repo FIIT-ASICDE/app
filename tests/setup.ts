@@ -53,9 +53,24 @@ export async function testingPrisma() {
         "drop schema if exists public cascade; create schema public;",
     );
 
-    await execAsync("bunx prisma migrate reset --force", {
-        env: { ...process.env, DATABASE_URL: connectionUri },
-    });
+    const migrateCommand = "bunx prisma migrate reset --force";
+    try {
+        const { stdout, stderr } = await execAsync(migrateCommand, {
+            env: { ...process.env, DATABASE_URL: connectionUri },
+        });
+        if (stdout) {
+            console.log("Command stdout:");
+            console.log(stdout);
+        }
+        if (stderr) {
+            console.log("Command stderr:");
+            console.log(stderr);
+        }
+    } catch (error) {
+        console.error(`Error executing command: ${migrateCommand}`);
+        console.error(error);
+        throw error;
+    }
 
     return {
         prisma,
