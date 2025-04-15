@@ -50,31 +50,31 @@ build-editor-server:
     only:
         changes:
             - editor-server/**
-# integration-test:
-#     stage: test
-#     tags:
-#         - bun
-#     dependencies:
-#         - build-app
-#     services:
-#         - name: postgres:latest
-#           alias: postgres
-#     variables:
-#         POSTGRES_DB: asicde
-#         POSTGRES_USER: asicde
-#         POSTGRES_PASSWORD: asicde
-#     cache:
-#         key: $CI_COMMIT_REF_SLUG
-#         paths:
-#             - bun.lock
-#             - node_modules
-#             - .next/cache/
-#     before_script:
-#         - apt-get update && apt-get install -y git
-#     script:
-#         - bun install
-#         - bun test
-#
+
+integration-test:
+    stage: test
+    tags:
+        - bun
+    dependencies:
+        - build-app
+    services:
+        - name: postgres:latest
+          alias: postgres
+    variables:
+        POSTGRES_DB: asicde
+        POSTGRES_USER: asicde
+        POSTGRES_PASSWORD: asicde
+    cache:
+        key: $CI_COMMIT_REF_SLUG
+        paths:
+            - bun.lock
+            - node_modules
+            - .next/cache/
+    before_script:
+        - apt-get update && apt-get install -y git
+    script:
+        - bun install
+        - bun test
 # deploy-dev:
 #     stage: deploy
 #     environment:
