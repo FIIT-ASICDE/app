@@ -64,6 +64,7 @@ integration-test:
         POSTGRES_DB: asicde
         POSTGRES_USER: asicde
         POSTGRES_PASSWORD: asicde
+        DATABASE_URL: "postgresql://asicde:asicde@postgres:5432/asicde"
     cache:
         key: $CI_COMMIT_REF_SLUG
         paths:
@@ -75,6 +76,7 @@ integration-test:
     script:
         - bun install
         - bunx prisma generate
+        - bunx prisma migrate reset --force
         - bun test
 
 # deploy-dev:
