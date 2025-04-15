@@ -53,9 +53,11 @@ export async function testingPrisma() {
         "drop schema if exists public cascade; create schema public;",
     );
 
+    console.log("before migration");
     await execAsync("bunx prisma migrate deploy", {
         env: { ...process.env, DATABASE_URL: connectionUri },
     });
+    console.log("after migration");
 
     return {
         prisma,
