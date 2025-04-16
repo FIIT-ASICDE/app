@@ -1,4 +1,4 @@
-import { BottomPanelContentTab, Configuration } from "@/lib/types/editor";
+import { BottomPanelContentTab, Configuration, SimulationOutput } from "@/lib/types/editor";
 
 import { SimulationTabContent } from "@/components/editor/bottom-panel-content/simulation-tab-content";
 import { SynthesisTabContent } from "@/components/editor/bottom-panel-content/synthesis-tab-content";
@@ -7,7 +7,7 @@ interface BottomPanelTabContentProps {
     activeBottomPanelContent: BottomPanelContentTab;
     handleCloseBottomPanel: () => void;
     configuration: Configuration | undefined;
-    simulationOutput: Array<string>;
+    simulationOutput: Array<SimulationOutput>;
 }
 
 export const BottomPanelTabContent = ({

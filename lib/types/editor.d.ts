@@ -39,3 +39,13 @@ export type SimulationTab =
     | "all"
     | "errors"
     | "warnings";
+
+type SimulationOutputType =
+    | "info"
+    | "error"
+    | "warning";
+
+interface SimulationOutput {
+    type: SimulationOutputType;
+    content: string;
+}

@@ -1,13 +1,13 @@
 import { CloseButton } from "@/components/editor/navigation/close-button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Configuration, SimulationTab } from "@/lib/types/editor";
+import { Configuration, SimulationOutput, SimulationTab } from "@/lib/types/editor";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface SimulationTabContentProps {
     handleCloseBottomPanel: () => void;
     configuration: Configuration | undefined;
-    simulationOutput: Array<string>;
+    simulationOutput: Array<SimulationOutput>;
 }
 
 export const SimulationTabContent = ({
@@ -44,8 +44,8 @@ export const SimulationTabContent = ({
             <ScrollArea className="h-full w-full mt-4">
                 {activeTab === "all" && (
                     <div className="space-y-0 font-mono text-muted-foreground text-sm">
-                        {simulationOutput.map((line: string, i: number) => (
-                            <div key={i}>{line}</div>
+                        {simulationOutput.map((line: SimulationOutput, index: number) => (
+                            <div key={index}>{line.content}</div>
                         ))}
                     </div>
                 )}

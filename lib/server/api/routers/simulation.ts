@@ -11,6 +11,7 @@ import fs from "fs";
 
 import axios from "axios";
 import FormData from "form-data";
+import { SimulationOutput } from "@/lib/types/editor";
 
 
 
@@ -109,7 +110,7 @@ function simulateVerilatorCppStream() {
             yield `Simulation Verilator C++ started.`;
 
             const repoIdDecoded = decodeURIComponent(input.repoId);
-            const testbenchPathDecode = decodeURIComponent(input.testbenchPath).replace(/\\/g, "/");;
+            const testbenchPathDecode = decodeURIComponent(input.testbenchPath).replace(/\\/g, "/");
 
             console.log("repo id: ", repoIdDecoded);
             console.log("testbench path: ", testbenchPathDecode);
@@ -157,12 +158,18 @@ function simulateVerilatorCppStream() {
 
             for await (const chunk of simulation.stdout) {
                 console.log(chunk.toString())
-                yield `[stdout] ${chunk.toString()}`;
+                yield {
+                    type: "info",
+                    content: `[stdout] ${chunk.toString()}`,
+                } satisfies SimulationOutput;
             }
 
             for await (const chunk of simulation.stderr) {
                 console.log(chunk.toString())
-                yield `[stderr] ${chunk.toString()}`;
+                yield {
+                    type: "error",
+                    content: `[stdout] ${chunk.toString()}`,
+                } satisfies SimulationOutput;
             }
 
             yield `✅ Simulation successfully finished.`;
