@@ -9,7 +9,7 @@ lint:
     tags:
         - bun
     script:
-        - bun install
+        - bun install --frozen-lockfile
         - bun run lint
     cache:
         key: $CI_COMMIT_REF_SLUG
@@ -26,7 +26,7 @@ build-app:
             - .next
         expire_in: 24 hours
     script:
-        - bun install
+        - bun install --frozen-lockfile
         - bun run build
     cache:
         key: $CI_COMMIT_REF_SLUG
@@ -45,7 +45,7 @@ build-editor-server:
         expire_in: 24 hours
     script:
         - cd editor-server
-        - bun install
+        - bun install --frozen-lockfile
         - bun build server.ts --compile --minify --outfile ./build/editor-server
     only:
         changes:
@@ -74,11 +74,10 @@ integration-test:
     before_script:
         - apt-get update && apt-get install -y git
     script:
-        - bun install
+        - bun install --frozen-lockfile
         - bunx prisma generate
         - bunx prisma migrate reset --force
         - bun test
-
 # deploy-dev:
 #     stage: deploy
 #     environment:
@@ -87,7 +86,7 @@ integration-test:
 #     tags:
 #         - alpine
 #     dependencies:
-#         - build-app
+#         - integration-test
 #     before_script:
 #         - "command -v ssh-agent >/dev/null || ( apk add --update openssh openssl rsync )"
 #         - mkdir -p ~/.ssh
@@ -99,11 +98,10 @@ integration-test:
 #         - echo "StrictHostKeyChecking no" >> ~/.ssh/config # https://forum.gitlab.com/t/error-host-key-verification-failed/77315/3
 #     script:
 #         - echo -e "bun.lock\npackage.json\npublic/\nmigrations/\n.next/\nprisma/\nscripts/" > filelist.txt
-#         - rsync -avzr --delete --exclude '.env' --exclude 'editor-server' --files-from=filelist.txt ./ asicde-dev-env@asicde.fiit.stuba.sk:/home/asicde-dev-env/asicde/
+#         - rsync -avzr --delete --exclude '.env' --exclude 'editor-server' --files-from=filelist.txt ./ asicde@asicde.fiit.stuba.sk:/home/asicde/asicde/
 #         - ssh asicde-dev-env@asicde.fiit.stuba.sk "cd ~/asicde && ./scripts/deploy.sh"
 #     only:
 #         - master
-#
 # deploy-dev-editor-server:
 #     stage: deploy
 #     environment:
@@ -123,9 +121,9 @@ integration-test:
 #         - ssh-add -v ~/.ssh/id_ed25519
 #         - echo "StrictHostKeyChecking no" >> ~/.ssh/config # https://forum.gitlab.com/t/error-host-key-verification-failed/77315/3
 #     script:
-#         - rsync -avzr --delete scripts asicde-dev-env@asicde.fiit.stuba.sk:/home/asicde-dev-env/asicde/
-#         - rsync -avzr --delete editor-server/build/editor-server asicde-dev-env@asicde.fiit.stuba.sk:/home/asicde-dev-env/asicde/editor-server/
-#         - ssh asicde-dev-env@asicde.fiit.stuba.sk "cd ~/asicde && ./scripts/deploy-editor-server.sh"
+#         - rsync -avzr --delete scripts asicde@asicde.fiit.stuba.sk:/home/asicde/asicde/
+#         - rsync -avzr --delete editor-server/build/editor-server asicde@asicde.fiit.stuba.sk:/home/asicde/asicde/editor-server/
+#         - ssh asicde@asicde.fiit.stuba.sk "cd ~/asicde && ./scripts/deploy-editor-server.sh"
 #     only:
 #         refs:
 #             - master
