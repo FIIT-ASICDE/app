@@ -98,9 +98,9 @@ deploy-dev:
         - ssh-add -v ~/.ssh/id_ed25519
         - echo "StrictHostKeyChecking no" >> ~/.ssh/config # https://forum.gitlab.com/t/error-host-key-verification-failed/77315/3
     script:
-        - echo -e "bun.lock\npackage.json\npublic/\n.next/\nprisma/\nscripts/" > filelist.txt
-        - rsync -avzr --delete --exclude '.env' --exclude 'editor-server' --files-from=filelist.txt ./ asicde@asicde.fiit.stuba.sk:/home/asicde/asicde/
-        # - ssh asicde@asicde.fiit.stuba.sk "cd ~/asicde && ./scripts/deploy.sh"
+        # - echo -e "bun.lock\npackage.json\npublic/\n.next/\nprisma/\nscripts/" > filelist.txt
+        - ssh asicde@asicde.fiit.stuba.sk "ls -lah"
+        # - rsync -avzr --delete --exclude '.env' --exclude 'editor-server' --files-from=filelist.txt ./ asicde@asicde.fiit.stuba.sk:/home/asicde/asicde/
     only:
         - master
 # deploy-dev-editor-server:
