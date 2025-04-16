@@ -2,7 +2,7 @@ stages:
     - code-quality
     - build
     - test
-    # - deploy
+    - deploy
 
 lint:
     stage: code-quality
@@ -78,30 +78,31 @@ integration-test:
         - bunx prisma generate
         - bunx prisma migrate reset --force
         - bun test
-# deploy-dev:
-#     stage: deploy
-#     environment:
-#         name: development
-#         url: https://ide.drasic.com
-#     tags:
-#         - alpine
-#     dependencies:
-#         - integration-test
-#     before_script:
-#         - "command -v ssh-agent >/dev/null || ( apk add --update openssh openssl rsync )"
-#         - mkdir -p ~/.ssh
-#         - chmod 700 ~/.ssh
-#         - echo "$DEPLOYER_SSH_PK" | openssl enc -base64 -d -out ~/.ssh/id_ed25519
-#         - chmod 400 ~/.ssh/id_ed25519
-#         - eval $(ssh-agent -s)
-#         - ssh-add -v ~/.ssh/id_ed25519
-#         - echo "StrictHostKeyChecking no" >> ~/.ssh/config # https://forum.gitlab.com/t/error-host-key-verification-failed/77315/3
-#     script:
-#         - echo -e "bun.lock\npackage.json\npublic/\nmigrations/\n.next/\nprisma/\nscripts/" > filelist.txt
-#         - rsync -avzr --delete --exclude '.env' --exclude 'editor-server' --files-from=filelist.txt ./ asicde@asicde.fiit.stuba.sk:/home/asicde/asicde/
-#         - ssh asicde-dev-env@asicde.fiit.stuba.sk "cd ~/asicde && ./scripts/deploy.sh"
-#     only:
-#         - master
+
+deploy-dev:
+    stage: deploy
+    environment:
+        name: development
+        url: https://ide.drasic.com
+    tags:
+        - alpine
+    dependencies:
+        - integration-test
+    before_script:
+        - "command -v ssh-agent >/dev/null || ( apk add --update openssh openssl rsync )"
+        - mkdir -p ~/.ssh
+        - chmod 700 ~/.ssh
+        - echo "$DEPLOYER_SSH_PK" | openssl enc -base64 -d -out ~/.ssh/id_ed25519
+        - chmod 400 ~/.ssh/id_ed25519
+        - eval $(ssh-agent -s)
+        - ssh-add -v ~/.ssh/id_ed25519
+        - echo "StrictHostKeyChecking no" >> ~/.ssh/config # https://forum.gitlab.com/t/error-host-key-verification-failed/77315/3
+    script:
+        - echo -e "bun.lock\npackage.json\npublic/\n.next/\nprisma/\nscripts/" > filelist.txt
+        - rsync -avzr --delete --exclude '.env' --exclude 'editor-server' --files-from=filelist.txt ./ asicde@asicde.fiit.stuba.sk:/home/asicde/asicde/
+        # - ssh asicde@asicde.fiit.stuba.sk "cd ~/asicde && ./scripts/deploy.sh"
+    only:
+        - master
 # deploy-dev-editor-server:
 #     stage: deploy
 #     environment:
