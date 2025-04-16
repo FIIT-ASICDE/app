@@ -9,7 +9,7 @@ lint:
     tags:
         - bun
     script:
-        - bun install --frozen-lockfile
+        - bun install
         - bun run lint
     cache:
         key: $CI_COMMIT_REF_SLUG

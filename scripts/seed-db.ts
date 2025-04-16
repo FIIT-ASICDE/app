@@ -1,5 +1,3 @@
-import prisma from "@/prisma";
-import { faker } from "@faker-js/faker";
 import {
     Organization,
     OrganizationRole,
@@ -12,7 +10,9 @@ import {
     User,
     UserMetadata,
     UserRole,
-} from "@prisma/client";
+} from "@/lib/prisma";
+import prisma from "@/prisma";
+import { faker } from "@faker-js/faker";
 
 const LogConfig = {
     enabled: true,

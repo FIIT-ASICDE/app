@@ -1,4 +1,5 @@
 import { readGithubRepoBranches, readUsersGithubRepos } from "@/lib/github";
+import { $Enums } from "@/lib/prisma";
 import { paginationSchema } from "@/lib/schemas/common-schemas";
 import {
     cloneRepoSchema,
@@ -17,7 +18,6 @@ import {
     RepositoryItemChange,
 } from "@/lib/types/repository";
 import { ReturnTypeOf } from "@octokit/core/dist-types/types";
-import { $Enums } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { exec } from "child_process";
 import { access, mkdir, rm } from "fs/promises";

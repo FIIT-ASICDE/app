@@ -1,6 +1,6 @@
+import { PrismaClient } from "@/lib/prisma";
+import { DefaultArgs } from "@/lib/prisma/runtime/library";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@prisma/client";
-import { DefaultArgs } from "@prisma/client/runtime/library";
 
 // https://www.prisma.io/docs/orm/more/help-and-troubleshooting/help-articles/nextjs-prisma-client-dev-practices
 export const prismaClientSingleton = (

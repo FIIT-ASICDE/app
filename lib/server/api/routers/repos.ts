@@ -22,7 +22,7 @@ import {
 } from "@/lib/types/repository";
 import { UserDisplay } from "@/lib/types/user";
 import { PrismaType } from "@/prisma";
-import { $Enums } from "@prisma/client";
+import { $Enums } from "@/lib/prisma";
 import { TRPCError } from "@trpc/server";
 import { exec } from "child_process";
 import { access, mkdir, rename, rm } from "fs/promises";

@@ -1,7 +1,7 @@
+import { OrganizationRole } from "@/lib/prisma";
 import { Invitation } from "@/lib/types/invitation";
 import { RepositoryDisplay } from "@/lib/types/repository";
 import { UserDisplay } from "@/lib/types/user";
-import { OrganizationRole } from "@prisma/client";
 
 export type Organisation = {
     id: string;
