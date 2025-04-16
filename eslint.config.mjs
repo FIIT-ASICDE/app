@@ -8,7 +8,9 @@ const __dirname = dirname(__filename);
 const compat = new FlatCompat({ baseDirectory: __dirname });
 
 const eslintConfig = [
-    ...compat.extends("next", "prettier"),
+    ...compat.extends("next/core-web-vitals"),
+    ...compat.extends("next/typescript"),
+    ...compat.extends("prettier"),
     {
         rules: {
             "no-restricted-imports": ["error", { patterns: ["../*", "./*"] }],
