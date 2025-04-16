@@ -26,7 +26,7 @@ build-app:
             - .next
         expire_in: 24 hours
     script:
-        - bun install --frozen-lockfile
+        - bun install
         - bun run build
     cache:
         key: $CI_COMMIT_REF_SLUG
@@ -45,7 +45,7 @@ build-editor-server:
         expire_in: 24 hours
     script:
         - cd editor-server
-        - bun install --frozen-lockfile
+        - bun install
         - bun build server.ts --compile --minify --outfile ./build/editor-server
     only:
         changes:
@@ -74,7 +74,7 @@ integration-test:
     before_script:
         - apt-get update && apt-get install -y git
     script:
-        - bun install --frozen-lockfile
+        - bun install
         - bunx prisma generate
         - bunx prisma migrate reset --force
         - bun test
