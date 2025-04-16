@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 set -e
-source ~/.bashrc
 
 bun install --production
 bunx prisma generate
