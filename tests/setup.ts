@@ -116,10 +116,11 @@ export async function initializeUser(
         }
     }
 
+    const userEmail = userData?.email ?? `${randomUUIDv7()}@example.com`;
     const user = await prisma.user.create({
         data: {
             id: userData?.id ?? randomUUIDv7(),
-            email: userData?.email ?? "alice@example.com",
+            email: userEmail,
             name: userData?.name ?? "Alice Doe",
             image: userData?.image ?? "https://example.com/alice-avatar.png",
             metadata: {
