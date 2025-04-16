@@ -49,9 +49,6 @@ export async function testingPrisma() {
             await postgresContainer.stop();
         };
     }
-    await prisma.$executeRawUnsafe(
-        "drop schema if exists public cascade; create schema public;",
-    );
 
     const migrateCommand = "bunx prisma migrate reset --force";
     try {
