@@ -2,15 +2,13 @@
 
 import { api } from "@/lib/trpc/react";
 import { GitCommit } from "@/lib/types/repository";
-import {
-    ChevronLeft,
-    ChevronRight,
-    GitGraph,
-    History,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, GitGraph, History } from "lucide-react";
 import { useState } from "react";
 
+import { CommitTableRow } from "@/components/editor/sidebar-content/source-control/commit-table-row";
+import { PushDialog } from "@/components/editor/sidebar-content/source-control/push-dialog";
 import { NoData } from "@/components/generic/no-data";
+import { CommitsTableSkeleton } from "@/components/skeletons/commits-table-skeleton";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -29,9 +27,6 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { PushDialog } from "@/components/editor/sidebar-content/source-control/push-dialog";
-import { CommitTableRow } from "@/components/editor/sidebar-content/source-control/commit-table-row";
-import { CommitsTableSkeleton } from "@/components/skeletons/commits-table-skeleton";
 
 interface CommitHistoryDialogProps {
     repositoryId: string;
@@ -47,15 +42,21 @@ export const CommitHistoryDialog = ({
 
     const pageSize: number = 5;
 
-    const commitHistoryNotPushed = api.git.commits.useQuery({
-        repoId: repositoryId,
-        pageSize: 500
-    }, {
-        staleTime: Infinity
-    });
+    const commitHistoryNotPushed = api.git.commits.useQuery(
+        {
+            repoId: repositoryId,
+            pageSize: 500,
+        },
+        {
+            staleTime: Infinity,
+        },
+    );
 
-    const commitsNotPushed: Array<GitCommit> = commitHistoryNotPushed.data ?
-        commitHistoryNotPushed.data.commits.filter((commit: GitCommit) => !commit.pushed) : [];
+    const commitsNotPushed: Array<GitCommit> = commitHistoryNotPushed.data
+        ? commitHistoryNotPushed.data.commits.filter(
+              (commit: GitCommit) => !commit.pushed,
+          )
+        : [];
 
     const commitHistory = api.git.commits.useQuery({
         repoId: repositoryId,
@@ -71,11 +72,15 @@ export const CommitHistoryDialog = ({
         }
     };
 
+    const pushMutation = api.git.push.useMutation();
+
     const handlePush = (commits: Array<GitCommit>) => {
-        // TODO: handle push commit
         if (commits.length === 0) return;
 
-        console.log("Push " + commits.length + " commits");
+        pushMutation.mutateAsync({ repoId: repositoryId }).then(() => {
+            commitHistoryNotPushed.refetch();
+            commitHistory.refetch();
+        });
     };
 
     return (
@@ -96,13 +101,13 @@ export const CommitHistoryDialog = ({
                         <DialogHeader>
                             <DialogTitle>Commit history</DialogTitle>
                             <div className="flex flex-row items-center justify-between gap-x-5">
-                                <DialogDescription className="mt-3 mb-5">
+                                <DialogDescription className="mb-5 mt-3">
                                     Here you can view the detailed history of
                                     your pushed and waiting commits.
                                 </DialogDescription>
                                 {commitsNotPushed.length > 0 && (
                                     <PushDialog
-                                        commits={commitHistory.data ? commitHistory.data.commits : []}
+                                        commits={commitsNotPushed}
                                         onPushAction={handlePush}
                                     />
                                 )}
@@ -129,15 +134,22 @@ export const CommitHistoryDialog = ({
                                 </TableHeader>
                                 <TableBody>
                                     {commitHistory.data ? (
-                                        commitHistory.data.commits.length > 0 ? (
+                                        commitHistory.data.commits.length >
+                                        0 ? (
                                             commitHistory.data.commits.map(
-                                                (commit: GitCommit, index: number) => (
+                                                (
+                                                    commit: GitCommit,
+                                                    index: number,
+                                                ) => (
                                                     <CommitTableRow
-                                                        key={index + commit.hash}
+                                                        key={
+                                                            index + commit.hash
+                                                        }
                                                         commit={commit}
-                                                        expandedRowHash={expandedRowHash}
+                                                        expandedRowHash={
+                                                            expandedRowHash
+                                                        }
                                                         toggleRow={toggleRow}
-                                                        handlePush={handlePush}
                                                     />
                                                 ),
                                             )

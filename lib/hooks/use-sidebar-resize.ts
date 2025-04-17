@@ -67,7 +67,6 @@ export function useSidebarResize({
             lastWidth.current = startWidth.current;
             lastLoggedWidth.current = startWidth.current;
 
-            // console.log(`[Rail] Started at ${currentWidth}`);
             e.preventDefault();
         },
         [enableDrag, isCollapsed, currentWidth],

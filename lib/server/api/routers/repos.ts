@@ -4,6 +4,7 @@ import {
     loadRepoDirOrFile,
     loadRepoItems,
 } from "@/lib/files/repo-files";
+import { $Enums } from "@/lib/prisma";
 import {
     createRepositoryFormSchema,
     editRepositoryFormSchema,
@@ -23,7 +24,6 @@ import {
 } from "@/lib/types/repository";
 import { UserDisplay } from "@/lib/types/user";
 import { PrismaType } from "@/prisma";
-import { $Enums } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { exec } from "child_process";
 import { access, mkdir, rename, rm, writeFile } from "fs/promises";

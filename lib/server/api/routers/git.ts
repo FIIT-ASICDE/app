@@ -1,4 +1,5 @@
 import { readGithubRepoBranches, readUsersGithubRepos } from "@/lib/github";
+import { $Enums } from "@/lib/prisma";
 import { paginationSchema } from "@/lib/schemas/common-schemas";
 import {
     cloneRepoSchema,
@@ -17,7 +18,6 @@ import {
     RepositoryItemChange,
 } from "@/lib/types/repository";
 import { ReturnTypeOf } from "@octokit/core/dist-types/types";
-import { $Enums } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { exec } from "child_process";
 import { access, mkdir, rm } from "fs/promises";
@@ -34,6 +34,7 @@ export const gitRouter = createTRPCRouter({
     changes: gitChanges(),
     commit: gitCommit(),
     commits: showCommits(),
+    push: gitPush(),
 });
 
 function userGithubRepos() {
@@ -722,6 +723,117 @@ function showCommits() {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to get git commits",
+                    cause: error,
+                });
+            }
+        });
+}
+
+function gitPush() {
+    return protectedProcedure
+        .input(z.object({ repoId: z.string().uuid() }))
+        .mutation(async ({ ctx, input }): Promise<void> => {
+            await hasUserRole(ctx.prisma, input.repoId, ctx.session.user.id, [
+                "OWNER",
+                "ADMIN",
+                "CONTRIBUTOR",
+            ]);
+
+            const repoPath = await resolveRepoPathOrThrow(
+                ctx.prisma,
+                input.repoId,
+            );
+
+            try {
+                // Check if the repository has any remotes
+                const { stdout: remoteOutput } = await execPromise(
+                    `git -C "${repoPath}" remote`,
+                ).catch(() => ({ stdout: "" }));
+
+                if (!remoteOutput.trim()) {
+                    throw new TRPCError({
+                        code: "BAD_REQUEST",
+                        message: "Repository has no remote configured",
+                    });
+                }
+
+                // Get the default remote
+                const remote = remoteOutput.trim().split("\n")[0];
+
+                // Get the current branch
+                const { stdout: branchOutput } = await execPromise(
+                    `git -C "${repoPath}" branch --show-current`,
+                ).catch(() => ({ stdout: "" }));
+
+                const currentBranch = branchOutput.trim() || "master";
+
+                await execPromise(
+                    `git -C "${repoPath}" config user.email "${ctx.session.user.email || "user@asicde.sk"}"`,
+                );
+                await execPromise(
+                    `git -C "${repoPath}" config user.name "${ctx.session.user.name || "ASICDE"}"`,
+                );
+
+                await execPromise(
+                    `git -C "${repoPath}" push ${remote} ${currentBranch}`,
+                );
+
+                // Reset git user configuration
+                await execPromise(
+                    `git -C "${repoPath}" config --unset user.email`,
+                ).catch(() => {});
+                await execPromise(
+                    `git -C "${repoPath}" config --unset user.name`,
+                ).catch(() => {});
+            } catch (error) {
+                console.error("Error pushing commits:", error);
+
+                // Clean up git config in case of error
+                try {
+                    await execPromise(
+                        `git -C "${repoPath}" config --unset user.email`,
+                    ).catch(() => {});
+                    await execPromise(
+                        `git -C "${repoPath}" config --unset user.name`,
+                    ).catch(() => {});
+                } catch (cleanupError) {
+                    console.error(
+                        "Failed to clean up git config:",
+                        cleanupError,
+                    );
+                }
+
+                if (error instanceof TRPCError) {
+                    throw error;
+                }
+
+                const errorMessage =
+                    error instanceof Error ? error.message : String(error);
+
+                if (
+                    errorMessage.includes("rejected") &&
+                    errorMessage.includes("non-fast-forward")
+                ) {
+                    throw new TRPCError({
+                        code: "CONFLICT",
+                        message:
+                            "Push rejected. Remote contains work that you don't have locally. Pull first before pushing.",
+                        cause: error,
+                    });
+                }
+
+                if (errorMessage.includes("Permission denied")) {
+                    throw new TRPCError({
+                        code: "FORBIDDEN",
+                        message:
+                            "Permission denied when pushing to remote repository.",
+                        cause: error,
+                    });
+                }
+
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to push to remote repository",
                     cause: error,
                 });
             }

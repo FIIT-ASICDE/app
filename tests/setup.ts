@@ -49,13 +49,25 @@ export async function testingPrisma() {
             await postgresContainer.stop();
         };
     }
-    await prisma.$executeRawUnsafe(
-        "drop schema if exists public cascade; create schema public;",
-    );
 
-    await execAsync("bunx prisma migrate deploy", {
-        env: { ...process.env, DATABASE_URL: connectionUri },
-    });
+    const migrateCommand = "bunx prisma migrate reset --force";
+    try {
+        const { stdout, stderr } = await execAsync(migrateCommand, {
+            env: { ...process.env, DATABASE_URL: connectionUri },
+        });
+        if (stdout) {
+            console.log("Command stdout:");
+            console.log(stdout);
+        }
+        if (stderr) {
+            console.log("Command stderr:");
+            console.log(stderr);
+        }
+    } catch (error) {
+        console.error(`Error executing command: ${migrateCommand}`);
+        console.error(error);
+        throw error;
+    }
 
     return {
         prisma,
@@ -104,10 +116,11 @@ export async function initializeUser(
         }
     }
 
+    const userEmail = userData?.email ?? `${randomUUIDv7()}@example.com`;
     const user = await prisma.user.create({
         data: {
             id: userData?.id ?? randomUUIDv7(),
-            email: userData?.email ?? "alice@example.com",
+            email: userEmail,
             name: userData?.name ?? "Alice Doe",
             image: userData?.image ?? "https://example.com/alice-avatar.png",
             metadata: {

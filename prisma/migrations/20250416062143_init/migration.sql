@@ -1,4 +1,5 @@
-create extension if not exists pg_trgm;
+-- CreateExtension
+CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
 -- CreateEnum
 CREATE TYPE "OrganizationRole" AS ENUM ('MEMBER', 'ADMIN');
@@ -11,6 +12,19 @@ CREATE TYPE "RepoRole" AS ENUM ('ADMIN', 'CONTRIBUTOR', 'VIEWER', 'OWNER');
 
 -- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('USER', 'ADMIN');
+
+-- CreateTable
+CREATE TABLE "EditorSession" (
+    "id" UUID NOT NULL,
+    "userId" UUID NOT NULL,
+    "repoId" UUID NOT NULL,
+    "openFiles" JSONB,
+    "activeFile" JSONB,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "EditorSession_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "Organization" (
@@ -147,6 +161,9 @@ CREATE TABLE "VerificationToken" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "EditorSession_userId_repoId_key" ON "EditorSession"("userId", "repoId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Organization_name_key" ON "Organization"("name");
 
 -- CreateIndex
@@ -202,6 +219,12 @@ CREATE UNIQUE INDEX "Session_sessionToken_key" ON "Session"("sessionToken");
 
 -- CreateIndex
 CREATE INDEX "Session_userId_idx" ON "Session"("userId");
+
+-- AddForeignKey
+ALTER TABLE "EditorSession" ADD CONSTRAINT "EditorSession_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "EditorSession" ADD CONSTRAINT "EditorSession_repoId_fkey" FOREIGN KEY ("repoId") REFERENCES "Repo"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "OrganizationUser" ADD CONSTRAINT "OrganizationUser_userMetadataId_fkey" FOREIGN KEY ("userMetadataId") REFERENCES "UserMetadata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
