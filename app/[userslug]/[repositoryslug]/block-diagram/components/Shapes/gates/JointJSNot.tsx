@@ -1,4 +1,4 @@
-import { Not } from "@/app/block-diagram/components/Shapes/classes/not";
+import { Not } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/classes/not";
 import { shapes } from "@joint/core";
 
 export const JointJSNot = (not: Not) => {

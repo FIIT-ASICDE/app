@@ -1,6 +1,6 @@
-import { Module } from "@/app/block-diagram/components/Shapes/classes/module";
+import { Module } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/classes/module";
 import { shapes } from "@joint/core";
-import { ParsedModule } from "@/app/block-diagram/utils/DiagramGeneration/interfaces";
+import { ParsedModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces";
 
 export const JointJSModule = (module: Module, parseModulesResults: ParsedModule[]) => {
 

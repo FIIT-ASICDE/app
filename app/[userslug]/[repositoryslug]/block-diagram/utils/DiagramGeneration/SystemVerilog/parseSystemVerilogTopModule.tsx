@@ -1,4 +1,4 @@
-import {ParsedTopModule, TopModulePort, SubModule } from "@/app/block-diagram/utils/DiagramGeneration/interfaces"
+import {ParsedTopModule, TopModulePort, SubModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces"
 
 export function parseSystemVerilogTopModule(text: string): ParsedTopModule | null {
     const moduleRegex = /module\s+(\w+)\s*\(([\s\S]*?)\)\s*;([\s\S]*?)endmodule/gm;

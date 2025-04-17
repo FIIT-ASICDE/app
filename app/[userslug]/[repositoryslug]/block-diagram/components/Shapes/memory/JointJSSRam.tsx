@@ -1,4 +1,4 @@
-import { Sram } from "@/app/block-diagram/components/Shapes/classes/sram";
+import { Sram } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/classes/sram";
 import { shapes } from "@joint/core";
 
 export const JointJSSRam = (sram: Sram) => {

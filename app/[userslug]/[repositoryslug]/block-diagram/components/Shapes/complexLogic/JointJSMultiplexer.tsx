@@ -1,4 +1,4 @@
-import { Multiplexer } from "@/app/block-diagram/components/Shapes/classes/multiplexer";
+import { Multiplexer } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/classes/multiplexer";
 import { shapes } from "@joint/core";
 
 export const JointJSMultiplexer = (multiplexer: Multiplexer) => {

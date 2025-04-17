@@ -1,4 +1,4 @@
-import { Nand } from "@/app/block-diagram/components/Shapes/classes/nand";
+import { Nand } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/classes/nand";
 import { shapes } from "@joint/core";
 
 export const JointJSNand = (nand: Nand) => {

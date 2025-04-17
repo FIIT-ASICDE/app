@@ -1,9 +1,9 @@
-import { Module } from "@/app/block-diagram/components/Shapes/classes/module";
-import { Port } from "@/app/block-diagram/components/Shapes/classes/port";
-import { JointJSInputPort } from "@/app/block-diagram/components/Shapes/io/JointJSInputPort";
-import { JointJSOutputPort } from "@/app/block-diagram/components/Shapes/io/JointJSOutputPort";
-import { JointJSModule } from "@/app/block-diagram/components/Shapes/modules/JointJSModule";
-import { CustomPort, ParsedModule, ParsedTopModule } from "@/app/block-diagram/utils/DiagramGeneration/interfaces";
+import { Module } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/classes/module";
+import { Port } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/classes/port";
+import { JointJSInputPort } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/io/JointJSInputPort";
+import { JointJSOutputPort } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/io/JointJSOutputPort";
+import { JointJSModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/modules/JointJSModule";
+import { CustomPort, ParsedModule, ParsedTopModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces";
 import { dia, shapes } from '@joint/core';
 import { v4 as uuidv4 } from 'uuid';
 

@@ -1,6 +1,6 @@
-import { Splitter } from "@/app/block-diagram/components/Shapes/classes/splitter";
+import { Splitter } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/classes/splitter";
 import { shapes } from "@joint/core";
-import { UnifiedPackage } from "@/app/block-diagram/utils/DiagramGeneration/interfaces";
+import { UnifiedPackage } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces";
 
 export const JointJSSplitter = (splitter: Splitter, parseResults: UnifiedPackage[]) => {
 

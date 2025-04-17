@@ -3,7 +3,7 @@
 import React, { createContext, useState, ReactNode, useEffect } from "react";
 import { dia, shapes } from "@joint/core";
 import { Repository, FileDisplayItem, RepositoryItem } from "@/lib/types/repository";
-import { UnifiedPackage, ParsedModule } from "@/app/block-diagram/utils/DiagramGeneration/interfaces";
+import { UnifiedPackage, ParsedModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces";
 
 
 export type LanguageOption = "SystemVerilog" | "VHDL";

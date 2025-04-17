@@ -1,4 +1,4 @@
-import {Alu} from "@/app/block-diagram/components/Shapes/classes/alu";
+import {Alu} from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/classes/alu";
 import { shapes } from "@joint/core";
 
 export const JointJSAlu = (alu: Alu) => {

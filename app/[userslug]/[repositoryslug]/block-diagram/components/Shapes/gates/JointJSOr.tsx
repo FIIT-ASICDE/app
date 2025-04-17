@@ -1,4 +1,4 @@
-import { Or } from "@/app/block-diagram/components/Shapes/classes/or";
+import { Or } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/classes/or";
 import { shapes } from "@joint/core";
 
 export const JointJSOr = (or: Or) => {

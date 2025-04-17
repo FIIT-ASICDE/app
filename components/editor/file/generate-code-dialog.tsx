@@ -4,8 +4,8 @@ import { RepositoryItem, FileDisplayItem } from "@/lib/types/repository";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { generateSystemVerilogCode } from "@/app/diagram-test/utils/CodeGeneration/SystemVerilogGeneration/SystemVerilogCodeGenerator";
-import { generateVHDLCode } from "@/app/diagram-test/utils/CodeGeneration/VHDLGeneration/VDHLCodeGenerator";
+import { generateSystemVerilogCode } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/CodeGeneration/SystemVerilogGeneration/SystemVerilogCodeGenerator";
+import { generateVHDLCode } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/CodeGeneration/VHDLGeneration/VDHLCodeGenerator";
 import { dia, shapes } from '@joint/core';
 interface GenerateCodeDialogProps {
     repositoryId: string;

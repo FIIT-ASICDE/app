@@ -2,8 +2,8 @@
 "use client";
 
 import React from "react";
-import Layout from "@/app/block-diagram/components/Layout/Layout";
-import { DiagramProvider } from "@/app/block-diagram/context/DiagramContext";
+import Layout from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Layout/Layout";
+import { DiagramProvider } from "@/app/[userslug]/[repositoryslug]/block-diagram/context/DiagramContext";
 import type { Repository, FileDisplayItem, RepositoryItem } from "@/lib/types/repository";
 
 interface DiagramPageProps {

@@ -1,4 +1,4 @@
-import { Xor } from "@/app/block-diagram/components/Shapes/classes/xor";
+import { Xor } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/classes/xor";
 import { shapes } from "@joint/core";
 
 export const JointJSXor = (xor: Xor) => {

@@ -1,4 +1,4 @@
-import { Xnor } from "@/app/block-diagram/components/Shapes/classes/xnor";
+import { Xnor } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/classes/xnor";
 import { shapes } from "@joint/core";
 
 export const JointJSXnor = (xnor: Xnor) => {

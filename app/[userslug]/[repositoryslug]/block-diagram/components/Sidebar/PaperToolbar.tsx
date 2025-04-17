@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useDiagramContext } from "@/app/block-diagram/context/useDiagramContext";
+import { useDiagramContext } from "@/app/[userslug]/[repositoryslug]/block-diagram/context/useDiagramContext";
 import { Code, Expand } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { api } from "@/lib/trpc/react";
 import type { FileDisplayItem } from "@/lib/types/repository";
 import {
     generateSystemVerilogCode
-} from "@/app/block-diagram/utils/CodeGeneration/SystemVerilogGeneration/SystemVerilogCodeGenerator";
-import { generateVHDLCode } from "@/app/block-diagram/utils/CodeGeneration/VHDLGeneration/VDHLCodeGenerator";
+} from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/CodeGeneration/SystemVerilogGeneration/SystemVerilogCodeGenerator";
+import { generateVHDLCode } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/CodeGeneration/VHDLGeneration/VDHLCodeGenerator";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";

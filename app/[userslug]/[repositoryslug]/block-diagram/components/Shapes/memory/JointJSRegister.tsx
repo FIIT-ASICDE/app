@@ -1,4 +1,4 @@
-import { Register } from "@/app/block-diagram/components/Shapes/classes/register";
+import { Register } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/classes/register";
 import { shapes } from "@joint/core";
 
 export const JointJSRegister = (register: Register) => {

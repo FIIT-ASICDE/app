@@ -4,12 +4,14 @@ import { RepositoryItem, FileDisplayItem } from "@/lib/types/repository";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { parseSystemVerilogTopModule } from "@/app/diagram-test/utils/DiagramGeneration/SystemVerilog/parseSystemVerilogTopModule";
-import { createDiagramFromParsedModule } from "@/app/diagram-test/utils/DiagramGeneration/SystemVerilog/createDiagramFromParsedModule";
+import { parseSystemVerilogTopModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/SystemVerilog/parseSystemVerilogTopModule";
+import { createDiagramFromParsedModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/createDiagramFromParsedModule";
 import {
     parseSystemVerilogModules
-} from "@/app/diagram-test/utils/DiagramGeneration/SystemVerilog/parseSystemVerilogModules";
-import { ParsedModule } from "@/app/diagram-test/utils/DiagramGeneration/interfaces";
+} from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/SystemVerilog/parseSystemVerilogModules";
+import { ParsedModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces";
+import { parseVHDLTopEntity } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/VHDL/parseVHDLTopEntity";
+import { parseVhdlEntities } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/VHDL/parseVHDLEntities";
 
 interface GenerateDiagramDialogProps {
     repositoryId: string;
@@ -47,9 +49,6 @@ export const GenerateDiagramDialog = ({
         enabled: open && !!ownerName && !!repoName,
     });
 
-
-
-
     const addGeneratedFileToTree = (name: string, absolutePath: string) => {
         const alreadyExists = tree.some(item => item.absolutePath === absolutePath);
         if (!alreadyExists) {
@@ -70,44 +69,92 @@ export const GenerateDiagramDialog = ({
             return;
         }
 
+        const isSystemVerilog = diagramFile.name.toLowerCase().endsWith(".sv");
+        const isVHDL = diagramFile.name.toLowerCase().endsWith(".vhd") || diagramFile.name.toLowerCase().endsWith(".vhdl");
+
         try {
-            const parsedTopModule = parseSystemVerilogTopModule(fileData.content as string);
+            if (isSystemVerilog) {
+                const parsedTopModule = parseSystemVerilogTopModule(fileData.content as string);
 
-            const svFiles = allFiles?.filter(
-                (file) =>
-                    file.type === "file" &&
-                    file.name.toLowerCase().endsWith(".sv") &&
-                    file.content
-            ) || [];
+                const svFiles = allFiles?.filter(
+                    (file) =>
+                        file.type === "file" &&
+                        file.name.toLowerCase().endsWith(".sv") &&
+                        file.content
+                ) || [];
 
-            const parsedModules: ParsedModule[] = svFiles.flatMap((file) => {
-                try {
-                    return parseSystemVerilogModules(file.content);
-                } catch (err) {
-                    console.warn(`Failed to parse modules in ${file.name}`, err);
-                    return [];
-                }
-            });
+                const parsedModules: ParsedModule[] = svFiles.flatMap((file) => {
+                    try {
+                        return parseSystemVerilogModules(file.content);
+                    } catch (err) {
+                        console.warn(`Failed to parse modules in ${file.name}`, err);
+                        return [];
+                    }
+                });
 
-            const graph = createDiagramFromParsedModule(parsedTopModule, parsedModules);
+                const graph = createDiagramFromParsedModule(parsedTopModule, parsedModules);
 
-            const fileName = diagramFile.name.replace(/\.sv$/, ".bd");
-            const filePath = diagramFile.absolutePath.replace(/[^/]+$/, fileName);
+                const fileName = diagramFile.name.replace(/\.sv$/i, ".bd");
+                const filePath = diagramFile.absolutePath.replace(/[^/]+$/, fileName);
 
-            saveFileMutation.mutate({
-                repoId: repositoryId,
-                path: filePath,
-                content: JSON.stringify(graph.toJSON(), null, 2),
-            }, {
-                onSuccess: () => {
-                    toast.success("Diagram generated");
-                    addGeneratedFileToTree(fileName, filePath);
-                    setOpen(false);
-                },
-                onError: (err) => {
-                    toast.error("Failed to save file: " + err.message);
-                },
-            });
+                saveFileMutation.mutate({
+                    repoId: repositoryId,
+                    path: filePath,
+                    content: JSON.stringify(graph.toJSON(), null, 2),
+                }, {
+                    onSuccess: () => {
+                        toast.success("Diagram generated");
+                        addGeneratedFileToTree(fileName, filePath);
+                        setOpen(false);
+                    },
+                    onError: (err) => {
+                        toast.error("Failed to save file: " + err.message);
+                    },
+                });
+            } else if (isVHDL) {
+                const parsedTopEntity = parseVHDLTopEntity(fileData.content as string);
+
+                console.log(parsedTopEntity);
+
+                const vhdlFiles = allFiles?.filter(
+                    (file) =>
+                        file.type === "file" &&
+                        (file.name.toLowerCase().endsWith(".vhd") || file.name.toLowerCase().endsWith(".vhdl")) &&
+                        file.content
+                ) || [];
+
+                const parsedEntities: ParsedModule[] = vhdlFiles.flatMap((file) => {
+                    try {
+                        return parseVhdlEntities(file.content);
+                    } catch (err) {
+                        console.warn(`Failed to parse VHDL in ${file.name}`, err);
+                        return [];
+                    }
+                });
+
+                const graph = createDiagramFromParsedModule(parsedTopEntity, parsedEntities);
+
+
+                const fileName = diagramFile.name.replace(/\.(vhd|vhdl)$/i, ".bd");
+                const filePath = diagramFile.absolutePath.replace(/[^/]+$/, fileName);
+
+                saveFileMutation.mutate({
+                    repoId: repositoryId,
+                    path: filePath,
+                    content: JSON.stringify(graph.toJSON(), null, 2),
+                }, {
+                    onSuccess: () => {
+                        toast.success("Diagram generated");
+                        addGeneratedFileToTree(fileName, filePath);
+                        setOpen(false);
+                    },
+                    onError: (err) => {
+                        toast.error("Failed to save file: " + err.message);
+                    },
+                });
+            } else {
+                toast.error("Unsupported file type for diagram generation.");
+            }
         } catch (err) {
             toast.error("Failed to generate diagram: " + (err as Error).message);
         }
@@ -124,7 +171,7 @@ export const GenerateDiagramDialog = ({
                 </DialogHeader>
                 <div className="flex flex-col gap-2 mt-4">
                     <Button onClick={handleGenerateDiagram} disabled={isFileLoading}>
-                        {isFileLoading ? "Loading..." : "Generate Diagram from SystemVerilog"}
+                        {isFileLoading ? "Loading..." : "Generate Diagram"}
                     </Button>
                 </div>
             </DialogContent>

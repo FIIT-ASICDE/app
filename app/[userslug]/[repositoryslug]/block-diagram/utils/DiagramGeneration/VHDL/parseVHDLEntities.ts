@@ -1,4 +1,4 @@
-import { ModulePort, ParsedModule } from "@/app/block-diagram/utils/DiagramGeneration/interfaces";
+import { ModulePort, ParsedModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces";
 
 export function parseVhdlEntities(text: string): ParsedModule[] {
     const entities: ParsedModule[] = [];

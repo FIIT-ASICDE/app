@@ -1,7 +1,7 @@
-import { useDiagramContext } from "@/app/block-diagram/context/useDiagramContext";
+import { useDiagramContext } from "@/app/[userslug]/[repositoryslug]/block-diagram/context/useDiagramContext";
 import { V, dia, elementTools, linkTools, shapes } from "@joint/core";
 import { useEffect, useRef } from 'react';
-import { CustomPort } from "@/app/block-diagram/utils/DiagramGeneration/interfaces";
+import { CustomPort } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces";
 
 
 const highlightSettings = {
@@ -388,7 +388,7 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
                     console.log("Cannot switch, form has errors.");
                     return;
                 }
-                
+
                 const elementModel = elementView.model;
 
                 const elementTool = new dia.ToolsView({
@@ -772,3 +772,4 @@ const useJointJS = (paperElement: React.RefObject<HTMLDivElement>, isReady: bool
 };
 
 export default useJointJS;
+

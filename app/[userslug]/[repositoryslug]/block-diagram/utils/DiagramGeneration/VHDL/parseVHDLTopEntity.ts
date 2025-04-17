@@ -1,4 +1,4 @@
-import { ParsedTopModule, TopModulePort, SubModule } from "@/app/block-diagram/utils/DiagramGeneration/interfaces";
+import { ParsedTopModule, TopModulePort, SubModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces";
 
 /**
  * Парсим VHDL-топ entity и его submodules

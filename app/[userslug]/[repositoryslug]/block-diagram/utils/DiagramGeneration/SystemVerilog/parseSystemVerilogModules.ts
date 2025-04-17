@@ -1,4 +1,4 @@
-import { ParsedModule, ModulePort } from "@/app/block-diagram/utils/DiagramGeneration/interfaces";
+import { ParsedModule, ModulePort } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces";
 
 
 export function parseSystemVerilogModules(text: string): ParsedModule[] {

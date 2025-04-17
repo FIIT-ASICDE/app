@@ -1,5 +1,5 @@
 import { dia } from "@joint/core";
-import {CustomPort} from '@/app/block-diagram/utils/DiagramGeneration/interfaces'
+import {CustomPort} from '@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces'
 
 const operatorMapVHDL: { [key: string]: string } = {
     and: 'AND',

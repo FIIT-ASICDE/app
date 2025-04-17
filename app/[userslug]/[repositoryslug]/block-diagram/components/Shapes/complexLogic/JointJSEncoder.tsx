@@ -1,4 +1,4 @@
-import { Encoder } from "@/app/block-diagram/components/Shapes/classes/encoder";
+import { Encoder } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/classes/encoder";
 import { shapes } from "@joint/core";
 
 export const JointJSEncoder = (encoder: Encoder) => {

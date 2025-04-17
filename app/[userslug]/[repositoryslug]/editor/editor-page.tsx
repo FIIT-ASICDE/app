@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/resizable";
 import { EditorTabs } from "@/components/editor/editor-tabs";
 import { ImperativePanelGroupHandle } from "react-resizable-panels";
-import DiagramPage from "@/app/diagram-test/page";
+import DiagramPage from "@/app/[userslug]/[repositoryslug]/block-diagram/page";
 
 interface EditorPageProps {
     repository: Repository;

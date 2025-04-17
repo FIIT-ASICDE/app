@@ -1,6 +1,6 @@
-import { Combiner } from "@/app/block-diagram/components/Shapes/classes/combiner";
+import { Combiner } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/classes/combiner";
 import { shapes } from "@joint/core";
-import { UnifiedPackage } from "@/app/block-diagram/utils/DiagramGeneration/interfaces";
+import { UnifiedPackage } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces";
 
 
 export const JointJSCombiner = (combiner: Combiner, parseResults: UnifiedPackage[]) => {

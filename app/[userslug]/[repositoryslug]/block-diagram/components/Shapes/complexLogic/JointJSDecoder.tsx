@@ -1,4 +1,4 @@
-import { Decoder } from "@/app/block-diagram/components/Shapes/classes/decoder";
+import { Decoder } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/classes/decoder";
 import { shapes } from "@joint/core";
 
 export const JointJSDecoder = (decoder: Decoder) => {

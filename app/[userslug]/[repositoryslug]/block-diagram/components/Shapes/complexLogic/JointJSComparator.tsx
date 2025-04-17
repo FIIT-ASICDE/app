@@ -1,4 +1,4 @@
-import {Comparator} from "@/app/block-diagram/components/Shapes/classes/comparator";
+import {Comparator} from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/classes/comparator";
 import { shapes } from "@joint/core";
 
 export const JointJSComparator = (comparator: Comparator) => {

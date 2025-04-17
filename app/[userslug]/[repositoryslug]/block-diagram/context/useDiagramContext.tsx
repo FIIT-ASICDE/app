@@ -1,7 +1,7 @@
 // pages/block-diagram/context/useDiagramContext.tsx
 
 import { useContext } from 'react';
-import { DiagramContext } from "@/app/block-diagram/context/DiagramContext";
+import { DiagramContext } from "@/app/[userslug]/[repositoryslug]/block-diagram/context/DiagramContext";
 
 export const useDiagramContext = () => {
     const context = useContext(DiagramContext);

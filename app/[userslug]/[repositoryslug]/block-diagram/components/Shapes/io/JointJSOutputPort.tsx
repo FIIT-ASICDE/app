@@ -1,4 +1,4 @@
-import { Port } from "@/app/block-diagram/components/Shapes/classes/port";
+import { Port } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/classes/port";
 import { shapes } from "@joint/core";
 
 export const JointJSOutputPort = (output: Port) => {

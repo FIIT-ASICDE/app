@@ -3,9 +3,9 @@
 "use client";
 
 import React from 'react';
-import Sidebar from '@/app/block-diagram/components/Sidebar/Sidebar';
-import DiagramArea from '@/app/block-diagram/components/DiagramArea/DiagramArea';
-import PropertiesPanel from '@/app/block-diagram/components/PropertiesPanel/PropertiesPanel';
+import Sidebar from '@/app/[userslug]/[repositoryslug]/block-diagram/components/Sidebar/Sidebar';
+import DiagramArea from '@/app/[userslug]/[repositoryslug]/block-diagram/components/DiagramArea/DiagramArea';
+import PropertiesPanel from '@/app/[userslug]/[repositoryslug]/block-diagram/components/PropertiesPanel/PropertiesPanel';
 import {
     ResizablePanelGroup,
     ResizablePanel,
