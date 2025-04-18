@@ -34,3 +34,18 @@ export type Configuration = {
     simulation: SimulationConfiguration;
     synthesis: SynthesisConfiguration;
 };
+
+export type SimulationTab =
+    | "all"
+    | "errors"
+    | "lastSimulation";
+
+type SimulationOutputType =
+    | "info"
+    | "error"
+    | "warning";
+
+interface SimulationOutput {
+    type: SimulationOutputType;
+    content: string;
+}
