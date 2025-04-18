@@ -38,7 +38,7 @@ export type Configuration = {
 export type SimulationTab =
     | "all"
     | "errors"
-    | "warnings";
+    | "lastSimulation";
 
 type SimulationOutputType =
     | "info"

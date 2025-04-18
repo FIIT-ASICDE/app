@@ -8,13 +8,15 @@ interface BottomPanelTabContentProps {
     handleCloseBottomPanel: () => void;
     configuration: Configuration | undefined;
     simulationOutput: Array<SimulationOutput>;
+    lastSimulation: string | null;
 }
 
 export const BottomPanelTabContent = ({
     activeBottomPanelContent,
     handleCloseBottomPanel,
     configuration,
-    simulationOutput
+    simulationOutput,
+    lastSimulation
 }: BottomPanelTabContentProps) => {
     return (
         <div className="flex h-full">
@@ -23,6 +25,7 @@ export const BottomPanelTabContent = ({
                     handleCloseBottomPanel={handleCloseBottomPanel}
                     configuration={configuration}
                     simulationOutput={simulationOutput}
+                    lastSimulation={lastSimulation}
                 />
             )}
 

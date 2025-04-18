@@ -30,6 +30,7 @@ import { ImperativePanelGroupHandle } from "react-resizable-panels";
 
 interface EditorPageProps {
     repository: Repository;
+    lastSimulation: string | null;
 }
 
 const DynamicEditor = dynamic(() => import("@/components/editor/editor"), {
@@ -37,7 +38,7 @@ const DynamicEditor = dynamic(() => import("@/components/editor/editor"), {
     ssr: false,
 });
 
-export default function EditorPage({ repository }: EditorPageProps) {
+export default function EditorPage({ repository, lastSimulation }: EditorPageProps) {
     const [activeSidebarContent, setActiveSidebarContent] =
         useState<SidebarContentTab>("fileExplorer");
     const [activeBottomPanelContent, setActiveBottomPanelContent] =
@@ -377,6 +378,7 @@ export default function EditorPage({ repository }: EditorPageProps) {
                         handleCloseBottomPanel={handleCloseBottomPanel}
                         configuration={configuration}
                         simulationOutput={resultVerilatorCpp.data ?? resultIcarus.data ?? resultVerilatorSv.data ?? []}
+                        lastSimulation={lastSimulation}
                     />
                 </ResizablePanel>
             </ResizablePanelGroup>

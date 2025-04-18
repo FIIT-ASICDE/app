@@ -8,11 +8,13 @@ interface SimulationTabContentProps {
     handleCloseBottomPanel: () => void;
     configuration: Configuration | undefined;
     simulationOutput: Array<SimulationOutput>;
+    lastSimulation: string | null;
 }
 
 export const SimulationTabContent = ({
     handleCloseBottomPanel,
-    simulationOutput
+    simulationOutput,
+    lastSimulation
 }: SimulationTabContentProps) => {
     const [activeTab, setActiveTab] = useState<SimulationTab>("all");
 
@@ -25,15 +27,15 @@ export const SimulationTabContent = ({
                         )} onClick={() => setActiveTab("all")}>
                         Simulation
                     </span>
-                    <span className={cn("text-base cursor-pointer underline-offset-4 decoration-accent",
+                    <span className={cn("text-xl cursor-pointer underline-offset-4 decoration-accent",
                         activeTab === "errors" ? "underline" : "text-muted-foreground hover:underline"
                     )} onClick={() => setActiveTab("errors")}>
                         Errors
                     </span>
-                    <span className={cn("text-base cursor-pointer underline-offset-4 decoration-accent",
-                        activeTab === "warnings" ? "underline" : "text-muted-foreground hover:underline"
-                    )} onClick={() => setActiveTab("warnings")}>
-                        Warnings
+                    <span className={cn("text-xl cursor-pointer underline-offset-4 decoration-accent",
+                        activeTab === "lastSimulation" ? "underline" : "text-muted-foreground hover:underline"
+                    )} onClick={() => setActiveTab("lastSimulation")}>
+                        Last finished simulation
                     </span>
                 </div>
                 <CloseButton
@@ -45,20 +47,31 @@ export const SimulationTabContent = ({
                 {activeTab === "all" && (
                     <div className="space-y-0 font-mono text-muted-foreground text-sm">
                         {simulationOutput.map((line: SimulationOutput, index: number) => (
-                            <div key={index}>{line.content}</div>
+                            <span key={index}>
+                                {line.content}
+                                <br/>
+                            </span>
                         ))}
                     </div>
                 )}
 
                 {activeTab === "errors" && (
                     <div className="space-y-0 font-mono text-muted-foreground text-sm">
-
+                        {simulationOutput.filter((line) => line.type === "error").map((line, index) => (
+                            <span key={index}>
+                                {line.content}
+                                <br />
+                            </span>
+                        ))
+                        }
                     </div>
                 )}
 
-                {activeTab === "warnings" && (
+                {activeTab === "lastSimulation" && lastSimulation != null && (
                     <div className="space-y-0 font-mono text-muted-foreground text-sm">
-
+                        {lastSimulation.split("\n").map((line, idx) => (
+                            <div key={idx}>{line}</div>
+                        ))}
                     </div>
                 )}
             </ScrollArea>
