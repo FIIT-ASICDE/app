@@ -265,8 +265,11 @@ export default function EditorPage({ repository }: EditorPageProps) {
     }, 3000);
 
     const isDiagramFile = (file: FileDisplayItem) => {
-        const fileName = file.name.toLowerCase();
-        return fileName.endsWith('.bd');
+        if (file.name != undefined) {
+            const fileName = file.name.toLowerCase();
+            return fileName.endsWith('.bd');
+        }
+
     };
 
     useEffect(() => {

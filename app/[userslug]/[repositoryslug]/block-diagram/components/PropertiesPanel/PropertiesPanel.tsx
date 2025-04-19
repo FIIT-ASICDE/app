@@ -41,8 +41,6 @@ import {JointJSEncoder} from "@/app/[userslug]/[repositoryslug]/block-diagram/co
 import {Encoder} from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/classes/encoder";
 import { Pencil, Trash2, CircleAlert } from 'lucide-react';
 import { api } from "@/lib/trpc/react";
-
-
 import { dia } from "@joint/core";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -55,13 +53,20 @@ import {
     SelectValue
 } from "@/components/ui/select";
 import {Label} from "@/components/ui/label";
-import { parseVHDLTextFromRegex } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/VHDL/parseVHDLTextFromRegex";
-import { parseSystemVerilogTextFromRegex } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/SystemVerilog/parseSystemVerilogTextFromRegex";
-import { parseSystemVerilogModules } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/SystemVerilog/parseSystemVerilogModules";
-import { parseVhdlEntities } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/VHDL/parseVHDLEntities";
 import { UnifiedPackage, ParsedModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces";
 import { toast } from "sonner";
-import { fi } from "@faker-js/faker";
+import {
+    parseSystemVerilogText
+} from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/SystemVerilog/parsePackagesAndStructs";
+import {
+    parseVHDLText
+} from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/VHDL/parsePackagesAndRecords";
+import {
+    parseVHDLEntities
+} from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/VHDL/EntityVisitor";
+import {
+    parseSystemVerilogModules
+} from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/SystemVerilog/parseSystemVerilogModules";
 
 
 
@@ -236,7 +241,7 @@ const PropertiesPanel = () => {
         if (selectedLanguage === "SystemVerilog") {
             parsedPackages = svFiles.flatMap((file) => {
                 try {
-                    return parseSystemVerilogTextFromRegex(file.content);
+                    return parseSystemVerilogText(file.content);
                 } catch (err) {
                     console.warn(`Failed to parse ${file.name}`, err);
                     return [];
@@ -245,7 +250,7 @@ const PropertiesPanel = () => {
         } else if (selectedLanguage === "VHDL") {
             parsedPackages = vhdlFiles.flatMap((file) => {
                 try {
-                    return parseVHDLTextFromRegex(file.content);
+                    return parseVHDLText(file.content);
                 } catch (err) {
                     console.warn(`Failed to parse ${file.name}`, err);
                     return [];
@@ -269,7 +274,7 @@ const PropertiesPanel = () => {
         } else if (selectedLanguage === "VHDL") {
             parsedModules = vhdlFiles.flatMap((file) => {
                 try {
-                    return parseVhdlEntities(file.content);
+                    return parseVHDLEntities(file.content.toUpperCase());
                 } catch (err) {
                     console.warn(`Failed to parse entities in ${file.name}`, err);
                     return [];

@@ -11,7 +11,10 @@ import {
 } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/SystemVerilog/parseSystemVerilogModules";
 import { ParsedModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces";
 import { parseVHDLTopEntity } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/VHDL/parseVHDLTopEntity";
-import { parseVhdlEntities } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/VHDL/parseVHDLEntities";
+import { parseVHDLEntities } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/VHDL/EntityVisitor";
+import {
+    parseTopModule
+} from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/SystemVerilog/parseTopModule";
 
 interface GenerateDiagramDialogProps {
     repositoryId: string;
@@ -41,6 +44,7 @@ export const GenerateDiagramDialog = ({
     }, {
         enabled: open && !!ownerName && !!repoName,
     });
+    console.log(fileData);
 
     const { data: allFiles } = api.repo.loadAllFilesInRepo.useQuery({
         ownerSlug: ownerName!,
@@ -74,7 +78,6 @@ export const GenerateDiagramDialog = ({
 
         try {
             if (isSystemVerilog) {
-                const parsedTopModule = parseSystemVerilogTopModule(fileData.content as string);
 
                 const svFiles = allFiles?.filter(
                     (file) =>
@@ -92,7 +95,9 @@ export const GenerateDiagramDialog = ({
                     }
                 });
 
-                const graph = createDiagramFromParsedModule(parsedTopModule, parsedModules);
+                const parsedTopModule = parseTopModule(fileData.content as string, parsedModules);
+
+                const graph = createDiagramFromParsedModule(parsedTopModule);
 
                 const fileName = diagramFile.name.replace(/\.sv$/i, ".bd");
                 const filePath = diagramFile.absolutePath.replace(/[^/]+$/, fileName);
@@ -125,7 +130,7 @@ export const GenerateDiagramDialog = ({
 
                 const parsedEntities: ParsedModule[] = vhdlFiles.flatMap((file) => {
                     try {
-                        return parseVhdlEntities(file.content);
+                        return parseVHDLEntities(file.content.toUpperCase());
                     } catch (err) {
                         console.warn(`Failed to parse VHDL in ${file.name}`, err);
                         return [];

@@ -3,10 +3,14 @@ import { Port } from "@/app/[userslug]/[repositoryslug]/block-diagram/components
 import { JointJSInputPort } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/io/JointJSInputPort";
 import { JointJSOutputPort } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/io/JointJSOutputPort";
 import { JointJSModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/components/Shapes/modules/JointJSModule";
-import { CustomPort, ParsedModule, ParsedTopModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces";
-import { dia, shapes } from '@joint/core';
-import { v4 as uuidv4 } from 'uuid';
+import {
+    CustomPort,
+    ParsedTopModule,
+} from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces";
+import { dia, shapes } from "@joint/core";
+import { v4 as uuidv4 } from "uuid";
 
+/** Скрыть кружок и линию у порта, чтобы не мешался */
 const hidePort = (element: dia.Element, portId: string) => {
     element.portProp(portId, 'attrs/circle', { display: 'none' });
     element.portProp(portId, 'attrs/portCircle/cx', element.getPort(portId)?.group === 'input' ? 3 : -3);
@@ -14,120 +18,125 @@ const hidePort = (element: dia.Element, portId: string) => {
     element.portProp(portId, 'attrs/portLine', { display: 'none' });
 };
 
-
-const createLink = (sourceId: string, sourcePortId: string, targetId: string, targetPortId: string): dia.Link => {
+const createLink = (
+    sourceId: string,
+    sourcePortId: string,
+    targetId: string,
+    targetPortId: string
+): dia.Link => {
     return new shapes.standard.Link({
         attrs: {
             line: {
-                stroke: '#000',
+                stroke: "#000",
                 strokeWidth: 1,
                 targetMarker: {
-                    type: 'classic',
-                    stroke: '#000',
-                    fill: '#000',
+                    type: "classic",
+                    stroke: "#000",
+                    fill: "#000",
                 },
             },
-            vertex: {
-                r: 5,
-                fill: '#33a1ff',
-                stroke: '#000',
-                strokeWidth: 1,
-            },
         },
-        source: { id: sourceId, magnet: 'portCircle', port: sourcePortId },
-        target: { id: targetId, magnet: 'portCircle', port: targetPortId },
-        interactive: {
-            vertexAdd: true,
-            vertexMove: true,
-            vertexRemove: true,
-            arrowheadMove: false,
-        },
+        source: { id: sourceId, magnet: "portCircle", port: sourcePortId },
+        target: { id: targetId, magnet: "portCircle", port: targetPortId },
         id: uuidv4(),
     });
 };
 
-
 export const createDiagramFromParsedModule = (
-    parsedTopModule: ParsedTopModule | null,
-    parsedModules: ParsedModule[],
+    parsedTopModule: ParsedTopModule | null
 ): dia.Graph => {
     const graph = new dia.Graph({}, { cellNamespace: shapes });
+    if (!parsedTopModule) return graph;
 
-    const portElements: Record<string, dia.Element> = {};
+    // 1) Рисуем топ‑порты
+    const topPortEls: Record<string, dia.Element> = {};
+    parsedTopModule.ports.forEach((port, i) => {
+        const posX = port.direction === "input" ? 100 : 600;
+        const posY = 100 + i * 100;
+        const pd = new Port();
+        pd.name = port.name;
+        pd.position = { x: posX, y: posY };
+        pd.dataBandwidth = port.width;
+        const el =
+            port.direction === "input"
+                ? JointJSInputPort(pd)
+                : JointJSOutputPort(pd);
+        topPortEls[port.name] = el;
+        graph.addCell(el);
+    });
 
-    if (parsedTopModule){
-        parsedTopModule.ports.forEach((port, index) => {
-            const posX = port.direction === "input" ? 100 : 600;
-            const posY = 100 + index * 100;
+    // 2) Рисуем sub‑модули (только один раз на инстанс)
+    const subEls: Record<string, dia.Element> = {};
+    parsedTopModule.subModules.forEach((sub, i) => {
+        if (subEls[sub.instanceName]) return;       // уже нарисовали
+        const md = new Module();
+        md.name = sub.moduleName;
+        md.instance = sub.instanceName;
 
-            const portData = new Port();
-            portData.name = port.name;
-            portData.position = { x: posX, y: posY };
-            portData.dataBandwidth = port.width;
+        md.inPorts = sub.portConnections
+            .filter((c) => c.direction === "input")
+            .map((c) => ({ name: c.portName, bandwidth: c.width }));
+        md.outPorts = sub.portConnections
+            .filter((c) => c.direction === "output")
+            .map((c) => ({ name: c.portName, bandwidth: c.width }));
 
-            const portElement =
-                port.direction === "input"
-                    ? JointJSInputPort(portData)
-                    : JointJSOutputPort(portData);
+        const el = JointJSModule(md, []);
+        el.position(300, 100 + i * 200);
+        graph.addCell(el);
+        subEls[sub.instanceName] = el;
+    });
 
-            portElements[port.name] = portElement;
-            graph.addCell(portElement);
+    // 3) Собираем сети по сигналам
+    type Conn = { el: dia.Element; portId: string; direction: "input" | "output" };
+    const nets: Record<string, Conn[]> = {};
+
+    // 3a) порты sub‑модулей
+    parsedTopModule.subModules.forEach((sub) => {
+        const el = subEls[sub.instanceName];
+        const ports = el.getPorts() as CustomPort[];
+        sub.portConnections.forEach((c) => {
+            const cp = ports.find((p) => p.name === c.portName);
+            if (!cp) return;
+            nets[c.connectedTo] ||= [];
+            nets[c.connectedTo].push({
+                el,
+                portId: cp.id,
+                direction: c.direction,  // вход/выход sub‑модуля
+            });
         });
+    });
 
-        parsedTopModule.subModules.forEach((sub, index) => {
-            const foundModule = parsedModules.find(m => m.name === sub.moduleName);
-            const posX = 300;
-            const posY = 100 + index * 200;
+    // 3b) топ‑порты
+    parsedTopModule.ports.forEach((port) => {
+        const el = topPortEls[port.name];
+        if (!el) return;
+        const p = el.getPorts()?.[0];
+        if (!p) return;
+        nets[port.name] ||= [];
+        // **инвертируем**: топ‑вход — источник, топ‑выход — приёмник
+        const dir: "output" | "input" =
+            port.direction === "input" ? "output" : "input";
+        nets[port.name].push({ el, portId: p.id, direction: dir });
+    });
 
-            const moduleData = new Module();
-            moduleData.name = sub.moduleName;
-            moduleData.instance = sub.instanceName;
-
-            if (foundModule) {
-                const inputPorts = foundModule.ports.filter(p => p.direction === 'input' || p.direction === 'in');
-                const outputPorts = foundModule.ports.filter(p => p.direction === 'output' || p.direction === 'out');
-
-                moduleData.inPorts = inputPorts.map((p) => ({
-                    name: p.name,
-                    bandwidth: p.width || 1,
-                }));
-
-                moduleData.outPorts = outputPorts.map((p) => ({
-                    name: p.name,
-                    bandwidth: p.width || 1,
-                }));
-            }
-
-            const element = JointJSModule(moduleData, []);
-            element.position(posX, posY);
-            graph.addCell(element);
-
-            sub.portConnections.forEach((conn) => {
-                const sourceElement = portElements[conn.connectedTo];
-                if (!sourceElement) return;
-
-                const sourcePortId = sourceElement.getPorts()[0]?.id;
-                const ports = element.getPorts() as CustomPort[];
-                const targetPortId = ports.find((p) => p.name === conn.portName)?.id;
-                if (!sourcePortId || !targetPortId) return;
-
-                hidePort(sourceElement, sourcePortId);
-                hidePort(element, targetPortId);
-
+    // 4) Стягиваем каждую сеть: из каждого источника → ко всем приёмникам
+    Object.values(nets).forEach((conns) => {
+        const sources = conns.filter((c) => c.direction === "output");
+        const sinks   = conns.filter((c) => c.direction === "input");
+        sources.forEach((src) => {
+            sinks.forEach((snk) => {
+                hidePort(src.el, src.portId);
+                hidePort(snk.el, snk.portId);
                 const link = createLink(
-                    sourceElement.id.toString(),
-                    sourcePortId,
-                    element.id.toString(),
-                    targetPortId
+                    src.el.id.toString(),
+                    src.portId,
+                    snk.el.id.toString(),
+                    snk.portId
                 );
                 graph.addCell(link);
             });
         });
+    });
 
-        return graph;
-    }
-    else {
-        return graph;
-    }
-
+    return graph;
 };

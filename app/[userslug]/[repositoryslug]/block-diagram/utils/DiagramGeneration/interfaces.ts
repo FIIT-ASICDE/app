@@ -39,7 +39,12 @@ export interface TopModulePort {
 export interface SubModule {
     moduleName: string;
     instanceName: string;
-    portConnections: { portName: string; connectedTo: string; width: number }[];
+    portConnections: {
+        portName: string;
+        connectedTo: string;
+        width: number;
+        direction: 'input' | 'output' | 'inout';
+    }[];
 }
 
 export interface ParsedTopModule {
