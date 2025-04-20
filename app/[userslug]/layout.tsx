@@ -19,9 +19,5 @@ export default async function UserLayout({
 }: UserLayoutProps): Promise<ReactElement> {
     const session = await auth();
     await redirectIfNotOnboarded(session, "home");
-    return (
-        <ProtectedLayout>
-            {children}
-        </ProtectedLayout>
-    );
-};
+    return <ProtectedLayout>{children}</ProtectedLayout>;
+}

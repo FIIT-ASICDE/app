@@ -1,11 +1,11 @@
 import { imgSrc } from "@/lib/client-file-utils";
 import { Repository } from "@/lib/types/repository";
+import { ReactElement } from "react";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { EditRepositoryDialog } from "@/components/repositories/edit-repository-dialog";
 import { RepositoryNavigation } from "@/components/repositories/repository-navigation";
-import { ReactElement } from "react";
 
 interface RepositoryHeaderProps {
     repository: Repository;

@@ -4,13 +4,13 @@ import type { LayoutType } from "@/lib/types/generic";
 import { cn } from "@/lib/utils";
 import { LayoutGrid, Rows3 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ReactElement } from "react";
 
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ReactElement } from "react";
 
 interface LayoutOptionsProps {
     layout: LayoutType;
@@ -25,7 +25,7 @@ interface LayoutOptionsProps {
  */
 export const LayoutOptions = ({
     layout,
-    className
+    className,
 }: LayoutOptionsProps): ReactElement => {
     const searchParams = useSearchParams();
     const pathname = usePathname();

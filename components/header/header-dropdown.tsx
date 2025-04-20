@@ -16,6 +16,7 @@ import {
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import * as React from "react";
+import { ReactElement } from "react";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
@@ -29,7 +30,6 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ReactElement } from "react";
 
 interface HeaderDropdownProps {
     user: OnboardedUser;

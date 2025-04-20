@@ -2,6 +2,7 @@ import { api } from "@/lib/trpc/react";
 import { Repository } from "@/lib/types/repository";
 import { Globe, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ReactElement } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { ReactElement } from "react";
 
 interface ChangeVisibilityDialogProps {
     repository: Repository;

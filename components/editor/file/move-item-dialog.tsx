@@ -41,9 +41,7 @@ export const MoveItemDialog = ({
     onCancel,
 }: MoveItemDialogProps): ReactElement => {
     const targetItemName: string =
-        targetItem.name === ""
-            ? "root directory"
-            : targetItem.name;
+        targetItem.name === "" ? "root directory" : targetItem.name;
 
     const itemType: "file" | "directory" =
         sourceItem.type === "directory" ||

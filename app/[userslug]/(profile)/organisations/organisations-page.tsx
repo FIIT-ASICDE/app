@@ -1,7 +1,11 @@
 import { PaginationResult } from "@/lib/types/generic";
-import { OrganisationDisplay, RoleOrganisationFilter } from "@/lib/types/organisation";
+import {
+    OrganisationDisplay,
+    RoleOrganisationFilter,
+} from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 import { Building } from "lucide-react";
+import { ReactElement } from "react";
 
 import { DynamicPagination } from "@/components/generic/dynamic-pagination";
 import { LayoutOptions } from "@/components/generic/layout-options";
@@ -10,7 +14,6 @@ import { CreateOrganisationDialog } from "@/components/organisations/create-orga
 import { OrganisationCard } from "@/components/organisations/organisation-card";
 import { OrganisationFilter } from "@/components/organisations/organisation-filter";
 import Search from "@/components/ui/search";
-import { ReactElement } from "react";
 
 interface OrganisationsPageProps {
     usersOrganisations: Array<OrganisationDisplay>;

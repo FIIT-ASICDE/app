@@ -3,6 +3,7 @@
 import type { OrganisationDisplay } from "@/lib/types/organisation";
 import { BookUser, Folders, Settings, UsersRound } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { ReactElement } from "react";
 
 import { getCurrentPage } from "@/components/generic/generic";
 import { NavigationButton } from "@/components/generic/navigation-button";
@@ -14,7 +15,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ReactElement } from "react";
 
 interface OrganisationNavigationProps {
     organisation: OrganisationDisplay;

@@ -1,12 +1,10 @@
 import { FolderPlus } from "lucide-react";
-
-
+import { ReactElement } from "react";
 
 import GithubIcon from "@/components/icons/github";
 import { RepoOrgCardSkeleton } from "@/components/skeletons/repo-org-card-skeleton";
 import { RepoOrgSubmenuSkeleton } from "@/components/skeletons/repo-org-submenu-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ReactElement } from "react";
 
 /**
  * Loading page for repositories page at user profile

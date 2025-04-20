@@ -2,7 +2,7 @@
 
 import { api } from "@/lib/trpc/react";
 import { OnboardedUser } from "@/lib/types/user";
-import { ReactNode, createContext, useContext, ReactElement } from "react";
+import { ReactElement, ReactNode, createContext, useContext } from "react";
 
 type UserContextType = {
     user: OnboardedUser;
@@ -23,7 +23,7 @@ interface UserProviderProps {
  */
 export function UserProvider({
     children,
-    userId
+    userId,
 }: UserProviderProps): ReactElement {
     const [user] = api.user.byId.useSuspenseQuery(userId);
 

@@ -1,7 +1,8 @@
+import { ReactElement } from "react";
+
 import { DescriptionSkeleton } from "@/components/skeletons/description-skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ReactElement } from "react";
 
 /**
  * Loading page for overview page for a repository

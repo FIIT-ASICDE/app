@@ -1,8 +1,8 @@
 import { Check, ChevronRight } from "lucide-react";
+import { ReactElement } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { ReactElement } from "react";
 
 /**
  * Skeleton component of a table of commits

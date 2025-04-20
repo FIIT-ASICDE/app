@@ -1,14 +1,24 @@
 import { BadgeType, CardType, FilterType } from "@/lib/types/generic";
 import { Invitation } from "@/lib/types/invitation";
 import { RoleOrganisationFilter } from "@/lib/types/organisation";
-import { DirectoryItem, FavoriteRepositoriesFilter, FileDisplayItem, FileItem, PinnedRepositoriesFilter, PublicRepositoriesFilter, RepositoryItem, RepositoryItemChange } from "@/lib/types/repository";
+import {
+    DirectoryItem,
+    FavoriteRepositoriesFilter,
+    FileDisplayItem,
+    FileItem,
+    PinnedRepositoriesFilter,
+    PublicRepositoriesFilter,
+    RepositoryItem,
+    RepositoryItemChange,
+} from "@/lib/types/repository";
 import { Dispatch, ReactElement, SetStateAction } from "react";
 
-
-
 import { RepositoryItemChangeIcon } from "@/components/editor/changes/repository-item-change-icon";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 /**
  * Function used to calculate and format a time delta
@@ -49,10 +59,7 @@ export const getTimeDeltaString = (lastActivity: Date): string => {
  * @param date {Date}
  * @returns {string} Formatted string of the action and its date
  */
-export const getDateString = (
-    actionType: string, 
-    date: Date
-): string => {
+export const getDateString = (actionType: string, date: Date): string => {
     const monthLong: string = date.toLocaleString("default", { month: "long" });
     const yearFull: string = date.toLocaleString("default", {
         year: "numeric",
@@ -66,9 +73,7 @@ export const getDateString = (
  * @param badgeType {BadgeType}
  * @returns {string} Classname
  */
-export const getBadgeStyle = (
-    badgeType: BadgeType
-): string => {
+export const getBadgeStyle = (badgeType: BadgeType): string => {
     switch (badgeType) {
         case "public":
             return "bg-badge-public text-badge-public-foreground hover:bg-badge-public-hover dark:bg-[var(--badge-public)] dark:text-[var(--badge-public-foreground)] dark:hover:bg-[var(--badge-public-hover)]";
@@ -109,9 +114,7 @@ export const getCurrentPage = (
  * @param invitation {Invitation}
  * @returns Object containing the display name, image and link of an invitation
  */
-export const getInvitationDisplayData = (
-    invitation: Invitation
-) => {
+export const getInvitationDisplayData = (invitation: Invitation) => {
     const displayName: string =
         invitation.type === "repository"
             ? invitation.repository?.ownerName +
@@ -139,9 +142,7 @@ export const getInvitationDisplayData = (
  * @param cardType {CardType}
  * @returns {string} Color of a card stripe
  */
-const getCardStripeColor = (
-    cardType: CardType
-): string => {
+const getCardStripeColor = (cardType: CardType): string => {
     switch (cardType) {
         case "repository":
             return "before:bg-badge-repository";
@@ -172,9 +173,7 @@ const getCardStripeColor = (
  * @param cardType {CardType}
  * @returns {string} Card stripe classname
  */
-export const getCardStripe = (
-    cardType: CardType
-): string => {
+export const getCardStripe = (cardType: CardType): string => {
     const color: string = getCardStripeColor(cardType);
 
     return `relative before:absolute before:inset-y-0 before:left-0 before:w-1.5 ${color} before:rounded-l-2xl`;
@@ -187,7 +186,7 @@ export const getCardStripe = (
  * @returns {boolean | undefined} Boolean or undefined value
  */
 export const parseBoolean = (
-    value: string | undefined
+    value: string | undefined,
 ): boolean | undefined => {
     return value === "true" ? true : value === "false" ? false : undefined;
 };
@@ -238,9 +237,7 @@ export const parseFilterValue = (
  * @param date {Date | undefined}
  * @returns {string} Formatted date
  */
-export const datePretty = (
-    date: Date | undefined
-): string => {
+export const datePretty = (date: Date | undefined): string => {
     if (!date) {
         return "";
     }
@@ -362,7 +359,7 @@ export const languageColors: Record<string, string> = {
  * @returns {Array<RepositoryItem>} Sorted file tree
  */
 export const sortTree = (
-    tree: Array<RepositoryItem>
+    tree: Array<RepositoryItem>,
 ): Array<RepositoryItem> => {
     return tree.sort((a: RepositoryItem, b: RepositoryItem) => {
         if (
@@ -386,7 +383,7 @@ export const sortTree = (
  * @returns {ReactElement} Tooltip content
  */
 export const getChangeTooltipContent = (
-    itemChange: RepositoryItemChange
+    itemChange: RepositoryItemChange,
 ): ReactElement => {
     if (["added", "modified", "deleted"].includes(itemChange.change.type)) {
         return (
@@ -432,7 +429,7 @@ export const getChangeTooltipContent = (
  * @returns {ReactElement} Tooltip content
  */
 export const getChangeContent = (
-    itemChange: RepositoryItemChange
+    itemChange: RepositoryItemChange,
 ): ReactElement => {
     return (
         <Tooltip>
@@ -459,13 +456,10 @@ export const getChangeContent = (
 export const addItemToTree = (
     tree: Array<RepositoryItem>,
     parentPath: string,
-    newItem: FileDisplayItem | DirectoryItem
+    newItem: FileDisplayItem | DirectoryItem,
 ): Array<RepositoryItem> => {
     if (parentPath === "") {
-        return [
-            ...tree,
-            newItem,
-        ];
+        return [...tree, newItem];
     }
 
     return tree.map((item) => {
@@ -498,16 +492,16 @@ export const addItemToTree = (
  */
 export const deleteItemFromTree = (
     tree: Array<RepositoryItem>,
-    deletePath: string
+    deletePath: string,
 ): Array<RepositoryItem> => {
     return tree
         .filter((item: RepositoryItem) => item.absolutePath !== deletePath)
         .map((item: RepositoryItem) => {
-            if (
-                (item.type === "directory") &&
-                item.children
-            ) {
-                return { ...item, children: deleteItemFromTree(item.children, deletePath) };
+            if (item.type === "directory" && item.children) {
+                return {
+                    ...item,
+                    children: deleteItemFromTree(item.children, deletePath),
+                };
             }
             return item;
         });
@@ -524,11 +518,19 @@ export const deleteItemFromTree = (
 export const renameItemInTree = (
     tree: Array<RepositoryItem>,
     originalPath: string,
-    newName: string
+    newName: string,
 ): Array<RepositoryItem> => {
     return tree.map((item: RepositoryItem) => {
         if (item.absolutePath === originalPath) {
-            const newAbsolutePath: string = item.absolutePath.split("\\").join("/").split("/").slice(0, -1).join("/") + "/" + newName;
+            const newAbsolutePath: string =
+                item.absolutePath
+                    .split("\\")
+                    .join("/")
+                    .split("/")
+                    .slice(0, -1)
+                    .join("/") +
+                "/" +
+                newName;
 
             return {
                 ...item,
@@ -536,13 +538,14 @@ export const renameItemInTree = (
                 absolutePath: newAbsolutePath,
             };
         }
-        if (
-            (item.type === "directory") &&
-            item.children
-        ) {
+        if (item.type === "directory" && item.children) {
             return {
                 ...item,
-                children: renameItemInTree(item.children, originalPath, newName),
+                children: renameItemInTree(
+                    item.children,
+                    originalPath,
+                    newName,
+                ),
             };
         }
         return item;
@@ -560,12 +563,17 @@ export const renameItemInTree = (
 export const moveItemInTree = (
     tree: Array<RepositoryItem>,
     sourceItem: RepositoryItem,
-    targetItem: RepositoryItem
+    targetItem: RepositoryItem,
 ): Array<RepositoryItem> => {
-    const treeWithoutSource: Array<RepositoryItem> = deleteItemFromTree(tree, sourceItem.absolutePath);
+    const treeWithoutSource: Array<RepositoryItem> = deleteItemFromTree(
+        tree,
+        sourceItem.absolutePath,
+    );
 
-    sourceItem.absolutePath = targetItem.name === "" ?
-        sourceItem.name : targetItem.absolutePath + "/" + sourceItem.name;
+    sourceItem.absolutePath =
+        targetItem.name === ""
+            ? sourceItem.name
+            : targetItem.absolutePath + "/" + sourceItem.name;
 
     console.log(sourceItem);
 
@@ -585,14 +593,17 @@ export const moveItemInTree = (
  */
 export const findItemInTree = (
     tree: Array<RepositoryItem>,
-    absolutePath: string
+    absolutePath: string,
 ): RepositoryItem | undefined => {
     for (const item of tree) {
         if (item.absolutePath === absolutePath) {
             return item;
         }
         if (item.type === "directory" && item.children?.length) {
-            const found: RepositoryItem | undefined = findItemInTree(item.children, absolutePath);
+            const found: RepositoryItem | undefined = findItemInTree(
+                item.children,
+                absolutePath,
+            );
             if (found) return found;
         }
     }
@@ -638,7 +649,7 @@ export const handleToggle = (
  * @returns {Array<FileDisplayItem | FileItem>} Array of files
  */
 export const getFilesFromRepo = (
-    tree: Array<RepositoryItem> | undefined
+    tree: Array<RepositoryItem> | undefined,
 ): Array<FileDisplayItem | FileItem> => {
     if (!tree) return [];
 

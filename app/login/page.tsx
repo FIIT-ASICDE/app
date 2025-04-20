@@ -2,6 +2,7 @@ import { auth, providerMap, signIn } from "@/auth";
 import { redirectIfNotOnboarded } from "@/lib/onboarding-guard";
 import { AuthError } from "next-auth";
 import Image from "next/image";
+import { ReactElement } from "react";
 
 import GithubIcon from "@/components/icons/github";
 import GoogleIcon from "@/components/icons/google";
@@ -15,7 +16,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { ReactElement } from "react";
 
 interface LoginPageProps {
     searchParams: Promise<{
@@ -30,7 +30,7 @@ interface LoginPageProps {
  * @returns {ReactElement} Login page component
  */
 export default async function LoginPage({
-    searchParams
+    searchParams,
 }: LoginPageProps): Promise<ReactElement> {
     const session = await auth();
     await redirectIfNotOnboarded(session, "login");

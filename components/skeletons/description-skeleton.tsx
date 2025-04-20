@@ -1,8 +1,8 @@
 import { Calendar } from "lucide-react";
+import { ReactElement } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ReactElement } from "react";
 
 /**
  * Skeleton component of a user/organisation description

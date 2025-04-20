@@ -16,7 +16,7 @@ interface ThemeIconProps {
 export const ThemeIcon = ({
     theme,
     className,
-    filled
+    filled,
 }: ThemeIconProps): ReactElement => {
     if (theme === "light") {
         if (filled) {

@@ -1,10 +1,10 @@
 import { Eye, Folder, Lock } from "lucide-react";
+import { ReactElement } from "react";
 
 import { RepositorySettingsTabsSkeleton } from "@/components/skeletons/repository-settings-tabs-skeleton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ReactElement } from "react";
 
 /**
  * Loading page for settings page for a repository

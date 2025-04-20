@@ -1,8 +1,12 @@
-import { BottomPanelContentTab, Configuration, SimulationOutput } from "@/lib/types/editor";
+import {
+    BottomPanelContentTab,
+    Configuration,
+    SimulationOutput,
+} from "@/lib/types/editor";
+import { ReactElement } from "react";
 
 import { SimulationTabContent } from "@/components/editor/bottom-panel-content/simulation-tab-content";
 import { SynthesisTabContent } from "@/components/editor/bottom-panel-content/synthesis-tab-content";
-import { ReactElement } from "react";
 
 interface BottomPanelTabContentProps {
     activeBottomPanelContent: BottomPanelContentTab;
@@ -23,7 +27,7 @@ export const BottomPanelTabContent = ({
     handleCloseBottomPanel,
     configuration,
     simulationOutput,
-    lastSimulation
+    lastSimulation,
 }: BottomPanelTabContentProps): ReactElement => {
     return (
         <div className="flex h-full">

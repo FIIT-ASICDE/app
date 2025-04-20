@@ -1,7 +1,7 @@
 import { RepositoryItemChange } from "@/lib/types/repository";
+import { ReactElement } from "react";
 
 import { getChangeContent } from "@/components/generic/generic";
-import { ReactElement } from "react";
 
 interface ChangesTableProps {
     expanded: boolean;

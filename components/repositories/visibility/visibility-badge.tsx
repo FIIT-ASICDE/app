@@ -1,9 +1,9 @@
 import type { RepositoryVisibility } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
+import { ReactElement } from "react";
 
 import { getBadgeStyle } from "@/components/generic/generic";
 import { Badge } from "@/components/ui/badge";
-import { ReactElement } from "react";
 
 interface VisibilityBadgeProps {
     visibility: RepositoryVisibility;
@@ -16,7 +16,7 @@ interface VisibilityBadgeProps {
  * @returns {ReactElement} Badge component
  */
 export const VisibilityBadge = ({
-    visibility
+    visibility,
 }: VisibilityBadgeProps): ReactElement => {
     return (
         <Badge

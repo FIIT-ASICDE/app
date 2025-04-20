@@ -1,7 +1,8 @@
+import { ReactElement } from "react";
+
 import { Avatar } from "@/components/ui/avatar";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ReactElement } from "react";
 
 /**
  * Skeleton component of a card

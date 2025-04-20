@@ -4,6 +4,7 @@ import { OrganisationSettingsTab } from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 import { BookUser, Mail, TriangleAlert } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ReactElement } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +12,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ReactElement } from "react";
 
 interface OrganisationSettingsTabsProps {
     tab: OrganisationSettingsTab;

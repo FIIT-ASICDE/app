@@ -3,6 +3,7 @@ import { RepositoryDisplay } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { Calendar, Code } from "lucide-react";
 import Link from "next/link";
+import { ReactElement } from "react";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
@@ -12,7 +13,6 @@ import {
 } from "@/components/generic/generic";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
-import { ReactElement } from "react";
 
 interface RecentRepositoryCardDisplayProps {
     repository: RepositoryDisplay;

@@ -2,11 +2,11 @@
 
 import { imgSrc } from "@/lib/client-file-utils";
 import { UserDisplay } from "@/lib/types/user";
+import { ReactElement } from "react";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { BlockContributorDialog } from "@/components/repositories/contributors/block-contributor-dialog";
-import { ReactElement } from "react";
 
 interface ContributorCardProps {
     contributor: UserDisplay;

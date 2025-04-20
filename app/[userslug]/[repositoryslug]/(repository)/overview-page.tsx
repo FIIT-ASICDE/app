@@ -1,12 +1,12 @@
 import { RepositoryOverview } from "@/lib/types/repository";
 import { Calendar, FileX2 } from "lucide-react";
+import { ReactElement } from "react";
 
 import { getDateString } from "@/components/generic/generic";
 import { NoData } from "@/components/generic/no-data";
 import LanguageStatisticsChart from "@/components/repositories/code/language-statistics";
 import { MarkdownRenderer } from "@/components/repositories/code/markdown-renderer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ReactElement } from "react";
 
 interface OverviewPageProps {
     repository: RepositoryOverview;
@@ -19,7 +19,7 @@ interface OverviewPageProps {
  * @returns {ReactElement} Overview page component
  */
 export default function OverviewPage({
-    repository
+    repository,
 }: OverviewPageProps): ReactElement {
     return (
         <div className="m-6 flex flex-col gap-x-3 md:flex-row">

@@ -47,7 +47,7 @@ interface RepositoryFilterProps {
  * @returns {ReactElement} Filter component
  */
 export const RepositoryFilter = ({
-    filters
+    filters,
 }: RepositoryFilterProps): ReactElement => {
     const searchParams = useSearchParams();
     const pathname = usePathname();

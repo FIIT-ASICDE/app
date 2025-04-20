@@ -29,7 +29,7 @@ interface OverviewPageProps {
  * @returns {ReactElement} Overview page component
  */
 export default function OverviewPage({
-    overview
+    overview,
 }: OverviewPageProps): ReactElement {
     const organisation: Organisation = overview.organisation;
 

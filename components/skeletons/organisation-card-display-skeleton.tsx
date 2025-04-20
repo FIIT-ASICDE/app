@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
 import { UsersRound } from "lucide-react";
+import { ReactElement } from "react";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ReactElement } from "react";
 
 interface OrganisationCardSkeletonProps {
     titleClassName?: string;

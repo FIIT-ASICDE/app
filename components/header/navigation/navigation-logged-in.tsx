@@ -1,7 +1,7 @@
 import { OnboardedUser } from "@/lib/types/user";
+import { ReactElement } from "react";
 
 import { HeaderDropdown } from "@/components/header/header-dropdown";
-import { ReactElement } from "react";
 
 interface NavigationLoggedInProps {
     user: OnboardedUser;
@@ -14,7 +14,7 @@ interface NavigationLoggedInProps {
  * @returns {ReactElement} Navigation component
  */
 export const NavigationLoggedIn = ({
-    user
+    user,
 }: NavigationLoggedInProps): ReactElement => {
     return (
         <nav className="absolute right-0 mr-2 flex flex-row items-center gap-x-3">

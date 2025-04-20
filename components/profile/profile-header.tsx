@@ -1,11 +1,11 @@
 import { imgSrc } from "@/lib/client-file-utils";
 import { OnboardedUser } from "@/lib/types/user";
+import { ReactElement } from "react";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { EditProfileDialog } from "@/components/profile/edit-profile-dialog";
 import { ProfileNavigation } from "@/components/profile/profile-navigation";
-import { ReactElement } from "react";
 
 interface ProfileHeaderProps {
     profile: OnboardedUser;
@@ -20,7 +20,7 @@ interface ProfileHeaderProps {
  */
 export const ProfileHeader = ({
     profile,
-    isItMe
+    isItMe,
 }: ProfileHeaderProps): ReactElement => {
     return (
         <div className="flex flex-row items-center justify-between">

@@ -1,11 +1,11 @@
 import { auth } from "@/auth";
 import { api } from "@/lib/trpc/server";
 import Link from "next/link";
+import { ReactElement } from "react";
 
 import { CommandBar } from "@/components/header/header-command";
 import { NavigationLoggedIn } from "@/components/header/navigation/navigation-logged-in";
 import LogoIcon from "@/components/icons/logo";
-import { ReactElement } from "react";
 
 /**
  * Header component containing the logo, command bar and a navigation

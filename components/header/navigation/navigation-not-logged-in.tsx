@@ -1,7 +1,7 @@
 import Link from "next/link";
+import { ReactElement } from "react";
 
 import { Button } from "@/components/ui/button";
-import { ReactElement } from "react";
 
 /**
  * Navigation component for the user that is not yet logged-in

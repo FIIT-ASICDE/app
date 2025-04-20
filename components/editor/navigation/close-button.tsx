@@ -1,12 +1,12 @@
 import { cn } from "@/lib/utils";
 import { Minus } from "lucide-react";
+import { ReactElement } from "react";
 
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ReactElement } from "react";
 
 interface CloseButtonProps {
     onClick?: () => void;

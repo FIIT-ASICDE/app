@@ -1,9 +1,9 @@
+import { Configuration } from "@/lib/types/editor";
 import { ChevronRight } from "lucide-react";
+import { ReactElement } from "react";
 
 import { CloseButton } from "@/components/editor/navigation/close-button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Configuration } from "@/lib/types/editor";
-import { ReactElement } from "react";
 
 interface SynthesisTabContentProps {
     handleCloseBottomPanel: () => void;
@@ -38,8 +38,13 @@ export const SynthesisTabContent = ({
                         </span>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-muted-foreground text-sm">Type: {configuration?.synthesis.type}</span>
-                        <span className="text-muted-foreground text-sm">TestBench: {configuration?.synthesis.file.absolutePath}</span>
+                        <span className="text-sm text-muted-foreground">
+                            Type: {configuration?.synthesis.type}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                            TestBench:{" "}
+                            {configuration?.synthesis.file.absolutePath}
+                        </span>
                     </div>
                 </div>
             </ScrollArea>

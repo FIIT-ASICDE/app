@@ -6,6 +6,7 @@ import {
 } from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 import { UsersRound } from "lucide-react";
+import { ReactElement } from "react";
 
 import { DynamicPagination } from "@/components/generic/dynamic-pagination";
 import { LayoutOptions } from "@/components/generic/layout-options";
@@ -14,7 +15,6 @@ import { InviteMemberDialog } from "@/components/invitations/invite-member-dialo
 import { MemberCard } from "@/components/organisations/members/member-card";
 import { OrganisationFilter } from "@/components/organisations/organisation-filter";
 import Search from "@/components/ui/search";
-import { ReactElement } from "react";
 
 interface MembersPageProps {
     org: OrganisationDisplay;

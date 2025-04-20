@@ -1,6 +1,7 @@
 import { Code, FileIcon, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import { ReactElement } from "react";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { darcula, docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
@@ -8,7 +9,6 @@ import { getTimeDeltaString } from "@/components/generic/generic";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ReactElement } from "react";
 
 interface FilePreviewProps {
     name: string;

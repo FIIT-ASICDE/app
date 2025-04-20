@@ -16,7 +16,7 @@ interface NoDataProps {
 export const NoData = ({
     icon: Icon,
     message,
-    className
+    className,
 }: NoDataProps): ReactElement => {
     return (
         <div

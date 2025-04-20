@@ -1,10 +1,17 @@
 import { api } from "@/lib/trpc/react";
 import { FileDisplayItem, RepositoryItem } from "@/lib/types/repository";
 import { FileIcon, FilePlus } from "lucide-react";
-import { Dispatch, FormEvent, ReactElement, SetStateAction, useState } from "react";
+import {
+    Dispatch,
+    FormEvent,
+    ReactElement,
+    SetStateAction,
+    useState,
+} from "react";
 import { toast } from "sonner";
 
 import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer/file-explorer-control-button";
+import { addItemToTree } from "@/components/generic/generic";
 import {
     Dialog,
     DialogContent,
@@ -13,7 +20,6 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { addItemToTree } from "@/components/generic/generic";
 
 interface CreateFileDialogProps {
     repositoryId: string;

@@ -3,13 +3,13 @@ import { OrganisationDisplay } from "@/lib/types/organisation";
 import { RepositoryDisplay } from "@/lib/types/repository";
 import { UserDisplay } from "@/lib/types/user";
 import { cn } from "@/lib/utils";
+import { ReactElement } from "react";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { getCardStripe } from "@/components/generic/generic";
 import { InviteUserDialog } from "@/components/invitations/invite-user-dialog";
 import { Card, CardContent } from "@/components/ui/card";
-import { ReactElement } from "react";
 
 interface UserCardProps {
     user: UserDisplay;

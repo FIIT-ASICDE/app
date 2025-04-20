@@ -1,12 +1,12 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { ReactElement } from "react";
 
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ReactElement } from "react";
 
 interface DynamicTitleProps {
     title: string;

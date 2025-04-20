@@ -52,7 +52,7 @@ interface SettingsPageProps {
  */
 export default function SettingsPage({
     settings,
-    tab
+    tab,
 }: SettingsPageProps): ReactElement {
     const { user } = useUser();
 

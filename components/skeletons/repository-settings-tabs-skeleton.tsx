@@ -1,8 +1,8 @@
 import { Folder, Mail, TriangleAlert, UsersRound } from "lucide-react";
+import { ReactElement } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ReactElement } from "react";
 
 /**
  * Skeleton component of a tabs component on the repository settings page

@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
 import { Mail } from "lucide-react";
+import { ReactElement } from "react";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ReactElement } from "react";
 
 interface UserCardSkeletonProps {
     titleClassName?: string;
@@ -16,7 +16,7 @@ interface UserCardSkeletonProps {
  * @returns {ReactElement} Skeleton component
  */
 export const UserCardSkeleton = ({
-    titleClassName
+    titleClassName,
 }: UserCardSkeletonProps): ReactElement => {
     return (
         <Card className="max-w-full pl-1.5 shadow-lg">

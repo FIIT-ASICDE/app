@@ -10,10 +10,10 @@ import type {
 import { Dispatch, ReactElement, SetStateAction } from "react";
 import { z } from "zod";
 
+import { ConfigurationTabContent } from "@/components/editor/sidebar-content/configuration/configuration-tab-content";
 import { FileExplorerTabContent } from "@/components/editor/sidebar-content/file-explorer/file-explorer-tab-content";
 import { SearchTabContent } from "@/components/editor/sidebar-content/search/search-tab-content";
 import { SourceControlTabContent } from "@/components/editor/sidebar-content/source-control/source-control-tab-content";
-import { ConfigurationTabContent } from "@/components/editor/sidebar-content/configuration/configuration-tab-content";
 
 interface SidebarTabContentProps {
     activeSidebarContent: SidebarContentTab;

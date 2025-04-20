@@ -1,10 +1,10 @@
 import { Search as SearchIcon } from "lucide-react";
+import { ReactElement } from "react";
 
 import { FileExplorerSkeleton } from "@/components/skeletons/file-explorer-skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ReactElement } from "react";
 
 /**
  * Loading page for code page for a repository

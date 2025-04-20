@@ -2,6 +2,7 @@ import { RepositorySettingsTab } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { Folder, Mail, TriangleAlert, UsersRound } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ReactElement } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -9,7 +10,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ReactElement } from "react";
 
 interface RepositorySettingsTabsProps {
     tab: RepositorySettingsTab;

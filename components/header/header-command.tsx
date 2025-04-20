@@ -17,9 +17,7 @@ interface CommandBarProps {
  * @param {CommandBarProps} props - Component props
  * @returns {ReactElement} Command bar component
  */
-export const CommandBar = ({
-    user
-}: CommandBarProps): ReactElement => {
+export const CommandBar = ({ user }: CommandBarProps): ReactElement => {
     const [commandOpen, setCommandOpen] = useState(false);
 
     return (

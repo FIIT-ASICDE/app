@@ -12,7 +12,7 @@ interface GithubIconProps {
  * @returns {ReactElement} Icon
  */
 export default function GithubIcon({
-    className
+    className,
 }: GithubIconProps): ReactElement {
     return (
         <svg viewBox="0 0 24 24" className={cn("h-5 w-5", className)}>

@@ -3,6 +3,7 @@ import { CardType } from "@/lib/types/generic";
 import { Invitation } from "@/lib/types/invitation";
 import { cn } from "@/lib/utils";
 import { CircleCheck, CircleDot, CircleX, Clock } from "lucide-react";
+import { ReactElement } from "react";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
@@ -17,7 +18,6 @@ import {
     CardFooter,
     CardHeader,
 } from "@/components/ui/card";
-import { ReactElement } from "react";
 
 interface InvitationCardProps {
     invitation: Invitation;

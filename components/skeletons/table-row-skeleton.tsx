@@ -1,9 +1,9 @@
 import { cn } from "@/lib/utils";
 import { File as FileIcon, Folder } from "lucide-react";
+import { ReactElement } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { ReactElement } from "react";
 
 interface TableRowSkeletonProps {
     type: "directory" | "file";

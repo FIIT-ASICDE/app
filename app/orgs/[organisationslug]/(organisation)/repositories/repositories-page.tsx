@@ -5,6 +5,7 @@ import { OrganisationDisplay } from "@/lib/types/organisation";
 import { PublicRepositoriesFilter, Repository } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { Folders } from "lucide-react";
+import { ReactElement } from "react";
 
 import { DynamicPagination } from "@/components/generic/dynamic-pagination";
 import { LayoutOptions } from "@/components/generic/layout-options";
@@ -13,7 +14,6 @@ import { CreateRepositoryDialog } from "@/components/repositories/create-reposit
 import RepositoryCard from "@/components/repositories/repository-card";
 import { RepositoryFilter } from "@/components/repositories/repository-filter";
 import Search from "@/components/ui/search";
-import { ReactElement } from "react";
 
 interface RepositoriesPageProps {
     repos: Array<Repository>;

@@ -1,9 +1,9 @@
 import { InvitationType } from "@/lib/types/invitation";
 import { cn } from "@/lib/utils";
+import { ReactElement } from "react";
 
 import { getBadgeStyle } from "@/components/generic/generic";
 import { Badge } from "@/components/ui/badge";
-import { ReactElement } from "react";
 
 interface InvitationBadgeProps {
     invitationType: InvitationType;
@@ -16,7 +16,7 @@ interface InvitationBadgeProps {
  * @returns {ReactElement} Badge component
  */
 export const InvitationBadge = ({
-    invitationType
+    invitationType,
 }: InvitationBadgeProps): ReactElement => {
     return (
         <Badge

@@ -3,10 +3,10 @@
 import { Repository } from "@/lib/types/repository";
 import { BookUser, Code, CodeXml, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { ReactElement } from "react";
 
 import { getCurrentPage } from "@/components/generic/generic";
 import { NavigationButton } from "@/components/generic/navigation-button";
-import { ReactElement } from "react";
 
 interface RepositoryNavigationProps {
     repository: Repository;

@@ -2,13 +2,13 @@ import { imgSrc } from "@/lib/client-file-utils";
 import { RepositoryDisplay } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { Pin } from "lucide-react";
+import { ReactElement } from "react";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { getCardStripe } from "@/components/generic/generic";
 import { VisibilityBadge } from "@/components/repositories/visibility/visibility-badge";
 import { Card, CardHeader } from "@/components/ui/card";
-import { ReactElement } from "react";
 
 interface PinnedRepositoryCardDisplayProps {
     repository: RepositoryDisplay;

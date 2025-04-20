@@ -6,6 +6,7 @@ import { Repository } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { Pin, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ReactElement } from "react";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
@@ -17,7 +18,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ReactElement } from "react";
 
 interface RepositoryCardProps {
     repository: Repository;

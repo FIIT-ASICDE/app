@@ -1,7 +1,8 @@
+import { ReactElement } from "react";
+
 import { RepoOrgSubmenuSkeleton } from "@/components/skeletons/repo-org-submenu-skeleton";
 import { UserCardSkeleton } from "@/components/skeletons/user-card-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ReactElement } from "react";
 
 /**
  * Loading page for all users page

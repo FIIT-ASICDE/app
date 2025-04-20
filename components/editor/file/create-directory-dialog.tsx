@@ -1,10 +1,17 @@
 import { api } from "@/lib/trpc/react";
 import { DirectoryItem, RepositoryItem } from "@/lib/types/repository";
 import { Folder, FolderPlus } from "lucide-react";
-import { Dispatch, FormEvent, ReactElement, SetStateAction, useState } from "react";
+import {
+    Dispatch,
+    FormEvent,
+    ReactElement,
+    SetStateAction,
+    useState,
+} from "react";
 import { toast } from "sonner";
 
 import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer/file-explorer-control-button";
+import { addItemToTree } from "@/components/generic/generic";
 import {
     Dialog,
     DialogContent,
@@ -13,7 +20,6 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { addItemToTree } from "@/components/generic/generic";
 
 interface CreateDirectoryDialogProps {
     repositoryId: string;
@@ -59,7 +65,7 @@ export const CreateDirectoryDialog = ({
                 const updatedTree = addItemToTree(
                     tree,
                     parentItem.absolutePath,
-                    newDirectory
+                    newDirectory,
                 );
                 setTree(updatedTree);
             }

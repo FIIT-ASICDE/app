@@ -4,13 +4,13 @@ import { RepositoryDisplay } from "@/lib/types/repository";
 import { UserDisplay } from "@/lib/types/user";
 import { cn } from "@/lib/utils";
 import { UsersRound } from "lucide-react";
+import { ReactElement } from "react";
 
 import { DynamicPagination } from "@/components/generic/dynamic-pagination";
 import { LayoutOptions } from "@/components/generic/layout-options";
 import { NoData } from "@/components/generic/no-data";
 import Search from "@/components/ui/search";
 import { UserCard } from "@/components/users/user-card";
-import { ReactElement } from "react";
 
 interface UsersPageProps {
     users: Array<UserDisplay>;

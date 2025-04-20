@@ -1,3 +1,5 @@
+import { ReactElement } from "react";
+
 import { TableRowSkeleton } from "@/components/skeletons/table-row-skeleton";
 import {
     Table,
@@ -6,7 +8,6 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { ReactElement } from "react";
 
 /**
  * Skeleton component of the file explorer

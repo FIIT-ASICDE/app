@@ -2,12 +2,12 @@
 
 import { imgSrc } from "@/lib/client-file-utils";
 import { OrganisationDisplay } from "@/lib/types/organisation";
+import { ReactElement } from "react";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { EditOrganisationDialog } from "@/components/organisations/edit-organisation-dialog";
 import { OrganisationNavigation } from "@/components/organisations/organisation-navigation";
-import { ReactElement } from "react";
 
 interface OrganisationHeaderProps {
     organisation: OrganisationDisplay;

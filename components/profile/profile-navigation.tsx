@@ -3,10 +3,10 @@
 import { User } from "@/lib/types/user";
 import { BookUser, Building, Folders, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { ReactElement } from "react";
 
 import { getCurrentPage } from "@/components/generic/generic";
 import { NavigationButton } from "@/components/generic/navigation-button";
-import { ReactElement } from "react";
 
 interface ProfileNavigationProps {
     profile: User;

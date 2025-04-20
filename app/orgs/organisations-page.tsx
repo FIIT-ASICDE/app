@@ -2,6 +2,7 @@ import { PaginationResult } from "@/lib/types/generic";
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 import { Building } from "lucide-react";
+import { ReactElement } from "react";
 
 import { DynamicPagination } from "@/components/generic/dynamic-pagination";
 import { LayoutOptions } from "@/components/generic/layout-options";
@@ -9,7 +10,6 @@ import { NoData } from "@/components/generic/no-data";
 import { CreateOrganisationDialog } from "@/components/organisations/create-organisation-dialog";
 import { OrganisationCardDisplay } from "@/components/organisations/organisation-card-display";
 import Search from "@/components/ui/search";
-import { ReactElement } from "react";
 
 interface OrganisationsPageProps {
     organisations: Array<OrganisationDisplay>;

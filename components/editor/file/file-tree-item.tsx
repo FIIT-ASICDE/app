@@ -5,16 +5,21 @@ import { cn } from "@/lib/utils";
 import { FileIcon, Folder } from "lucide-react";
 import {
     Dispatch,
-    DragEvent, ReactElement,
+    DragEvent,
+    ReactElement,
     RefObject,
     SetStateAction,
     useRef,
-    useState
+    useState,
 } from "react";
 
-import { RepositoryItemActions } from "@/components/editor/sidebar-content/file-explorer/repository-item-actions";
-import { findItemInTree, handleToggle, sortTree } from "@/components/generic/generic";
 import { ExpandCollapseIcon } from "@/components/editor/file/expand-collapse-icon";
+import { RepositoryItemActions } from "@/components/editor/sidebar-content/file-explorer/repository-item-actions";
+import {
+    findItemInTree,
+    handleToggle,
+    sortTree,
+} from "@/components/generic/generic";
 
 interface FileTreeItemProps {
     repositoryId: string;
@@ -96,12 +101,16 @@ export const FileTreeItem = ({
 
         try {
             const sourcePath: string = event.dataTransfer.getData("text/plain");
-            const sourceItem: RepositoryItem | undefined = findItemInTree(tree, sourcePath);
+            const sourceItem: RepositoryItem | undefined = findItemInTree(
+                tree,
+                sourcePath,
+            );
 
             if (!sourceItem) return;
             if (sourceItem.absolutePath === item.absolutePath) return;
             if (item.type !== "directory") return;
-            if (item.absolutePath.startsWith(sourceItem.absolutePath + "/")) return;
+            if (item.absolutePath.startsWith(sourceItem.absolutePath + "/"))
+                return;
 
             onMoveItem?.(sourceItem, item);
         } catch (error) {
@@ -150,10 +159,20 @@ export const FileTreeItem = ({
                             <ExpandCollapseIcon
                                 expanded={expandedItems.some(
                                     (expandedItem: RepositoryItem) =>
-                                        expandedItem.absolutePath === item.absolutePath,
+                                        expandedItem.absolutePath ===
+                                        item.absolutePath,
                                 )}
-                                hasChildren={item.type === "directory" && item.children.length > 0}
-                                handleToggle={() => handleToggle(item, expandedItems, setExpandedItemsAction)}
+                                hasChildren={
+                                    item.type === "directory" &&
+                                    item.children.length > 0
+                                }
+                                handleToggle={() =>
+                                    handleToggle(
+                                        item,
+                                        expandedItems,
+                                        setExpandedItemsAction,
+                                    )
+                                }
                                 className="mr-2"
                             />
                             <Folder
@@ -203,8 +222,16 @@ export const FileTreeItem = ({
                                     onItemClick={(repoItem: RepositoryItem) => {
                                         console.log("2clicked on:", repoItem);
 
-                                        if (repoItem.type === "directory" || repoItem.type === "directory-display") {
-                                            handleToggle(repoItem, expandedItems, setExpandedItemsAction);
+                                        if (
+                                            repoItem.type === "directory" ||
+                                            repoItem.type ===
+                                                "directory-display"
+                                        ) {
+                                            handleToggle(
+                                                repoItem,
+                                                expandedItems,
+                                                setExpandedItemsAction,
+                                            );
                                         } else {
                                             onItemClick?.(repoItem);
                                         }

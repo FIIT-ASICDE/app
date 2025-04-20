@@ -1,8 +1,8 @@
 import { AvatarDisplayType, AvatarProportions } from "@/lib/types/generic";
 import { cn } from "@/lib/utils";
+import { ReactElement } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ReactElement } from "react";
 
 interface AvatarDisplayProps {
     displayType: AvatarDisplayType;

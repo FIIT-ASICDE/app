@@ -7,6 +7,7 @@ import { Invitation } from "@/lib/types/invitation";
 import { cn } from "@/lib/utils";
 import { Calendar, CircleCheck, CircleX } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ReactElement } from "react";
 import { toast } from "sonner";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
@@ -19,7 +20,6 @@ import {
 import { InvitationBadge } from "@/components/invitations/invitation-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
-import { ReactElement } from "react";
 
 interface InvitationCardDisplayProps {
     invitation: Invitation;

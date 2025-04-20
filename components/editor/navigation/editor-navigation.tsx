@@ -1,5 +1,6 @@
 import type {
-    BottomPanelContentTab, Configuration,
+    BottomPanelContentTab,
+    Configuration,
     SidebarContentTab,
 } from "@/lib/types/editor";
 import { Repository } from "@/lib/types/repository";
@@ -7,11 +8,19 @@ import {
     Cog,
     Command,
     File,
-    GitCommitHorizontal, Play, PlayCircle,
-    SearchIcon
+    GitCommitHorizontal,
+    Play,
+    PlayCircle,
+    SearchIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { Dispatch, ReactElement, RefObject, SetStateAction, useState } from "react";
+import {
+    Dispatch,
+    ReactElement,
+    RefObject,
+    SetStateAction,
+    useState,
+} from "react";
 import type { ImperativePanelGroupHandle } from "react-resizable-panels";
 
 import { CommandBarDialog } from "@/components/command/command-bar-dialog";
@@ -152,10 +161,7 @@ export const EditorNavigation = ({
                     />
                 </div>
 
-                <Separator
-                    orientation="horizontal"
-                    className="mx-auto w-3/5"
-                />
+                <Separator orientation="horizontal" className="mx-auto w-3/5" />
 
                 <div className="flex flex-1 flex-col items-center gap-2 bg-header p-2">
                     <SidebarNavigationButton

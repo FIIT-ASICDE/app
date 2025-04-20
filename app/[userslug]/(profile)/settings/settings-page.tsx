@@ -1,12 +1,17 @@
 "use client";
 
 import { UserSettingsTab } from "@/lib/types/user";
-import { CircleUserRound, CircleX, LogOut, Settings2, TriangleAlert } from "lucide-react";
+import {
+    CircleUserRound,
+    CircleX,
+    LogOut,
+    Settings2,
+    TriangleAlert,
+} from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
-
-
+import { ReactElement } from "react";
 
 import { useUser } from "@/components/context/user-context";
 import { DeleteAccountDialog } from "@/components/profile/delete-account-dialog";
@@ -15,9 +20,11 @@ import { UserSettingsTabs } from "@/components/profile/user-settings-tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { ReactElement } from "react";
-
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface SettingsPageProps {
     userSlug: string;
@@ -31,8 +38,8 @@ interface SettingsPageProps {
  * @returns {ReactElement} Settings page component
  */
 export default function SettingsPage({
-    userSlug, 
-    tab 
+    userSlug,
+    tab,
 }: SettingsPageProps): ReactElement {
     const { user } = useUser();
     const router = useRouter();

@@ -2,6 +2,7 @@ import { OrganisationDisplay } from "@/lib/types/organisation";
 import { UsersOverview } from "@/lib/types/user";
 import { Building, Calendar, Ellipsis, PinOff } from "lucide-react";
 import Link from "next/link";
+import { ReactElement } from "react";
 
 import { getDateString } from "@/components/generic/generic";
 import { NoData } from "@/components/generic/no-data";
@@ -13,7 +14,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ReactElement } from "react";
 
 interface OverviewPageProps {
     overview: UsersOverview;
@@ -26,9 +26,9 @@ interface OverviewPageProps {
  * @returns {ReactElement} Overview page component
  */
 export default function OverviewPage({
-    overview
+    overview,
 }: OverviewPageProps): ReactElement {
-    const profile= overview.profile;
+    const profile = overview.profile;
     const organisations = overview.organisations;
     const pinnedRepositories = overview.pinnedRepositories;
 

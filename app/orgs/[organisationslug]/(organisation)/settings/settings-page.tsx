@@ -7,6 +7,7 @@ import type {
     OrganisationSettingsTab,
     OrganizationSettings,
 } from "@/lib/types/organisation";
+import { UserDisplay } from "@/lib/types/user";
 import {
     BookUser,
     CircleX,
@@ -34,7 +35,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { UserDisplay } from "@/lib/types/user";
 
 interface SettingsPageProps {
     settings: OrganizationSettings;
@@ -49,7 +49,7 @@ interface SettingsPageProps {
  */
 export default function SettingsPage({
     tab,
-    settings
+    settings,
 }: SettingsPageProps): ReactElement {
     const router = useRouter();
     const organisation: OrganisationDisplay = settings.org;

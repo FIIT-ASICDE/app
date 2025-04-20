@@ -17,8 +17,7 @@ export type SimulationType =
     | "verilatorSystemVerilog"
     | "icarusVerilog";
 
-export type SynthesisType =
-    | "yosys";
+export type SynthesisType = "yosys";
 
 type SimulationConfiguration = {
     type: SimulationType;
@@ -35,15 +34,9 @@ export type Configuration = {
     synthesis: SynthesisConfiguration;
 };
 
-export type SimulationTab =
-    | "all"
-    | "errors"
-    | "lastSimulation";
+export type SimulationTab = "all" | "errors" | "lastSimulation";
 
-type SimulationOutputType =
-    | "info"
-    | "error"
-    | "warning";
+type SimulationOutputType = "info" | "error" | "warning";
 
 interface SimulationOutput {
     type: SimulationOutputType;

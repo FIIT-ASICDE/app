@@ -8,6 +8,7 @@ import { z } from "zod";
 import { RepositoryItemChangeDisplay } from "@/components/editor/changes/repository-item-change-display";
 import { CloseButton } from "@/components/editor/navigation/close-button";
 import { CommitChanges } from "@/components/editor/sidebar-content/source-control/commit-changes";
+import { CommitHistoryDialog } from "@/components/editor/sidebar-content/source-control/commit-history-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,7 +18,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { CommitHistoryDialog } from "@/components/editor/sidebar-content/source-control/commit-history-dialog";
 
 interface SourceControlTabContentProps {
     repositoryId: string;
@@ -55,14 +55,16 @@ export const SourceControlTabContent = ({
     };
 
     return (
-        <div className="flex flex-col h-full w-full relative">
-            <header className="flex flex-col gap-y-3 p-4 w-full">
+        <div className="relative flex h-full w-full flex-col">
+            <header className="flex w-full flex-col gap-y-3 p-4">
                 <div className="flex flex-row items-center justify-between gap-x-3">
-                    <span className="font-medium text-lg pr-8">Source Control</span>
+                    <span className="pr-8 text-lg font-medium">
+                        Source Control
+                    </span>
                     <CloseButton
                         onClick={handleCloseSidebarAction}
                         tooltip="Close sidebar"
-                        className="absolute top-4 right-4"
+                        className="absolute right-4 top-4"
                     />
                 </div>
             </header>
@@ -75,12 +77,13 @@ export const SourceControlTabContent = ({
                         <div className="space-y-1">
                             {changes.length > 0 ? (
                                 <>
-                                    <div
-                                        className="flex cursor-pointer flex-row items-center gap-x-3 rounded border border-transparent p-1 px-2 hover:border-accent">
+                                    <div className="flex cursor-pointer flex-row items-center gap-x-3 rounded border border-transparent p-1 px-2 hover:border-accent">
                                         <Checkbox
                                             id="all-changes"
                                             checked={allChangesSelected}
-                                            onCheckedChange={handleSelectAllChanges}
+                                            onCheckedChange={
+                                                handleSelectAllChanges
+                                            }
                                             className="checked:bg-primary"
                                         />
                                         <Label
@@ -101,8 +104,10 @@ export const SourceControlTabContent = ({
                                                     side="right"
                                                     className="font-normal"
                                                 >
-                                                    {changes.length} total change
-                                                    {changes.length !== 1 && "s"}
+                                                    {changes.length} total
+                                                    change
+                                                    {changes.length !== 1 &&
+                                                        "s"}
                                                 </TooltipContent>
                                             </Tooltip>
                                         </Label>
@@ -125,7 +130,9 @@ export const SourceControlTabContent = ({
                                             key={index}
                                             itemChange={itemChange}
                                             changesSelected={changesSelected}
-                                            setChangesSelected={setChangesSelected}
+                                            setChangesSelected={
+                                                setChangesSelected
+                                            }
                                         />
                                     ),
                                 )}

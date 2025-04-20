@@ -1,11 +1,9 @@
 import { UserRoundPlus } from "lucide-react";
-
-
+import { ReactElement } from "react";
 
 import { RepoOrgCardSkeleton } from "@/components/skeletons/repo-org-card-skeleton";
 import { RepoOrgSubmenuSkeleton } from "@/components/skeletons/repo-org-submenu-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ReactElement } from "react";
 
 /**
  * Loading page for organisations page at user profile

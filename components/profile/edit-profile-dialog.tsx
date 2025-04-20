@@ -63,7 +63,7 @@ interface EditProfileDialogProps {
  * @returns {ReactElement} Dialog component
  */
 export const EditProfileDialog = ({
-    profile
+    profile,
 }: EditProfileDialogProps): ReactElement => {
     const { user } = useUser();
     const isItMe: boolean = profile.id === user.id;
