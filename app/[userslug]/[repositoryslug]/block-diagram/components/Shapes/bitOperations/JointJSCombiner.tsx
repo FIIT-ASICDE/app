@@ -74,13 +74,13 @@ export const JointJSCombiner = (combiner: Combiner, parseResults: UnifiedPackage
         isStruct: isStruct,
         language: combiner.language,
         position: { x: combiner.position?.x || 100, y: combiner.position?.y || 100 },
-        size: { width: dimension/2, height: dimension},
+        size: { width: 2, height: dimension},
         attrs: {
             body: {
-                refD: 'M 0 0 L 0 100 Z',
+                refD: 'M 0 0 L 2 0 L 2 100 L 0 100 Z',
                 fill: 'white',
                 stroke: '#000',
-                strokeWidth: 6,
+                strokeWidth: 2,
             },
             label: {
                 text: combiner.name,

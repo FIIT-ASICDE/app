@@ -1,4 +1,4 @@
-// app/antlr/VHDL/EntityVisitor.ts
+// app/antlr/VHDL/ParseEntities.ts
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import { ParseTree }                   from 'antlr4ts/tree/ParseTree';
 import { CharStreams, CommonTokenStream } from 'antlr4ts';
@@ -19,7 +19,7 @@ export interface ParsedEntity {
     ports: EntityPort[];
 }
 
-export class EntityVisitor
+export class ParseEntities
     extends AbstractParseTreeVisitor<void>
     implements vhdlVisitor<void>
 {
@@ -108,13 +108,13 @@ export class EntityVisitor
 }
 
 // Функция‑обёртка
-export function parseVHDLEntities(vhdlText: string): ParsedEntity[] {
+export function parseEntities(vhdlText: string): ParsedEntity[] {
     const inputStream = CharStreams.fromString(vhdlText);
     const lexer       = new vhdlLexer(inputStream);
     const tokens      = new CommonTokenStream(lexer);
     const parserInst  = new vhdlParser(tokens);
     const tree        = parserInst.design_file();
-    const visitor     = new EntityVisitor();
+    const visitor     = new ParseEntities();
     visitor.visit(tree);
     return visitor.entities;
 }

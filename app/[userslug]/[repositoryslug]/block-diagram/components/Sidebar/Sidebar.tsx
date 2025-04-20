@@ -62,10 +62,12 @@ const Sidebar = () => {
 
 
     return (
-        <div className='grid grid-cols-3 gap-2 p-1'>
-            {elements.map((el) => (
-                <ElementIcon key={`${el.type}-${el.label}`} {...el} />
-            ))}
+        <div className='h-full overflow-y-auto'>
+            <div className='grid grid-cols-2 gap-2 p-1'>
+                {elements.map((el) => (
+                    <ElementIcon key={`${el.type}-${el.label}`} {...el} />
+                ))}
+            </div>
         </div>
     );
 

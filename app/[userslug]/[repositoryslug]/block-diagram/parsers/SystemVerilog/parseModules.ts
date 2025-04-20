@@ -142,7 +142,7 @@ class ModuleVisitor
 }
 
 // Функция для парсинга модулей SystemVerilog
-export function parseSystemVerilogModules(svText: string): ParsedModule[] {
+export function parseModules(svText: string): ParsedModule[] {
     try {
         // Создаем лексер и парсер
         const inputStream = CharStreams.fromString(svText);

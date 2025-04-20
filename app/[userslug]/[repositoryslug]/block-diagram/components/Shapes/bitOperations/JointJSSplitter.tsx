@@ -30,7 +30,7 @@ export const JointJSSplitter = (splitter: Splitter, parseResults: UnifiedPackage
                     startBit: field.startBit,
                     endBit: field.endBit,
                     isStruct: false,
-                    args: { x: dimension/2, y: portY }
+                    args: { x: 0, y: portY }
                 });
             }
         }
@@ -78,13 +78,13 @@ export const JointJSSplitter = (splitter: Splitter, parseResults: UnifiedPackage
         isStruct: isStruct,
         language: splitter.language,
         position: { x: splitter.position?.x || 100, y: splitter.position?.y || 100 },
-        size: { width: dimension/2, height: dimension},
+        size: { width: 2, height: dimension},
         attrs: {
             body: {
-                refD: 'M 0 0 L 0 100 Z',
+                refD: 'M 0 0 L 2 0 L 2 100 L 0 100 Z',
                 fill: 'white',
                 stroke: '#000',
-                strokeWidth: 6,
+                strokeWidth: 2,
             },
             label: {
                 text: splitter.name,

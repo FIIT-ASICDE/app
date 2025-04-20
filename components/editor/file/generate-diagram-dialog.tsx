@@ -4,17 +4,18 @@ import { RepositoryItem, FileDisplayItem } from "@/lib/types/repository";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { parseSystemVerilogTopModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/SystemVerilog/parseSystemVerilogTopModule";
 import { createDiagramFromParsedModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/createDiagramFromParsedModule";
 import {
-    parseSystemVerilogModules
-} from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/SystemVerilog/parseSystemVerilogModules";
+    parseModules
+} from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/SystemVerilog/parseModules";
 import { ParsedModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces";
-import { parseVHDLTopEntity } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/VHDL/parseVHDLTopEntity";
-import { parseVHDLEntities } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/VHDL/EntityVisitor";
+import { parseEntities } from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/VHDL/parseEntities";
 import {
     parseTopModule
-} from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/SystemVerilog/parseTopModule";
+} from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/SystemVerilog/parseTopModule";
+import {
+    parseTopEntity
+} from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/VHDL/parseTopEntity";
 
 interface GenerateDiagramDialogProps {
     repositoryId: string;
@@ -88,7 +89,7 @@ export const GenerateDiagramDialog = ({
 
                 const parsedModules: ParsedModule[] = svFiles.flatMap((file) => {
                     try {
-                        return parseSystemVerilogModules(file.content);
+                        return parseModules(file.content);
                     } catch (err) {
                         console.warn(`Failed to parse modules in ${file.name}`, err);
                         return [];
@@ -117,10 +118,6 @@ export const GenerateDiagramDialog = ({
                     },
                 });
             } else if (isVHDL) {
-                const parsedTopEntity = parseVHDLTopEntity(fileData.content as string);
-
-                console.log(parsedTopEntity);
-
                 const vhdlFiles = allFiles?.filter(
                     (file) =>
                         file.type === "file" &&
@@ -130,14 +127,16 @@ export const GenerateDiagramDialog = ({
 
                 const parsedEntities: ParsedModule[] = vhdlFiles.flatMap((file) => {
                     try {
-                        return parseVHDLEntities(file.content.toUpperCase());
+                        return parseEntities(file.content.toUpperCase());
                     } catch (err) {
                         console.warn(`Failed to parse VHDL in ${file.name}`, err);
                         return [];
                     }
                 });
+                const parsedTopEntity = parseTopEntity((fileData.content as string).toUpperCase(), parsedEntities);
 
-                const graph = createDiagramFromParsedModule(parsedTopEntity, parsedEntities);
+
+                const graph = createDiagramFromParsedModule(parsedTopEntity);
 
 
                 const fileName = diagramFile.name.replace(/\.(vhd|vhdl)$/i, ".bd");

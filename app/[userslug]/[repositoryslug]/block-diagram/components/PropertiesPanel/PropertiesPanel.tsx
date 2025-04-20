@@ -56,17 +56,17 @@ import {Label} from "@/components/ui/label";
 import { UnifiedPackage, ParsedModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces";
 import { toast } from "sonner";
 import {
-    parseSystemVerilogText
-} from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/SystemVerilog/parsePackagesAndStructs";
+    parsePackagesAndStructs
+} from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/SystemVerilog/parsePackagesAndStructs";
 import {
-    parseVHDLText
-} from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/VHDL/parsePackagesAndRecords";
+    parsePackagesAndRecords
+} from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/VHDL/parsePackagesAndRecords";
 import {
-    parseVHDLEntities
-} from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/VHDL/EntityVisitor";
+    parseEntities
+} from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/VHDL/parseEntities";
 import {
-    parseSystemVerilogModules
-} from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/SystemVerilog/parseSystemVerilogModules";
+    parseModules
+} from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/SystemVerilog/parseModules";
 
 
 
@@ -241,7 +241,7 @@ const PropertiesPanel = () => {
         if (selectedLanguage === "SystemVerilog") {
             parsedPackages = svFiles.flatMap((file) => {
                 try {
-                    return parseSystemVerilogText(file.content);
+                    return parsePackagesAndStructs(file.content);
                 } catch (err) {
                     console.warn(`Failed to parse ${file.name}`, err);
                     return [];
@@ -250,7 +250,7 @@ const PropertiesPanel = () => {
         } else if (selectedLanguage === "VHDL") {
             parsedPackages = vhdlFiles.flatMap((file) => {
                 try {
-                    return parseVHDLText(file.content);
+                    return parsePackagesAndRecords(file.content);
                 } catch (err) {
                     console.warn(`Failed to parse ${file.name}`, err);
                     return [];
@@ -265,7 +265,7 @@ const PropertiesPanel = () => {
         if (selectedLanguage === "SystemVerilog") {
             parsedModules = svFiles.flatMap((file) => {
                 try {
-                    return parseSystemVerilogModules(file.content);
+                    return parseModules(file.content);
                 } catch (err) {
                     console.warn(`Failed to parse modules in ${file.name}`, err);
                     return [];
@@ -274,7 +274,7 @@ const PropertiesPanel = () => {
         } else if (selectedLanguage === "VHDL") {
             parsedModules = vhdlFiles.flatMap((file) => {
                 try {
-                    return parseVHDLEntities(file.content.toUpperCase());
+                    return parseEntities(file.content.toUpperCase());
                 } catch (err) {
                     console.warn(`Failed to parse entities in ${file.name}`, err);
                     return [];
@@ -699,28 +699,30 @@ const PropertiesPanel = () => {
 
     if (!selectedElement || selectedElement.isLink()) {
         return (
-            <div className="p-4 space-y-4">
-                <div className="space-y-1">
-                    <Label>Select language for packages</Label>
-                    <Select
-                        value={selectedLanguage}
-                        onValueChange={(value) => {
-                            const isLocked = checkLanguageLock();
-                            if (!isLocked) {
-                                setSelectedLanguage(value as "SystemVerilog" | "VHDL");
-                            } else {
-                                toast.error("You can't change language because there are elements with assigned language.");
-                            }
-                        }}
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Choose a language" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="SystemVerilog">SystemVerilog</SelectItem>
-                            <SelectItem value="VHDL">VHDL</SelectItem>
-                        </SelectContent>
-                    </Select>
+            <div className='h-full overflow-y-auto'>
+                <div className="p-4 space-y-4">
+                    <div className="space-y-1">
+                        <Label>Select language for packages</Label>
+                        <Select
+                            value={selectedLanguage}
+                            onValueChange={(value) => {
+                                const isLocked = checkLanguageLock();
+                                if (!isLocked) {
+                                    setSelectedLanguage(value as "SystemVerilog" | "VHDL");
+                                } else {
+                                    toast.error("You can't change language because there are elements with assigned language.");
+                                }
+                            }}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Choose a language" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="SystemVerilog">SystemVerilog</SelectItem>
+                                <SelectItem value="VHDL">VHDL</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
             </div>
         );
@@ -1128,7 +1130,7 @@ const PropertiesPanel = () => {
                                         Add reset port
                                     </Label>
                                 </div>
-                                
+
                                 <div className="flex items-center space-x-2">
                                     <Checkbox
                                         id="enablePort"

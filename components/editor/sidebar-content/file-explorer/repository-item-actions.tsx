@@ -157,6 +157,8 @@ export const RepositoryItemActions = ({
                     setTree={setTree}
                     onAction={onAction}
                 />
+                {!isDiagramFile && (
+                    <>
                 <DropdownMenuSeparator />
                 <GenerateDiagramDialog
                     repositoryId={repositoryId}
@@ -164,6 +166,8 @@ export const RepositoryItemActions = ({
                     tree={tree}
                     setTree={setTree}
                 />
+                </>
+                )}
 
                 {isDiagramFile && (
                     <>

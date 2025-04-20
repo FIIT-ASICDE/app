@@ -185,6 +185,7 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
 
         if (type === 'splitter') {
 
+
             const inputPort = cellPorts.find(p => p.group === 'input');
             const inputKey = `${cell.id}:${inputPort?.id}`;
             const inputSignal = connectionMap[inputKey] ? connectionMap[inputKey][0] : '/* unconnected */';
