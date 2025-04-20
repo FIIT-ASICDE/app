@@ -6,20 +6,25 @@ export interface BaseSymbolInfo {
     uri: string;
   }
   
-  interface PortContainer {
-    ports: string[];
+  export interface PortInfo {
+    name: string;
+    direction: string;
+    datatype: string;
   }
   
-  export interface ModuleSymbolInfo extends BaseSymbolInfo, PortContainer {
+  export interface ModuleSymbolInfo extends BaseSymbolInfo {
     type: "module";
+    ports: PortInfo[];
   }
   
-  export interface InterfaceSymbolInfo extends BaseSymbolInfo, PortContainer {
+  export interface InterfaceSymbolInfo extends BaseSymbolInfo {
     type: "interface";
+    ports: PortInfo[];
   }
   
-  export interface ProgramSymbolInfo extends BaseSymbolInfo, PortContainer {
+  export interface ProgramSymbolInfo extends BaseSymbolInfo {
     type: "program";
+    ports: PortInfo[];
   }
   
   export interface ClassSymbolInfo extends BaseSymbolInfo {

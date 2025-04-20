@@ -57,18 +57,18 @@ export async function loadSnippets(language: string) {
 
         if (language === "systemverilog") {
           const allSymbols = symbolTableManager.getAllSymbols();
-          const matchingModules = Object.values(allSymbols).filter(
+
+          const matchingSymbols = Object.values(allSymbols).filter(
             (s): s is ModuleSymbolInfo | InterfaceSymbolInfo | ProgramSymbolInfo =>
               (s.type === "module" || s.type === "interface" || s.type === "program") &&
               s.name.toLowerCase().startsWith(word.toLowerCase()) &&
               Array.isArray(s.ports)
           );
-          
-          
-          for (const symbol of matchingModules) {
+
+          for (const symbol of matchingSymbols) {
             const instanceName = `\${0:u_${symbol.name}}`;
             const portLines = symbol.ports.map((p, i) => `  .${p}(\${${i + 1}:${p}})`);
-          
+
             dynamicSuggestions.push({
               label: `${symbol.name} instantiation`,
               kind: monaco.languages.CompletionItemKind.Snippet,
@@ -79,7 +79,50 @@ export async function loadSnippets(language: string) {
               range,
             });
           }
+
+          const testbenchSymbols = Object.values(allSymbols).filter(
+            (s): s is ModuleSymbolInfo =>
+              s.type === "module" &&
+              s.name.toLowerCase().startsWith(word.toLowerCase()) &&
+              Array.isArray(s.ports)
+          );
+
+          for (const symbol of testbenchSymbols) {
+            const tbName = `tb_${symbol.name}`;
+            const dutName = `u_${symbol.name}`;
+
+            const signalDecls = symbol.ports
+              .map(p => `  ${p.direction} ${p.datatype} ${p.name};`)
+              .join("\n");
           
+            const portConns = symbol.ports
+              .map((p, i) => `    .${p.name}(\${${i + 1}:${p.name}})`)
+              .join(",\n");
+          
+          
+
+              const insertText = [
+                `module ${tbName};`,
+                "",
+                signalDecls,
+                "",
+                "// DUT instantiation",
+                `${symbol.name} ${dutName} (`,
+                portConns,
+                ");",
+                "",
+                "endmodule"
+              ].join("\n");
+
+            dynamicSuggestions.push({
+              label: `${symbol.name} testbench`,
+              kind: monaco.languages.CompletionItemKind.Snippet,
+              insertText: insertText,
+              insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              documentation: `Testbench wrapper for ${symbol.name}`,
+              range,
+            });
+          }
         }
 
         const suggestions = [

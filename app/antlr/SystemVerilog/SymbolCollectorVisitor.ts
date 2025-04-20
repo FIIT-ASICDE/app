@@ -24,6 +24,7 @@ import {
   PackageSymbolInfo,
   ProgramSymbolInfo,
   InterfaceSymbolInfo,
+  PortInfo,
 } from "./symbolTable";
 
 const lastVisitTime: Record<string, number> = {};
@@ -38,7 +39,7 @@ export class SymbolCollectorVisitor
 
   public symbolTable: SymbolTable = {};
 
-  private addSymbol(type: SymbolInfo["type"], ident?: { text: string; start: any }, ports?: string[]) {
+  private addSymbol(type: SymbolInfo["type"], ident?: { text: string; start: any }, ports?: PortInfo[]) {
     if (!ident || !ident.start) return;
     const { text: name, start } = ident;
 
@@ -95,22 +96,24 @@ export class SymbolCollectorVisitor
     this.symbolTable[name] = symbol;
   }
 
-  private extractPorts(ctx: any): string[] {
+  private extractPorts(ctx: any): PortInfo[] {
     const portDeclCtx = ctx?.module_header?.()?.list_of_port_declarations?.()
       || ctx?.interface_header?.()?.list_of_port_declarations?.()
       || ctx?.program_header?.()?.list_of_port_declarations?.();
   
     if (!portDeclCtx) return [];
   
-    const ports: string[] = [];
+    const ports: PortInfo[] = [];
   
     function walk(node: any) {
       if (!node || !node.children) return;
       for (const child of node.children) {
         if (typeof child.port_identifier === "function") {
           const ident = child.port_identifier();
+          const direction = child.port_direction().text;
+          const datatype = child.data_type().text;
           if (ident?.text) {
-            ports.push(ident.text);
+            ports.push({name: ident.text, direction: direction, datatype: datatype});
           }
         } else {
           walk(child);
