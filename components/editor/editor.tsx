@@ -9,6 +9,15 @@ import { registerLanguageSupport } from "./editor-config/registerLanguage";
 import { parseAndCollectSymbols } from "@/app/antlr/SystemVerilog/parseAndCollectSymbols";
 import { FileItem, FileDisplayItem } from "@/lib/types/repository";
 
+window.addEventListener("unhandledrejection", (event) => {
+  if (
+    event.reason?.name === "Canceled" ||
+    event.reason?.message === "Canceled"
+  ) {
+    event.preventDefault();
+  }
+});
+
 function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
