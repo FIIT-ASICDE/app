@@ -1,7 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
 import { parseAndCollectSymbols } from "@/app/antlr/SystemVerilog/parseAndCollectSymbols";
-import { symbolTableManager } from "@/app/antlr/SystemVerilog/symbolTable";
 
 const supportedExtensions = [".sv", ".v", ".svh"];
 
@@ -23,7 +22,6 @@ export async function indexRepositorySymbols(repoPath: string, virtualPrefix: st
             
             parseAndCollectSymbols(code, uri);
 
-            //symbolTableManager.debug();
           } catch (err) {
             console.warn(`[SymbolIndex] Failed to parse ${fullPath}:`, err);
           }

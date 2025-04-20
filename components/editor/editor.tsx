@@ -54,7 +54,6 @@ export default function Editor({
   }
 
   useEffect(() => {
-    console.log("Editor mounted");
     if (!monacoEl.current) return;
 
     const uri = monaco.Uri.parse(`inmemory://${filePath}`);

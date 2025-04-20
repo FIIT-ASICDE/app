@@ -4,21 +4,27 @@ import {
   Interface_declarationContext,
   Package_declarationContext,
   Class_declarationContext,
-  Function_declarationContext,
-  Task_declarationContext,
   Type_declarationContext,
   DescriptionContext,
   Source_textContext,
-  Function_identifierContext,
-  IdentifierContext,
-  Package_item_declarationContext,
   Function_body_declarationContext,
   Task_body_declarationContext,
 } from "./generated/SystemVerilogParser";
 
 import { AbstractParseTreeVisitor } from "antlr4ts/tree";
 import { SystemVerilogParserVisitor } from "./generated/SystemVerilogParserVisitor";
-import { SymbolInfo, SymbolTable } from "./symbolTable";
+import {
+  SymbolInfo,
+  SymbolTable,
+  ModuleSymbolInfo,
+  FunctionSymbolInfo,
+  TaskSymbolInfo,
+  TypedefSymbolInfo,
+  ClassSymbolInfo,
+  PackageSymbolInfo,
+  ProgramSymbolInfo,
+  InterfaceSymbolInfo,
+} from "./symbolTable";
 
 const lastVisitTime: Record<string, number> = {};
 
@@ -32,16 +38,88 @@ export class SymbolCollectorVisitor
 
   public symbolTable: SymbolTable = {};
 
-  private addSymbol(type: SymbolInfo["type"], ident?: { text: string; start: any }) {
+  private addSymbol(type: SymbolInfo["type"], ident?: { text: string; start: any }, ports?: string[]) {
     if (!ident || !ident.start) return;
     const { text: name, start } = ident;
-    this.symbolTable[name] = {
+
+    const common = {
       name,
+      uri: this.uri,
       line: start.line,
       column: start.charPositionInLine,
-      uri: this.uri,
-      type,
     };
+
+    let symbol: SymbolInfo;
+
+    switch (type) {
+      case "module":
+        symbol = {
+          ...common,
+          type,
+          ports: ports ?? [],
+        } satisfies ModuleSymbolInfo;
+        break;
+      case "interface":
+        symbol = {
+          ...common,
+          type,
+          ports: ports ?? [],
+        } satisfies InterfaceSymbolInfo;
+        break;
+      case "program":
+        symbol = {
+          ...common,
+          type,
+          ports: ports ?? [],
+        } satisfies ProgramSymbolInfo;
+        break;
+      case "function":
+        symbol = { ...common, type } satisfies FunctionSymbolInfo;
+        break;
+      case "task":
+        symbol = { ...common, type } satisfies TaskSymbolInfo;
+        break;
+      case "typedef":
+        symbol = { ...common, type } satisfies TypedefSymbolInfo;
+        break;
+      case "class":
+        symbol = { ...common, type } satisfies ClassSymbolInfo;
+        break;
+      case "package":
+        symbol = { ...common, type } satisfies PackageSymbolInfo;
+        break;
+      default:
+        return;
+    }
+
+    this.symbolTable[name] = symbol;
+  }
+
+  private extractPorts(ctx: any): string[] {
+    const portDeclCtx = ctx?.module_header?.()?.list_of_port_declarations?.()
+      || ctx?.interface_header?.()?.list_of_port_declarations?.()
+      || ctx?.program_header?.()?.list_of_port_declarations?.();
+  
+    if (!portDeclCtx) return [];
+  
+    const ports: string[] = [];
+  
+    function walk(node: any) {
+      if (!node || !node.children) return;
+      for (const child of node.children) {
+        if (typeof child.port_identifier === "function") {
+          const ident = child.port_identifier();
+          if (ident?.text) {
+            ports.push(ident.text);
+          }
+        } else {
+          walk(child);
+        }
+      }
+    }
+  
+    walk(portDeclCtx);
+    return ports;
   }
 
   visitModule_declaration(ctx: Module_declarationContext): void {
@@ -49,7 +127,8 @@ export class SymbolCollectorVisitor
       ?.module_identifier?.()
       ?.identifier?.()
       ?.simple_identifier?.();
-    this.addSymbol("module", ident);
+    const ports = this.extractPorts(ctx);
+    this.addSymbol("module", ident, ports);
     this.visitChildren(ctx);
   }
 
@@ -57,7 +136,8 @@ export class SymbolCollectorVisitor
     const ident = ctx.program_identifier?.()
       ?.identifier?.()
       ?.simple_identifier?.();
-    this.addSymbol("program", ident);
+    const ports = this.extractPorts(ctx);
+    this.addSymbol("program", ident, ports);
     this.visitChildren(ctx);
   }
 
@@ -66,7 +146,8 @@ export class SymbolCollectorVisitor
       ?.interface_identifier?.()
       ?.identifier?.()
       ?.simple_identifier?.();
-    this.addSymbol("interface", ident);
+      const ports = this.extractPorts(ctx);
+    this.addSymbol("interface", ident, ports);
     this.visitChildren(ctx);
   }
 
@@ -92,7 +173,6 @@ export class SymbolCollectorVisitor
     this.addSymbol("function", simple);
     this.visitChildren(ctx);
   }
-  
 
   visitTask_body_declaration(ctx: Task_body_declarationContext): void {
     const identCtx = ctx.task_identifier()?.identifier?.();
