@@ -3,6 +3,7 @@ import { File as FileIcon, Folder } from "lucide-react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { TableCell, TableRow } from "@/components/ui/table";
+import { ReactElement } from "react";
 
 interface TableRowSkeletonProps {
     type: "directory" | "file";
@@ -10,11 +11,16 @@ interface TableRowSkeletonProps {
     lastActivityClassName?: string;
 }
 
+/**
+ * Skeleton component of a table row component
+ *
+ * @returns {ReactElement} Skeleton component
+ */
 export const TableRowSkeleton = ({
     type,
     fileNameClassName,
     lastActivityClassName,
-}: TableRowSkeletonProps) => {
+}: TableRowSkeletonProps): ReactElement => {
     return (
         <TableRow className="">
             <TableCell className="flex flex-row items-center gap-x-3">

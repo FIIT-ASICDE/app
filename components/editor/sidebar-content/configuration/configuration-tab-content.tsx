@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Configuration, SimulationType, SynthesisType } from "@/lib/types/editor";
 import { Button } from "@/components/ui/button";
 import { FileIcon, Info, Save } from "lucide-react";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { Dispatch, ReactElement, SetStateAction, useEffect, useRef, useState } from "react";
 import { getFilesFromRepo } from "@/components/generic/generic";
 import { Portal } from "@radix-ui/react-portal";
 import {
@@ -27,12 +27,18 @@ interface ConfigurationTabContentProps {
     setConfigurationAction: Dispatch<SetStateAction<Configuration | undefined>>;
 }
 
+/**
+ * Tab content component that lets the user change the configuration of simulation and synthesis
+ *
+ * @param {ConfigurationTabContentProps} props - Component props
+ * @returns {ReactElement} Tab content component
+ */
 export const ConfigurationTabContent = ({
     repository,
     handleCloseSidebarAction,
     configuration,
     setConfigurationAction,
-}: ConfigurationTabContentProps) => {
+}: ConfigurationTabContentProps): ReactElement => {
     const [selectedSimulationType, setSelectedSimulationType] = useState<SimulationType | undefined>(undefined);
     const [selectedSimulationTestBenchFile, setSelectedSimulationTestBenchFile] = useState<FileDisplayItem | FileItem | undefined>(undefined);
 

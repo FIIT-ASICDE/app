@@ -6,6 +6,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ReactElement } from "react";
 
 interface CloseButtonProps {
     onClick?: () => void;
@@ -13,11 +14,17 @@ interface CloseButtonProps {
     tooltip?: string;
 }
 
+/**
+ * Button component that closes the sidebar or the bottom panel on the editor page
+ *
+ * @param {CloseButtonProps} props - Component props
+ * @returns {ReactElement} Button component
+ */
 export const CloseButton = ({
     onClick,
     className,
     tooltip,
-}: CloseButtonProps) => {
+}: CloseButtonProps): ReactElement => {
     return (
         <Tooltip>
             <TooltipTrigger asChild>

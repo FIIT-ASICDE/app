@@ -8,16 +8,23 @@ import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { getCardStripe } from "@/components/generic/generic";
 import { VisibilityBadge } from "@/components/repositories/visibility/visibility-badge";
 import { Card, CardHeader } from "@/components/ui/card";
+import { ReactElement } from "react";
 
 interface FavoriteRepositoryCardDisplayProps {
     repository: RepositoryDisplay;
     className?: string;
 }
 
+/**
+ * Card component that displays shortened amount of information about a favorite repository
+ *
+ * @param {FavoriteRepositoryCardDisplayProps} props - Component props
+ * @returns {ReactElement} Card component
+ */
 export const FavoriteRepositoryCardDisplay = ({
     repository,
     className,
-}: FavoriteRepositoryCardDisplayProps) => {
+}: FavoriteRepositoryCardDisplayProps): ReactElement => {
     const repositoryDisplayName: string =
         repository.ownerName + "/" + repository.name;
     const repositoryLink: string = "/" + repositoryDisplayName;

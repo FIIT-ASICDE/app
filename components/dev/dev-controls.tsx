@@ -10,8 +10,14 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ReactElement } from "react";
 
-export default function DevControls() {
+/**
+ * Controls that are shown only when in development mode
+ *
+ * @returns {ReactElement} Development controls component
+ */
+export default function DevControls(): ReactElement {
     const { setTheme } = useTheme();
 
     return (

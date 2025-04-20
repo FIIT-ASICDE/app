@@ -1,18 +1,25 @@
 import { RepositoryItemChange } from "@/lib/types/repository";
 
 import { getChangeContent } from "@/components/generic/generic";
+import { ReactElement } from "react";
 
 interface ChangesTableProps {
     expanded: boolean;
     commitChanges: Array<RepositoryItemChange>;
 }
 
+/**
+ * Table component that displays changes made on a repository
+ *
+ * @param {ChangesTableProps} props - Component props
+ * @returns {ReactElement} Table component
+ */
 export const ChangesTable = ({
     expanded,
     commitChanges,
-}: ChangesTableProps) => {
+}: ChangesTableProps): ReactElement => {
     if (!expanded) {
-        return null;
+        return <></>;
     }
 
     return (

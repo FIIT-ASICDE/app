@@ -17,6 +17,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ReactElement } from "react";
 
 interface RepositoryCardProps {
     repository: Repository;
@@ -24,11 +25,17 @@ interface RepositoryCardProps {
     className?: string;
 }
 
+/**
+ * Card component that displays information about a repository
+ *
+ * @param {RepositoryCardProps} props - Component props
+ * @returns {ReactElement} Card component
+ */
 export default function RepositoryCard({
     repository,
     isUserOwner,
     className,
-}: RepositoryCardProps) {
+}: RepositoryCardProps): ReactElement {
     const router = useRouter();
 
     const repositoryDisplayName: string =

@@ -17,6 +17,7 @@ import { ImportRepositoryDialog } from "@/components/repositories/import-reposit
 import RepositoryCard from "@/components/repositories/repository-card";
 import { RepositoryFilter } from "@/components/repositories/repository-filter";
 import Search from "@/components/ui/search";
+import { ReactElement } from "react";
 
 interface RepositoriesPageProps {
     repos: Array<Repository>;
@@ -32,12 +33,18 @@ interface RepositoriesPageProps {
     };
 }
 
+/**
+ * Repositories page for user profile
+ *
+ * @param {RepositoriesPageProps} props - Component props
+ * @returns {Promise<ReactElement>} Repositories page component
+ */
 export default async function RepositoriesPage({
     repos,
     canUserCreate,
     userOrgs,
     searchParams,
-}: RepositoriesPageProps) {
+}: RepositoriesPageProps): Promise<ReactElement> {
     return (
         <div className="bg-background text-foreground">
             <div className="flex items-center justify-between">

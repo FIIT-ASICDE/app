@@ -5,16 +5,23 @@ import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { EditRepositoryDialog } from "@/components/repositories/edit-repository-dialog";
 import { RepositoryNavigation } from "@/components/repositories/repository-navigation";
+import { ReactElement } from "react";
 
 interface RepositoryHeaderProps {
     repository: Repository;
     canEdit: boolean;
 }
 
+/**
+ * Header component used on the repository page
+ *
+ * @param {RepositoryHeaderProps} props - Component props
+ * @returns {ReactElement} Header component
+ */
 export const RepositoryHeader = ({
     canEdit,
     repository,
-}: RepositoryHeaderProps) => {
+}: RepositoryHeaderProps): ReactElement => {
     return (
         <div className="flex flex-row items-center justify-between">
             <div className="flex min-w-0 flex-row items-center space-x-6 px-6 py-4">

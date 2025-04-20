@@ -17,7 +17,7 @@ import {
     UserRound,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, ReactElement, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -54,9 +54,15 @@ interface EditOrganisationDialogProps {
     organisation: OrganisationDisplay;
 }
 
+/**
+ * Dialog component that lets the user edit information about an organisation
+ *
+ * @param {EditOrganisationDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const EditOrganisationDialog = ({
     organisation,
-}: EditOrganisationDialogProps) => {
+}: EditOrganisationDialogProps): ReactElement => {
     const router = useRouter();
     const [open, setOpen] = useState<boolean>(false);
 
@@ -137,7 +143,7 @@ export const EditOrganisationDialog = ({
     };
 
     if (organisation.userRole !== "ADMIN") {
-        return undefined;
+        return <></>;
     }
 
     const showSubmitButtonContent = () => {

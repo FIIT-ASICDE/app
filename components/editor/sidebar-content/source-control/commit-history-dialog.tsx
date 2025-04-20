@@ -3,7 +3,7 @@
 import { api } from "@/lib/trpc/react";
 import { GitCommit } from "@/lib/types/repository";
 import { ChevronLeft, ChevronRight, GitGraph, History } from "lucide-react";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 
 import { CommitTableRow } from "@/components/editor/sidebar-content/source-control/commit-table-row";
 import { PushDialog } from "@/components/editor/sidebar-content/source-control/push-dialog";
@@ -32,9 +32,15 @@ interface CommitHistoryDialogProps {
     repositoryId: string;
 }
 
+/**
+ * Dialog component displaying the commit history of a repository
+ *
+ * @param {CommitHistoryDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const CommitHistoryDialog = ({
     repositoryId,
-}: CommitHistoryDialogProps) => {
+}: CommitHistoryDialogProps): ReactElement => {
     const [expandedRowHash, setExpandedRowHash] = useState<string | undefined>(
         undefined,
     );

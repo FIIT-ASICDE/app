@@ -9,7 +9,7 @@ import {
 import { cn } from "@/lib/utils";
 import { GitBranch, Globe, Loader2, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 import { toast } from "sonner";
 
 import { useUser } from "@/components/context/user-context";
@@ -44,7 +44,12 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-export const ImportRepositoryDialog = () => {
+/**
+ * Dialog component that lets the user import a repository
+ *
+ * @returns {ReactElement} Dialog component
+ */
+export const ImportRepositoryDialog = (): ReactElement => {
     const { user } = useUser();
     const router = useRouter();
 

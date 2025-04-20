@@ -3,7 +3,7 @@
 import { commitSchema } from "@/lib/schemas/git-schemas";
 import { RepositoryItemChange } from "@/lib/types/repository";
 import { FileText, GitCommitHorizontal, Loader2 } from "lucide-react";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, ReactElement, SetStateAction, useState } from "react";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,12 @@ interface CommitChangesProps {
     isLoading?: boolean;
 }
 
+/**
+ * Button component that lets the user commit changes made on a repository
+ *
+ * @param {CommitChangesProps} props - Component props
+ * @returns {ReactElement} Button component
+ */
 export const CommitChanges = ({
     repositoryId,
     changes,
@@ -32,7 +38,7 @@ export const CommitChanges = ({
     setChangesSelectedAction,
     onCommitAction,
     isLoading,
-}: CommitChangesProps) => {
+}: CommitChangesProps): ReactElement => {
     const [commitMessage, setCommitMessage] = useState<string>("");
 
     const handleCommitChanges = () => {

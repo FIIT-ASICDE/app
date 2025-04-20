@@ -10,8 +10,14 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { ReactElement } from "react";
 
-export default async function OnboardingPage() {
+/**
+ * Onboarding page for a user
+ *
+ * @returns {Promise<ReactElement>} Onboarding page component
+ */
+export default async function OnboardingPage(): Promise<ReactElement> {
     const session = await auth();
     await redirectIfNotOnboarded(session, "onboarding");
 

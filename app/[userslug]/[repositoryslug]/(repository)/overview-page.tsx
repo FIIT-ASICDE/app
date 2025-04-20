@@ -6,12 +6,21 @@ import { NoData } from "@/components/generic/no-data";
 import LanguageStatisticsChart from "@/components/repositories/code/language-statistics";
 import { MarkdownRenderer } from "@/components/repositories/code/markdown-renderer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ReactElement } from "react";
 
 interface OverviewPageProps {
     repository: RepositoryOverview;
 }
 
-export default function OverviewPage({ repository }: OverviewPageProps) {
+/**
+ * Overview page for a repository page
+ *
+ * @param {OverviewPageProps} props - Component props
+ * @returns {ReactElement} Overview page component
+ */
+export default function OverviewPage({
+    repository
+}: OverviewPageProps): ReactElement {
     return (
         <div className="m-6 flex flex-col gap-x-3 md:flex-row">
             <aside className="flex w-full flex-col gap-y-3 md:w-1/3">

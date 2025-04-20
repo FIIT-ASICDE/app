@@ -12,7 +12,7 @@ import type {
     RepositoryItem,
 } from "@/lib/types/repository";
 import dynamic from "next/dynamic";
-import { type ElementRef, RefObject, useEffect, useRef, useState } from "react";
+import { type ElementRef, ReactElement, RefObject, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
 import { z } from "zod";
@@ -38,7 +38,16 @@ const DynamicEditor = dynamic(() => import("@/components/editor/editor"), {
     ssr: false,
 });
 
-export default function EditorPage({ repository, lastSimulation }: EditorPageProps) {
+/**
+ * Editor page
+ *
+ * @param {EditorPageProps} props - Component props
+ * @returns {ReactElement} Editor page component
+ */
+export default function EditorPage({
+    repository,
+    lastSimulation
+}: EditorPageProps): ReactElement {
     const [activeSidebarContent, setActiveSidebarContent] =
         useState<SidebarContentTab>("fileExplorer");
     const [activeBottomPanelContent, setActiveBottomPanelContent] =

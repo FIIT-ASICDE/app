@@ -1,19 +1,27 @@
 import { auth } from "@/auth";
 import { api } from "@/lib/trpc/server";
 import { TRPCError } from "@trpc/server";
-import React from "react";
+import React, { ReactElement } from "react";
 
 import Header from "@/components/header/header";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { Separator } from "@/components/ui/separator";
 
+interface ProfileLayoutProps {
+    children: React.ReactNode;
+    params: Promise<{ userslug: string }>;
+}
+
+/**
+ * Layout for user profile
+ *
+ * @param {ProfileLayoutProps} props - Component props
+ * @returns {Promise<ReactElement>} User profile layout component
+ */
 export default async function ProfileLayout({
     children,
     params,
-}: Readonly<{
-    children: React.ReactNode;
-    params: Promise<{ userslug: string }>;
-}>) {
+}: ProfileLayoutProps): Promise<ReactElement> {
     const session = await auth();
     const userSlug = (await params).userslug;
     try {

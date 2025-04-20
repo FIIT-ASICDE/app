@@ -2,7 +2,7 @@
 
 import { commitSchema } from "@/lib/schemas/git-schemas";
 import type { RepositoryItemChange } from "@/lib/types/repository";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 import { z } from "zod";
 
 import { RepositoryItemChangeDisplay } from "@/components/editor/changes/repository-item-change-display";
@@ -27,13 +27,19 @@ interface SourceControlTabContentProps {
     isLoading?: boolean;
 }
 
+/**
+ * Tab content component that lets the user see changes & commits
+ *
+ * @param {SourceControlTabContentProps} props - Component props
+ * @returns {ReactElement} Tab content component
+ */
 export const SourceControlTabContent = ({
     repositoryId,
     changes,
     handleCloseSidebarAction,
     onCommitAction,
     isLoading,
-}: SourceControlTabContentProps) => {
+}: SourceControlTabContentProps): ReactElement => {
     const [changesSelected, setChangesSelected] = useState<
         Array<RepositoryItemChange>
     >([]);

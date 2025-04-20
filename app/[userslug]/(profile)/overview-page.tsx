@@ -13,13 +13,22 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ReactElement } from "react";
 
 interface OverviewPageProps {
     overview: UsersOverview;
 }
 
-export default function OverviewPage({ overview }: OverviewPageProps) {
-    const profile = overview.profile;
+/**
+ * Overview page for user profile
+ *
+ * @param {OverviewPageProps} props - Component props
+ * @returns {ReactElement} Overview page component
+ */
+export default function OverviewPage({
+    overview
+}: OverviewPageProps): ReactElement {
+    const profile= overview.profile;
     const organisations = overview.organisations;
     const pinnedRepositories = overview.pinnedRepositories;
 

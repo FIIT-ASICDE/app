@@ -1,8 +1,5 @@
 import { PaginationResult } from "@/lib/types/generic";
-import {
-    OrganisationDisplay,
-    RoleOrganisationFilter,
-} from "@/lib/types/organisation";
+import { OrganisationDisplay, RoleOrganisationFilter } from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 import { Building } from "lucide-react";
 
@@ -13,6 +10,7 @@ import { CreateOrganisationDialog } from "@/components/organisations/create-orga
 import { OrganisationCard } from "@/components/organisations/organisation-card";
 import { OrganisationFilter } from "@/components/organisations/organisation-filter";
 import Search from "@/components/ui/search";
+import { ReactElement } from "react";
 
 interface OrganisationsPageProps {
     usersOrganisations: Array<OrganisationDisplay>;
@@ -25,11 +23,17 @@ interface OrganisationsPageProps {
     isItMe: boolean;
 }
 
+/**
+ * Organisations page for user profile
+ *
+ * @param {OrganisationsPageProps} props - Component props
+ * @returns {ReactElement} Organisations page component
+ */
 export default function OrganisationsPage({
     usersOrganisations,
     searchParams,
     isItMe,
-}: OrganisationsPageProps) {
+}: OrganisationsPageProps): ReactElement {
     return (
         <div className="bg-background text-foreground">
             <div className="flex items-center justify-between">

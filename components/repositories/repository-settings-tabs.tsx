@@ -9,14 +9,21 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ReactElement } from "react";
 
 interface RepositorySettingsTabsProps {
     tab: RepositorySettingsTab;
 }
 
+/**
+ * Tabs component used on the settings part of the repository page
+ *
+ * @param {RepositorySettingsTabsProps} props - Component props
+ * @returns {ReactElement} Tabs component
+ */
 export const RepositorySettingsTabs = ({
     tab,
-}: RepositorySettingsTabsProps) => {
+}: RepositorySettingsTabsProps): ReactElement => {
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();

@@ -12,16 +12,23 @@ import {
 } from "@/components/generic/generic";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
+import { ReactElement } from "react";
 
 interface RecentRepositoryCardDisplayProps {
     repository: RepositoryDisplay;
     className?: string;
 }
 
+/**
+ * Card component that displays shortened amount of information about a recent repository
+ *
+ * @param {RecentRepositoryCardDisplayProps} props - Component props
+ * @returns {ReactElement} Card component
+ */
 export const RecentRepositoryCardDisplay = ({
     repository,
     className,
-}: RecentRepositoryCardDisplayProps) => {
+}: RecentRepositoryCardDisplayProps): ReactElement => {
     const repositoryDisplayName: string =
         repository.ownerName + "/" + repository.name;
     const repositoryLink: string = "/" + repositoryDisplayName;

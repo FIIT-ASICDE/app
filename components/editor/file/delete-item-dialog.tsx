@@ -1,7 +1,7 @@
 import { api } from "@/lib/trpc/react";
 import { RepositoryItem } from "@/lib/types/repository";
 import { X } from "lucide-react";
-import { Dispatch, FormEvent, SetStateAction, useState } from "react";
+import { Dispatch, FormEvent, ReactElement, SetStateAction, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -24,13 +24,19 @@ interface DeleteItemDialogProps {
     onAction?: () => void;
 }
 
+/**
+ * Dialog that lets the user delete an item from a repository
+ *
+ * @param {DeleteItemDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const DeleteItemDialog = ({
     repositoryId,
     repositoryItem,
     tree,
     setTree,
     onAction,
-}: DeleteItemDialogProps) => {
+}: DeleteItemDialogProps): ReactElement => {
     const [open, setOpen] = useState<boolean>(false);
 
     const itemDisplayType: string =

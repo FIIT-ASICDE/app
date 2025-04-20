@@ -11,14 +11,21 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ReactElement } from "react";
 
 interface OrganisationSettingsTabsProps {
     tab: OrganisationSettingsTab;
 }
 
+/**
+ * Tabs component used on the settings part of the organisation page
+ *
+ * @param {OrganisationSettingsTabsProps} props - Component props
+ * @returns {ReactElement} Tabs component
+ */
 export const OrganisationSettingsTabs = ({
     tab,
-}: OrganisationSettingsTabsProps) => {
+}: OrganisationSettingsTabsProps): ReactElement => {
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();

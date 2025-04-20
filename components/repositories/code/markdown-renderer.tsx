@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type React from "react";
+import type { ReactElement } from "react";
 import Markdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
@@ -7,6 +8,7 @@ import remarkGfm from "remark-gfm";
 
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+
 
 interface MarkdownRendererProps {
     content: string;
@@ -16,9 +18,15 @@ type ComponentType = React.ComponentPropsWithoutRef<
     typeof Markdown
 >["components"];
 
-export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
+/**
+ * Component that renders a markdown file
+ *
+ * @param {MarkdownRendererProps} props - Component props
+ * @returns {ReactElement} Render component
+ */
+export const MarkdownRenderer = ({
     content,
-}) => {
+}: MarkdownRendererProps): ReactElement => {
     const components: ComponentType = {
         code({ className, children, ...props }) {
             const match = /language-(\w+)/.exec(className || "");

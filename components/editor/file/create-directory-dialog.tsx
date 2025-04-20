@@ -1,7 +1,7 @@
 import { api } from "@/lib/trpc/react";
 import { DirectoryItem, RepositoryItem } from "@/lib/types/repository";
 import { Folder, FolderPlus } from "lucide-react";
-import { Dispatch, FormEvent, SetStateAction, useState } from "react";
+import { Dispatch, FormEvent, ReactElement, SetStateAction, useState } from "react";
 import { toast } from "sonner";
 
 import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer/file-explorer-control-button";
@@ -24,6 +24,12 @@ interface CreateDirectoryDialogProps {
     onAction?: () => void;
 }
 
+/**
+ * Dialog that lets the user create a new directory within a repository
+ *
+ * @param {CreateDirectoryDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const CreateDirectoryDialog = ({
     repositoryId,
     parentItem,
@@ -31,7 +37,7 @@ export const CreateDirectoryDialog = ({
     tree,
     setTree,
     onAction,
-}: CreateDirectoryDialogProps) => {
+}: CreateDirectoryDialogProps): ReactElement => {
     const [open, setOpen] = useState<boolean>(false);
     const [directoryName, setDirectoryName] = useState<string>("");
 

@@ -6,6 +6,7 @@ import { UserDisplay } from "@/lib/types/user";
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { BlockContributorDialog } from "@/components/repositories/contributors/block-contributor-dialog";
+import { ReactElement } from "react";
 
 interface ContributorCardProps {
     contributor: UserDisplay;
@@ -13,11 +14,17 @@ interface ContributorCardProps {
     isItMe: boolean;
 }
 
+/**
+ * Card component displaying information about a contributor
+ *
+ * @param {ContributorCardProps} props - Component props
+ * @returns {ReactElement} Card component
+ */
 export const ContributorCard = ({
     contributor,
     repositoryId,
     isItMe,
-}: ContributorCardProps) => {
+}: ContributorCardProps): ReactElement => {
     const contributorLink: string = "/" + contributor.username;
 
     return (

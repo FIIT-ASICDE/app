@@ -13,16 +13,23 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ReactElement } from "react";
 
 interface OrganisationCardDisplayProps {
     organisation: OrganisationDisplay;
     className?: string;
 }
 
+/**
+ * Card component displaying shortened amount of information about an organisation
+ *
+ * @param {OrganisationCardDisplayProps} props - Component props
+ * @returns {ReactElement} Card component
+ */
 export const OrganisationCardDisplay = ({
     organisation,
     className,
-}: OrganisationCardDisplayProps) => {
+}: OrganisationCardDisplayProps): ReactElement => {
     const organisationLink: string = "/orgs/" + organisation.name;
 
     return (

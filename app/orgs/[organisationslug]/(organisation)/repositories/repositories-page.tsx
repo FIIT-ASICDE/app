@@ -13,6 +13,7 @@ import { CreateRepositoryDialog } from "@/components/repositories/create-reposit
 import RepositoryCard from "@/components/repositories/repository-card";
 import { RepositoryFilter } from "@/components/repositories/repository-filter";
 import Search from "@/components/ui/search";
+import { ReactElement } from "react";
 
 interface RepositoriesPageProps {
     repos: Array<Repository>;
@@ -25,11 +26,17 @@ interface RepositoriesPageProps {
     };
 }
 
+/**
+ * Repositories page for organisation profile
+ *
+ * @param {RepositoriesPageProps} props - Component props
+ * @returns {ReactElement} Repositories page component
+ */
 export default function RepositoriesPage({
     repos,
     org,
     searchParams,
-}: RepositoriesPageProps) {
+}: RepositoriesPageProps): ReactElement {
     return (
         <div className="bg-background text-foreground">
             <div className="flex items-center justify-between">

@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { ElementType } from "react";
+import { ElementType, ReactElement } from "react";
 
 import {
     Tooltip,
@@ -14,12 +14,18 @@ interface NavigationButtonProps {
     onClick?: () => void;
 }
 
+/**
+ * Navigation button component within the editor navigation that does not interact with the sidebar nor the bottom panel
+ *
+ * @param {NavigationButtonProps} props - Component props
+ * @returns {ReactElement} Button component
+ */
 export const NavigationButton = ({
     icon: Icon,
     tooltip,
     tooltipSide,
     onClick,
-}: NavigationButtonProps) => {
+}: NavigationButtonProps): ReactElement => {
     return (
         <Tooltip>
             <TooltipTrigger asChild>

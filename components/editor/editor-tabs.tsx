@@ -1,7 +1,7 @@
 "use client";
 
 import { X, MoreHorizontal, ChevronDown } from "lucide-react";
-import { useRef, useState, useEffect, useCallback, Dispatch, SetStateAction } from "react";
+import { useRef, useState, useEffect, useCallback, Dispatch, SetStateAction, ReactElement } from "react";
 import { FileDisplayItem } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import {
@@ -26,6 +26,12 @@ interface EditorTabsProps {
     handleCloseTabAction: (tab: FileDisplayItem) => void;
 }
 
+/**
+ * Editor tabs component for editor page
+ *
+ * @param {EditorTabsProps} props - Component props
+ * @returns {ReactElement} Editor tabs component
+ */
 export const EditorTabs = ({
     openFiles,
     setOpenFilesAction,
@@ -33,7 +39,7 @@ export const EditorTabs = ({
     setActiveFileAction,
     handleTabSwitchAction,
     handleCloseTabAction,
-}: EditorTabsProps) => {
+}: EditorTabsProps): ReactElement => {
     const tabsContainerRef = useRef<HTMLDivElement>(null);
     const [visibleTabs, setVisibleTabs] = useState<FileDisplayItem[]>([]);
     const [hiddenTabs, setHiddenTabs] = useState<FileDisplayItem[]>([]);

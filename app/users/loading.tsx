@@ -1,8 +1,14 @@
 import { RepoOrgSubmenuSkeleton } from "@/components/skeletons/repo-org-submenu-skeleton";
 import { UserCardSkeleton } from "@/components/skeletons/user-card-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ReactElement } from "react";
 
-export default function Loading() {
+/**
+ * Loading page for all users page
+ *
+ * @returns {ReactElement} All users page skeleton component
+ */
+export default function Loading(): ReactElement {
     const titleWidths: Array<number> = [
         32, 36, 24, 44, 48, 28, 24, 40, 36, 24, 32, 44,
     ];

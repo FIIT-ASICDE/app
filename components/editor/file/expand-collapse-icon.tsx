@@ -1,4 +1,5 @@
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { ReactElement } from "react";
 
 interface ExpandCollapseIconProps {
     expanded?: boolean;
@@ -7,12 +8,18 @@ interface ExpandCollapseIconProps {
     className?: string;
 }
 
+/**
+ * Icon that symbolises the expand & collapse actions
+ *
+ * @param {ExpandCollapseIconProps} props - Component props
+ * @returns {ReactElement} Icon
+ */
 export const ExpandCollapseIcon = ({
     expanded,
     hasChildren,
     handleToggle,
     className,
-}: ExpandCollapseIconProps) => {
+}: ExpandCollapseIconProps): ReactElement => {
     if (!hasChildren) {
         return <span className="max-h-4 min-h-4 min-w-4 max-w-4 mr-2"></span>;
     }

@@ -4,8 +4,14 @@ import { RepositorySettingsTabsSkeleton } from "@/components/skeletons/repositor
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ReactElement } from "react";
 
-export default function Loading() {
+/**
+ * Loading page for settings page for a repository
+ *
+ * @returns {ReactElement} Settings page skeleton component
+ */
+export default function Loading(): ReactElement {
     return (
         <div className="m-6 flex flex-col gap-x-3 md:flex-row">
             <aside className="w-full md:w-1/5">

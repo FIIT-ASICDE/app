@@ -5,8 +5,14 @@ import { Avatar } from "@/components/ui/avatar";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
+import { ReactElement } from "react";
 
-export const RepoOrgCardSkeleton = () => {
+/**
+ * Skeleton component of a repository card or an organisation card
+ *
+ * @returns {ReactElement} Skeleton component
+ */
+export const RepoOrgCardSkeleton = (): ReactElement => {
     return (
         <Card className="max-w-full pl-1.5 shadow-lg">
             <CardHeader>

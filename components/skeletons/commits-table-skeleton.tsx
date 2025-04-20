@@ -2,8 +2,14 @@ import { Check, ChevronRight } from "lucide-react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { TableCell, TableRow } from "@/components/ui/table";
+import { ReactElement } from "react";
 
-export const CommitsTableSkeleton = () => {
+/**
+ * Skeleton component of a table of commits
+ *
+ * @returns {ReactElement} Skeleton component
+ */
+export const CommitsTableSkeleton = (): ReactElement => {
     return (
         <>
             {[1, 2, 3, 4, 5].map((index: number) => (

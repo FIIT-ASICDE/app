@@ -10,13 +10,23 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ReactElement } from "react";
 
 interface LayoutOptionsProps {
     layout: LayoutType;
     className?: string;
 }
 
-export const LayoutOptions = ({ layout, className }: LayoutOptionsProps) => {
+/**
+ * Component that lets the user change the layout of a displayed list
+ *
+ * @param {LayoutOptionsProps} props - Component props
+ * @returns {ReactElement} Layout options component
+ */
+export const LayoutOptions = ({
+    layout,
+    className
+}: LayoutOptionsProps): ReactElement => {
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();

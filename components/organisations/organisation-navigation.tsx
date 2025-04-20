@@ -14,14 +14,21 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ReactElement } from "react";
 
 interface OrganisationNavigationProps {
     organisation: OrganisationDisplay;
 }
 
+/**
+ * Navigation component used on the organisation page
+ *
+ * @param {OrganisationNavigationProps} props - Component props
+ * @returns {ReactElement} Navigation component
+ */
 export const OrganisationNavigation = ({
     organisation,
-}: OrganisationNavigationProps) => {
+}: OrganisationNavigationProps): ReactElement => {
     const pathname: string = usePathname();
     const currentPage: string = getCurrentPage(pathname, 2);
 

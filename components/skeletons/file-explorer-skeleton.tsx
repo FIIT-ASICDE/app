@@ -6,8 +6,14 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { ReactElement } from "react";
 
-export const FileExplorerSkeleton = () => {
+/**
+ * Skeleton component of the file explorer
+ *
+ * @returns {ReactElement} Skeleton component
+ */
+export const FileExplorerSkeleton = (): ReactElement => {
     return (
         <Table className="w-full">
             <TableHeader>

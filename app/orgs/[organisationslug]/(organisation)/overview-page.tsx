@@ -5,7 +5,7 @@ import {
 } from "@/lib/types/organisation";
 import { Calendar, Ellipsis, PinOff, UsersRound } from "lucide-react";
 import Link from "next/link";
-import { Suspense } from "react";
+import { ReactElement, Suspense } from "react";
 
 import { getDateString } from "@/components/generic/generic";
 import { NoData } from "@/components/generic/no-data";
@@ -22,7 +22,15 @@ interface OverviewPageProps {
     overview: OrganisationOverview;
 }
 
-export default function OverviewPage({ overview }: OverviewPageProps) {
+/**
+ * Overview page for organisation profile
+ *
+ * @param {OverviewPageProps} props - Component props
+ * @returns {ReactElement} Overview page component
+ */
+export default function OverviewPage({
+    overview
+}: OverviewPageProps): ReactElement {
     const organisation: Organisation = overview.organisation;
 
     return (

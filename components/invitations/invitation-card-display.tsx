@@ -19,16 +19,23 @@ import {
 import { InvitationBadge } from "@/components/invitations/invitation-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card";
+import { ReactElement } from "react";
 
 interface InvitationCardDisplayProps {
     invitation: Invitation;
     className?: string;
 }
 
+/**
+ * Card component displaying shortened amount of information about an invitation
+ *
+ * @param {InvitationCardDisplayProps} props - Component props
+ * @returns {ReactElement} Card component
+ */
 export const InvitationCardDisplay = ({
     invitation,
     className,
-}: InvitationCardDisplayProps) => {
+}: InvitationCardDisplayProps): ReactElement => {
     const router = useRouter();
 
     const invitationDisplayData = getInvitationDisplayData(invitation);

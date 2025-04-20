@@ -5,11 +5,11 @@ import { cn } from "@/lib/utils";
 import { FileIcon, Folder } from "lucide-react";
 import {
     Dispatch,
-    DragEvent,
+    DragEvent, ReactElement,
     RefObject,
     SetStateAction,
     useRef,
-    useState,
+    useState
 } from "react";
 
 import { RepositoryItemActions } from "@/components/editor/sidebar-content/file-explorer/repository-item-actions";
@@ -36,6 +36,12 @@ interface FileTreeItemProps {
     onDragOverItem?: () => void;
 }
 
+/**
+ * Component that depicts a file tree item within a repository
+ *
+ * @param {FileTreeItemProps} props - Component props
+ * @returns {ReactElement} File tree item component
+ */
 export const FileTreeItem = ({
     repositoryId,
     item,
@@ -51,7 +57,7 @@ export const FileTreeItem = ({
     setHoveredItemAction,
     onMoveItem,
     onDragOverItem,
-}: FileTreeItemProps) => {
+}: FileTreeItemProps): ReactElement => {
     const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
     const [isDragOver, setIsDragOver] = useState<boolean>(false);
     const itemRef: RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);

@@ -14,6 +14,7 @@ import { InviteMemberDialog } from "@/components/invitations/invite-member-dialo
 import { MemberCard } from "@/components/organisations/members/member-card";
 import { OrganisationFilter } from "@/components/organisations/organisation-filter";
 import Search from "@/components/ui/search";
+import { ReactElement } from "react";
 
 interface MembersPageProps {
     org: OrganisationDisplay;
@@ -26,11 +27,17 @@ interface MembersPageProps {
     };
 }
 
+/**
+ * Members page for organisation profile
+ *
+ * @param {MembersPageProps} props - Component props
+ * @returns {ReactElement} Members page component
+ */
 export default function MembersPage({
     members,
     searchParams,
     org,
-}: MembersPageProps) {
+}: MembersPageProps): ReactElement {
     return (
         <div className="bg-background text-foreground">
             <div className="flex items-center justify-between">

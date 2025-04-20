@@ -9,6 +9,7 @@ import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { getCardStripe } from "@/components/generic/generic";
 import { InviteUserDialog } from "@/components/invitations/invite-user-dialog";
 import { Card, CardContent } from "@/components/ui/card";
+import { ReactElement } from "react";
 
 interface UserCardProps {
     user: UserDisplay;
@@ -17,12 +18,17 @@ interface UserCardProps {
     className?: string;
 }
 
+/**
+ * Card component displaying information about a user
+ *
+ * @returns {ReactElement} Skeleton component
+ */
 export const UserCard = ({
     user,
     usersOrganisations,
     usersRepositories,
     className,
-}: UserCardProps) => {
+}: UserCardProps): ReactElement => {
     const userLink: string = "/" + user.username;
 
     return (

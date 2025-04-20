@@ -5,7 +5,7 @@ import { UserDisplay } from "@/lib/types/user";
 import { Command as CommandPrimitive } from "cmdk";
 import { Loader2, UsersRound } from "lucide-react";
 import * as React from "react";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import {
@@ -30,6 +30,12 @@ interface MultiSelectProps {
     isLoading?: boolean;
 }
 
+/**
+ * Component that lets the user select multiple options
+ *
+ * @param {MultiSelectProps} props - Component props
+ * @returns {ReactElement} Select component
+ */
 export const MultiSelect = ({
     placeholder,
     elements,
@@ -38,7 +44,7 @@ export const MultiSelect = ({
     onChangeAction,
     filterValues,
     isLoading,
-}: MultiSelectProps) => {
+}: MultiSelectProps): ReactElement => {
     const inputRef = React.useRef<HTMLInputElement>(null);
     const [open, setOpen] = useState<boolean>(false);
     const [inputValue, setInputValue] = React.useState("");

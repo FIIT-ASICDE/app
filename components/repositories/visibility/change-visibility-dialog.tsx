@@ -14,14 +14,21 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { ReactElement } from "react";
 
 interface ChangeVisibilityDialogProps {
     repository: Repository;
 }
 
+/**
+ * Dialog component that lets the user change the visibility of a repository
+ *
+ * @param {ChangeVisibilityDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const ChangeVisibilityDialog = ({
     repository,
-}: ChangeVisibilityDialogProps) => {
+}: ChangeVisibilityDialogProps): ReactElement => {
     const router = useRouter();
     const getRepositoryVisibilityChangeMessage = () => {
         if (repository.visibility === "public") {

@@ -3,12 +3,21 @@ import { cn } from "@/lib/utils";
 
 import { getBadgeStyle } from "@/components/generic/generic";
 import { Badge } from "@/components/ui/badge";
+import { ReactElement } from "react";
 
 interface VisibilityBadgeProps {
     visibility: RepositoryVisibility;
 }
 
-export const VisibilityBadge = ({ visibility }: VisibilityBadgeProps) => {
+/**
+ * Component that displays a badge based on the visibility of a repository
+ *
+ * @param {VisibilityBadgeProps} props - Component props
+ * @returns {ReactElement} Badge component
+ */
+export const VisibilityBadge = ({
+    visibility
+}: VisibilityBadgeProps): ReactElement => {
     return (
         <Badge
             variant="default"

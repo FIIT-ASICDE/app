@@ -8,6 +8,7 @@ import { getTimeDeltaString } from "@/components/generic/generic";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ReactElement } from "react";
 
 interface FilePreviewProps {
     name: string;
@@ -18,6 +19,12 @@ interface FilePreviewProps {
     openInIDEPath?: string;
 }
 
+/**
+ * Component that displays the content preview of a file within a repository
+ *
+ * @param {FilePreviewProps} props - Component props
+ * @returns {ReactElement} Preview component
+ */
 export const FilePreview = ({
     name,
     language,
@@ -25,7 +32,7 @@ export const FilePreview = ({
     lastActivity,
     onXPressed,
     openInIDEPath,
-}: FilePreviewProps) => {
+}: FilePreviewProps): ReactElement => {
     const { theme, resolvedTheme } = useTheme();
 
     const themeToSyntaxHighlighterStyle = () => {

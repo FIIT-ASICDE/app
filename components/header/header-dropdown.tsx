@@ -29,6 +29,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ReactElement } from "react";
 
 interface HeaderDropdownProps {
     user: OnboardedUser;
@@ -36,11 +37,17 @@ interface HeaderDropdownProps {
     className?: string;
 }
 
+/**
+ * Dropdown menu component used in the header
+ *
+ * @param {HeaderDropdownProps} props - Component props
+ * @returns {ReactElement} Dropdown menu component
+ */
 export const HeaderDropdown = ({
     user,
     avatarDisplayType,
     className,
-}: HeaderDropdownProps) => {
+}: HeaderDropdownProps): ReactElement => {
     const { username, name, surname, image } = user;
 
     return (

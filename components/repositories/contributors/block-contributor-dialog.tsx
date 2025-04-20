@@ -2,7 +2,7 @@ import { api } from "@/lib/trpc/react";
 import { UserDisplay } from "@/lib/types/user";
 import { CircleX } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,10 +26,16 @@ interface BlockContributorDialogProps {
     repositoryId: string;
 }
 
+/**
+ * Dialog component that lets the user block a user from further contributing to a repository
+ *
+ * @param {BlockContributorDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const BlockContributorDialog = ({
     contributor,
     repositoryId,
-}: BlockContributorDialogProps) => {
+}: BlockContributorDialogProps): ReactElement => {
     const [revokeContributionInput, setRevokeContributionInput] =
         useState<string>("");
 

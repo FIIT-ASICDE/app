@@ -24,6 +24,12 @@ interface FileExplorerTabContentProps {
     onFileClick?: (item: RepositoryItem) => void;
 }
 
+/**
+ * Tab content component that lets the user explore the repository file tree
+ *
+ * @param {FileExplorerTabContentProps} props - Component props
+ * @returns {ReactElement} Tab content component
+ */
 export const FileExplorerTabContent = ({
     repository,
     tree,

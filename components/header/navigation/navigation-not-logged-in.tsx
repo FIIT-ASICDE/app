@@ -1,8 +1,14 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { ReactElement } from "react";
 
-export const NavigationNotLoggedIn = () => {
+/**
+ * Navigation component for the user that is not yet logged-in
+ *
+ * @returns {ReactElement} Navigation component
+ */
+export const NavigationNotLoggedIn = (): ReactElement => {
     return (
         <nav className="absolute right-0 mr-2 flex flex-row items-center gap-2">
             <Link href={"/public"}>

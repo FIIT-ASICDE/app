@@ -4,14 +4,20 @@ import { UsersRound } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ReactElement } from "react";
 
 interface OrganisationCardSkeletonProps {
     titleClassName?: string;
 }
 
+/**
+ * Skeleton component of the organisation card display
+ *
+ * @returns {ReactElement} Skeleton component
+ */
 export const OrganisationCardDisplaySkeleton = ({
     titleClassName,
-}: OrganisationCardSkeletonProps) => {
+}: OrganisationCardSkeletonProps): ReactElement => {
     return (
         <Card className="max-w-full p-0 pl-1.5 shadow-lg">
             <CardHeader className="p-3 pr-6">

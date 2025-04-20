@@ -2,7 +2,7 @@
 
 import { Repository } from "@/lib/types/repository";
 import { SearchIcon } from "lucide-react";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 
 import { CloseButton } from "@/components/editor/navigation/close-button";
 import { Input } from "@/components/ui/input";
@@ -14,10 +14,16 @@ interface SearchTabContentProps {
     handleCloseSidebarAction: () => void;
 }
 
+/**
+ * Tab content component that lets the user search for items within the repository
+ *
+ * @param {SearchTabContentProps} props - Component props
+ * @returns {ReactElement} Tab content component
+ */
 export const SearchTabContent = ({
     repository,
     handleCloseSidebarAction,
-}: SearchTabContentProps) => {
+}: SearchTabContentProps): ReactElement => {
     const [repositorySearchTerm, setRepositorySearchTerm] =
         useState<string>("");
 

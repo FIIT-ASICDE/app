@@ -1,7 +1,7 @@
 import { CloseButton } from "@/components/editor/navigation/close-button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Configuration, SimulationOutput, SimulationTab } from "@/lib/types/editor";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface SimulationTabContentProps {
@@ -11,11 +11,17 @@ interface SimulationTabContentProps {
     lastSimulation: string | null;
 }
 
+/**
+ * Simulation tab content for the bottom panel on editor page
+ *
+ * @param {SimulationTabContentProps} props - Component props
+ * @returns {ReactElement} Simulation tab content component
+ */
 export const SimulationTabContent = ({
     handleCloseBottomPanel,
     simulationOutput,
     lastSimulation
-}: SimulationTabContentProps) => {
+}: SimulationTabContentProps): ReactElement => {
     const [activeTab, setActiveTab] = useState<SimulationTab>("all");
 
     return (

@@ -7,7 +7,7 @@ import { InviteUserTab, OrganisationDisplay } from "@/lib/types/organisation";
 import { RepositoryDisplay } from "@/lib/types/repository";
 import { UserDisplay } from "@/lib/types/user";
 import { Building, FolderPlus, Loader2, Mail } from "lucide-react";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 import { toast } from "sonner";
 
 import { useUser } from "@/components/context/user-context";
@@ -43,11 +43,17 @@ interface InviteUserDialogProps {
     usersRepositories: Array<RepositoryDisplay>;
 }
 
+/**
+ * Dialog component that lets the user invite another user to an organisation or to collaborate on a repository
+ *
+ * @param {InviteUserDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const InviteUserDialog = ({
     selectedUser,
     usersOrganisations,
     usersRepositories,
-}: InviteUserDialogProps) => {
+}: InviteUserDialogProps): ReactElement => {
     const { user } = useUser();
 
     const [open, setOpen] = useState<boolean>(false);

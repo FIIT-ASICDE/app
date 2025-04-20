@@ -8,16 +8,23 @@ import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { getCardStripe } from "@/components/generic/generic";
 import { VisibilityBadge } from "@/components/repositories/visibility/visibility-badge";
 import { Card, CardHeader } from "@/components/ui/card";
+import { ReactElement } from "react";
 
 interface PinnedRepositoryCardDisplayProps {
     repository: RepositoryDisplay;
     className?: string;
 }
 
+/**
+ * Card component that displays shortened amount of information about a pinned repository
+ *
+ * @param {PinnedRepositoryCardDisplayProps} props - Component props
+ * @returns {ReactElement} Card component
+ */
 export const PinnedRepositoryCardDisplay = ({
     repository,
     className,
-}: PinnedRepositoryCardDisplayProps) => {
+}: PinnedRepositoryCardDisplayProps): ReactElement => {
     const repositoryDisplayName: string =
         repository.ownerName + "/" + repository.name;
     const repositoryLink: string = "/" + repositoryDisplayName;

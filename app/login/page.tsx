@@ -15,6 +15,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { ReactElement } from "react";
 
 interface LoginPageProps {
     searchParams: Promise<{
@@ -22,7 +23,15 @@ interface LoginPageProps {
     }>;
 }
 
-export default async function LoginPage({ searchParams }: LoginPageProps) {
+/**
+ * Login page
+ *
+ * @param {LoginPageProps} props - Component props
+ * @returns {ReactElement} Login page component
+ */
+export default async function LoginPage({
+    searchParams
+}: LoginPageProps): Promise<ReactElement> {
     const session = await auth();
     await redirectIfNotOnboarded(session, "login");
 

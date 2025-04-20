@@ -1,7 +1,7 @@
 import { api } from "@/lib/trpc/react";
 import { RepositoryItem } from "@/lib/types/repository";
 import { FileIcon, Folder, Pen } from "lucide-react";
-import { Dispatch, FormEvent, SetStateAction, useState } from "react";
+import { Dispatch, FormEvent, ReactElement, SetStateAction, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -22,13 +22,19 @@ interface RenameItemDialogProps {
     onAction?: () => void;
 }
 
+/**
+ * Dialog that lets the user rename an item within a repository
+ *
+ * @param {RenameItemDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const RenameItemDialog = ({
     repositoryId,
     item,
     tree,
     setTree,
     onAction,
-}: RenameItemDialogProps) => {
+}: RenameItemDialogProps): ReactElement => {
     const [open, setOpen] = useState<boolean>(false);
     const [newItemName, setNewItemName] = useState<string>(item.name);
 

@@ -4,8 +4,14 @@ import { FileExplorerSkeleton } from "@/components/skeletons/file-explorer-skele
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ReactElement } from "react";
 
-export default function Loading() {
+/**
+ * Loading page for code page for a repository
+ *
+ * @returns {ReactElement} Code page skeleton component
+ */
+export default function Loading(): ReactElement {
     return (
         <div>
             <div className="flex items-center justify-between">

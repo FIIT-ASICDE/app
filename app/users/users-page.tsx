@@ -10,6 +10,7 @@ import { LayoutOptions } from "@/components/generic/layout-options";
 import { NoData } from "@/components/generic/no-data";
 import Search from "@/components/ui/search";
 import { UserCard } from "@/components/users/user-card";
+import { ReactElement } from "react";
 
 interface UsersPageProps {
     users: Array<UserDisplay>;
@@ -22,12 +23,18 @@ interface UsersPageProps {
     };
 }
 
+/**
+ * All users page
+ *
+ * @param {UsersPageProps} props - Component props
+ * @returns {ReactElement} All users page component
+ */
 export const UsersPage = ({
     users,
     usersOrganisations,
     usersRepositories,
     searchParams,
-}: UsersPageProps) => {
+}: UsersPageProps): ReactElement => {
     return (
         <div className="bg-background text-foreground">
             <div className="m-6 mb-0 flex w-1/2 items-center space-x-5">

@@ -11,7 +11,7 @@ import {
     SearchIcon
 } from "lucide-react";
 import Link from "next/link";
-import { Dispatch, RefObject, SetStateAction, useState } from "react";
+import { Dispatch, ReactElement, RefObject, SetStateAction, useState } from "react";
 import type { ImperativePanelGroupHandle } from "react-resizable-panels";
 
 import { CommandBarDialog } from "@/components/command/command-bar-dialog";
@@ -51,6 +51,12 @@ interface EditorNavigationProps {
     repository: Repository;
 }
 
+/**
+ * Navigation component within the editor page
+ *
+ * @param {EditorNavigationProps} props - Component props
+ * @returns {ReactElement} Navigation component
+ */
 export const EditorNavigation = ({
     sidebarProps: {
         horizontalGroupRef,
@@ -73,7 +79,7 @@ export const EditorNavigation = ({
     onStartSimulation,
     onStartSynthesis,
     isGitRepo,
-}: EditorNavigationProps) => {
+}: EditorNavigationProps): ReactElement => {
     const { user } = useUser();
 
     const [commandOpen, setCommandOpen] = useState<boolean>(false);

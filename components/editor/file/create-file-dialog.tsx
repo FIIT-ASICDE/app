@@ -1,7 +1,7 @@
 import { api } from "@/lib/trpc/react";
 import { FileDisplayItem, RepositoryItem } from "@/lib/types/repository";
 import { FileIcon, FilePlus } from "lucide-react";
-import { Dispatch, FormEvent, SetStateAction, useState } from "react";
+import { Dispatch, FormEvent, ReactElement, SetStateAction, useState } from "react";
 import { toast } from "sonner";
 
 import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer/file-explorer-control-button";
@@ -24,6 +24,12 @@ interface CreateFileDialogProps {
     onAction?: () => void;
 }
 
+/**
+ * Dialog that lets the user create a new file within a repository
+ *
+ * @param {CreateFileDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const CreateFileDialog = ({
     repositoryId,
     parentItem,
@@ -31,7 +37,7 @@ export const CreateFileDialog = ({
     tree,
     setTree,
     onAction,
-}: CreateFileDialogProps) => {
+}: CreateFileDialogProps): ReactElement => {
     const [open, setOpen] = useState<boolean>(false);
     const [fileName, setFileName] = useState<string>("");
 

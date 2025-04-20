@@ -57,16 +57,23 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ReactElement } from "react";
 
 interface CreateRepositoryDialogProps {
     usersOrganisations: Array<Omit<OrganisationDisplay, "memberCount">>;
     fromOrg: boolean;
 }
 
+/**
+ * Dialog component that lets the user create a new repository
+ *
+ * @param {CreateRepositoryDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const CreateRepositoryDialog = ({
     usersOrganisations,
     fromOrg,
-}: CreateRepositoryDialogProps) => {
+}: CreateRepositoryDialogProps): ReactElement => {
     const { user } = useUser();
     const router = useRouter();
 

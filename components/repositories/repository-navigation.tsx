@@ -6,14 +6,21 @@ import { usePathname } from "next/navigation";
 
 import { getCurrentPage } from "@/components/generic/generic";
 import { NavigationButton } from "@/components/generic/navigation-button";
+import { ReactElement } from "react";
 
 interface RepositoryNavigationProps {
     repository: Repository;
 }
 
+/**
+ * Navigation component used on the repository page
+ *
+ * @param {RepositoryNavigationProps} props - Component props
+ * @returns {ReactElement} Navigation component
+ */
 export const RepositoryNavigation = ({
     repository,
-}: RepositoryNavigationProps) => {
+}: RepositoryNavigationProps): ReactElement => {
     const pathname: string = usePathname();
     const currentPage: string = getCurrentPage(pathname, 2);
 

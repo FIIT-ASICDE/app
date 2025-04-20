@@ -1,8 +1,14 @@
 import { DescriptionSkeleton } from "@/components/skeletons/description-skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ReactElement } from "react";
 
-export default function Loading() {
+/**
+ * Loading page for overview page for a repository
+ *
+ * @returns {ReactElement} Overview page skeleton component
+ */
+export default function Loading(): ReactElement {
     return (
         <div className="m-6 flex flex-col gap-x-3 md:flex-row">
             <aside className="flex w-full flex-col gap-y-3 md:w-1/3">

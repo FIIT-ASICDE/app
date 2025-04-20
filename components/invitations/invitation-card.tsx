@@ -17,16 +17,23 @@ import {
     CardFooter,
     CardHeader,
 } from "@/components/ui/card";
+import { ReactElement } from "react";
 
 interface InvitationCardProps {
     invitation: Invitation;
     className?: string;
 }
 
+/**
+ * Card component displaying information about an invitation
+ *
+ * @param {InvitationCardProps} props - Component props
+ * @returns {ReactElement} Card component
+ */
 export const InvitationCard = ({
     invitation,
     className,
-}: InvitationCardProps) => {
+}: InvitationCardProps): ReactElement => {
     const invitationSenderLink: string = "/" + invitation.sender.username;
 
     const getInvitationDescription = () => {

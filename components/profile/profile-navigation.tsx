@@ -6,16 +6,23 @@ import { usePathname } from "next/navigation";
 
 import { getCurrentPage } from "@/components/generic/generic";
 import { NavigationButton } from "@/components/generic/navigation-button";
+import { ReactElement } from "react";
 
 interface ProfileNavigationProps {
     profile: User;
     isItMe: boolean;
 }
 
+/**
+ * Navigation component used on the user profile page
+ *
+ * @param {ProfileNavigationProps} props - Component props
+ * @returns {ReactElement} Navigation component
+ */
 export const ProfileNavigation = ({
     profile,
     isItMe,
-}: ProfileNavigationProps) => {
+}: ProfileNavigationProps): ReactElement => {
     const pathname: string = usePathname();
     const currentPage: string = getCurrentPage(pathname, 1);
 

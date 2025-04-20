@@ -3,7 +3,7 @@
 import { api } from "@/lib/trpc/react";
 import type { DirectoryDisplayItem, RepositoryItem } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
-import { Dispatch, DragEvent, SetStateAction, useState } from "react";
+import { Dispatch, DragEvent, ReactElement, SetStateAction, useState } from "react";
 import { toast } from "sonner";
 
 import { FileTreeItem } from "@/components/editor/file/file-tree-item";
@@ -21,6 +21,12 @@ interface FileTreeProps {
     setExpandedItemsAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
 }
 
+/**
+ * Component displaying the whole file tree of a repository
+ *
+ * @param {FileTreeProps} props - Component props
+ * @returns {ReactElement} File tree component
+ */
 export const FileTree = ({
     repositoryId,
     tree,
@@ -30,7 +36,7 @@ export const FileTree = ({
     setSelectedItemAction,
     expandedItems,
     setExpandedItemsAction,
-}: FileTreeProps) => {
+}: FileTreeProps): ReactElement => {
     const [moveDialogOpen, setMoveDialogOpen] = useState<boolean>(false);
     const [sourceItem, setSourceItem] = useState<RepositoryItem | undefined>(
         undefined

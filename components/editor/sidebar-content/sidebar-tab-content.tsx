@@ -7,7 +7,7 @@ import type {
     RepositoryItem,
     RepositoryItemChange,
 } from "@/lib/types/repository";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, ReactElement, SetStateAction } from "react";
 import { z } from "zod";
 
 import { FileExplorerTabContent } from "@/components/editor/sidebar-content/file-explorer/file-explorer-tab-content";
@@ -31,6 +31,12 @@ interface SidebarTabContentProps {
     setConfigurationAction: Dispatch<SetStateAction<Configuration | undefined>>;
 }
 
+/**
+ * Content of the sidebar, can display file explorer, search, source control or configuration
+ *
+ * @param {SidebarTabContentProps} props - Component props
+ * @returns {ReactElement} Sidebar content component
+ */
 export const SidebarTabContent = ({
     activeSidebarContent,
     repository,
@@ -42,7 +48,7 @@ export const SidebarTabContent = ({
     onCommit,
     configuration,
     setConfigurationAction,
-}: SidebarTabContentProps) => {
+}: SidebarTabContentProps): ReactElement => {
     return (
         <div className="flex h-full">
             {activeSidebarContent === "fileExplorer" && (

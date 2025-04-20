@@ -18,7 +18,7 @@ import {
     UserRoundMinus,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 
 import { NoData } from "@/components/generic/no-data";
 import { InvitationCard } from "@/components/invitations/invitation-card";
@@ -34,18 +34,28 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { UserDisplay } from "@/lib/types/user";
 
 interface SettingsPageProps {
     settings: OrganizationSettings;
     tab: OrganisationSettingsTab;
 }
 
-export default function SettingsPage({ tab, settings }: SettingsPageProps) {
+/**
+ * Settings page for organisation profile
+ *
+ * @param {SettingsPageProps} props - Component props
+ * @returns {ReactElement} Settings page component
+ */
+export default function SettingsPage({
+    tab,
+    settings
+}: SettingsPageProps): ReactElement {
     const router = useRouter();
     const organisation: OrganisationDisplay = settings.org;
-    const isUserAdmin = settings.isUserAdmin;
-    const isUserOnlyAdmin = settings.isUserOnlyAdmin;
-    const possibleAdmins = settings.possibleAdmins;
+    const isUserAdmin: boolean | undefined = settings.isUserAdmin;
+    const isUserOnlyAdmin: boolean | undefined = settings.isUserOnlyAdmin;
+    const possibleAdmins: Array<UserDisplay> = settings.possibleAdmins;
 
     const pendingInvitations: Array<Invitation> = settings.pendingInvitations;
     const acceptedInvitations: Array<Invitation> = settings.acceptedInvitations;

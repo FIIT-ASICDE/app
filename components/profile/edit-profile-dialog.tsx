@@ -18,7 +18,7 @@ import {
     UserRoundPen,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, ReactElement, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -56,7 +56,15 @@ interface EditProfileDialogProps {
     profile: OnboardedUser;
 }
 
-export const EditProfileDialog = ({ profile }: EditProfileDialogProps) => {
+/**
+ * Dialog component that lets the user edit their profile
+ *
+ * @param {EditProfileDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
+export const EditProfileDialog = ({
+    profile
+}: EditProfileDialogProps): ReactElement => {
     const { user } = useUser();
     const isItMe: boolean = profile.id === user.id;
 
@@ -147,7 +155,7 @@ export const EditProfileDialog = ({ profile }: EditProfileDialogProps) => {
     };
 
     if (!isItMe) {
-        return undefined;
+        return <></>;
     }
 
     const showSubmitButtonContent = () => {

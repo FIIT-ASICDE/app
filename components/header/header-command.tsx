@@ -2,7 +2,7 @@
 
 import { OnboardedUser } from "@/lib/types/user";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 
 import { CommandBarDialog } from "@/components/command/command-bar-dialog";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,15 @@ interface CommandBarProps {
     user: OnboardedUser;
 }
 
-export const CommandBar = ({ user }: CommandBarProps) => {
+/**
+ * Command bar component used in the header
+ *
+ * @param {CommandBarProps} props - Component props
+ * @returns {ReactElement} Command bar component
+ */
+export const CommandBar = ({
+    user
+}: CommandBarProps): ReactElement => {
     const [commandOpen, setCommandOpen] = useState(false);
 
     return (

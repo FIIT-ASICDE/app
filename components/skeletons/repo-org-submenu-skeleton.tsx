@@ -1,6 +1,6 @@
 import { LayoutGrid, Rows3, SlidersHorizontal } from "lucide-react";
 import { Search as SearchIcon } from "lucide-react";
-import { ElementType } from "react";
+import { ElementType, ReactElement } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,12 +19,17 @@ interface RepoOrgSubmenuProps {
     hideFilter?: boolean;
 }
 
+/**
+ * Skeleton component of a submenu on the repository or the organisation page
+ *
+ * @returns {ReactElement} Skeleton component
+ */
 export const RepoOrgSubmenuSkeleton = ({
     searchText,
     createButton,
     importButton,
     hideFilter,
-}: RepoOrgSubmenuProps) => {
+}: RepoOrgSubmenuProps): ReactElement => {
     return (
         <div className="flex items-center justify-between">
             <div className="m-6 mb-0 flex w-1/2 items-center space-x-5">
