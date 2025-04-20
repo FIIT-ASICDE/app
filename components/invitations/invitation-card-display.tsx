@@ -7,6 +7,7 @@ import { Invitation } from "@/lib/types/invitation";
 import { cn } from "@/lib/utils";
 import { Calendar, CircleCheck, CircleX } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ReactElement } from "react";
 import { toast } from "sonner";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
@@ -25,10 +26,16 @@ interface InvitationCardDisplayProps {
     className?: string;
 }
 
+/**
+ * Card component displaying shortened amount of information about an invitation
+ *
+ * @param {InvitationCardDisplayProps} props - Component props
+ * @returns {ReactElement} Card component
+ */
 export const InvitationCardDisplay = ({
     invitation,
     className,
-}: InvitationCardDisplayProps) => {
+}: InvitationCardDisplayProps): ReactElement => {
     const router = useRouter();
 
     const invitationDisplayData = getInvitationDisplayData(invitation);

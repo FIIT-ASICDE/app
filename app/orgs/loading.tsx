@@ -1,10 +1,16 @@
 import { UserRoundPlus } from "lucide-react";
+import { ReactElement } from "react";
 
 import { OrganisationCardDisplaySkeleton } from "@/components/skeletons/organisation-card-display-skeleton";
 import { RepoOrgSubmenuSkeleton } from "@/components/skeletons/repo-org-submenu-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function Loading() {
+/**
+ * Loading page for all organisations page
+ *
+ * @returns {ReactElement} All organisations page skeleton component
+ */
+export default function Loading(): ReactElement {
     const titleWidths: Array<number> = [32, 36, 24, 44, 48, 28, 24, 40];
 
     return (

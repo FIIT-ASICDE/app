@@ -1,4 +1,11 @@
-export const MicrosoftIcon = () => {
+import { ReactElement } from "react";
+
+/**
+ * Microsoft icon component
+ *
+ * @returns {ReactElement} Icon
+ */
+export const MicrosoftIcon = (): ReactElement => {
     return (
         <svg viewBox="0 0 23 23" className="mr-2 h-5 w-5">
             <path fill="#f35325" d="M1 1h10v10H1z" />

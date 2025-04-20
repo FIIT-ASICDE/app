@@ -4,6 +4,7 @@ import { RepositoryDisplay } from "@/lib/types/repository";
 import { UserDisplay } from "@/lib/types/user";
 import { cn } from "@/lib/utils";
 import { UsersRound } from "lucide-react";
+import { ReactElement } from "react";
 
 import { DynamicPagination } from "@/components/generic/dynamic-pagination";
 import { LayoutOptions } from "@/components/generic/layout-options";
@@ -22,12 +23,18 @@ interface UsersPageProps {
     };
 }
 
+/**
+ * All users page
+ *
+ * @param {UsersPageProps} props - Component props
+ * @returns {ReactElement} All users page component
+ */
 export const UsersPage = ({
     users,
     usersOrganisations,
     usersRepositories,
     searchParams,
-}: UsersPageProps) => {
+}: UsersPageProps): ReactElement => {
     return (
         <div className="bg-background text-foreground">
             <div className="m-6 mb-0 flex w-1/2 items-center space-x-5">

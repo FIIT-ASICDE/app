@@ -1,9 +1,15 @@
 import { Calendar } from "lucide-react";
+import { ReactElement } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export const DescriptionSkeleton = () => {
+/**
+ * Skeleton component of a user/organisation description
+ *
+ * @returns {ReactElement} Skeleton component
+ */
+export const DescriptionSkeleton = (): ReactElement => {
     return (
         <Skeleton>
             <Card>

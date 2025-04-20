@@ -2,7 +2,7 @@ import { api } from "@/lib/trpc/react";
 import { Repository } from "@/lib/types/repository";
 import { CircleX } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 
 import { useUser } from "@/components/context/user-context";
 import { Button } from "@/components/ui/button";
@@ -21,9 +21,15 @@ interface DeleteRepositoryDialogProps {
     repository: Repository;
 }
 
+/**
+ * Dialog component that lets the user delete a repository
+ *
+ * @param {DeleteRepositoryDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const DeleteRepositoryDialog = ({
     repository,
-}: DeleteRepositoryDialogProps) => {
+}: DeleteRepositoryDialogProps): ReactElement => {
     const router = useRouter();
     const { user } = useUser();
 

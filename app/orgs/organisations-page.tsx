@@ -2,6 +2,7 @@ import { PaginationResult } from "@/lib/types/generic";
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 import { Building } from "lucide-react";
+import { ReactElement } from "react";
 
 import { DynamicPagination } from "@/components/generic/dynamic-pagination";
 import { LayoutOptions } from "@/components/generic/layout-options";
@@ -19,10 +20,16 @@ interface OrganisationsPageProps {
     };
 }
 
+/**
+ * All organisations page
+ *
+ * @param {OrganisationsPageProps} props - Component props
+ * @returns {ReactElement} All organisations page component
+ */
 export const OrganisationsPage = ({
     organisations,
     searchParams,
-}: OrganisationsPageProps) => {
+}: OrganisationsPageProps): ReactElement => {
     return (
         <div className="bg-background text-foreground">
             <div className="flex items-center justify-between">

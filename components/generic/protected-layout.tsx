@@ -1,13 +1,23 @@
 import { auth } from "@/auth";
 import { HydrateClient, api } from "@/lib/trpc/server";
 import { RedirectType, redirect } from "next/navigation";
-import React from "react";
+import React, { ReactElement } from "react";
 
 import { UserProvider } from "@/components/context/user-context";
 
+interface ProtectedLayoutProps {
+    children: React.ReactNode;
+}
+
+/**
+ * Layout component that lets only a logged-in user continue
+ *
+ * @param {ProtectedLayoutProps} props - Component props
+ * @returns {Promise<ReactElement>} No data component
+ */
 export default async function ProtectedLayout({
     children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: ProtectedLayoutProps): Promise<ReactElement> {
     const session = await auth();
 
     if (!session || !session.user || !session.user.id) {

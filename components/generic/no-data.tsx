@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { ElementType } from "react";
+import { ElementType, ReactElement } from "react";
 
 interface NoDataProps {
     icon: ElementType;
@@ -7,7 +7,17 @@ interface NoDataProps {
     className?: string;
 }
 
-export const NoData = ({ icon: Icon, message, className }: NoDataProps) => {
+/**
+ * Component that lets the user know there are no data fulfilling their requirements
+ *
+ * @param {NoDataProps} props - Component props
+ * @returns {ReactElement} No data component
+ */
+export const NoData = ({
+    icon: Icon,
+    message,
+    className,
+}: NoDataProps): ReactElement => {
     return (
         <div
             className={cn(

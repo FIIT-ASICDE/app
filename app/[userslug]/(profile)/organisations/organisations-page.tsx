@@ -5,6 +5,7 @@ import {
 } from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 import { Building } from "lucide-react";
+import { ReactElement } from "react";
 
 import { DynamicPagination } from "@/components/generic/dynamic-pagination";
 import { LayoutOptions } from "@/components/generic/layout-options";
@@ -25,11 +26,17 @@ interface OrganisationsPageProps {
     isItMe: boolean;
 }
 
+/**
+ * Organisations page for user profile
+ *
+ * @param {OrganisationsPageProps} props - Component props
+ * @returns {ReactElement} Organisations page component
+ */
 export default function OrganisationsPage({
     usersOrganisations,
     searchParams,
     isItMe,
-}: OrganisationsPageProps) {
+}: OrganisationsPageProps): ReactElement {
     return (
         <div className="bg-background text-foreground">
             <div className="flex items-center justify-between">

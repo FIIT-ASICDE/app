@@ -6,7 +6,7 @@ import { Repository } from "@/lib/types/repository";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FileText, Loader2, Pen, Save, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -42,9 +42,15 @@ interface EditRepositoryDialogProps {
     repository: Repository;
 }
 
+/**
+ * Dialog component that lets the user edit a repository
+ *
+ * @param {EditRepositoryDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const EditRepositoryDialog = ({
     repository,
-}: EditRepositoryDialogProps) => {
+}: EditRepositoryDialogProps): ReactElement => {
     const router = useRouter();
     const form = useForm<z.infer<typeof editRepositoryFormSchema>>({
         resolver: zodResolver(editRepositoryFormSchema),

@@ -3,6 +3,7 @@
 import { User } from "@/lib/types/user";
 import { BookUser, Building, Folders, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { ReactElement } from "react";
 
 import { getCurrentPage } from "@/components/generic/generic";
 import { NavigationButton } from "@/components/generic/navigation-button";
@@ -12,10 +13,16 @@ interface ProfileNavigationProps {
     isItMe: boolean;
 }
 
+/**
+ * Navigation component used on the user profile page
+ *
+ * @param {ProfileNavigationProps} props - Component props
+ * @returns {ReactElement} Navigation component
+ */
 export const ProfileNavigation = ({
     profile,
     isItMe,
-}: ProfileNavigationProps) => {
+}: ProfileNavigationProps): ReactElement => {
     const pathname: string = usePathname();
     const currentPage: string = getCurrentPage(pathname, 1);
 

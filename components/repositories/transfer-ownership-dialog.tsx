@@ -3,7 +3,7 @@ import { api } from "@/lib/trpc/react";
 import { Repository } from "@/lib/types/repository";
 import { SquareArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 import { toast } from "sonner";
 
 import { useUser } from "@/components/context/user-context";
@@ -33,9 +33,15 @@ interface TransferOwnershipDialogProps {
     repository: Repository;
 }
 
+/**
+ * Dialog component that lets the user transfer the ownership of a repository
+ *
+ * @param {TransferOwnershipDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const TransferOwnershipDialog = ({
     repository,
-}: TransferOwnershipDialogProps) => {
+}: TransferOwnershipDialogProps): ReactElement => {
     const { user } = useUser();
     const router = useRouter();
 

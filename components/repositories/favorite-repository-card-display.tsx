@@ -2,6 +2,7 @@ import { imgSrc } from "@/lib/client-file-utils";
 import { RepositoryDisplay } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { Star } from "lucide-react";
+import { ReactElement } from "react";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
@@ -14,10 +15,16 @@ interface FavoriteRepositoryCardDisplayProps {
     className?: string;
 }
 
+/**
+ * Card component that displays shortened amount of information about a favorite repository
+ *
+ * @param {FavoriteRepositoryCardDisplayProps} props - Component props
+ * @returns {ReactElement} Card component
+ */
 export const FavoriteRepositoryCardDisplay = ({
     repository,
     className,
-}: FavoriteRepositoryCardDisplayProps) => {
+}: FavoriteRepositoryCardDisplayProps): ReactElement => {
     const repositoryDisplayName: string =
         repository.ownerName + "/" + repository.name;
     const repositoryLink: string = "/" + repositoryDisplayName;

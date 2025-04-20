@@ -1,18 +1,26 @@
 import { api } from "@/lib/trpc/server";
 import { TRPCError } from "@trpc/server";
-import React from "react";
+import React, { ReactElement } from "react";
 
 import Header from "@/components/header/header";
 import { RepositoryHeader } from "@/components/repositories/repository-header";
 import { Separator } from "@/components/ui/separator";
 
+interface RepositoryLayoutProps {
+    children: React.ReactNode;
+    params: Promise<{ userslug: string; repositoryslug: string }>;
+}
+
+/**
+ * Layout for a repository page
+ *
+ * @param {RepositoryLayoutProps} props - Component props
+ * @returns {Promise<ReactElement>} Repository layout component
+ */
 export default async function RepositoryLayout({
     children,
     params,
-}: {
-    children: React.ReactNode;
-    params: Promise<{ userslug: string; repositoryslug: string }>;
-}) {
+}: RepositoryLayoutProps): Promise<ReactElement> {
     const { userslug, repositoryslug } = await params;
 
     try {

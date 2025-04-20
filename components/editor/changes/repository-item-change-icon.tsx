@@ -1,16 +1,23 @@
 import { RepositoryItemChange } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { CircleDot, CirclePlus, CircleX, MoveUpRight, Pen } from "lucide-react";
+import { ReactElement } from "react";
 
-interface ItemChangeIconProps {
+interface RepositoryItemChangeIconProps {
     itemChange: RepositoryItemChange;
     className?: string;
 }
 
+/**
+ * Icon corresponding to the type of change on a repository item
+ *
+ * @param {RepositoryItemChangeIconProps} props - Component props
+ * @returns {ReactElement} Icon
+ */
 export const RepositoryItemChangeIcon = ({
     itemChange,
     className,
-}: ItemChangeIconProps) => {
+}: RepositoryItemChangeIconProps): ReactElement => {
     const fullClassName: string = cn("w-4 h-4", className);
 
     switch (itemChange.change.type) {

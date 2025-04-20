@@ -11,6 +11,7 @@ import {
 import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
+import { ReactElement } from "react";
 
 import { useUser } from "@/components/context/user-context";
 import { DeleteAccountDialog } from "@/components/profile/delete-account-dialog";
@@ -30,14 +31,23 @@ interface SettingsPageProps {
     tab: UserSettingsTab;
 }
 
-export default function SettingsPage({ userSlug, tab }: SettingsPageProps) {
+/**
+ * Settings page for user profile
+ *
+ * @param {SettingsPageProps} props - Component props
+ * @returns {ReactElement} Settings page component
+ */
+export default function SettingsPage({
+    userSlug,
+    tab,
+}: SettingsPageProps): ReactElement {
     const { user } = useUser();
     const router = useRouter();
     const { theme, setTheme } = useTheme();
 
     if (userSlug !== user.username) {
         router.back();
-        return;
+        return <></>;
     }
 
     return (

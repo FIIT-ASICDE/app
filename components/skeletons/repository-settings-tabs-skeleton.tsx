@@ -1,9 +1,15 @@
 import { Folder, Mail, TriangleAlert, UsersRound } from "lucide-react";
+import { ReactElement } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export const RepositorySettingsTabsSkeleton = () => {
+/**
+ * Skeleton component of a tabs component on the repository settings page
+ *
+ * @returns {ReactElement} Skeleton component
+ */
+export const RepositorySettingsTabsSkeleton = (): ReactElement => {
     return (
         <Skeleton className="bg-transparent">
             <div className="flex w-full flex-row gap-3 md:flex-col">

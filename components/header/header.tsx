@@ -1,12 +1,18 @@
 import { auth } from "@/auth";
 import { api } from "@/lib/trpc/server";
 import Link from "next/link";
+import { ReactElement } from "react";
 
 import { CommandBar } from "@/components/header/header-command";
 import { NavigationLoggedIn } from "@/components/header/navigation/navigation-logged-in";
 import LogoIcon from "@/components/icons/logo";
 
-export default async function Header() {
+/**
+ * Header component containing the logo, command bar and a navigation
+ *
+ * @returns {Promise<ReactElement>} Header component
+ */
+export default async function Header(): Promise<ReactElement> {
     const session = await auth();
 
     const user = session ? await api.user.byId(session.user.id) : undefined;

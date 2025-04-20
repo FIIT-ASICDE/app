@@ -2,7 +2,7 @@
 
 import { Repository } from "@/lib/types/repository";
 import { SearchIcon } from "lucide-react";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 
 import { CloseButton } from "@/components/editor/navigation/close-button";
 import { Input } from "@/components/ui/input";
@@ -14,22 +14,28 @@ interface SearchTabContentProps {
     handleCloseSidebarAction: () => void;
 }
 
+/**
+ * Tab content component that lets the user search for items within the repository
+ *
+ * @param {SearchTabContentProps} props - Component props
+ * @returns {ReactElement} Tab content component
+ */
 export const SearchTabContent = ({
     repository,
     handleCloseSidebarAction,
-}: SearchTabContentProps) => {
+}: SearchTabContentProps): ReactElement => {
     const [repositorySearchTerm, setRepositorySearchTerm] =
         useState<string>("");
 
     return (
-        <div className="flex flex-col h-full w-full relative">
-            <header className="flex flex-col gap-y-3 p-4 w-full">
+        <div className="relative flex h-full w-full flex-col">
+            <header className="flex w-full flex-col gap-y-3 p-4">
                 <div className="flex flex-row items-center justify-between gap-x-3">
-                    <span className="font-medium text-lg pr-8">Search</span>
+                    <span className="pr-8 text-lg font-medium">Search</span>
                     <CloseButton
                         onClick={handleCloseSidebarAction}
                         tooltip="Close sidebar"
-                        className="absolute top-4 right-4"
+                        className="absolute right-4 top-4"
                     />
                 </div>
             </header>

@@ -1,10 +1,11 @@
 "use client";
 
 import { commitSchema } from "@/lib/schemas/git-schemas";
-import { api, RouterInputs } from "@/lib/trpc/react";
+import { RouterInputs, api } from "@/lib/trpc/react";
 import type {
-    BottomPanelContentTab, Configuration,
-    SidebarContentTab
+    BottomPanelContentTab,
+    Configuration,
+    SidebarContentTab,
 } from "@/lib/types/editor";
 import type {
     FileDisplayItem,
@@ -12,12 +13,21 @@ import type {
     RepositoryItem,
 } from "@/lib/types/repository";
 import dynamic from "next/dynamic";
-import { type ElementRef, RefObject, useEffect, useRef, useState } from "react";
+import {
+    type ElementRef,
+    ReactElement,
+    RefObject,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
+import { ImperativePanelGroupHandle } from "react-resizable-panels";
 import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
 import { z } from "zod";
 
 import { BottomPanelTabContent } from "@/components/editor/bottom-panel-content/bottom-panel-tab-content";
+import { EditorTabs } from "@/components/editor/editor-tabs";
 import { EditorNavigation } from "@/components/editor/navigation/editor-navigation";
 import { SidebarTabContent } from "@/components/editor/sidebar-content/sidebar-tab-content";
 import {
@@ -25,8 +35,6 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { EditorTabs } from "@/components/editor/editor-tabs";
-import { ImperativePanelGroupHandle } from "react-resizable-panels";
 
 interface EditorPageProps {
     repository: Repository;
@@ -38,7 +46,16 @@ const DynamicEditor = dynamic(() => import("@/components/editor/editor"), {
     ssr: false,
 });
 
-export default function EditorPage({ repository, lastSimulation }: EditorPageProps) {
+/**
+ * Editor page
+ *
+ * @param {EditorPageProps} props - Component props
+ * @returns {ReactElement} Editor page component
+ */
+export default function EditorPage({
+    repository,
+    lastSimulation,
+}: EditorPageProps): ReactElement {
     const [activeSidebarContent, setActiveSidebarContent] =
         useState<SidebarContentTab>("fileExplorer");
     const [activeBottomPanelContent, setActiveBottomPanelContent] =
@@ -59,10 +76,12 @@ export default function EditorPage({ repository, lastSimulation }: EditorPagePro
     const [activeFile, setActiveFile] = useState<FileDisplayItem | null>(null);
     const [openFiles, setOpenFiles] = useState<Array<FileDisplayItem>>([]);
 
-    const [configuration, setConfiguration] = useState<Configuration | undefined>(undefined);
+    const [configuration, setConfiguration] = useState<
+        Configuration | undefined
+    >(undefined);
 
     useEffect(() => {
-        const conf: string | null = localStorage.getItem('configuration');
+        const conf: string | null = localStorage.getItem("configuration");
         if (conf) {
             setConfiguration(JSON.parse(conf));
         }
@@ -95,29 +114,41 @@ export default function EditorPage({ repository, lastSimulation }: EditorPagePro
         },
     });
 
-    const [verilatorCppInput, setVerilatorCppInput] = useState<RouterInputs["simulation"]["simulateVerilatorCppStream"] | null>(null);
+    const [verilatorCppInput, setVerilatorCppInput] = useState<
+        RouterInputs["simulation"]["simulateVerilatorCppStream"] | null
+    >(null);
 
-    const resultVerilatorCpp = api.simulation.simulateVerilatorCppStream.useQuery(verilatorCppInput!, {
-        enabled: !!verilatorCppInput,
-    });
+    const resultVerilatorCpp =
+        api.simulation.simulateVerilatorCppStream.useQuery(verilatorCppInput!, {
+            enabled: !!verilatorCppInput,
+        });
 
+    const [verilatorSvInput, setVerilatorSvInput] = useState<
+        RouterInputs["simulation"]["simulateVerilatorSvStream"] | null
+    >(null);
 
-    const [verilatorSvInput, setVerilatorSvInput] = useState<RouterInputs["simulation"]["simulateVerilatorSvStream"] | null>(null);
+    const resultVerilatorSv = api.simulation.simulateVerilatorSvStream.useQuery(
+        verilatorSvInput!,
+        {
+            enabled: !!verilatorSvInput,
+        },
+    );
 
-    const resultVerilatorSv = api.simulation.simulateVerilatorSvStream.useQuery(verilatorSvInput!, {
-        enabled: !!verilatorSvInput,
-    });
+    const [icarusInput, setIcarusInput] = useState<
+        RouterInputs["simulation"]["simulateIcarusVerilogStream"] | null
+    >(null);
 
-    const [icarusInput, setIcarusInput] = useState<RouterInputs["simulation"]["simulateIcarusVerilogStream"] | null>(null);
-
-    const resultIcarus = api.simulation.simulateIcarusVerilogStream.useQuery(icarusInput!, {
-        enabled: !!icarusInput,
-    });
+    const resultIcarus = api.simulation.simulateIcarusVerilogStream.useQuery(
+        icarusInput!,
+        {
+            enabled: !!icarusInput,
+        },
+    );
 
     const onStartSimulation = () => {
         // TODO: adam start simulation
-        console.log(configuration?.simulation.type)
-        console.log(configuration?.simulation.testBench)
+        console.log(configuration?.simulation.type);
+        console.log(configuration?.simulation.testBench);
 
         // simulateMutation.mutate({
         //     repoId: repository.id,
@@ -125,15 +156,14 @@ export default function EditorPage({ repository, lastSimulation }: EditorPagePro
         //     svPath: selectedSvFile.absolutePath
         // });
 
-
         console.log(
             "Starting simulation with type: " +
-            configuration?.simulation.type +
-            " and file: " +
-            configuration?.simulation.testBench,
+                configuration?.simulation.type +
+                " and file: " +
+                configuration?.simulation.testBench,
         );
 
-        if(configuration?.simulation.type === "verilatorC++") {
+        if (configuration?.simulation.type === "verilatorC++") {
             const newInput = {
                 repoId: repository.id,
                 testbenchPath: configuration?.simulation.testBench.absolutePath,
@@ -141,8 +171,7 @@ export default function EditorPage({ repository, lastSimulation }: EditorPagePro
             setVerilatorCppInput(newInput); // <- toto spustí subscription
         }
 
-
-        if(configuration?.simulation.type === "verilatorSystemVerilog") {
+        if (configuration?.simulation.type === "verilatorSystemVerilog") {
             const newInput = {
                 repoId: repository.id,
                 testbenchPath: configuration?.simulation.testBench.absolutePath,
@@ -150,7 +179,7 @@ export default function EditorPage({ repository, lastSimulation }: EditorPagePro
             setVerilatorSvInput(newInput); // <- toto spustí subscription
         }
 
-        if(configuration?.simulation.type === "icarusVerilog") {
+        if (configuration?.simulation.type === "icarusVerilog") {
             const newInput = {
                 repoId: repository.id,
                 testbenchPath: configuration?.simulation.testBench.absolutePath,
@@ -188,7 +217,7 @@ export default function EditorPage({ repository, lastSimulation }: EditorPagePro
             "Starting synthesis with type: " +
                 configuration?.synthesis.type +
                 " and file: " +
-                configuration?.synthesis.file.absolutePath
+                configuration?.synthesis.file.absolutePath,
         );
     };
 
@@ -205,8 +234,16 @@ export default function EditorPage({ repository, lastSimulation }: EditorPagePro
             language: item.language,
         };
 
-        if (!openFiles.some((file: FileDisplayItem) => file.absolutePath === item.absolutePath)) {
-            setOpenFiles((prevFiles: Array<FileDisplayItem>) => [...prevFiles, fileDisplay]);
+        if (
+            !openFiles.some(
+                (file: FileDisplayItem) =>
+                    file.absolutePath === item.absolutePath,
+            )
+        ) {
+            setOpenFiles((prevFiles: Array<FileDisplayItem>) => [
+                ...prevFiles,
+                fileDisplay,
+            ]);
         }
         setActiveFile(fileDisplay);
     };
@@ -377,7 +414,12 @@ export default function EditorPage({ repository, lastSimulation }: EditorPagePro
                         activeBottomPanelContent={activeBottomPanelContent}
                         handleCloseBottomPanel={handleCloseBottomPanel}
                         configuration={configuration}
-                        simulationOutput={resultVerilatorCpp.data ?? resultIcarus.data ?? resultVerilatorSv.data ?? []}
+                        simulationOutput={
+                            resultVerilatorCpp.data ??
+                            resultIcarus.data ??
+                            resultVerilatorSv.data ??
+                            []
+                        }
                         lastSimulation={lastSimulation}
                     />
                 </ResizablePanel>

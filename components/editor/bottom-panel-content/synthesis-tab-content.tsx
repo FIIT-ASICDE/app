@@ -1,18 +1,25 @@
+import { Configuration } from "@/lib/types/editor";
 import { ChevronRight } from "lucide-react";
+import { ReactElement } from "react";
 
 import { CloseButton } from "@/components/editor/navigation/close-button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Configuration } from "@/lib/types/editor";
 
 interface SynthesisTabContentProps {
     handleCloseBottomPanel: () => void;
     configuration: Configuration | undefined;
 }
 
+/**
+ * Synthesis tab content for the bottom panel on editor page
+ *
+ * @param {SynthesisTabContentProps} props - Component props
+ * @returns {ReactElement} Synthesis tab content component
+ */
 export const SynthesisTabContent = ({
     handleCloseBottomPanel,
     configuration,
-}: SynthesisTabContentProps) => {
+}: SynthesisTabContentProps): ReactElement => {
     return (
         <div className="relative w-full text-nowrap p-4 pt-14">
             <header className="absolute left-4 right-4 top-4 flex flex-row items-center justify-between">
@@ -31,8 +38,13 @@ export const SynthesisTabContent = ({
                         </span>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-muted-foreground text-sm">Type: {configuration?.synthesis.type}</span>
-                        <span className="text-muted-foreground text-sm">TestBench: {configuration?.synthesis.file.absolutePath}</span>
+                        <span className="text-sm text-muted-foreground">
+                            Type: {configuration?.synthesis.type}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                            TestBench:{" "}
+                            {configuration?.synthesis.file.absolutePath}
+                        </span>
                     </div>
                 </div>
             </ScrollArea>

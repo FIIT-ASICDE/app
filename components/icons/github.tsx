@@ -1,10 +1,19 @@
 import { cn } from "@/lib/utils";
+import { ReactElement } from "react";
 
 interface GithubIconProps {
     className?: string;
 }
 
-export default function GithubIcon({ className }: GithubIconProps) {
+/**
+ * Github icon component
+ *
+ * @param {GithubIconProps} props - Component props
+ * @returns {ReactElement} Icon
+ */
+export default function GithubIcon({
+    className,
+}: GithubIconProps): ReactElement {
     return (
         <svg viewBox="0 0 24 24" className={cn("h-5 w-5", className)}>
             <path

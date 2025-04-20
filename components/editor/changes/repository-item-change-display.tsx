@@ -1,22 +1,28 @@
 import { RepositoryItemChange } from "@/lib/types/repository";
 import { FileIcon } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, ReactElement, SetStateAction } from "react";
 
 import { getChangeContent } from "@/components/generic/generic";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
-interface ItemChangeDisplayProps {
+interface RepositoryItemChangeDisplayProps {
     itemChange: RepositoryItemChange;
     changesSelected: Array<RepositoryItemChange>;
     setChangesSelected: Dispatch<SetStateAction<Array<RepositoryItemChange>>>;
 }
 
+/**
+ * Component displaying a change on a repository item
+ *
+ * @param {RepositoryItemChangeDisplayProps} props - Component props
+ * @returns {ReactElement} Item change component
+ */
 export const RepositoryItemChangeDisplay = ({
     itemChange,
     changesSelected,
     setChangesSelected,
-}: ItemChangeDisplayProps) => {
+}: RepositoryItemChangeDisplayProps): ReactElement => {
     const handleCheckboxChange = (
         itemChange: RepositoryItemChange,
         newChecked: boolean,

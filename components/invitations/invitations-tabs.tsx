@@ -3,7 +3,7 @@
 import { InvitationsTab } from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 import { CircleCheck, CircleDot, CircleX } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, ReactElement, SetStateAction } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -12,10 +12,16 @@ interface InvitationsTabsProps {
     setTabAction: Dispatch<SetStateAction<InvitationsTab>>;
 }
 
+/**
+ * Tabs component used on invitations page
+ *
+ * @param {InvitationsTabsProps} props - Component props
+ * @returns {ReactElement} Tabs component
+ */
 export const InvitationsTabs = ({
     tab,
     setTabAction,
-}: InvitationsTabsProps) => {
+}: InvitationsTabsProps): ReactElement => {
     return (
         <div className="flex w-full flex-row gap-3">
             <Button

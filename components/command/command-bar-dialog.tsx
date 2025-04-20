@@ -1,7 +1,7 @@
 import { CommandElementGroup } from "@/lib/types/generic";
 import { OnboardedUser } from "@/lib/types/user";
 import Link from "next/link";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, ReactElement, SetStateAction } from "react";
 
 import { CommandOptions } from "@/components/command/command-options";
 import {
@@ -20,12 +20,17 @@ interface CommandBarDialogProps {
     commandOpen: boolean;
     setCommandOpen: Dispatch<SetStateAction<boolean>>;
 }
-
+/**
+ * Command bar dialog for quick navigation from the header
+ *
+ * @param {CommandBarDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const CommandBarDialog = ({
     user,
     commandOpen,
     setCommandOpen,
-}: CommandBarDialogProps) => {
+}: CommandBarDialogProps): ReactElement => {
     const commandOptions: Array<CommandElementGroup> = CommandOptions({ user });
 
     return (
