@@ -3,6 +3,7 @@ import { gitRouter } from "@/lib/server/api/routers/git";
 import { orgRouter } from "@/lib/server/api/routers/orgs";
 import { repoRouter } from "@/lib/server/api/routers/repos";
 import { simulationRouter } from "@/lib/server/api/routers/simulation";
+import { synthesisRouter } from "@/lib/server/api/routers/synthesis";
 import { userRouter } from "@/lib/server/api/routers/user";
 import { createCallerFactory, createTRPCRouter } from "@/lib/server/api/trpc";
 
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
     git: gitRouter,
     editor: editorRouter,
     simulation: simulationRouter,
+    synthesis: synthesisRouter,
 });
 
 // export type definition of API

@@ -34,6 +34,8 @@ export type Configuration = {
     synthesis: SynthesisConfiguration;
 };
 
+type SynthesisOutput = "info" | "error" | "warning";
+
 export type SimulationTab = "all" | "errors" | "lastSimulation";
 
 type SimulationOutputType = "info" | "error" | "warning";

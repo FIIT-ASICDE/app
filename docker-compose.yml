@@ -8,3 +8,13 @@
       image: transpilation-app
       ports:
         - "8080:8080"
+    
+    yosys:
+      build:
+        context: ./path-to-your-dockerfile
+        dockerfile: Dockerfile
+      image: yosys
+      volumes:
+        - ./public/synthesis-app:/yosys_workspace
+      stdin_open: true
+      tty: true
