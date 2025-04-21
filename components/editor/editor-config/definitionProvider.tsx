@@ -1,6 +1,16 @@
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { symbolTableManager } from "@/app/antlr/SystemVerilog/symbolTable";
-import { FileItem, FileDisplayItem } from "@/lib/types/repository";
+import { trpcClient } from "@/lib/trpc/client";
+
+function extractRepoInfoFromUri(uri: monaco.Uri) {
+  const pathParts = decodeURIComponent(uri.path).replace(/^\/+/, "").split("/");
+
+  const ownerSlug = decodeURIComponent(uri.authority);
+  const repositorySlug = pathParts.shift() || "";
+  const path = pathParts.join("/");
+
+  return { ownerSlug, repositorySlug, path };
+}
 
 export function registerDefinitionProvider(
   language: string,
@@ -15,25 +25,59 @@ export function registerDefinitionProvider(
       if (!word) return;
 
       const allSymbols = Object.values(symbolTableManager.getAllSymbols());
-
       const symbol = allSymbols.find((s) => s.name === word.word);
       if (!symbol) return;
 
-      // Create a proper URI for the target file
-      const targetUri = monaco.Uri.parse(`inmemory://${symbol.uri}`);
+      const targetUri = monaco.Uri.parse(symbol.uri);
+      let targetModel = monaco.editor.getModel(targetUri);
+
+      if (!targetModel) {
+        try {
+          const { ownerSlug, repositorySlug, path } = extractRepoInfoFromUri(targetUri);
+
+          const fileResult = await trpcClient.repo.loadRepoItem.query({
+            ownerSlug,
+            repositorySlug,
+            path,
+          });
+
+          if (fileResult.type === "file") {
+            try {
+              const maybeExisting = monaco.editor.getModel(targetUri);
+              if (!maybeExisting) {
+                targetModel = monaco.editor.createModel(fileResult.content, "systemverilog", targetUri);
+              } else {
+                targetModel = maybeExisting;
+              }
+            } catch (e: any) {
+              if (e.message?.includes("already exists")) {
+                targetModel = monaco.editor.getModel(targetUri);
+              } else {
+                throw e;
+              }
+            }
+          }
+          
+        } catch (err) {
+          return;
+        }
+      }
+
+      if (!targetModel) {
+        return;
+      }
+
       const range = new monaco.Range(
         symbol.line,
-        symbol.column,
+        symbol.column + 1,
         symbol.line,
-        symbol.column + symbol.name.length
+        symbol.column + symbol.name.length + 1
       );
 
-      // Store the navigation state for potential custom handling
       if (pendingNavigationRef) {
         pendingNavigationRef.current = { uri: targetUri, range };
       }
 
-      // Return the location to allow editor navigation
       return { uri: targetUri, range };
     },
   });

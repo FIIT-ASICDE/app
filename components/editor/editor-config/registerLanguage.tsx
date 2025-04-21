@@ -1,7 +1,6 @@
 import { loadSnippets } from "./snippets";
 import { registerDefinitionProvider } from "./definitionProvider";
 
-import { FileItem, FileDisplayItem } from "@/lib/types/repository";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 
 export async function registerLanguageSupport(

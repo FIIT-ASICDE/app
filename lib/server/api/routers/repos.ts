@@ -1682,10 +1682,12 @@ export async function ownerBySlug(
             image: organization.image || undefined,
         };
     }
-
     const user = await prisma.user.findFirst({
         select: { id: true, name: true, image: true },
-        where: { name: decodedOwnerSlug },
+        where: { name: {
+            equals: decodedOwnerSlug,
+            mode: "insensitive",
+          }, },
     });
 
     if (!user) {

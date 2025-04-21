@@ -302,9 +302,17 @@ export default function EditorPage({ repository }: EditorPageProps) {
     }, []);
 
     const handleEditorReady = useCallback(() => {
-        console.log("[EditorPage] Editor is ready, initializing symbol table");
         if (repository.symbolTable) {
-            symbolTableManager.initializeWithData(repository.symbolTable);
+            symbolTableManager.initializeWithData({
+                ...repository.symbolTable,
+                fileSymbols: {
+                    ...repository.symbolTable.fileSymbols,
+                    symbols: repository.symbolTable.fileSymbols.symbols.map(symbol => ({
+                        ...symbol,
+                        type: "typedef" as const,
+                    })),
+                },
+            });
         } else {
             symbolTableManager.initialize();
         }

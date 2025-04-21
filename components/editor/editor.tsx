@@ -94,10 +94,10 @@ export default function Editor({
           event.target.type === monaco.editor.MouseTargetType.CONTENT_TEXT
         ) {
           const { uri, range } = pendingNavigationRef.current;
-
+      
           if (onOpenFile) {
             const fileName = uri.path.split("/").pop() || "untitled";
-
+          
             onOpenFile({
               type: "file-display",
               name: fileName,
@@ -105,22 +105,29 @@ export default function Editor({
               language: "systemverilog",
               lastActivity: new Date(),
             });
+          
+            const tryJump = () => {
+              const model = monaco.editor.getModel(uri);
+              if (model && editorRef.current) {
+                if (model.getValue().length === 0) {
+                  setTimeout(tryJump, 50);
+                  return;
+                }
 
-            const disposable = monaco.editor.onDidCreateEditor((editor) => {
-              if (editor.getModel()?.uri.toString() === uri.toString()) {
-                editor.setPosition({
+                editorRef.current.setModel(model);
+                editorRef.current.setPosition({
                   lineNumber: range.startLineNumber,
                   column: range.startColumn,
                 });
-                editor.revealRangeInCenter(range);
-                editor.focus();
-                disposable.dispose();
+                editorRef.current.revealRangeInCenter(range);
+                editorRef.current.focus();
+                pendingNavigationRef.current = null;
+              } else {
+                setTimeout(tryJump, 50);
               }
-            });
-
-            pendingNavigationRef.current = null;
-            event.event.preventDefault();
-            event.event.stopPropagation();
+            };
+          
+            setTimeout(tryJump, 100);
           }
         }
       });
