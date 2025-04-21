@@ -18,7 +18,9 @@ import {
     type ElementRef,
     ReactElement,
     RefObject,
+    useCallback,
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from "react";
@@ -36,6 +38,7 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { symbolTableManager } from "@/app/antlr/SystemVerilog/symbolTable";
 
 interface EditorPageProps {
     repository: Repository;
@@ -227,34 +230,6 @@ export default function EditorPage({
             handleOpenFile(item);
         }
     };
-
-    //   const openFileByPath = (item: FileDisplayItem | FileItem) => {
-    //     const absolutePath = item.absolutePath.toLowerCase();
-      
-    //     const existingFile = openFiles.find(
-    //       (f) => f.absolutePath.toLowerCase() === absolutePath
-    //     );
-      
-    //     if (existingFile) {
-    //       setActiveFile(existingFile);
-    //       return;
-    //     }
-      
-    //     const newFile: FileDisplayItem = {
-    //       type: "file-display",
-    //       name: item.name,
-    //       absolutePath: item.absolutePath,
-    //       language: item.language,
-    //       lastActivity: item.lastActivity,
-    //     };
-      
-    //     setOpenFiles((prev) => {
-    //         const exists = prev.some((f) => f.absolutePath.toLowerCase() === newFile.absolutePath.toLowerCase());
-    //         return exists ? prev : [...prev, newFile];
-    //       });
-    //     setActiveFile(newFile);
-    //   };
-      
 
     const handleTabSwitch = (item: FileDisplayItem) => {
         setActiveFile(item);

@@ -114,7 +114,6 @@ export interface BaseSymbolInfo {
         }
       
         isInitialized = true;
-        //this.debug();
       },
       
   
