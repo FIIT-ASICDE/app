@@ -1,9 +1,16 @@
 import { api } from "@/lib/trpc/react";
 import { RepositoryItem } from "@/lib/types/repository";
 import { X } from "lucide-react";
-import { Dispatch, FormEvent, SetStateAction, useState } from "react";
+import {
+    Dispatch,
+    FormEvent,
+    ReactElement,
+    SetStateAction,
+    useState,
+} from "react";
 import { toast } from "sonner";
 
+import { deleteItemFromTree } from "@/components/generic/generic";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -14,7 +21,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { deleteItemFromTree } from "@/components/generic/generic";
 
 interface DeleteItemDialogProps {
     repositoryId: string;
@@ -24,13 +30,19 @@ interface DeleteItemDialogProps {
     onAction?: () => void;
 }
 
+/**
+ * Dialog that lets the user delete an item from a repository
+ *
+ * @param {DeleteItemDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const DeleteItemDialog = ({
     repositoryId,
     repositoryItem,
     tree,
     setTree,
     onAction,
-}: DeleteItemDialogProps) => {
+}: DeleteItemDialogProps): ReactElement => {
     const [open, setOpen] = useState<boolean>(false);
 
     const itemDisplayType: string =
@@ -44,7 +56,7 @@ export const DeleteItemDialog = ({
 
             const updatedTree: Array<RepositoryItem> = deleteItemFromTree(
                 tree,
-                repositoryItem.absolutePath
+                repositoryItem.absolutePath,
             );
             setTree(updatedTree);
 

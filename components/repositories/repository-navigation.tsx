@@ -3,6 +3,7 @@
 import { Repository } from "@/lib/types/repository";
 import { BookUser, Code, CodeXml, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { ReactElement } from "react";
 
 import { getCurrentPage } from "@/components/generic/generic";
 import { NavigationButton } from "@/components/generic/navigation-button";
@@ -11,9 +12,15 @@ interface RepositoryNavigationProps {
     repository: Repository;
 }
 
+/**
+ * Navigation component used on the repository page
+ *
+ * @param {RepositoryNavigationProps} props - Component props
+ * @returns {ReactElement} Navigation component
+ */
 export const RepositoryNavigation = ({
     repository,
-}: RepositoryNavigationProps) => {
+}: RepositoryNavigationProps): ReactElement => {
     const pathname: string = usePathname();
     const currentPage: string = getCurrentPage(pathname, 2);
 

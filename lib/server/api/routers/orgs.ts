@@ -1,3 +1,4 @@
+import { $Enums, Organization, OrganizationRole } from "@/lib/prisma";
 import {
     createOrgProcedureSchema,
     editOrganisationProcedureSchema,
@@ -19,7 +20,6 @@ import {
 } from "@/lib/types/organisation";
 import { UserDisplay } from "@/lib/types/user";
 import { PrismaType } from "@/prisma";
-import { $Enums, Organization, OrganizationRole } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { Session } from "next-auth";
 import { z } from "zod";

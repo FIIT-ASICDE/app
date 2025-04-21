@@ -6,6 +6,7 @@ import { Repository } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { Pin, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ReactElement } from "react";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
@@ -24,11 +25,17 @@ interface RepositoryCardProps {
     className?: string;
 }
 
+/**
+ * Card component that displays information about a repository
+ *
+ * @param {RepositoryCardProps} props - Component props
+ * @returns {ReactElement} Card component
+ */
 export default function RepositoryCard({
     repository,
     isUserOwner,
     className,
-}: RepositoryCardProps) {
+}: RepositoryCardProps): ReactElement {
     const router = useRouter();
 
     const repositoryDisplayName: string =

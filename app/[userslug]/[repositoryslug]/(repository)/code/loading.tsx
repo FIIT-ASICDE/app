@@ -1,11 +1,17 @@
 import { Search as SearchIcon } from "lucide-react";
+import { ReactElement } from "react";
 
 import { FileExplorerSkeleton } from "@/components/skeletons/file-explorer-skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function Loading() {
+/**
+ * Loading page for code page for a repository
+ *
+ * @returns {ReactElement} Code page skeleton component
+ */
+export default function Loading(): ReactElement {
     return (
         <div>
             <div className="flex items-center justify-between">

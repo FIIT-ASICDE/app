@@ -1,5 +1,6 @@
 import { imgSrc } from "@/lib/client-file-utils";
 import { GithubRepoDisplay } from "@/lib/types/repository";
+import { ReactElement } from "react";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
@@ -9,9 +10,15 @@ interface SelectRepositoryItemProps {
     repository: GithubRepoDisplay;
 }
 
+/**
+ * Select item component displaying information about a repository
+ *
+ * @param {SelectRepositoryItemProps} props - Component props
+ * @returns {ReactElement} Select item component
+ */
 export const SelectRepositoryItem = ({
     repository,
-}: SelectRepositoryItemProps) => {
+}: SelectRepositoryItemProps): ReactElement => {
     return (
         <SelectItem
             value={repository.name}

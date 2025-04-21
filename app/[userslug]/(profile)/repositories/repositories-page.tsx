@@ -8,6 +8,7 @@ import {
 } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { Folders } from "lucide-react";
+import { ReactElement } from "react";
 
 import { DynamicPagination } from "@/components/generic/dynamic-pagination";
 import { LayoutOptions } from "@/components/generic/layout-options";
@@ -32,12 +33,18 @@ interface RepositoriesPageProps {
     };
 }
 
+/**
+ * Repositories page for user profile
+ *
+ * @param {RepositoriesPageProps} props - Component props
+ * @returns {Promise<ReactElement>} Repositories page component
+ */
 export default async function RepositoriesPage({
     repos,
     canUserCreate,
     userOrgs,
     searchParams,
-}: RepositoriesPageProps) {
+}: RepositoriesPageProps): Promise<ReactElement> {
     return (
         <div className="bg-background text-foreground">
             <div className="flex items-center justify-between">

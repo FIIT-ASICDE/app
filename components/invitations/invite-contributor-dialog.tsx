@@ -3,7 +3,7 @@ import { useDebounce } from "@/lib/hooks/useDebounce";
 import { api } from "@/lib/trpc/react";
 import { UserDisplay } from "@/lib/types/user";
 import { MailPlus, Search } from "lucide-react";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 import { toast } from "sonner";
 
 import { useUser } from "@/components/context/user-context";
@@ -30,9 +30,15 @@ interface InviteContributorDialogProps {
     repositoryName: string;
 }
 
+/**
+ * Dialog component that lets the user invite a new contributor on a repository
+ *
+ * @param {InviteContributorDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const InviteContributorDialog = ({
     repositoryName,
-}: InviteContributorDialogProps) => {
+}: InviteContributorDialogProps): ReactElement => {
     const { user } = useUser();
 
     const [query, setQuery] = useState<string>("");

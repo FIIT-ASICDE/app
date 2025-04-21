@@ -6,6 +6,7 @@ import {
 } from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 import { UsersRound } from "lucide-react";
+import { ReactElement } from "react";
 
 import { DynamicPagination } from "@/components/generic/dynamic-pagination";
 import { LayoutOptions } from "@/components/generic/layout-options";
@@ -26,11 +27,17 @@ interface MembersPageProps {
     };
 }
 
+/**
+ * Members page for organisation profile
+ *
+ * @param {MembersPageProps} props - Component props
+ * @returns {ReactElement} Members page component
+ */
 export default function MembersPage({
     members,
     searchParams,
     org,
-}: MembersPageProps) {
+}: MembersPageProps): ReactElement {
     return (
         <div className="bg-background text-foreground">
             <div className="flex items-center justify-between">

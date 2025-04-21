@@ -1,6 +1,7 @@
 import { Code, FileIcon, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import { ReactElement } from "react";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { darcula, docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
@@ -18,6 +19,12 @@ interface FilePreviewProps {
     openInIDEPath?: string;
 }
 
+/**
+ * Component that displays the content preview of a file within a repository
+ *
+ * @param {FilePreviewProps} props - Component props
+ * @returns {ReactElement} Preview component
+ */
 export const FilePreview = ({
     name,
     language,
@@ -25,7 +32,7 @@ export const FilePreview = ({
     lastActivity,
     onXPressed,
     openInIDEPath,
-}: FilePreviewProps) => {
+}: FilePreviewProps): ReactElement => {
     const { theme, resolvedTheme } = useTheme();
 
     const themeToSyntaxHighlighterStyle = () => {

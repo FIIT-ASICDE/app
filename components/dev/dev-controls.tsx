@@ -2,6 +2,7 @@
 
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { ReactElement } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +12,12 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export default function DevControls() {
+/**
+ * Controls that are shown only when in development mode
+ *
+ * @returns {ReactElement} Development controls component
+ */
+export default function DevControls(): ReactElement {
     const { setTheme } = useTheme();
 
     return (

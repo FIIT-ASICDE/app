@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactElement, ReactNode } from "react";
 
 import {
     DropdownMenu,
@@ -17,12 +17,18 @@ interface TooltipDropdownProps {
     tooltipSide?: "right" | "top" | "bottom" | "left";
 }
 
+/**
+ * Dropdown menu component with a button that has a tooltip
+ *
+ * @param {TooltipDropdownProps} props - Component props
+ * @returns {ReactElement} Dropdown menu component
+ */
 export const TooltipDropdown = ({
     tooltip,
     dropdownTrigger,
     dropdownContent,
     tooltipSide,
-}: TooltipDropdownProps) => {
+}: TooltipDropdownProps): ReactElement => {
     return (
         <Tooltip>
             <DropdownMenu>

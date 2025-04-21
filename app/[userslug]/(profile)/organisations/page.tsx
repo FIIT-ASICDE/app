@@ -1,9 +1,8 @@
 import OrganisationsPage from "@/app/[userslug]/(profile)/organisations/organisations-page";
 import { auth } from "@/auth";
+import { OrganizationRole } from "@/lib/prisma";
 import { api } from "@/lib/trpc/server";
 import { RoleOrganisationFilter } from "@/lib/types/organisation";
-
-import { OrganizationRole } from ".prisma/client";
 
 import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
 

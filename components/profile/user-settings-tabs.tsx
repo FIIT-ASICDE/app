@@ -4,6 +4,7 @@ import { UserSettingsTab } from "@/lib/types/user";
 import { cn } from "@/lib/utils";
 import { CircleUserRound, Settings2, TriangleAlert } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ReactElement } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -11,7 +12,15 @@ interface UserSettingsTabsProps {
     tab: UserSettingsTab;
 }
 
-export const UserSettingsTabs = ({ tab }: UserSettingsTabsProps) => {
+/**
+ * Tabs component used on the settings part of the user profile page
+ *
+ * @param {UserSettingsTabsProps} props - Component props
+ * @returns {ReactElement} Tabs component
+ */
+export const UserSettingsTabs = ({
+    tab,
+}: UserSettingsTabsProps): ReactElement => {
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();

@@ -1,5 +1,5 @@
+import { OrganizationRole } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
-import { OrganizationRole } from "@prisma/client";
 
 import { getBadgeStyle } from "@/components/generic/generic";
 import { Badge } from "@/components/ui/badge";

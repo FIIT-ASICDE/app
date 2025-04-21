@@ -1,24 +1,42 @@
-import { CloseButton } from "@/components/editor/navigation/close-button";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+    Configuration,
+    SimulationType,
+    SynthesisType,
+} from "@/lib/types/editor";
 import { FileDisplayItem, FileItem, Repository } from "@/lib/types/repository";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Configuration, SimulationType, SynthesisType } from "@/lib/types/editor";
-import { Button } from "@/components/ui/button";
-import { FileIcon, Info, Save } from "lucide-react";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
-import { getFilesFromRepo } from "@/components/generic/generic";
 import { Portal } from "@radix-ui/react-portal";
+import { FileIcon, Info, Save } from "lucide-react";
+import {
+    Dispatch,
+    ReactElement,
+    SetStateAction,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
+import { toast } from "sonner";
+
+import { CloseButton } from "@/components/editor/navigation/close-button";
+import { getFilesFromRepo } from "@/components/generic/generic";
+import { Button } from "@/components/ui/button";
 import {
     CommandDialog,
     CommandEmpty,
     CommandGroup,
     CommandInput,
     CommandItem,
-    CommandList
+    CommandList,
 } from "@/components/ui/command";
-import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 
 interface ConfigurationTabContentProps {
     repository: Repository;
@@ -27,24 +45,43 @@ interface ConfigurationTabContentProps {
     setConfigurationAction: Dispatch<SetStateAction<Configuration | undefined>>;
 }
 
+/**
+ * Tab content component that lets the user change the configuration of simulation and synthesis
+ *
+ * @param {ConfigurationTabContentProps} props - Component props
+ * @returns {ReactElement} Tab content component
+ */
 export const ConfigurationTabContent = ({
     repository,
     handleCloseSidebarAction,
     configuration,
     setConfigurationAction,
-}: ConfigurationTabContentProps) => {
-    const [selectedSimulationType, setSelectedSimulationType] = useState<SimulationType | undefined>(undefined);
-    const [selectedSimulationTestBenchFile, setSelectedSimulationTestBenchFile] = useState<FileDisplayItem | FileItem | undefined>(undefined);
+}: ConfigurationTabContentProps): ReactElement => {
+    const [selectedSimulationType, setSelectedSimulationType] = useState<
+        SimulationType | undefined
+    >(undefined);
+    const [
+        selectedSimulationTestBenchFile,
+        setSelectedSimulationTestBenchFile,
+    ] = useState<FileDisplayItem | FileItem | undefined>(undefined);
 
-    const [selectedSynthesisType, setSelectedSynthesisType] = useState<SynthesisType | undefined>("yosys");
-    const [selectedSynthesisFile, setSelectedSynthesisFile] = useState<FileDisplayItem | FileItem | undefined>(undefined);
+    const [selectedSynthesisType, setSelectedSynthesisType] = useState<
+        SynthesisType | undefined
+    >("yosys");
+    const [selectedSynthesisFile, setSelectedSynthesisFile] = useState<
+        FileDisplayItem | FileItem | undefined
+    >(undefined);
 
-    const [simulationFileSelectOpen, setSimulationFileSelectOpen] = useState<boolean>(false);
+    const [simulationFileSelectOpen, setSimulationFileSelectOpen] =
+        useState<boolean>(false);
     const [hoveredType, setHoveredType] = useState<SimulationType>();
 
-    const [synthesisFileSelectOpen, setSynthesisFileSelectOpen] = useState<boolean>(false);
+    const [synthesisFileSelectOpen, setSynthesisFileSelectOpen] =
+        useState<boolean>(false);
 
-    const files: Array<FileItem | FileDisplayItem> = getFilesFromRepo(repository.tree);
+    const files: Array<FileItem | FileDisplayItem> = getFilesFromRepo(
+        repository.tree,
+    );
 
     const selectTriggerRef = useRef<HTMLButtonElement | null>(null);
     const [tooltipPosition, setTooltipPosition] = useState<{
@@ -144,14 +181,16 @@ export const ConfigurationTabContent = ({
     };
 
     return (
-        <div className="flex flex-col h-full w-full relative">
-            <header className="flex flex-col gap-y-3 p-4 w-full">
+        <div className="relative flex h-full w-full flex-col">
+            <header className="flex w-full flex-col gap-y-3 p-4">
                 <div className="flex flex-row items-center justify-between gap-x-3">
-                    <span className="font-medium text-lg pr-8">Configuration</span>
+                    <span className="pr-8 text-lg font-medium">
+                        Configuration
+                    </span>
                     <CloseButton
                         onClick={handleCloseSidebarAction}
                         tooltip="Close sidebar"
-                        className="absolute top-4 right-4"
+                        className="absolute right-4 top-4"
                     />
                 </div>
             </header>
@@ -162,29 +201,43 @@ export const ConfigurationTabContent = ({
                 <div className="text-nowrap p-4">
                     <div className="space-y-7">
                         <div className="space-y-2">
-                            <Label className="text-muted-foreground font-medium">Simulation</Label>
+                            <Label className="font-medium text-muted-foreground">
+                                Simulation
+                            </Label>
                             <div className="space-y-1">
                                 <div className="flex flex-col gap-y-2">
                                     <div className="relative">
                                         <Select
                                             value={selectedSimulationType}
-                                            onValueChange={(value: SimulationType) => {
+                                            onValueChange={(
+                                                value: SimulationType,
+                                            ) => {
                                                 setHoveredType(undefined);
-                                                setSelectedSimulationType(value);
-                                                setSelectedSimulationTestBenchFile(undefined);
+                                                setSelectedSimulationType(
+                                                    value,
+                                                );
+                                                setSelectedSimulationTestBenchFile(
+                                                    undefined,
+                                                );
                                             }}
                                         >
-                                            <SelectTrigger ref={selectTriggerRef}>
+                                            <SelectTrigger
+                                                ref={selectTriggerRef}
+                                            >
                                                 <SelectValue placeholder="Select simulation type" />
                                             </SelectTrigger>
                                             <SelectContent className="relative">
                                                 <SelectItem
                                                     value="verilatorC++"
                                                     onMouseEnter={() =>
-                                                        setHoveredType("verilatorC++")
+                                                        setHoveredType(
+                                                            "verilatorC++",
+                                                        )
                                                     }
                                                     onMouseLeave={() =>
-                                                        setHoveredType(undefined)
+                                                        setHoveredType(
+                                                            undefined,
+                                                        )
                                                     }
                                                 >
                                                     Verilator C++
@@ -192,10 +245,14 @@ export const ConfigurationTabContent = ({
                                                 <SelectItem
                                                     value="verilatorSystemVerilog"
                                                     onMouseEnter={() =>
-                                                        setHoveredType("verilatorSystemVerilog")
+                                                        setHoveredType(
+                                                            "verilatorSystemVerilog",
+                                                        )
                                                     }
                                                     onMouseLeave={() =>
-                                                        setHoveredType(undefined)
+                                                        setHoveredType(
+                                                            undefined,
+                                                        )
                                                     }
                                                 >
                                                     Verilator SystemVerilog
@@ -203,10 +260,14 @@ export const ConfigurationTabContent = ({
                                                 <SelectItem
                                                     value="icarusVerilog"
                                                     onMouseEnter={() =>
-                                                        setHoveredType("icarusVerilog")
+                                                        setHoveredType(
+                                                            "icarusVerilog",
+                                                        )
                                                     }
                                                     onMouseLeave={() =>
-                                                        setHoveredType(undefined)
+                                                        setHoveredType(
+                                                            undefined,
+                                                        )
                                                     }
                                                 >
                                                     Icarus Verilog
@@ -219,12 +280,16 @@ export const ConfigurationTabContent = ({
 
                                     <Button
                                         className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm font-normal ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
-                                        onClick={() => setSimulationFileSelectOpen(true)}
+                                        onClick={() =>
+                                            setSimulationFileSelectOpen(true)
+                                        }
                                     >
                                         {selectedSimulationTestBenchFile ? (
                                             <div className="flex flex-row items-center justify-start gap-x-2">
                                                 <FileIcon className="h-4 w-4 text-muted-foreground" />
-                                                {selectedSimulationTestBenchFile.name}
+                                                {
+                                                    selectedSimulationTestBenchFile.name
+                                                }
                                             </div>
                                         ) : (
                                             "Select a TestBench file"
@@ -239,14 +304,26 @@ export const ConfigurationTabContent = ({
                                     <CommandInput placeholder="Select a TestBench file..." />
                                     <ScrollArea className="h-full max-h-60">
                                         <CommandList>
-                                            <CommandGroup heading={getGroupHeading()}>
+                                            <CommandGroup
+                                                heading={getGroupHeading()}
+                                            >
                                                 {getSimulationFiles().map(
-                                                    (fileItem: FileItem | FileDisplayItem) => (
+                                                    (
+                                                        fileItem:
+                                                            | FileItem
+                                                            | FileDisplayItem,
+                                                    ) => (
                                                         <CommandItem
-                                                            key={fileItem.absolutePath}
+                                                            key={
+                                                                fileItem.absolutePath
+                                                            }
                                                             onSelect={() => {
-                                                                setSimulationFileSelectOpen(false);
-                                                                setSelectedSimulationTestBenchFile(fileItem);
+                                                                setSimulationFileSelectOpen(
+                                                                    false,
+                                                                );
+                                                                setSelectedSimulationTestBenchFile(
+                                                                    fileItem,
+                                                                );
                                                             }}
                                                             className="flex flex-row items-center gap-x-2"
                                                         >
@@ -256,9 +333,13 @@ export const ConfigurationTabContent = ({
                                                     ),
                                                 )}
                                                 <CommandEmpty>
-                                                    {selectedSimulationType === "verilatorC++" ? "No C++ files found"
-                                                        : selectedSimulationType === "verilatorSystemVerilog" ? "No SystemVerilog files found"
-                                                        : "No Verilog files found"}
+                                                    {selectedSimulationType ===
+                                                    "verilatorC++"
+                                                        ? "No C++ files found"
+                                                        : selectedSimulationType ===
+                                                            "verilatorSystemVerilog"
+                                                          ? "No SystemVerilog files found"
+                                                          : "No Verilog files found"}
                                                 </CommandEmpty>
                                             </CommandGroup>
                                         </CommandList>
@@ -268,25 +349,29 @@ export const ConfigurationTabContent = ({
                         </div>
 
                         <div className="space-y-2">
-                            <Label className="text-muted-foreground font-medium">Synthesis</Label>
+                            <Label className="font-medium text-muted-foreground">
+                                Synthesis
+                            </Label>
                             <div className="space-y-1">
                                 <div className="flex flex-col gap-y-2">
                                     <div className="relative">
                                         <Select
                                             defaultValue="yosys"
                                             value={selectedSynthesisType}
-                                            onValueChange={(value: SynthesisType) => {
+                                            onValueChange={(
+                                                value: SynthesisType,
+                                            ) => {
                                                 setSelectedSynthesisType(value);
-                                                setSelectedSynthesisFile(undefined);
+                                                setSelectedSynthesisFile(
+                                                    undefined,
+                                                );
                                             }}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select synthesis type" />
                                             </SelectTrigger>
                                             <SelectContent className="relative">
-                                                <SelectItem
-                                                    value="yosys"
-                                                >
+                                                <SelectItem value="yosys">
                                                     Yosys
                                                 </SelectItem>
                                             </SelectContent>
@@ -295,7 +380,9 @@ export const ConfigurationTabContent = ({
 
                                     <Button
                                         className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm font-normal ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
-                                        onClick={() => setSynthesisFileSelectOpen(true)}
+                                        onClick={() =>
+                                            setSynthesisFileSelectOpen(true)
+                                        }
                                     >
                                         {selectedSynthesisFile ? (
                                             <div className="flex flex-row items-center justify-start gap-x-2">
@@ -315,14 +402,29 @@ export const ConfigurationTabContent = ({
                                     <CommandInput placeholder="Select a file..." />
                                     <ScrollArea className="h-full max-h-60">
                                         <CommandList>
-                                            <CommandGroup heading={"Verilog files in " + repository.name}>
+                                            <CommandGroup
+                                                heading={
+                                                    "Verilog files in " +
+                                                    repository.name
+                                                }
+                                            >
                                                 {getSynthesisFiles().map(
-                                                    (fileItem: FileItem | FileDisplayItem) => (
+                                                    (
+                                                        fileItem:
+                                                            | FileItem
+                                                            | FileDisplayItem,
+                                                    ) => (
                                                         <CommandItem
-                                                            key={fileItem.absolutePath}
+                                                            key={
+                                                                fileItem.absolutePath
+                                                            }
                                                             onSelect={() => {
-                                                                setSynthesisFileSelectOpen(false);
-                                                                setSelectedSynthesisFile(fileItem);
+                                                                setSynthesisFileSelectOpen(
+                                                                    false,
+                                                                );
+                                                                setSelectedSynthesisFile(
+                                                                    fileItem,
+                                                                );
                                                             }}
                                                             className="flex flex-row items-center gap-x-2"
                                                         >
@@ -341,7 +443,7 @@ export const ConfigurationTabContent = ({
                             </div>
                         </div>
 
-                        <div className="w-full flex flex-row gap-x-3">
+                        <div className="flex w-full flex-row gap-x-3">
                             <Button
                                 variant="outline"
                                 className="w-1/2"
@@ -354,31 +456,48 @@ export const ConfigurationTabContent = ({
                                 className="w-1/2 hover:bg-primary-button-hover"
                                 disabled={
                                     selectedSimulationType === undefined ||
-                                    selectedSimulationTestBenchFile === undefined ||
+                                    selectedSimulationTestBenchFile ===
+                                        undefined ||
                                     selectedSynthesisType === undefined ||
                                     selectedSynthesisFile === undefined
                                 }
                                 onClick={() => {
-                                    if (selectedSimulationType && selectedSimulationTestBenchFile && selectedSynthesisType && selectedSynthesisFile) {
-                                        const newConfiguration: Configuration = {
-                                            ...configuration,
-                                            simulation: {
-                                                type: selectedSimulationType,
-                                                testBench: selectedSimulationTestBenchFile,
-                                            },
-                                            synthesis: {
-                                                type: selectedSynthesisType,
-                                                file: selectedSynthesisFile,
-                                            },
-                                        };
-                                        setConfigurationAction(newConfiguration);
-                                        localStorage.setItem("configuration", JSON.stringify(newConfiguration));
+                                    if (
+                                        selectedSimulationType &&
+                                        selectedSimulationTestBenchFile &&
+                                        selectedSynthesisType &&
+                                        selectedSynthesisFile
+                                    ) {
+                                        const newConfiguration: Configuration =
+                                            {
+                                                ...configuration,
+                                                simulation: {
+                                                    type: selectedSimulationType,
+                                                    testBench:
+                                                        selectedSimulationTestBenchFile,
+                                                },
+                                                synthesis: {
+                                                    type: selectedSynthesisType,
+                                                    file: selectedSynthesisFile,
+                                                },
+                                            };
+                                        setConfigurationAction(
+                                            newConfiguration,
+                                        );
+                                        localStorage.setItem(
+                                            "configuration",
+                                            JSON.stringify(newConfiguration),
+                                        );
 
-                                        toast.success("Configuration saved successfully");
+                                        toast.success(
+                                            "Configuration saved successfully",
+                                        );
 
                                         handleCloseSidebarAction();
                                     } else {
-                                        toast.error("Every input has to be filled to save a configuration")
+                                        toast.error(
+                                            "Every input has to be filled to save a configuration",
+                                        );
                                     }
                                 }}
                             >

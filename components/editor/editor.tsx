@@ -1,7 +1,7 @@
 "use client";
 
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
-import { useEffect, useRef } from "react";
+import { ReactElement, useEffect, useRef } from "react";
 import { MonacoBinding } from "y-monaco";
 import { WebsocketProvider } from "y-websocket";
 import * as Y from "yjs";
@@ -30,20 +30,26 @@ function debounce<T extends (...args: any[]) => any>(
 }
 
 interface EditorProps {
-  filePath: string;
-  language?: string;
-  theme?: string;
-  onOpenFile?: (item: FileDisplayItem) => void;
-  onReady?: () => void;
+    filePath: string;
+    language?: string;
+    theme?: string;
+    onOpenFile?: (item: FileDisplayItem) => void;
+    onReady?: () => void;
 }
 
+/**
+ * Editor component for editor page
+ *
+ * @param {EditorProps} props - Component props
+ * @returns {ReactElement} Editor component
+ */
 export default function Editor({
   filePath,
   language,
   theme = "vs-dark",
   onOpenFile,
   onReady,
-}: EditorProps) {
+}: EditorProps): ReactElement {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoEl = useRef<HTMLElement | null>(null);
   const providerRef = useRef<WebsocketProvider | null>(null);

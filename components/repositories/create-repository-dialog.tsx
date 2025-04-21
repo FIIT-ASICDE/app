@@ -15,6 +15,7 @@ import {
     UserRound,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ReactElement } from "react";
 import { UseFormReturn, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -63,10 +64,16 @@ interface CreateRepositoryDialogProps {
     fromOrg: boolean;
 }
 
+/**
+ * Dialog component that lets the user create a new repository
+ *
+ * @param {CreateRepositoryDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const CreateRepositoryDialog = ({
     usersOrganisations,
     fromOrg,
-}: CreateRepositoryDialogProps) => {
+}: CreateRepositoryDialogProps): ReactElement => {
     const { user } = useUser();
     const router = useRouter();
 

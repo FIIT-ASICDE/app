@@ -2,6 +2,7 @@ import { auth, providerMap, signIn } from "@/auth";
 import { redirectIfNotOnboarded } from "@/lib/onboarding-guard";
 import { AuthError } from "next-auth";
 import Image from "next/image";
+import { ReactElement } from "react";
 
 import GithubIcon from "@/components/icons/github";
 import GoogleIcon from "@/components/icons/google";
@@ -22,7 +23,15 @@ interface LoginPageProps {
     }>;
 }
 
-export default async function LoginPage({ searchParams }: LoginPageProps) {
+/**
+ * Login page
+ *
+ * @param {LoginPageProps} props - Component props
+ * @returns {ReactElement} Login page component
+ */
+export default async function LoginPage({
+    searchParams,
+}: LoginPageProps): Promise<ReactElement> {
     const session = await auth();
     await redirectIfNotOnboarded(session, "login");
 

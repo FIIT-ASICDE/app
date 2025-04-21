@@ -4,12 +4,14 @@ import { RoleOrganisationFilter } from "@/lib/types/organisation";
 import {
     DirectoryItem,
     FavoriteRepositoriesFilter,
-    FileDisplayItem, FileItem,
+    FileDisplayItem,
+    FileItem,
     PinnedRepositoriesFilter,
     PublicRepositoriesFilter,
     RepositoryItem,
-    RepositoryItemChange
+    RepositoryItemChange,
 } from "@/lib/types/repository";
+import { Dispatch, ReactElement, SetStateAction } from "react";
 
 import { RepositoryItemChangeIcon } from "@/components/editor/changes/repository-item-change-icon";
 import {
@@ -17,18 +19,23 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Dispatch, SetStateAction } from "react";
 
+/**
+ * Function used to calculate and format a time delta
+ *
+ * @param lastActivity {Date}
+ * @returns {string} Formatted string of the time delta
+ */
 export const getTimeDeltaString = (lastActivity: Date): string => {
     const now = new Date();
-    const deltaMilliseconds = now.getTime() - lastActivity.getTime();
+    const deltaMilliseconds: number = now.getTime() - lastActivity.getTime();
 
-    const seconds = Math.floor(deltaMilliseconds / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-    const months = Math.floor(days / 30);
-    const years = Math.floor(days / 365);
+    const seconds: number = Math.floor(deltaMilliseconds / 1000);
+    const minutes: number = Math.floor(seconds / 60);
+    const hours: number = Math.floor(minutes / 60);
+    const days: number = Math.floor(hours / 24);
+    const months: number = Math.floor(days / 30);
+    const years: number = Math.floor(days / 365);
 
     if (years > 0) {
         return `${years} ${years === 1 ? "year" : "years"} ago`;
@@ -45,7 +52,14 @@ export const getTimeDeltaString = (lastActivity: Date): string => {
     }
 };
 
-export const getDateString = (actionType: string, date: Date) => {
+/**
+ * Function used to display an action made on a specific date
+ *
+ * @param actionType {string}
+ * @param date {Date}
+ * @returns {string} Formatted string of the action and its date
+ */
+export const getDateString = (actionType: string, date: Date): string => {
     const monthLong: string = date.toLocaleString("default", { month: "long" });
     const yearFull: string = date.toLocaleString("default", {
         year: "numeric",
@@ -53,7 +67,13 @@ export const getDateString = (actionType: string, date: Date) => {
     return actionType + " " + monthLong + " " + yearFull;
 };
 
-export const getBadgeStyle = (badgeType: BadgeType) => {
+/**
+ * Function used to get the corresponding style of a badge
+ *
+ * @param badgeType {BadgeType}
+ * @returns {string} Classname
+ */
+export const getBadgeStyle = (badgeType: BadgeType): string => {
     switch (badgeType) {
         case "public":
             return "bg-badge-public text-badge-public-foreground hover:bg-badge-public-hover dark:bg-[var(--badge-public)] dark:text-[var(--badge-public-foreground)] dark:hover:bg-[var(--badge-public-hover)]";
@@ -72,6 +92,13 @@ export const getBadgeStyle = (badgeType: BadgeType) => {
     }
 };
 
+/**
+ * Function used to get the current page from a pathname
+ *
+ * @param pathname {string}
+ * @param sliceIndex {number}
+ * @returns {string} Current page
+ */
 export const getCurrentPage = (
     pathname: string,
     sliceIndex: number,
@@ -81,6 +108,12 @@ export const getCurrentPage = (
     return parts.length > 1 ? "/" + parts.slice(sliceIndex).join("/") : "/";
 };
 
+/**
+ * Function used to get the data of an invitation to display
+ *
+ * @param invitation {Invitation}
+ * @returns Object containing the display name, image and link of an invitation
+ */
 export const getInvitationDisplayData = (invitation: Invitation) => {
     const displayName: string =
         invitation.type === "repository"
@@ -103,7 +136,13 @@ export const getInvitationDisplayData = (invitation: Invitation) => {
     };
 };
 
-const getCardStripeColor = (cardType: CardType) => {
+/**
+ * Function used to get the corresponding color of a card stripe
+ *
+ * @param cardType {CardType}
+ * @returns {string} Color of a card stripe
+ */
+const getCardStripeColor = (cardType: CardType): string => {
     switch (cardType) {
         case "repository":
             return "before:bg-badge-repository";
@@ -128,16 +167,42 @@ const getCardStripeColor = (cardType: CardType) => {
     }
 };
 
-export const getCardStripe = (cardType: CardType) => {
+/**
+ * Function used to get the stripe classname on a card
+ *
+ * @param cardType {CardType}
+ * @returns {string} Card stripe classname
+ */
+export const getCardStripe = (cardType: CardType): string => {
     const color: string = getCardStripeColor(cardType);
 
     return `relative before:absolute before:inset-y-0 before:left-0 before:w-1.5 ${color} before:rounded-l-2xl`;
 };
 
-export const parseBoolean = (value: string | undefined) => {
+/**
+ * Function used to convert a string value to a boolean
+ *
+ * @param value {string | undefined}
+ * @returns {boolean | undefined} Boolean or undefined value
+ */
+export const parseBoolean = (
+    value: string | undefined,
+): boolean | undefined => {
     return value === "true" ? true : value === "false" ? false : undefined;
 };
 
+/**
+ * Function used to convert a value from the URL to a filter value
+ *
+ * @param filterType {FilterType}
+ * @param value {string | undefined}
+ * @returns {
+ *     | PinnedRepositoriesFilter
+ *     | FavoriteRepositoriesFilter
+ *     | PublicRepositoriesFilter
+ *     | RoleOrganisationFilter
+ * } Filter value
+ */
 export const parseFilterValue = (
     filterType: FilterType,
     value: string | undefined,
@@ -166,9 +231,15 @@ export const parseFilterValue = (
     }
 };
 
-export const datePretty = (date: Date | undefined) => {
+/**
+ * Function used to format a date
+ *
+ * @param date {Date | undefined}
+ * @returns {string} Formatted date
+ */
+export const datePretty = (date: Date | undefined): string => {
     if (!date) {
-        return;
+        return "";
     }
 
     const day: number = date.getDate();
@@ -180,6 +251,9 @@ export const datePretty = (date: Date | undefined) => {
     return `${day}.${month}.${year} at ${hours}:${minutes}`;
 };
 
+/**
+ * Record containing the colors of all languages for the language statistics chart
+ */
 export const languageColors: Record<string, string> = {
     plaintext: "#9CA3AF",
     abap: "#2563EB",
@@ -278,7 +352,15 @@ export const languageColors: Record<string, string> = {
     default: "#8884d8",
 };
 
-export const sortTree = (tree: Array<RepositoryItem>) => {
+/**
+ * Function used to sort a given file tree so that directories are before files
+ *
+ * @param tree {Array<RepositoryItem>}
+ * @returns {Array<RepositoryItem>} Sorted file tree
+ */
+export const sortTree = (
+    tree: Array<RepositoryItem>,
+): Array<RepositoryItem> => {
     return tree.sort((a: RepositoryItem, b: RepositoryItem) => {
         if (
             (a.type === "directory" || a.type === "directory-display") &&
@@ -294,7 +376,15 @@ export const sortTree = (tree: Array<RepositoryItem>) => {
     });
 };
 
-export const getChangeTooltipContent = (itemChange: RepositoryItemChange) => {
+/**
+ * Function used to get the tooltip content of an item change on a repository
+ *
+ * @param itemChange {RepositoryItemChange}
+ * @returns {ReactElement} Tooltip content
+ */
+export const getChangeTooltipContent = (
+    itemChange: RepositoryItemChange,
+): ReactElement => {
     if (["added", "modified", "deleted"].includes(itemChange.change.type)) {
         return (
             <span>
@@ -329,9 +419,18 @@ export const getChangeTooltipContent = (itemChange: RepositoryItemChange) => {
             </span>
         );
     }
+    return <></>;
 };
 
-export const getChangeContent = (itemChange: RepositoryItemChange) => {
+/**
+ * Function used to get the content of an item change on a repository
+ *
+ * @param itemChange {RepositoryItemChange}
+ * @returns {ReactElement} Tooltip content
+ */
+export const getChangeContent = (
+    itemChange: RepositoryItemChange,
+): ReactElement => {
     return (
         <Tooltip>
             <TooltipTrigger asChild className="text-muted-foreground">
@@ -346,16 +445,21 @@ export const getChangeContent = (itemChange: RepositoryItemChange) => {
     );
 };
 
+/**
+ * Function used to add a repository item to a file tree
+ *
+ * @param tree {Array<RepositoryItem>}
+ * @param parentPath {string}
+ * @param newItem {FileDisplayItem | DirectoryItem}
+ * @returns {Array<RepositoryItem>} Updated file tree
+ */
 export const addItemToTree = (
     tree: Array<RepositoryItem>,
     parentPath: string,
-    newItem: FileDisplayItem | DirectoryItem
+    newItem: FileDisplayItem | DirectoryItem,
 ): Array<RepositoryItem> => {
     if (parentPath === "") {
-        return [
-            ...tree,
-            newItem,
-        ];
+        return [...tree, newItem];
     }
 
     return tree.map((item) => {
@@ -379,31 +483,54 @@ export const addItemToTree = (
     });
 };
 
+/**
+ * Function used to delete a repository item from a file tree
+ *
+ * @param tree {Array<RepositoryItem>}
+ * @param deletePath {string}
+ * @returns {Array<RepositoryItem>} Updated file tree
+ */
 export const deleteItemFromTree = (
     tree: Array<RepositoryItem>,
-    deletePath: string
+    deletePath: string,
 ): Array<RepositoryItem> => {
     return tree
         .filter((item: RepositoryItem) => item.absolutePath !== deletePath)
         .map((item: RepositoryItem) => {
-            if (
-                (item.type === "directory") &&
-                item.children
-            ) {
-                return { ...item, children: deleteItemFromTree(item.children, deletePath) };
+            if (item.type === "directory" && item.children) {
+                return {
+                    ...item,
+                    children: deleteItemFromTree(item.children, deletePath),
+                };
             }
             return item;
         });
 };
 
+/**
+ * Function used to rename a repository item in a file tree
+ *
+ * @param tree {Array<RepositoryItem>}
+ * @param originalPath {string}
+ * @param newName {string}
+ * @returns {Array<RepositoryItem>} Updated file tree
+ */
 export const renameItemInTree = (
     tree: Array<RepositoryItem>,
     originalPath: string,
-    newName: string
+    newName: string,
 ): Array<RepositoryItem> => {
     return tree.map((item: RepositoryItem) => {
         if (item.absolutePath === originalPath) {
-            const newAbsolutePath: string = item.absolutePath.split("\\").join("/").split("/").slice(0, -1).join("/") + "/" + newName;
+            const newAbsolutePath: string =
+                item.absolutePath
+                    .split("\\")
+                    .join("/")
+                    .split("/")
+                    .slice(0, -1)
+                    .join("/") +
+                "/" +
+                newName;
 
             return {
                 ...item,
@@ -411,28 +538,42 @@ export const renameItemInTree = (
                 absolutePath: newAbsolutePath,
             };
         }
-        if (
-            (item.type === "directory") &&
-            item.children
-        ) {
+        if (item.type === "directory" && item.children) {
             return {
                 ...item,
-                children: renameItemInTree(item.children, originalPath, newName),
+                children: renameItemInTree(
+                    item.children,
+                    originalPath,
+                    newName,
+                ),
             };
         }
         return item;
     });
 };
 
+/**
+ * Function used to move a repository item in a file tree
+ *
+ * @param tree {Array<RepositoryItem>}
+ * @param sourceItem {RepositoryItem}
+ * @param targetItem {RepositoryItem}
+ * @returns {Array<RepositoryItem>} Updated file tree
+ */
 export const moveItemInTree = (
     tree: Array<RepositoryItem>,
     sourceItem: RepositoryItem,
-    targetItem: RepositoryItem
+    targetItem: RepositoryItem,
 ): Array<RepositoryItem> => {
-    const treeWithoutSource: Array<RepositoryItem> = deleteItemFromTree(tree, sourceItem.absolutePath);
+    const treeWithoutSource: Array<RepositoryItem> = deleteItemFromTree(
+        tree,
+        sourceItem.absolutePath,
+    );
 
-    sourceItem.absolutePath = targetItem.name === "" ?
-        sourceItem.name : targetItem.absolutePath + "/" + sourceItem.name;
+    sourceItem.absolutePath =
+        targetItem.name === ""
+            ? sourceItem.name
+            : targetItem.absolutePath + "/" + sourceItem.name;
 
     console.log(sourceItem);
 
@@ -443,27 +584,45 @@ export const moveItemInTree = (
     );
 };
 
+/**
+ * Function used to recursively find a repository item in a file tree
+ *
+ * @param tree {Array<RepositoryItem>}
+ * @param absolutePath {string}
+ * @returns {RepositoryItem | undefined} Repository item or undefined
+ */
 export const findItemInTree = (
     tree: Array<RepositoryItem>,
-    absolutePath: string
+    absolutePath: string,
 ): RepositoryItem | undefined => {
     for (const item of tree) {
         if (item.absolutePath === absolutePath) {
             return item;
         }
         if (item.type === "directory" && item.children?.length) {
-            const found: RepositoryItem | undefined = findItemInTree(item.children, absolutePath);
+            const found: RepositoryItem | undefined = findItemInTree(
+                item.children,
+                absolutePath,
+            );
             if (found) return found;
         }
     }
     return undefined;
 };
 
+/**
+ * Function used to handle the toggle action on a directory item in a file tree
+ *
+ * @param item {RepositoryItem}
+ * @param expandedItems {Array<RepositoryItem>}
+ * @param setExpandedItemsAction {Dispatch<SetStateAction<Array<RepositoryItem>>>}
+ * @returns {void}
+ */
 export const handleToggle = (
     item: RepositoryItem,
     expandedItems: Array<RepositoryItem>,
     setExpandedItemsAction: Dispatch<SetStateAction<Array<RepositoryItem>>>,
-) => {
+): void => {
     if (item.type === "directory" || item.type === "directory-display") {
         if (
             !expandedItems.find(
@@ -483,8 +642,14 @@ export const handleToggle = (
     }
 };
 
+/**
+ * Function used to get all files from a repository
+ *
+ * @param tree {Array<RepositoryItem> | undefined}
+ * @returns {Array<FileDisplayItem | FileItem>} Array of files
+ */
 export const getFilesFromRepo = (
-    tree: Array<RepositoryItem> | undefined
+    tree: Array<RepositoryItem> | undefined,
 ): Array<FileDisplayItem | FileItem> => {
     if (!tree) return [];
 

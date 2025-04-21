@@ -5,7 +5,7 @@ import { useDebounce } from "@/lib/hooks/useDebounce";
 import { api } from "@/lib/trpc/react";
 import { UserDisplay } from "@/lib/types/user";
 import { Search, UserRoundPlus } from "lucide-react";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 import { toast } from "sonner";
 
 import { useUser } from "@/components/context/user-context";
@@ -32,9 +32,15 @@ interface InviteMemberDialogProps {
     organisationName: string;
 }
 
+/**
+ * Dialog component that lets the user invite a new member to an organisation
+ *
+ * @param {InviteMemberDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const InviteMemberDialog = ({
     organisationName,
-}: InviteMemberDialogProps) => {
+}: InviteMemberDialogProps): ReactElement => {
     const { user } = useUser();
 
     const [query, setQuery] = useState<string>("");

@@ -2,6 +2,7 @@ import { api } from "@/lib/trpc/react";
 import { Repository } from "@/lib/types/repository";
 import { Globe, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ReactElement } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -19,9 +20,15 @@ interface ChangeVisibilityDialogProps {
     repository: Repository;
 }
 
+/**
+ * Dialog component that lets the user change the visibility of a repository
+ *
+ * @param {ChangeVisibilityDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const ChangeVisibilityDialog = ({
     repository,
-}: ChangeVisibilityDialogProps) => {
+}: ChangeVisibilityDialogProps): ReactElement => {
     const router = useRouter();
     const getRepositoryVisibilityChangeMessage = () => {
         if (repository.visibility === "public") {

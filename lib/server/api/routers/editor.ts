@@ -1,4 +1,5 @@
 import { getLanguageByExtension } from "@/lib/files/repo-files";
+import { Prisma } from "@/lib/prisma";
 import {
     addItemSchema,
     deleteItemSchema,
@@ -11,7 +12,6 @@ import {
 } from "@/lib/server/api/routers/repos";
 import { createTRPCRouter, protectedProcedure } from "@/lib/server/api/trpc";
 import { FileDisplayItem, RepositoryItem } from "@/lib/types/repository";
-import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { rename } from "fs/promises";
 import { rm } from "fs/promises";

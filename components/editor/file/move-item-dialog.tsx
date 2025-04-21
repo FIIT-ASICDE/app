@@ -1,6 +1,6 @@
 import { RepositoryItem } from "@/lib/types/repository";
 import { FileIcon, Folder } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, ReactElement, SetStateAction } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +26,12 @@ interface MoveItemDialogProps {
     onCancel: () => void;
 }
 
+/**
+ * Dialog that lets the user move an item within a repository
+ *
+ * @param {MoveItemDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const MoveItemDialog = ({
     isOpen,
     setIsOpen,
@@ -33,11 +39,9 @@ export const MoveItemDialog = ({
     targetItem,
     onConfirm,
     onCancel,
-}: MoveItemDialogProps) => {
+}: MoveItemDialogProps): ReactElement => {
     const targetItemName: string =
-        targetItem.name === ""
-            ? "root directory"
-            : targetItem.name;
+        targetItem.name === "" ? "root directory" : targetItem.name;
 
     const itemType: "file" | "directory" =
         sourceItem.type === "directory" ||

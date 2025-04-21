@@ -2,7 +2,7 @@
 
 import { type FileItem, type RepositoryItem } from "@/lib/types/repository";
 import { Folders } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 
 import FileExplorer from "@/components/repositories/code/file-explorer";
 import { FilePreview } from "@/components/repositories/code/file-preview";
@@ -16,12 +16,18 @@ interface CodePageProps {
     subPath: string;
 }
 
+/**
+ * Code page for a repository
+ *
+ * @param {CodePageProps} props - Component props
+ * @returns {ReactElement} Code page component
+ */
 export default function CodePage({
     tree,
     repositoryName,
     repositoryOwnerName,
     subPath,
-}: CodePageProps) {
+}: CodePageProps): ReactElement {
     const [filteredTree, setFilteredTree] =
         useState<Array<RepositoryItem>>(tree);
     const [fileSearchPhrase, setFileSearchPhrase] = useState<string>("");

@@ -1,9 +1,16 @@
 import { api } from "@/lib/trpc/react";
 import { RepositoryItem } from "@/lib/types/repository";
 import { FileIcon, Folder, Pen } from "lucide-react";
-import { Dispatch, FormEvent, SetStateAction, useState } from "react";
+import {
+    Dispatch,
+    FormEvent,
+    ReactElement,
+    SetStateAction,
+    useState,
+} from "react";
 import { toast } from "sonner";
 
+import { renameItemInTree } from "@/components/generic/generic";
 import {
     Dialog,
     DialogContent,
@@ -12,7 +19,6 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { renameItemInTree } from "@/components/generic/generic";
 
 interface RenameItemDialogProps {
     repositoryId: string;
@@ -22,13 +28,19 @@ interface RenameItemDialogProps {
     onAction?: () => void;
 }
 
+/**
+ * Dialog that lets the user rename an item within a repository
+ *
+ * @param {RenameItemDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const RenameItemDialog = ({
     repositoryId,
     item,
     tree,
     setTree,
     onAction,
-}: RenameItemDialogProps) => {
+}: RenameItemDialogProps): ReactElement => {
     const [open, setOpen] = useState<boolean>(false);
     const [newItemName, setNewItemName] = useState<string>(item.name);
 
@@ -46,7 +58,7 @@ export const RenameItemDialog = ({
             const updatedTree = renameItemInTree(
                 tree,
                 item.absolutePath,
-                newItemName.trim()
+                newItemName.trim(),
             );
             setTree(updatedTree);
 
@@ -63,7 +75,15 @@ export const RenameItemDialog = ({
         e.preventDefault();
         const trimmedNewItemName: string = newItemName.trim();
 
-        const newPath: string = item.absolutePath.split("\\").join("/").split("/").slice(0, -1).join("/") + "/" + trimmedNewItemName;
+        const newPath: string =
+            item.absolutePath
+                .split("\\")
+                .join("/")
+                .split("/")
+                .slice(0, -1)
+                .join("/") +
+            "/" +
+            trimmedNewItemName;
 
         if (trimmedNewItemName) {
             renameItemMutation.mutate({

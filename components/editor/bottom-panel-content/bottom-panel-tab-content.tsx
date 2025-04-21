@@ -1,4 +1,9 @@
-import { BottomPanelContentTab, Configuration } from "@/lib/types/editor";
+import {
+    BottomPanelContentTab,
+    Configuration,
+    SimulationOutput,
+} from "@/lib/types/editor";
+import { ReactElement } from "react";
 
 import { SimulationTabContent } from "@/components/editor/bottom-panel-content/simulation-tab-content";
 import { SynthesisTabContent } from "@/components/editor/bottom-panel-content/synthesis-tab-content";
@@ -7,15 +12,23 @@ interface BottomPanelTabContentProps {
     activeBottomPanelContent: BottomPanelContentTab;
     handleCloseBottomPanel: () => void;
     configuration: Configuration | undefined;
-    simulationOutput: string[];
+    simulationOutput: Array<SimulationOutput>;
+    lastSimulation: string | null;
 }
 
+/**
+ * Tab content of the bottom panel on editor page
+ *
+ * @param {BottomPanelTabContentProps} props - Component props
+ * @returns {ReactElement} Tab content component
+ */
 export const BottomPanelTabContent = ({
     activeBottomPanelContent,
     handleCloseBottomPanel,
     configuration,
-    simulationOutput
-}: BottomPanelTabContentProps) => {
+    simulationOutput,
+    lastSimulation,
+}: BottomPanelTabContentProps): ReactElement => {
     return (
         <div className="flex h-full">
             {activeBottomPanelContent === "simulation" && (
@@ -23,6 +36,7 @@ export const BottomPanelTabContent = ({
                     handleCloseBottomPanel={handleCloseBottomPanel}
                     configuration={configuration}
                     simulationOutput={simulationOutput}
+                    lastSimulation={lastSimulation}
                 />
             )}
 

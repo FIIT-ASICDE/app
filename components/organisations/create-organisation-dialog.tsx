@@ -16,7 +16,7 @@ import {
     UserRoundPlus,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, ReactElement, useState } from "react";
 import { UseFormReturn, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -46,7 +46,12 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 
-export const CreateOrganisationDialog = () => {
+/**
+ * Dialog component that lets the user create a new organisation
+ *
+ * @returns {ReactElement} Dialog component
+ */
+export const CreateOrganisationDialog = (): ReactElement => {
     const router = useRouter();
     const { user } = useUser();
     const [open, setOpen] = useState<boolean>(false);

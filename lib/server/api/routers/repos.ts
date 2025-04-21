@@ -4,6 +4,7 @@ import {
     loadRepoDirOrFile,
     loadRepoItems,
 } from "@/lib/files/repo-files";
+import { $Enums } from "@/lib/prisma";
 import {
     createRepositoryFormSchema,
     editRepositoryFormSchema,
@@ -22,7 +23,6 @@ import {
 } from "@/lib/types/repository";
 import { UserDisplay } from "@/lib/types/user";
 import { PrismaType } from "@/prisma";
-import { $Enums } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { exec } from "child_process";
 import { access, mkdir, rename, rm } from "fs/promises";
@@ -1978,9 +1978,12 @@ export async function hasUserRole(
     }
 }
 
-export function absoluteRepoPath(ownerName: string, repoName: string = ""): string {
-  const storageRoot = ensureStorageRootSet();
-  return path.join(storageRoot, ownerName, repoName);
+export function absoluteRepoPath(
+    ownerName: string,
+    repoName: string = "",
+): string {
+    const storageRoot = ensureStorageRootSet();
+    return path.join(storageRoot, ownerName, repoName);
 }
 
 export function getRelativePathInRepo(absolutePath: string): string {

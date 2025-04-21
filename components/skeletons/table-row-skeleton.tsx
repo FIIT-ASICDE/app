@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { File as FileIcon, Folder } from "lucide-react";
+import { ReactElement } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { TableCell, TableRow } from "@/components/ui/table";
@@ -10,11 +11,16 @@ interface TableRowSkeletonProps {
     lastActivityClassName?: string;
 }
 
+/**
+ * Skeleton component of a table row component
+ *
+ * @returns {ReactElement} Skeleton component
+ */
 export const TableRowSkeleton = ({
     type,
     fileNameClassName,
     lastActivityClassName,
-}: TableRowSkeletonProps) => {
+}: TableRowSkeletonProps): ReactElement => {
     return (
         <TableRow className="">
             <TableCell className="flex flex-row items-center gap-x-3">

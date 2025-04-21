@@ -16,6 +16,7 @@ import {
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import * as React from "react";
+import { ReactElement } from "react";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
@@ -36,11 +37,17 @@ interface HeaderDropdownProps {
     className?: string;
 }
 
+/**
+ * Dropdown menu component used in the header
+ *
+ * @param {HeaderDropdownProps} props - Component props
+ * @returns {ReactElement} Dropdown menu component
+ */
 export const HeaderDropdown = ({
     user,
     avatarDisplayType,
     className,
-}: HeaderDropdownProps) => {
+}: HeaderDropdownProps): ReactElement => {
     const { username, name, surname, image } = user;
 
     return (

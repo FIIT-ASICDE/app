@@ -1,6 +1,6 @@
 import { SidebarContentTab } from "@/lib/types/editor";
 import { cn } from "@/lib/utils";
-import { ElementType } from "react";
+import { ElementType, ReactElement } from "react";
 
 import {
     Tooltip,
@@ -16,13 +16,19 @@ interface SidebarNavigationButtonProps {
     onClick?: () => void;
 }
 
+/**
+ * Navigation button component within the editor navigation that interacts with the sidebar
+ *
+ * @param {SidebarNavigationButtonProps} props - Component props
+ * @returns {ReactElement} Button component
+ */
 export const SidebarNavigationButton = ({
     value,
     icon: Icon,
     tooltip,
     activeSidebarContent,
     onClick,
-}: SidebarNavigationButtonProps) => {
+}: SidebarNavigationButtonProps): ReactElement => {
     return (
         <Tooltip>
             <TooltipTrigger asChild>

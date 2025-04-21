@@ -1,4 +1,4 @@
-import { OrganizationRole } from "@prisma/client";
+import { OrganizationRole } from "@/lib/prisma";
 import { Shield, UserRound } from "lucide-react";
 
 interface RoleIconProps {

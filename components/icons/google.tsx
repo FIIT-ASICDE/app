@@ -1,4 +1,11 @@
-export default function GoogleIcon() {
+import { ReactElement } from "react";
+
+/**
+ * Google icon component
+ *
+ * @returns {ReactElement} Icon
+ */
+export default function GoogleIcon(): ReactElement {
     return (
         <svg viewBox="0 0 24 24" className="mr-2 h-5 w-5">
             <path

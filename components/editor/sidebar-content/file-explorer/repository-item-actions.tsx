@@ -1,6 +1,6 @@
 import { RepositoryItem } from "@/lib/types/repository";
 import { Code, Copy, Ellipsis } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, ReactElement, SetStateAction } from "react";
 import { toast } from "sonner";
 
 import { CreateDirectoryDialog } from "@/components/editor/file/create-directory-dialog";
@@ -26,6 +26,12 @@ interface RepositoryItemActionsProps {
     onOpenFile?: (item: RepositoryItem) => void;
 }
 
+/**
+ * Dropdown menu component that enables user repository actions
+ *
+ * @param {RepositoryItemActionsProps} props - Component props
+ * @returns {ReactElement} Dropdown menu component
+ */
 export const RepositoryItemActions = ({
     repositoryId,
     parentItem,
@@ -35,7 +41,7 @@ export const RepositoryItemActions = ({
     setDropdownOpen,
     onAction,
     onOpenFile,
-}: RepositoryItemActionsProps) => {
+}: RepositoryItemActionsProps): ReactElement => {
     const openFile = () => {
         onOpenFile?.(parentItem);
     };

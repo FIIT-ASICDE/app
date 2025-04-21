@@ -1,3 +1,5 @@
+import { ReactElement } from "react";
+
 import { TableRowSkeleton } from "@/components/skeletons/table-row-skeleton";
 import {
     Table,
@@ -7,7 +9,12 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
-export const FileExplorerSkeleton = () => {
+/**
+ * Skeleton component of the file explorer
+ *
+ * @returns {ReactElement} Skeleton component
+ */
+export const FileExplorerSkeleton = (): ReactElement => {
     return (
         <Table className="w-full">
             <TableHeader>

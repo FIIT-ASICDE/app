@@ -12,7 +12,7 @@ import {
     Star,
     StarOff,
 } from "lucide-react";
-import { Suspense } from "react";
+import { ReactElement, Suspense } from "react";
 
 import { DynamicPagination } from "@/components/generic/dynamic-pagination";
 import { NoData } from "@/components/generic/no-data";
@@ -35,11 +35,17 @@ interface DashboardPageProps {
     favoriteRepos: Array<RepositoryDisplay>;
 }
 
+/**
+ * Dashboard page for a user
+ *
+ * @param {DashboardPageProps} props - Component props
+ * @returns {ReactElement} Dashboard page component
+ */
 export default function DashboardPage({
     dashboard,
     searchParams,
     favoriteRepos,
-}: DashboardPageProps) {
+}: DashboardPageProps): ReactElement {
     const recentRepositories: Array<RepositoryDisplay> =
         dashboard.recentRepositories;
     const favoriteRepositories: Array<RepositoryDisplay> = favoriteRepos;

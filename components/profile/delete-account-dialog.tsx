@@ -1,7 +1,7 @@
 import { api } from "@/lib/trpc/react";
 import { CircleX } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 
 import { useUser } from "@/components/context/user-context";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
-export const DeleteAccountDialog = () => {
+/**
+ * Dialog component that lets the user delete their account
+ *
+ * @returns {ReactElement} Dialog component
+ */
+export const DeleteAccountDialog = (): ReactElement => {
     const { user } = useUser();
 
     const [deleteAccountInput, setDeleteAccountInput] = useState<string>("");

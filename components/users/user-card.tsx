@@ -3,6 +3,7 @@ import { OrganisationDisplay } from "@/lib/types/organisation";
 import { RepositoryDisplay } from "@/lib/types/repository";
 import { UserDisplay } from "@/lib/types/user";
 import { cn } from "@/lib/utils";
+import { ReactElement } from "react";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
@@ -17,12 +18,17 @@ interface UserCardProps {
     className?: string;
 }
 
+/**
+ * Card component displaying information about a user
+ *
+ * @returns {ReactElement} Skeleton component
+ */
 export const UserCard = ({
     user,
     usersOrganisations,
     usersRepositories,
     className,
-}: UserCardProps) => {
+}: UserCardProps): ReactElement => {
     const userLink: string = "/" + user.username;
 
     return (
