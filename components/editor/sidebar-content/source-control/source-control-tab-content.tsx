@@ -135,7 +135,9 @@ export const SourceControlTabContent = ({
                                             setChangesSelected={
                                                 setChangesSelected
                                             }
-                                            onOpenDiffEditorAction={onOpenDiffEditorAction}
+                                            onOpenDiffEditorAction={
+                                                onOpenDiffEditorAction
+                                            }
                                         />
                                     ),
                                 )}

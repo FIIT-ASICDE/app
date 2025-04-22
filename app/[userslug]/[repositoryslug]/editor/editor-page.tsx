@@ -28,16 +28,16 @@ import { useDebouncedCallback } from "use-debounce";
 import { z } from "zod";
 
 import { BottomPanelTabContent } from "@/components/editor/bottom-panel-content/bottom-panel-tab-content";
+import DynamicDiffEditor from "@/components/editor/diff-editor";
 import { EditorTabs } from "@/components/editor/editor-tabs";
 import { EditorNavigation } from "@/components/editor/navigation/editor-navigation";
 import { SidebarTabContent } from "@/components/editor/sidebar-content/sidebar-tab-content";
+import { findItemInTree } from "@/components/generic/generic";
 import {
     ResizableHandle,
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import DynamicDiffEditor from "@/components/editor/diff-editor";
-import { findItemInTree } from "@/components/generic/generic";
 
 interface EditorPageProps {
     repository: Repository;
@@ -245,10 +245,16 @@ export default function EditorPage({
     };
 
     const onOpenDiffEditorAction = (filePath: string) => {
-        const newActiveFile: RepositoryItem | undefined = findItemInTree(tree, filePath);
+        const newActiveFile: RepositoryItem | undefined = findItemInTree(
+            tree,
+            filePath,
+        );
 
         if (!newActiveFile) return;
-        if (newActiveFile.type !== "file-display" && newActiveFile.type !== "file") {
+        if (
+            newActiveFile.type !== "file-display" &&
+            newActiveFile.type !== "file"
+        ) {
             return;
         }
 
@@ -262,8 +268,7 @@ export default function EditorPage({
 
         if (
             !openFiles.some(
-                (file: FileDisplayItem) =>
-                    file.absolutePath === filePath,
+                (file: FileDisplayItem) => file.absolutePath === filePath,
             )
         ) {
             setOpenFiles((prevFiles: Array<FileDisplayItem>) => [
@@ -449,7 +454,7 @@ export default function EditorPage({
                                 handleTabSwitchAction={handleTabSwitch}
                                 handleCloseTabAction={handleCloseTab}
                             />
-                            {(activeFile && !showDiffEditor) ? (
+                            {activeFile && !showDiffEditor ? (
                                 <DynamicEditor
                                     filePath={
                                         repository.ownerName +
@@ -465,7 +470,7 @@ export default function EditorPage({
                                             : "vs-light"
                                     }
                                 />
-                            ) : (activeFile && showDiffEditor) ? (
+                            ) : activeFile && showDiffEditor ? (
                                 <DynamicDiffEditor
                                     filePath={
                                         repository.ownerName +

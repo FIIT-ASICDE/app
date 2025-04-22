@@ -292,7 +292,9 @@ export const ConfigurationTabContent = ({
                                                 }
                                             </div>
                                         ) : (
-                                            <span className="text-muted-foreground">Select a TestBench file</span>
+                                            <span className="text-muted-foreground">
+                                                Select a TestBench file
+                                            </span>
                                         )}
                                     </Button>
                                 </div>
@@ -390,7 +392,9 @@ export const ConfigurationTabContent = ({
                                                 {selectedSynthesisFile.name}
                                             </div>
                                         ) : (
-                                            <span className="text-muted-foreground">Select a Verilog file</span>
+                                            <span className="text-muted-foreground">
+                                                Select a Verilog file
+                                            </span>
                                         )}
                                     </Button>
                                 </div>

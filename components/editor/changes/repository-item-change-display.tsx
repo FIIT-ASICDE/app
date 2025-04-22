@@ -1,4 +1,8 @@
-import { FileDisplayItem, RepositoryItem, RepositoryItemChange } from "@/lib/types/repository";
+import {
+    FileDisplayItem,
+    RepositoryItem,
+    RepositoryItemChange,
+} from "@/lib/types/repository";
 import { FileIcon } from "lucide-react";
 import { Dispatch, ReactElement, SetStateAction } from "react";
 
