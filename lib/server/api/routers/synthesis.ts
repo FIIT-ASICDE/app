@@ -44,18 +44,18 @@ function runYosysStream() {
             );
 
             const now = new Date();
-            const simulationDir = now.toISOString().replace(/[:.]/g, "-");
-            const simDirPath = `sim_${simulationDir}`;
-            const outputFile = `${simDirPath}/output.txt`;
-            const outputVerilog = `${simDirPath}/output.v`;
+            const synthesisDir = now.toISOString().replace(/[:.]/g, "-");
+            const synDirPath = `syn_${synthesisDir}`;
+            const outputFile = `${synDirPath}/output.txt`;
+            const outputVerilog = `${synDirPath}/output.v`;
 
             const yosysCommand = `
                 cd /workspace && \
-                mkdir -p ${simDirPath} && \
+                mkdir -p ${synDirPath} && \
                 yosys -p "read_verilog ${verilogFilePath}; synth; write_verilog ${outputVerilog}" | tee ${outputFile}
             `.replace(/\n/g, " ");
 
-            const simulation = spawn("docker", [
+            const synthesis = spawn("docker", [
                 "exec",
                 containerId,
                 "bash",
@@ -63,7 +63,7 @@ function runYosysStream() {
                 yosysCommand,
             ]);
 
-            for await (const chunk of simulation.stdout) {
+            for await (const chunk of synthesis.stdout) {
                 console.log(chunk.toString());
                 yield {
                     type: "info",
@@ -71,7 +71,7 @@ function runYosysStream() {
                 } satisfies SynthesisOutput;
             }
 
-            for await (const chunk of simulation.stderr) {
+            for await (const chunk of synthesis.stderr) {
                 console.log(chunk.toString());
                 yield {
                     type: "error",
