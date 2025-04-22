@@ -12,6 +12,7 @@ import type {
     Repository,
     RepositoryItem,
 } from "@/lib/types/repository";
+import { useTheme } from "next-themes";
 import dynamic from "next/dynamic";
 import {
     type ElementRef,
@@ -35,7 +36,6 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { useTheme } from "next-themes";
 
 interface EditorPageProps {
     repository: Repository;
@@ -417,7 +417,11 @@ export default function EditorPage({
                                         activeFile.absolutePath
                                     }
                                     language={activeFile.language}
-                                    theme={theme === "dark" ? "vs-dark" : "hc-light"}
+                                    theme={
+                                        theme === "dark"
+                                            ? "vs-dark"
+                                            : "hc-light"
+                                    }
                                 />
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center text-muted-foreground">
@@ -449,4 +453,4 @@ export default function EditorPage({
             </ResizablePanelGroup>
         </div>
     );
-};
+}
