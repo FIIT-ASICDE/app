@@ -1,8 +1,8 @@
 "use client";
 
+import { api } from "@/lib/trpc/react";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { ReactElement, useEffect, useRef } from "react";
-import { api } from "@/lib/trpc/react";
 
 const originalContent: string = `return () => {
             if (diffEditorRef.current) {
@@ -34,7 +34,9 @@ export default function DynamicDiffEditor({
     language = "systemverilog",
     theme = "vs-dark",
 }: DynamicDiffEditorProps): ReactElement {
-    const diffEditorRef = useRef<monaco.editor.IStandaloneDiffEditor | null>(null);
+    const diffEditorRef = useRef<monaco.editor.IStandaloneDiffEditor | null>(
+        null,
+    );
     const monacoEl = useRef<HTMLElement | null>(null);
 
     useEffect(() => {
@@ -45,10 +47,13 @@ export default function DynamicDiffEditor({
             diffEditorRef.current = null;
         }
 
-        diffEditorRef.current = monaco.editor.createDiffEditor(monacoEl.current, {
-            theme,
-            automaticLayout: true,
-        });
+        diffEditorRef.current = monaco.editor.createDiffEditor(
+            monacoEl.current,
+            {
+                theme,
+                automaticLayout: true,
+            },
+        );
 
         const originalModel = monaco.editor.createModel("", language);
         const modifiedModel = monaco.editor.createModel("", language);
@@ -77,4 +82,4 @@ export default function DynamicDiffEditor({
     }, [originalContent, modifiedContent, language, theme]);
 
     return <main className="h-full w-full" ref={monacoEl}></main>;
-};
+}
