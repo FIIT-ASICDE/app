@@ -1,10 +1,10 @@
-import { 
+import {
     Configuration,
     SynthesisOutput,
     SynthesisTab,
 } from "@/lib/types/editor";
-import { ReactElement, useState } from "react";
 import { cn } from "@/lib/utils";
+import { ReactElement, useState } from "react";
 
 import { CloseButton } from "@/components/editor/navigation/close-button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -25,7 +25,7 @@ interface SynthesisTabContentProps {
 export const SynthesisTabContent = ({
     handleCloseBottomPanel,
     synthesisOutput,
-    lastSynthesis
+    lastSynthesis,
 }: SynthesisTabContentProps): ReactElement => {
     const [activeTab, setActiveTab] = useState<SynthesisTab>("all");
 
@@ -77,7 +77,7 @@ export const SynthesisTabContent = ({
                     <div className="space-y-0 font-mono text-sm text-muted-foreground">
                         {synthesisOutput.map(
                             (line: SynthesisOutput, index: number) => (
-                                <span key={index}>
+                                <span key={index} className="text-wrap">
                                     {line.content}
                                     <br />
                                 </span>

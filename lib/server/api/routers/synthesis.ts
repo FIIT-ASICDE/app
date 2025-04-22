@@ -1,6 +1,4 @@
-import {
-    resolveRepoPath,
-} from "@/lib/server/api/routers/repos";
+import { resolveRepoPath } from "@/lib/server/api/routers/repos";
 import { createTRPCRouter, publicProcedure } from "@/lib/server/api/trpc";
 import { SynthesisOutput } from "@/lib/types/editor";
 import { exec, spawn } from "child_process";
@@ -86,4 +84,4 @@ function runYosysStream() {
 
             await execPromise(`docker rm -f ${containerId}`);
         });
-};
+}
