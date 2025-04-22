@@ -211,6 +211,16 @@ export default function EditorPage({
         }
     };
 
+    const [yosysInput, setYosysInput] = useState<
+        RouterInputs["synthesis"]["runYosysStream"] | null
+    >(null);
+
+    const resultYosys = api.synthesis.runYosysStream.useQuery(
+        yosysInput!, {
+            enabled: !!yosysInput,
+        }
+    );
+
     const onStartSynthesis = () => {
         // TODO: maxo start synthesis
         console.log(
@@ -219,6 +229,14 @@ export default function EditorPage({
                 " and file: " +
                 configuration?.synthesis.file.absolutePath,
         );
+        
+        if (configuration?.synthesis.type === "yosys") {
+            const input = {
+                repoId: repository.id,
+                verilogFilePath: configuration.synthesis.file.absolutePath,
+            };
+            setYosysInput(input);
+        }
     };
 
     const handleFileClick = (item: RepositoryItem) => {
@@ -421,6 +439,8 @@ export default function EditorPage({
                             []
                         }
                         lastSimulation={lastSimulation}
+                        synthesisOutput={resultYosys.data ?? []}
+                        lastSynthesis={resultYosys.data?.[0]?.content ?? null}
                     />
                 </ResizablePanel>
             </ResizablePanelGroup>

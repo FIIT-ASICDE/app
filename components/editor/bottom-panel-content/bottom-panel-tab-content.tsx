@@ -2,6 +2,7 @@ import {
     BottomPanelContentTab,
     Configuration,
     SimulationOutput,
+    SynthesisOutput,
 } from "@/lib/types/editor";
 import { ReactElement } from "react";
 
@@ -14,6 +15,8 @@ interface BottomPanelTabContentProps {
     configuration: Configuration | undefined;
     simulationOutput: Array<SimulationOutput>;
     lastSimulation: string | null;
+    synthesisOutput: Array<SynthesisOutput>;
+    lastSynthesis: string | null;
 }
 
 /**
@@ -28,6 +31,8 @@ export const BottomPanelTabContent = ({
     configuration,
     simulationOutput,
     lastSimulation,
+    synthesisOutput,
+    lastSynthesis,
 }: BottomPanelTabContentProps): ReactElement => {
     return (
         <div className="flex h-full">
@@ -44,6 +49,8 @@ export const BottomPanelTabContent = ({
                 <SynthesisTabContent
                     handleCloseBottomPanel={handleCloseBottomPanel}
                     configuration={configuration}
+                    synthesisOutput={synthesisOutput}
+                    lastSynthesis={lastSynthesis}
                 />
             )}
         </div>

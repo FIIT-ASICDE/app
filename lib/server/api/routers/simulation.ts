@@ -433,7 +433,7 @@ function simulateIcarusVerilogStream() {
         });
 }
 
-async function getAllFilesByExtension(
+export async function getAllFilesByExtension(
     dir: string,
     fileExtension: string,
     baseDir = dir,
