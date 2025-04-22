@@ -1,12 +1,14 @@
+import {
+    resolveRepoPath,
+} from "@/lib/server/api/routers/repos";
 import { createTRPCRouter, publicProcedure } from "@/lib/server/api/trpc";
-import { resolveRepoPath } from "@/lib/server/api/routers/repos";
 import { SynthesisOutput } from "@/lib/types/editor";
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
-import { promises as fs } from "fs";
-import { spawn } from "child_process";
+import { exec, spawn } from "child_process";
+import util from "util";
 import { v4 as uuidv4 } from "uuid";
-import path from "path";
+import { z } from "zod";
+
+const execPromise = util.promisify(exec);
 
 export const synthesisRouter = createTRPCRouter({
     runYosysStream: runYosysStream(),
@@ -16,56 +18,72 @@ function runYosysStream() {
     return publicProcedure
         .input(
             z.object({
-                testbenchPath: z.string().min(1, "Testbench súbor musí mať názov."),
+                verilogFilePath: z
+                    .string()
+                    .min(1, "Verilog súbor musí mať názov."),
                 repoId: z.string(),
             }),
         )
-        .mutation(async ({ ctx, input }) => {
-            try {
-                const repoIdDecoded = decodeURIComponent(input.repoId);
-                const testbenchPathDecoded = decodeURIComponent(input.testbenchPath);
+        .query(async function* ({ input, ctx }) {
+            yield {
+                type: "info",
+                content: `Synthesis Yosys started.`,
+            } satisfies SynthesisOutput;
 
-                const absoluteRepoPath = await resolveRepoPath(ctx.prisma, repoIdDecoded);
-                const containerId = uuidv4();
+            const repoIdDecoded = decodeURIComponent(input.repoId);
+            const verilogFilePath = decodeURIComponent(input.verilogFilePath);
 
-                console.log("📁 Repo path:", absoluteRepoPath);
-                console.log("📄 Testbench path:", testbenchPathDecoded);
+            const absoluteRepoPath = await resolveRepoPath(
+                ctx.prisma,
+                repoIdDecoded,
+            );
+            const containerId = uuidv4();
 
-                await execPromise(
-                    `docker run -dit --name ${containerId} -v "${absoluteRepoPath}:/workspace" simulator-image`,
-                );
-                console.log(`✅ Docker container '${containerId}' started.`);
+            await execPromise(
+                `docker run -dit --name ${containerId} -v "${absoluteRepoPath}:/workspace" simulator-image`,
+            );
 
-                const yosysProcess = spawn("docker", [
-                    "exec", containerId, "bash", "-c",
-                    `cd /workspace && yosys -p "read_verilog ${testbenchPathDecoded}; synth; write_verilog output.v"`
-                ]);
+            const now = new Date();
+            const simulationDir = now.toISOString().replace(/[:.]/g, "-");
+            const simDirPath = `sim_${simulationDir}`;
+            const outputFile = `${simDirPath}/output.txt`;
+            const outputVerilog = `${simDirPath}/output.v`;
 
-                yosysProcess.stdout.on("data", (data) => {
-                    console.log(`📤 STDOUT: ${data.toString()}`);
-                });
+            const yosysCommand = `
+                cd /workspace && \
+                mkdir -p ${simDirPath} && \
+                yosys -p "read_verilog ${verilogFilePath}; synth; write_verilog ${outputVerilog}" | tee ${outputFile}
+            `.replace(/\n/g, " ");
 
-                yosysProcess.stderr.on("data", (data) => {
-                    console.error(`❌ STDERR: ${data.toString()}`);
-                });
+            const simulation = spawn("docker", [
+                "exec",
+                containerId,
+                "bash",
+                "-c",
+                yosysCommand,
+            ]);
 
-                yosysProcess.on("close", async (code) => {
-                    console.log(`🔚 Yosys finished with exit code ${code}`);
-
-                    // Optionally cleanup
-                    await execPromise(`docker rm -f ${containerId}`);
-                    console.log(`🧹 Docker container '${containerId}' removed.`);
-                });
-
-                return { status: "processing", containerId };
-
-            } catch (error) {
-                console.error("❌ Error during synthesis:", error);
-                throw new TRPCError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: "Chyba počas syntézy.",
-                    cause: error,
-                });
+            for await (const chunk of simulation.stdout) {
+                console.log(chunk.toString());
+                yield {
+                    type: "info",
+                    content: `[stdout] ${chunk.toString()} \n`,
+                } satisfies SynthesisOutput;
             }
+
+            for await (const chunk of simulation.stderr) {
+                console.log(chunk.toString());
+                yield {
+                    type: "error",
+                    content: `[stderr] ${chunk.toString()} \n`,
+                } satisfies SynthesisOutput;
+            }
+
+            yield {
+                type: "info",
+                content: `✅ Synthetis with Yosys finished.`,
+            } satisfies SynthesisOutput;
+
+            await execPromise(`docker rm -f ${containerId}`);
         });
 };

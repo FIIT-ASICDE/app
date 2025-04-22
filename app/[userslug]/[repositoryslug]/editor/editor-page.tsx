@@ -233,7 +233,7 @@ export default function EditorPage({
         if (configuration?.synthesis.type === "yosys") {
             const input = {
                 repoId: repository.id,
-                filePath: configuration.synthesis.file.absolutePath,
+                verilogFilePath: configuration.synthesis.file.absolutePath,
             };
             setYosysInput(input);
         }
@@ -436,9 +436,11 @@ export default function EditorPage({
                             resultVerilatorCpp.data ??
                             resultIcarus.data ??
                             resultVerilatorSv.data ??
-                            resultYosys.data
+                            []
                         }
                         lastSimulation={lastSimulation}
+                        synthesisOutput={resultYosys.data ?? []}
+                        lastSynthesis={resultYosys.data?.[0]?.content ?? null}
                     />
                 </ResizablePanel>
             </ResizablePanelGroup>
