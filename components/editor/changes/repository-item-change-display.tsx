@@ -1,8 +1,8 @@
-import { RepositoryItemChange } from "@/lib/types/repository";
+import { FileDisplayItem, RepositoryItem, RepositoryItemChange } from "@/lib/types/repository";
 import { FileIcon } from "lucide-react";
 import { Dispatch, ReactElement, SetStateAction } from "react";
 
-import { getChangeContent } from "@/components/generic/generic";
+import { findItemInTree, getChangeContent } from "@/components/generic/generic";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
@@ -10,6 +10,7 @@ interface RepositoryItemChangeDisplayProps {
     itemChange: RepositoryItemChange;
     changesSelected: Array<RepositoryItemChange>;
     setChangesSelected: Dispatch<SetStateAction<Array<RepositoryItemChange>>>;
+    onOpenDiffEditorAction: (filePath: string) => void;
 }
 
 /**
@@ -22,6 +23,7 @@ export const RepositoryItemChangeDisplay = ({
     itemChange,
     changesSelected,
     setChangesSelected,
+    onOpenDiffEditorAction,
 }: RepositoryItemChangeDisplayProps): ReactElement => {
     const handleCheckboxChange = (
         itemChange: RepositoryItemChange,
@@ -37,8 +39,7 @@ export const RepositoryItemChangeDisplay = ({
     };
 
     const handleOpenDiff = () => {
-        // TODO: diff editor
-        console.log("Show Diff editor of item: " + itemChange.itemPath);
+        onOpenDiffEditorAction(itemChange.itemPath);
     };
 
     return (

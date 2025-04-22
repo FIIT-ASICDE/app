@@ -36,6 +36,8 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import DynamicDiffEditor from "@/components/editor/diff-editor";
+import { findItemInTree } from "@/components/generic/generic";
 
 interface EditorPageProps {
     repository: Repository;
@@ -78,6 +80,8 @@ export default function EditorPage({
         useState<number>(20);
     const [activeFile, setActiveFile] = useState<FileDisplayItem | null>(null);
     const [openFiles, setOpenFiles] = useState<Array<FileDisplayItem>>([]);
+
+    const [showDiffEditor, setShowDiffEditor] = useState<boolean>(false);
 
     const [configuration, setConfiguration] = useState<
         Configuration | undefined
@@ -240,6 +244,37 @@ export default function EditorPage({
         }
     };
 
+    const onOpenDiffEditorAction = (filePath: string) => {
+        const newActiveFile: RepositoryItem | undefined = findItemInTree(tree, filePath);
+
+        if (!newActiveFile) return;
+        if (newActiveFile.type !== "file-display" && newActiveFile.type !== "file") {
+            return;
+        }
+
+        const fileDisplay: FileDisplayItem = {
+            type: "file-display",
+            name: "Diff: " + newActiveFile.name,
+            absolutePath: "Diff: " + newActiveFile.absolutePath,
+            lastActivity: newActiveFile.lastActivity,
+            language: newActiveFile.language,
+        };
+
+        if (
+            !openFiles.some(
+                (file: FileDisplayItem) =>
+                    file.absolutePath === filePath,
+            )
+        ) {
+            setOpenFiles((prevFiles: Array<FileDisplayItem>) => [
+                ...prevFiles,
+                fileDisplay,
+            ]);
+        }
+        setActiveFile(fileDisplay);
+        setShowDiffEditor(true);
+    };
+
     const handleFileClick = (item: RepositoryItem) => {
         if (item.type !== "file-display" && item.type !== "file") {
             return;
@@ -264,10 +299,16 @@ export default function EditorPage({
                 fileDisplay,
             ]);
         }
+        setShowDiffEditor(false);
         setActiveFile(fileDisplay);
     };
 
     const handleTabSwitch = (item: FileDisplayItem) => {
+        if (item.name.startsWith("Diff:")) {
+            setShowDiffEditor(true);
+        } else {
+            setShowDiffEditor(false);
+        }
         setActiveFile(item);
     };
 
@@ -393,6 +434,7 @@ export default function EditorPage({
                                 }}
                                 configuration={configuration}
                                 setConfigurationAction={setConfiguration}
+                                onOpenDiffEditorAction={onOpenDiffEditorAction}
                             />
                         </ResizablePanel>
 
@@ -407,7 +449,7 @@ export default function EditorPage({
                                 handleTabSwitchAction={handleTabSwitch}
                                 handleCloseTabAction={handleCloseTab}
                             />
-                            {activeFile ? (
+                            {(activeFile && !showDiffEditor) ? (
                                 <DynamicEditor
                                     filePath={
                                         repository.ownerName +
@@ -420,7 +462,23 @@ export default function EditorPage({
                                     theme={
                                         theme === "dark"
                                             ? "vs-dark"
-                                            : "hc-light"
+                                            : "vs-light"
+                                    }
+                                />
+                            ) : (activeFile && showDiffEditor) ? (
+                                <DynamicDiffEditor
+                                    filePath={
+                                        repository.ownerName +
+                                        "/" +
+                                        repository.name +
+                                        "/" +
+                                        activeFile.absolutePath
+                                    }
+                                    language={activeFile.language}
+                                    theme={
+                                        theme === "dark"
+                                            ? "vs-dark"
+                                            : "vs-light"
                                     }
                                 />
                             ) : (
