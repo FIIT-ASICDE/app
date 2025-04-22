@@ -149,9 +149,9 @@ export const EditorTabs = ({
                             <div
                                 key={index + file.absolutePath}
                                 className={cn(
-                                    "flex w-32 cursor-pointer items-center justify-center border-x border-accent px-2 py-2 text-sm",
+                                    "flex w-32 cursor-pointer items-center justify-between border-x border-accent px-2 py-2 text-sm",
                                     isActive
-                                        ? "bg-[#1e1e1e] text-foreground"
+                                        ? "bg-background dark:bg-[#1e1e1e] text-foreground"
                                         : "text-muted-foreground hover:text-foreground",
                                 )}
                                 onClick={() => handleTabSwitchAction(file)}
@@ -242,7 +242,7 @@ export const EditorTabs = ({
                 </div>
             </div>
             {activeFile && (
-                <div className="flex h-8 w-full items-center truncate bg-[#1e1e1e] p-2 text-xs text-muted-foreground">
+                <div className="flex h-8 w-full items-center truncate bg-background dark:bg-[#1e1e1e] p-2 text-xs text-muted-foreground">
                     {activeFile.absolutePath}
                 </div>
             )}

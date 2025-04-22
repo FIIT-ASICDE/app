@@ -35,6 +35,7 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { useTheme } from "next-themes";
 
 interface EditorPageProps {
     repository: Repository;
@@ -56,6 +57,8 @@ export default function EditorPage({
     repository,
     lastSimulation,
 }: EditorPageProps): ReactElement {
+    const { theme } = useTheme();
+
     const [activeSidebarContent, setActiveSidebarContent] =
         useState<SidebarContentTab>("fileExplorer");
     const [activeBottomPanelContent, setActiveBottomPanelContent] =
@@ -413,6 +416,8 @@ export default function EditorPage({
                                         "/" +
                                         activeFile.absolutePath
                                     }
+                                    language={activeFile.language}
+                                    theme={theme === "dark" ? "vs-dark" : "hc-light"}
                                 />
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center text-muted-foreground">
@@ -444,4 +449,4 @@ export default function EditorPage({
             </ResizablePanelGroup>
         </div>
     );
-}
+};
