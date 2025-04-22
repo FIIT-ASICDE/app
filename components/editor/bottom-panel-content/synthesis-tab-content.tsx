@@ -77,7 +77,7 @@ export const SynthesisTabContent = ({
                     <div className="space-y-0 font-mono text-sm text-muted-foreground">
                         {synthesisOutput.map(
                             (line: SynthesisOutput, index: number) => (
-                                <span key={index}>
+                                <span key={index} className="text-wrap">
                                     {line.content}
                                     <br />
                                 </span>

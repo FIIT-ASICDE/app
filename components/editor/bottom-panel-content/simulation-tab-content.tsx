@@ -77,7 +77,7 @@ export const SimulationTabContent = ({
                     <div className="space-y-0 font-mono text-sm text-muted-foreground">
                         {simulationOutput.map(
                             (line: SimulationOutput, index: number) => (
-                                <span key={index}>
+                                <span key={index} className="text-wrap">
                                     {line.content}
                                     <br />
                                 </span>
@@ -89,9 +89,9 @@ export const SimulationTabContent = ({
                 {activeTab === "errors" && (
                     <div className="space-y-0 font-mono text-sm text-muted-foreground">
                         {simulationOutput
-                            .filter((line) => line.type === "error")
-                            .map((line, index) => (
-                                <span key={index}>
+                            .filter((line: SimulationOutput) => line.type === "error")
+                            .map((line: SimulationOutput, index: number) => (
+                                <span key={index} className="text-wrap">
                                     {line.content}
                                     <br />
                                 </span>
@@ -101,8 +101,11 @@ export const SimulationTabContent = ({
 
                 {activeTab === "lastSimulation" && lastSimulation != null && (
                     <div className="space-y-0 font-mono text-sm text-muted-foreground">
-                        {lastSimulation.split("\n").map((line, idx) => (
-                            <div key={idx}>{line}</div>
+                        {lastSimulation.split("\n").map((line: string, index: number) => (
+                            <span key={index} className="text-wrap">
+                                {line}
+                                <br />
+                            </span>
                         ))}
                     </div>
                 )}

@@ -30,6 +30,7 @@ import { SidebarNavigationButton } from "@/components/editor/navigation/sidebar-
 import { HeaderDropdown } from "@/components/header/header-dropdown";
 import LogoIcon from "@/components/icons/logo";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 
 interface EditorNavigationProps {
     sidebarProps: {
@@ -147,16 +148,100 @@ export const EditorNavigation = ({
         }
     };
 
+    const conf: string | null = localStorage.getItem("configuration");
+    const configuration: Configuration = JSON.parse(conf || "");
+
+    const getSimulationTooltipContent = () => {
+        if (!configuration) {
+            return (
+                <p className="w-48 text-sm text-muted-foreground">
+                    Simulation not yet configured
+                </p>
+            );
+        }
+
+        return (
+            <div className="flex flex-col gap-y-2 items-center w-48">
+                <Button
+                    variant="link"
+                    size="sm"
+                    className="px-2 text-foreground w-full"
+                    onClick={() => {
+                        if (activeBottomPanelContent !== "simulation") {
+                            toggleVerticalCollapse("simulation");
+                            setActiveBottomPanelContent("simulation");
+                        }
+                        onStartSimulation();
+                    }}
+                >
+                    Run simulation...
+                </Button>
+                <div className="flex flex-col gap-y-1 w-full">
+                    <div className="flex flex-row justify-between items-center text-sm w-full gap-x-2">
+                        <span className="text-muted-foreground">Simulation type:</span>
+                        <span>{configuration.simulation.type}</span>
+                    </div>
+                    <div className="flex flex-row justify-between items-center text-sm w-full gap-x-2">
+                        <span className="text-muted-foreground">TestBench file:</span>
+                        <span>{configuration.simulation.testBench.name}</span>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const getSynthesisTooltipContent = () => {
+        if (!configuration) {
+            return (
+                <p className="w-48 text-sm text-muted-foreground">
+                    Synthesis not yet configured
+                </p>
+            );
+        }
+
+        return (
+            <div className="flex flex-col gap-y-2 items-center w-48">
+                <Button
+                    variant="link"
+                    size="sm"
+                    className="px-2 text-foreground w-full"
+                    onClick={() => {
+                        if (activeBottomPanelContent !== "synthesis") {
+                            toggleVerticalCollapse("synthesis");
+                            setActiveBottomPanelContent("synthesis");
+                        }
+                        onStartSynthesis();
+                    }}
+                >
+                    Run synthesis...
+                </Button>
+                <div className="flex flex-col gap-y-1 w-full">
+                    <div className="flex flex-row justify-between items-center text-sm w-full gap-x-2">
+                        <span className="text-muted-foreground">Synthesis type:</span>
+                        <span>{configuration.synthesis.type}</span>
+                    </div>
+                    <div className="flex flex-row justify-between items-center text-sm w-full gap-x-2">
+                        <span className="text-muted-foreground">File:</span>
+                        <span>{configuration.synthesis.file.name}</span>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <>
             <div className="flex h-full w-14 flex-col rounded-none border-r bg-header">
                 <div className="flex flex-col items-center gap-2 p-2">
                     <Link href={"/"}>
-                        <NavigationButton icon={LogoIcon} tooltip="Home" />
+                        <NavigationButton
+                            icon={LogoIcon}
+                            tooltip={<p>Home</p>}
+                        />
                     </Link>
                     <NavigationButton
                         icon={Command}
-                        tooltip="Command"
+                        tooltip={<p>Command</p>}
                         onClick={() => setCommandOpen(!commandOpen)}
                     />
                 </div>
@@ -211,23 +296,19 @@ export const EditorNavigation = ({
                 <div className="flex flex-col items-center gap-2 p-2">
                     <NavigationButton
                         icon={Play}
-                        tooltip="Simulation"
+                        tooltip={getSimulationTooltipContent()}
                         onClick={() => {
                             toggleVerticalCollapse("simulation");
                             setActiveBottomPanelContent("simulation");
-
-                            onStartSimulation();
                         }}
                     />
 
                     <NavigationButton
                         icon={PlayCircle}
-                        tooltip="Synthesis"
+                        tooltip={getSynthesisTooltipContent()}
                         onClick={() => {
                             toggleVerticalCollapse("synthesis");
                             setActiveBottomPanelContent("synthesis");
-
-                            onStartSynthesis();
                         }}
                     />
 
