@@ -29,6 +29,7 @@ interface SidebarTabContentProps {
     };
     configuration: Configuration | undefined;
     setConfigurationAction: Dispatch<SetStateAction<Configuration | undefined>>;
+    onOpenDiffEditorAction: (filePath: string) => void;
 }
 
 /**
@@ -48,6 +49,7 @@ export const SidebarTabContent = ({
     onCommit,
     configuration,
     setConfigurationAction,
+    onOpenDiffEditorAction,
 }: SidebarTabContentProps): ReactElement => {
     return (
         <div className="flex h-full">
@@ -73,6 +75,7 @@ export const SidebarTabContent = ({
                     handleCloseSidebarAction={handleCloseSidebarAction}
                     onCommitAction={onCommit.action}
                     isLoading={onCommit.isLoading}
+                    onOpenDiffEditorAction={onOpenDiffEditorAction}
                 />
             )}
             {activeSidebarContent === "configuration" && (

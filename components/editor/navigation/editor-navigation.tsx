@@ -204,7 +204,7 @@ export const EditorNavigation = ({
     };
 
     const getSynthesisTooltipContent = () => {
-        if (!configuration) {
+        if (!configuration.synthesis) {
             return (
                 <p className="w-48 text-sm text-muted-foreground">
                     Synthesis not yet configured

@@ -39,6 +39,8 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import DynamicDiffEditor from "@/components/editor/diff-editor";
+import { findItemInTree } from "@/components/generic/generic";
 import { symbolTableManager } from "@/antlr/SystemVerilog/utilities/monacoEditor/symbolTable";
 import DiagramPage from "@/app/[userslug]/[repositoryslug]/block-diagram/diagram-page";
 
@@ -83,6 +85,8 @@ export default function EditorPage({
         useState<number>(20);
     const [activeFile, setActiveFile] = useState<FileDisplayItem | null>(null);
     const [openFiles, setOpenFiles] = useState<Array<FileDisplayItem>>([]);
+
+    const [showDiffEditor, setShowDiffEditor] = useState<boolean>(false);
 
     const [configuration, setConfiguration] = useState<
         Configuration | undefined
@@ -245,13 +249,71 @@ export default function EditorPage({
         }
     };
 
+    const onOpenDiffEditorAction = (filePath: string) => {
+        const newActiveFile: RepositoryItem | undefined = findItemInTree(tree, filePath);
+
+        if (!newActiveFile) return;
+        if (newActiveFile.type !== "file-display" && newActiveFile.type !== "file") {
+            return;
+        }
+
+        const fileDisplay: FileDisplayItem = {
+            type: "file-display",
+            name: "Diff: " + newActiveFile.name,
+            absolutePath: "Diff: " + newActiveFile.absolutePath,
+            lastActivity: newActiveFile.lastActivity,
+            language: newActiveFile.language,
+        };
+
+        if (
+            !openFiles.some(
+                (file: FileDisplayItem) =>
+                    file.absolutePath === filePath,
+            )
+        ) {
+            setOpenFiles((prevFiles: Array<FileDisplayItem>) => [
+                ...prevFiles,
+                fileDisplay,
+            ]);
+        }
+        setActiveFile(fileDisplay);
+        setShowDiffEditor(true);
+    };
+
     const handleFileClick = (item: RepositoryItem) => {
         if (item.type === "file" || item.type === "file-display") {
             handleOpenFile(item);
         }
+
+        const fileDisplay: FileDisplayItem = {
+            type: "file-display",
+            name: item.name,
+            absolutePath: item.absolutePath,
+            lastActivity: item.lastActivity,
+            language: item.language,
+        };
+
+        if (
+            !openFiles.some(
+                (file: FileDisplayItem) =>
+                    file.absolutePath === item.absolutePath,
+            )
+        ) {
+            setOpenFiles((prevFiles: Array<FileDisplayItem>) => [
+                ...prevFiles,
+                fileDisplay,
+            ]);
+        }
+        setShowDiffEditor(false);
+        setActiveFile(fileDisplay);
     };
 
     const handleTabSwitch = (item: FileDisplayItem) => {
+        if (item.name.startsWith("Diff:")) {
+            setShowDiffEditor(true);
+        } else {
+            setShowDiffEditor(false);
+        }
         setActiveFile(item);
     };
 
@@ -433,6 +495,7 @@ export default function EditorPage({
                                 }}
                                 configuration={configuration}
                                 setConfigurationAction={setConfiguration}
+                                onOpenDiffEditorAction={onOpenDiffEditorAction}
                             />
                         </ResizablePanel>
 
