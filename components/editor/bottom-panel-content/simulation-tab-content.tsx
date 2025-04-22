@@ -89,7 +89,10 @@ export const SimulationTabContent = ({
                 {activeTab === "errors" && (
                     <div className="space-y-0 font-mono text-sm text-muted-foreground">
                         {simulationOutput
-                            .filter((line: SimulationOutput) => line.type === "error")
+                            .filter(
+                                (line: SimulationOutput) =>
+                                    line.type === "error",
+                            )
                             .map((line: SimulationOutput, index: number) => (
                                 <span key={index} className="text-wrap">
                                     {line.content}
@@ -101,12 +104,14 @@ export const SimulationTabContent = ({
 
                 {activeTab === "lastSimulation" && lastSimulation != null && (
                     <div className="space-y-0 font-mono text-sm text-muted-foreground">
-                        {lastSimulation.split("\n").map((line: string, index: number) => (
-                            <span key={index} className="text-wrap">
-                                {line}
-                                <br />
-                            </span>
-                        ))}
+                        {lastSimulation
+                            .split("\n")
+                            .map((line: string, index: number) => (
+                                <span key={index} className="text-wrap">
+                                    {line}
+                                    <br />
+                                </span>
+                            ))}
                     </div>
                 )}
             </ScrollArea>

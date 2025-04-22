@@ -29,8 +29,8 @@ import { NavigationButton } from "@/components/editor/navigation/navigation-butt
 import { SidebarNavigationButton } from "@/components/editor/navigation/sidebar-navigation-button";
 import { HeaderDropdown } from "@/components/header/header-dropdown";
 import LogoIcon from "@/components/icons/logo";
-import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 interface EditorNavigationProps {
     sidebarProps: {
@@ -161,11 +161,11 @@ export const EditorNavigation = ({
         }
 
         return (
-            <div className="flex flex-col gap-y-2 items-center w-48">
+            <div className="flex w-48 flex-col items-center gap-y-2">
                 <Button
                     variant="link"
                     size="sm"
-                    className="px-2 text-foreground w-full"
+                    className="w-full px-2 text-foreground"
                     onClick={() => {
                         if (activeBottomPanelContent !== "simulation") {
                             toggleVerticalCollapse("simulation");
@@ -176,13 +176,17 @@ export const EditorNavigation = ({
                 >
                     Run simulation...
                 </Button>
-                <div className="flex flex-col gap-y-1 w-full">
-                    <div className="flex flex-row justify-between items-center text-sm w-full gap-x-2">
-                        <span className="text-muted-foreground">Simulation type:</span>
+                <div className="flex w-full flex-col gap-y-1">
+                    <div className="flex w-full flex-row items-center justify-between gap-x-2 text-sm">
+                        <span className="text-muted-foreground">
+                            Simulation type:
+                        </span>
                         <span>{configuration.simulation.type}</span>
                     </div>
-                    <div className="flex flex-row justify-between items-center text-sm w-full gap-x-2">
-                        <span className="text-muted-foreground">TestBench file:</span>
+                    <div className="flex w-full flex-row items-center justify-between gap-x-2 text-sm">
+                        <span className="text-muted-foreground">
+                            TestBench file:
+                        </span>
                         <span>{configuration.simulation.testBench.name}</span>
                     </div>
                 </div>
@@ -200,11 +204,11 @@ export const EditorNavigation = ({
         }
 
         return (
-            <div className="flex flex-col gap-y-2 items-center w-48">
+            <div className="flex w-48 flex-col items-center gap-y-2">
                 <Button
                     variant="link"
                     size="sm"
-                    className="px-2 text-foreground w-full"
+                    className="w-full px-2 text-foreground"
                     onClick={() => {
                         if (activeBottomPanelContent !== "synthesis") {
                             toggleVerticalCollapse("synthesis");
@@ -215,12 +219,14 @@ export const EditorNavigation = ({
                 >
                     Run synthesis...
                 </Button>
-                <div className="flex flex-col gap-y-1 w-full">
-                    <div className="flex flex-row justify-between items-center text-sm w-full gap-x-2">
-                        <span className="text-muted-foreground">Synthesis type:</span>
+                <div className="flex w-full flex-col gap-y-1">
+                    <div className="flex w-full flex-row items-center justify-between gap-x-2 text-sm">
+                        <span className="text-muted-foreground">
+                            Synthesis type:
+                        </span>
                         <span>{configuration.synthesis.type}</span>
                     </div>
-                    <div className="flex flex-row justify-between items-center text-sm w-full gap-x-2">
+                    <div className="flex w-full flex-row items-center justify-between gap-x-2 text-sm">
                         <span className="text-muted-foreground">File:</span>
                         <span>{configuration.synthesis.file.name}</span>
                     </div>

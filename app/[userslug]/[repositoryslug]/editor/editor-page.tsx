@@ -215,11 +215,9 @@ export default function EditorPage({
         RouterInputs["synthesis"]["runYosysStream"] | null
     >(null);
 
-    const resultYosys = api.synthesis.runYosysStream.useQuery(
-        yosysInput!, {
-            enabled: !!yosysInput,
-        }
-    );
+    const resultYosys = api.synthesis.runYosysStream.useQuery(yosysInput!, {
+        enabled: !!yosysInput,
+    });
 
     const onStartSynthesis = () => {
         // TODO: maxo start synthesis
@@ -229,7 +227,7 @@ export default function EditorPage({
                 " and file: " +
                 configuration?.synthesis.file.absolutePath,
         );
-        
+
         if (configuration?.synthesis.type === "yosys") {
             const input = {
                 repoId: repository.id,
