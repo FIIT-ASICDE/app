@@ -12,6 +12,7 @@ import type {
     Repository,
     RepositoryItem,
 } from "@/lib/types/repository";
+import { useTheme } from "next-themes";
 import dynamic from "next/dynamic";
 import {
     type ElementRef,
@@ -56,6 +57,8 @@ export default function EditorPage({
     repository,
     lastSimulation,
 }: EditorPageProps): ReactElement {
+    const { theme } = useTheme();
+
     const [activeSidebarContent, setActiveSidebarContent] =
         useState<SidebarContentTab>("fileExplorer");
     const [activeBottomPanelContent, setActiveBottomPanelContent] =
@@ -412,6 +415,12 @@ export default function EditorPage({
                                         repository.name +
                                         "/" +
                                         activeFile.absolutePath
+                                    }
+                                    language={activeFile.language}
+                                    theme={
+                                        theme === "dark"
+                                            ? "vs-dark"
+                                            : "hc-light"
                                     }
                                 />
                             ) : (
