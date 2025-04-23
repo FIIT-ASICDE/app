@@ -57,7 +57,7 @@ export default function EditorPage({
     repository,
     lastSimulation,
 }: EditorPageProps): ReactElement {
-    const { theme } = useTheme();
+    const { theme, resolvedTheme } = useTheme();
 
     const [activeSidebarContent, setActiveSidebarContent] =
         useState<SidebarContentTab>("fileExplorer");
@@ -324,6 +324,15 @@ export default function EditorPage({
         saveSessionDebounced();
     }, [openFiles, activeFile, repository.id, saveSessionDebounced]);
 
+    const editorTheme = () => {
+        if (theme === "dark" || resolvedTheme === "dark") {
+            return "vs-dark";
+        } else if (theme === "light" || resolvedTheme === "light") {
+            return "vs-light";
+        }
+        return "vs-light";
+    };
+
     return (
         <div className="flex h-screen flex-row">
             <EditorNavigation
@@ -416,12 +425,11 @@ export default function EditorPage({
                                         "/" +
                                         activeFile.absolutePath
                                     }
-                                    language={activeFile.language}
-                                    theme={
-                                        theme === "dark"
-                                            ? "vs-dark"
-                                            : "hc-light"
-                                    }
+                                    language={activeFile.language.replace(
+                                        " ",
+                                        "",
+                                    )}
+                                    theme={editorTheme()}
                                 />
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center text-muted-foreground">

@@ -54,30 +54,29 @@ export default function Editor({
             automaticLayout: true,
         });
 
-        if (process.env.NODE_ENV !== "production") {
-            const ydoc = new Y.Doc();
-            ydocRef.current = ydoc;
+        // if (process.env.NODE_ENV !== "production") {
+        const ydoc = new Y.Doc();
+        ydocRef.current = ydoc;
 
-            console.log(filePath);
-            const provider = new WebsocketProvider(
-                process.env.NEXT_PUBLIC_EDITOR_SERVER_URL ??
-                    "wss://ide.drasic.com/ws",
-                "connect",
-                ydoc,
-                { params: { filePath } },
+        const provider = new WebsocketProvider(
+            process.env.NEXT_PUBLIC_EDITOR_SERVER_URL ??
+                "wss://ide.drasic.com/ws",
+            "connect",
+            ydoc,
+            { params: { filePath } },
+        );
+        providerRef.current = provider;
+
+        if (editorRef.current) {
+            const type = ydoc.getText("monaco");
+            new MonacoBinding(
+                type,
+                editorRef.current.getModel()!,
+                new Set([editorRef.current]),
+                provider.awareness,
             );
-            providerRef.current = provider;
-
-            if (editorRef.current) {
-                const type = ydoc.getText("monaco");
-                new MonacoBinding(
-                    type,
-                    editorRef.current.getModel()!,
-                    new Set([editorRef.current]),
-                    provider.awareness,
-                );
-            }
         }
+        // }
 
         return () => {
             if (editorRef.current) {
