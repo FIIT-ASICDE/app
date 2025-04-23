@@ -5,6 +5,7 @@ import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor
 import { vhdlVisitor } from '@/app/antlr/VHDL/generated/vhdlVisitor';
 import * as parser from '@/app/antlr/VHDL/generated/vhdlParser';
 import { ParseTree } from 'antlr4ts/tree/ParseTree';
+import { QuietErrorListener } from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/QuietErrorListener";
 
 export interface VhdlStructField {
     name: string;
@@ -376,6 +377,8 @@ export function parsePackagesAndRecords(vhdlText: string): VhdlPackage[] {
         const lexer = new vhdlLexer(inputStream);
         const tokenStream = new CommonTokenStream(lexer);
         const parser = new vhdlParser(tokenStream);
+        parser.removeErrorListeners();
+        parser.addErrorListener(new QuietErrorListener());
         
         // Парсим входной текст
         console.log("Parsing design file...");

@@ -5,6 +5,7 @@ import { SystemVerilogLexer } from "@/app/antlr/SystemVerilog/generated/SystemVe
 import { SystemVerilogParser } from "@/app/antlr/SystemVerilog/generated/SystemVerilogParser";
 import { SystemVerilogParserVisitor } from "@/app/antlr/SystemVerilog/generated/SystemVerilogParserVisitor";
 import * as parser from '@/app/antlr/SystemVerilog/generated/SystemVerilogParser';
+import { QuietErrorListener } from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/QuietErrorListener";
 
 // Интерфейсы для представления модулей и портов
 export interface ModulePort {
@@ -149,7 +150,8 @@ export function parseModules(svText: string): ParsedModule[] {
         const lexer = new SystemVerilogLexer(inputStream);
         const tokenStream = new CommonTokenStream(lexer);
         const parser = new SystemVerilogParser(tokenStream);
-        
+        parser.removeErrorListeners();
+        parser.addErrorListener(new QuietErrorListener());
         // Парсим входной текст
         const tree = parser.source_text();
         

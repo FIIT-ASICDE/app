@@ -6,6 +6,7 @@ import { vhdlLexer }     from '@/app/antlr/VHDL/generated/vhdlLexer';
 import { vhdlParser }    from '@/app/antlr/VHDL/generated/vhdlParser';
 import { vhdlVisitor }   from '@/app/antlr/VHDL/generated/vhdlVisitor';
 import * as parser       from '@/app/antlr/VHDL/generated/vhdlParser';
+import { QuietErrorListener } from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/QuietErrorListener";
 
 export interface EntityPort {
     name: string;
@@ -113,6 +114,8 @@ export function parseEntities(vhdlText: string): ParsedEntity[] {
     const lexer       = new vhdlLexer(inputStream);
     const tokens      = new CommonTokenStream(lexer);
     const parserInst  = new vhdlParser(tokens);
+    parserInst.removeErrorListeners();
+    parserInst.addErrorListener(new QuietErrorListener());
     const tree        = parserInst.design_file();
     const visitor     = new ParseEntities();
     visitor.visit(tree);

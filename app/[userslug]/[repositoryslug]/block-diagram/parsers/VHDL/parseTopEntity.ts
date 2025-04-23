@@ -7,6 +7,7 @@ import { vhdlParser } from '@/app/antlr/VHDL/generated/vhdlParser';
 import { vhdlVisitor } from '@/app/antlr/VHDL/generated/vhdlVisitor';
 import * as parser from '@/app/antlr/VHDL/generated/vhdlParser';
 import { ParsedModule, ModulePort, ParsedTopModule, SubModule, TopModulePort } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces";
+import { QuietErrorListener } from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/QuietErrorListener";
 
 
 /**
@@ -22,6 +23,8 @@ export function parseTopEntity(
     const lex = new vhdlLexer(input);
     const tokens = new CommonTokenStream(lex);
     const p = new vhdlParser(tokens);
+    p.removeErrorListeners();
+    p.addErrorListener(new QuietErrorListener());
     const tree = p.design_file();
     const visitor = new TopEntityVisitor(externals);
     visitor.visit(tree);

@@ -12,6 +12,7 @@ import {
     SystemVerilogParserVisitor
 } from '@/app/antlr/SystemVerilog/generated/SystemVerilogParserVisitor';
 import * as parser from '@/app/antlr/SystemVerilog/generated/SystemVerilogParser';
+import {QuietErrorListener } from '@/app/[userslug]/[repositoryslug]/block-diagram/parsers/QuietErrorListener'
 
 // Входные типы — список всех external модулей
 export interface ModulePort {
@@ -62,6 +63,8 @@ export function parseTopModule(
     const parserInstance = new SystemVerilogParser(tokens);
     const tree = parserInstance.source_text();
     const visitor = new TopModuleVisitor(externalMods);
+    parserInstance.removeErrorListeners();
+    parserInstance.addErrorListener(new QuietErrorListener());
     visitor.visit(tree);
     return visitor.topModule;
 }

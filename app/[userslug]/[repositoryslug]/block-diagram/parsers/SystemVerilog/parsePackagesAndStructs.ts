@@ -5,6 +5,7 @@ import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor
 import { SystemVerilogParserVisitor } from '@/app/antlr/SystemVerilog/generated/SystemVerilogParserVisitor';
 import * as parser from '@/app/antlr/SystemVerilog/generated/SystemVerilogParser';
 import { ParseTree } from 'antlr4ts/tree/ParseTree';
+import { QuietErrorListener } from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/QuietErrorListener";
 
 export interface StructField {
     name: string;
@@ -273,7 +274,8 @@ export function parsePackagesAndStructs(svText: string): Package[] {
         const lexer = new SystemVerilogLexer(inputStream);
         const tokenStream = new CommonTokenStream(lexer);
         const parser = new SystemVerilogParser(tokenStream);
-        
+        parser.removeErrorListeners();
+        parser.addErrorListener(new QuietErrorListener());
         // Парсим входной текст
         console.log("Parsing source text...");
         const tree = parser.source_text();
