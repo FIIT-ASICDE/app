@@ -2,7 +2,7 @@
 
 import { GitCommit } from "@/lib/types/repository";
 import { MoveUpRight, X } from "lucide-react";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 
 import { getTimeDeltaString } from "@/components/generic/generic";
 import { Button } from "@/components/ui/button";
@@ -28,11 +28,17 @@ interface PushDialogProps {
     onPushAction: (commits: Array<GitCommit>) => void;
 }
 
+/**
+ * Dialog component that lets the user push all commits on a repository
+ *
+ * @param {PushDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const PushDialog = ({
     singleCommit,
     commits,
     onPushAction,
-}: PushDialogProps) => {
+}: PushDialogProps): ReactElement => {
     const [open, setOpen] = useState<boolean>(false);
 
     return (

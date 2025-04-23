@@ -18,7 +18,7 @@ import {
     TriangleAlert,
     UsersRound,
 } from "lucide-react";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 
 import { useUser } from "@/components/context/user-context";
 import { NoData } from "@/components/generic/no-data";
@@ -44,7 +44,16 @@ interface SettingsPageProps {
     tab: RepositorySettingsTab;
 }
 
-export default function SettingsPage({ settings, tab }: SettingsPageProps) {
+/**
+ * Settings page for a repository
+ *
+ * @param {SettingsPageProps} props - Component props
+ * @returns {ReactElement} Settings page component
+ */
+export default function SettingsPage({
+    settings,
+    tab,
+}: SettingsPageProps): ReactElement {
     const { user } = useUser();
 
     const repository: Repository = settings.repository;

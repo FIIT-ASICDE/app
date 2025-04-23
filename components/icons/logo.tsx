@@ -1,8 +1,16 @@
+import { ReactElement } from "react";
+
 interface LogoIconProps {
     color?: string;
 }
 
-export default function LogoIcon({ color }: LogoIconProps) {
+/**
+ * Logo icon component
+ *
+ * @param {LogoIconProps} props - Component props
+ * @returns {ReactElement} Icon
+ */
+export default function LogoIcon({ color }: LogoIconProps): ReactElement {
     return (
         <svg
             width={30}

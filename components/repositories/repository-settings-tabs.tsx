@@ -2,6 +2,7 @@ import { RepositorySettingsTab } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
 import { Folder, Mail, TriangleAlert, UsersRound } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ReactElement } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,9 +15,15 @@ interface RepositorySettingsTabsProps {
     tab: RepositorySettingsTab;
 }
 
+/**
+ * Tabs component used on the settings part of the repository page
+ *
+ * @param {RepositorySettingsTabsProps} props - Component props
+ * @returns {ReactElement} Tabs component
+ */
 export const RepositorySettingsTabs = ({
     tab,
-}: RepositorySettingsTabsProps) => {
+}: RepositorySettingsTabsProps): ReactElement => {
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();

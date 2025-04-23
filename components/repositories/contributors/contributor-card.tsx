@@ -2,6 +2,7 @@
 
 import { imgSrc } from "@/lib/client-file-utils";
 import { UserDisplay } from "@/lib/types/user";
+import { ReactElement } from "react";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
@@ -13,11 +14,17 @@ interface ContributorCardProps {
     isItMe: boolean;
 }
 
+/**
+ * Card component displaying information about a contributor
+ *
+ * @param {ContributorCardProps} props - Component props
+ * @returns {ReactElement} Card component
+ */
 export const ContributorCard = ({
     contributor,
     repositoryId,
     isItMe,
-}: ContributorCardProps) => {
+}: ContributorCardProps): ReactElement => {
     const contributorLink: string = "/" + contributor.username;
 
     return (

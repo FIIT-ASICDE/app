@@ -1,7 +1,7 @@
 import type { ButtonVariant } from "@/lib/types/generic";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { ElementType } from "react";
+import { ElementType, ReactElement } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +19,12 @@ interface NavigationButtonProps {
     className?: string;
 }
 
+/**
+ * Button component that handles navigation
+ *
+ * @param {NavigationButtonProps} props - Component props
+ * @returns {ReactElement} Button component
+ */
 export const NavigationButton = ({
     title,
     icon: Icon,
@@ -26,10 +32,10 @@ export const NavigationButton = ({
     link,
     access,
     className,
-}: NavigationButtonProps) => {
+}: NavigationButtonProps): ReactElement => {
     const displayTitle: string = title.charAt(0).toUpperCase() + title.slice(1);
 
-    if (access === "none") return;
+    if (access === "none") return <></>;
 
     if (access === "nonInteractive") {
         return (

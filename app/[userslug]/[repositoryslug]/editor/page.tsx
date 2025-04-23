@@ -20,5 +20,9 @@ export default async function RepositoryEditorPage({
         loadItemsDisplaysDepth: -1,
     });
 
-    return <EditorPage repository={repo} />;
+    const lastSimulation = await api.simulation.getLastFinishedSimulation({
+        repo,
+    });
+
+    return <EditorPage repository={repo} lastSimulation={lastSimulation} />;
 }

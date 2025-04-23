@@ -1,7 +1,7 @@
 import { InviteUserTab, OrganisationDisplay } from "@/lib/types/organisation";
 import { RepositoryDisplay } from "@/lib/types/repository";
 import { Building, Folder } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, ReactElement, SetStateAction } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +23,12 @@ interface InviteUserDialogTabsProps {
     >;
 }
 
+/**
+ * Tabs component displaying the option between inviting to an organisation and to a repository
+ *
+ * @param {InviteUserDialogTabsProps} props - Component props
+ * @returns {ReactElement} Tabs component
+ */
 export const InviteUserDialogTabs = ({
     activeInviteUserTab,
     setActiveInviteUserTab,
@@ -30,7 +36,7 @@ export const InviteUserDialogTabs = ({
     usersRepositories,
     setSelectedOrganisation,
     setSelectedRepository,
-}: InviteUserDialogTabsProps) => {
+}: InviteUserDialogTabsProps): ReactElement => {
     return (
         <div className="flex w-full flex-row gap-x-3">
             {usersOrganisations.length === 0 ? (

@@ -1,21 +1,30 @@
 "use client";
 
-import { X, MoreHorizontal, ChevronDown } from "lucide-react";
-import { useRef, useState, useEffect, useCallback, Dispatch, SetStateAction } from "react";
 import { FileDisplayItem } from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
+import { ChevronDown, MoreHorizontal, X } from "lucide-react";
 import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
+    Dispatch,
+    ReactElement,
+    SetStateAction,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
+
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface EditorTabsProps {
     openFiles: Array<FileDisplayItem>;
@@ -26,6 +35,12 @@ interface EditorTabsProps {
     handleCloseTabAction: (tab: FileDisplayItem) => void;
 }
 
+/**
+ * Editor tabs component for editor page
+ *
+ * @param {EditorTabsProps} props - Component props
+ * @returns {ReactElement} Editor tabs component
+ */
 export const EditorTabs = ({
     openFiles,
     setOpenFilesAction,
@@ -33,7 +48,7 @@ export const EditorTabs = ({
     setActiveFileAction,
     handleTabSwitchAction,
     handleCloseTabAction,
-}: EditorTabsProps) => {
+}: EditorTabsProps): ReactElement => {
     const tabsContainerRef = useRef<HTMLDivElement>(null);
     const [visibleTabs, setVisibleTabs] = useState<FileDisplayItem[]>([]);
     const [hiddenTabs, setHiddenTabs] = useState<FileDisplayItem[]>([]);
@@ -42,7 +57,8 @@ export const EditorTabs = ({
         if (!tabsContainerRef.current) return;
 
         const containerWidth = tabsContainerRef.current.offsetWidth;
-        const availableWidth = containerWidth - (hiddenTabs.length > 0 ? 64 : 0);
+        const availableWidth =
+            containerWidth - (hiddenTabs.length > 0 ? 64 : 0);
         const tabWidth = 128;
 
         const maxVisibleTabs = Math.floor(availableWidth / tabWidth);
@@ -56,7 +72,7 @@ export const EditorTabs = ({
         } else {
             if (activeFile) {
                 const activeIndex = openFiles.findIndex(
-                    (file) => file.absolutePath === activeFile.absolutePath
+                    (file) => file.absolutePath === activeFile.absolutePath,
                 );
 
                 const halfVisible = Math.floor(maxVisibleTabs / 2);
@@ -66,7 +82,10 @@ export const EditorTabs = ({
                     startIndex = Math.max(0, openFiles.length - maxVisibleTabs);
                 }
 
-                newVisibleTabs = openFiles.slice(startIndex, startIndex + maxVisibleTabs);
+                newVisibleTabs = openFiles.slice(
+                    startIndex,
+                    startIndex + maxVisibleTabs,
+                );
                 newHiddenTabs = [
                     ...openFiles.slice(0, startIndex),
                     ...openFiles.slice(startIndex + maxVisibleTabs),
@@ -82,7 +101,8 @@ export const EditorTabs = ({
     }, [openFiles, activeFile, hiddenTabs.length]);
 
     useEffect(() => {
-        const currentTabsContainerRef: HTMLDivElement | null = tabsContainerRef.current;
+        const currentTabsContainerRef: HTMLDivElement | null =
+            tabsContainerRef.current;
 
         if (!currentTabsContainerRef) return;
 
@@ -118,33 +138,38 @@ export const EditorTabs = ({
         <div className="flex flex-col">
             <div
                 ref={tabsContainerRef}
-                className="flex flex-row justify-between items-center relative"
+                className="relative flex flex-row items-center justify-between"
             >
-                <div className="flex flex-row justify-start items-center">
+                <div className="flex flex-row items-center justify-start">
                     {visibleTabs.map((file: FileDisplayItem, index: number) => {
-                        const isActive: boolean = activeFile?.absolutePath === file.absolutePath;
+                        const isActive: boolean =
+                            activeFile?.absolutePath === file.absolutePath;
 
                         return (
                             <div
                                 key={index + file.absolutePath}
                                 className={cn(
-                                    "border-x border-accent text-sm w-32 flex cursor-pointer items-center justify-center px-2 py-2",
+                                    "flex w-32 cursor-pointer items-center justify-between border-x border-accent px-2 py-2 text-sm",
                                     isActive
-                                        ? "text-foreground bg-[#1e1e1e]"
-                                        : "text-muted-foreground hover:text-foreground"
+                                        ? "bg-background text-foreground dark:bg-[#1e1e1e]"
+                                        : "text-muted-foreground hover:text-foreground",
                                 )}
                                 onClick={() => handleTabSwitchAction(file)}
                             >
                                 <TooltipProvider delayDuration={500}>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <span className="truncate">{file.name}</span>
+                                            <span className="truncate">
+                                                {file.name}
+                                            </span>
                                         </TooltipTrigger>
-                                        <TooltipContent>{file.absolutePath}</TooltipContent>
+                                        <TooltipContent>
+                                            {file.absolutePath}
+                                        </TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>
                                 <button
-                                    className="ml-2 flex-shrink-0 hover:bg-accent rounded p-0.5 text-muted-foreground"
+                                    className="ml-2 flex-shrink-0 rounded p-0.5 text-muted-foreground hover:bg-accent"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         handleCloseTabAction(file);
@@ -161,26 +186,32 @@ export const EditorTabs = ({
                     {hiddenTabs.length > 0 && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="rounded w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent">
+                                <button className="flex h-8 w-8 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground">
                                     <ChevronDown className="h-4 w-4" />
                                 </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                                 {hiddenTabs.map((file, index) => {
-                                    const isActive = activeFile?.absolutePath === file.absolutePath;
+                                    const isActive =
+                                        activeFile?.absolutePath ===
+                                        file.absolutePath;
 
                                     return (
                                         <DropdownMenuItem
                                             key={index + file.absolutePath}
                                             className={cn(
                                                 "flex items-center justify-between",
-                                                isActive && "bg-accent"
+                                                isActive && "bg-accent",
                                             )}
-                                            onClick={() => handleTabSwitchAction(file)}
+                                            onClick={() =>
+                                                handleTabSwitchAction(file)
+                                            }
                                         >
-                                            <span className="truncate max-w-64">{file.name}</span>
+                                            <span className="max-w-64 truncate">
+                                                {file.name}
+                                            </span>
                                             <button
-                                                className="ml-2 hover:bg-accent rounded p-0.5"
+                                                className="ml-2 rounded p-0.5 hover:bg-accent"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleCloseTabAction(file);
@@ -197,14 +228,12 @@ export const EditorTabs = ({
                     {openFiles.length > 0 && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="rounded w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent">
+                                <button className="flex h-8 w-8 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground">
                                     <MoreHorizontal className="h-4 w-4" />
                                 </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                    onClick={handleCloseAllTabs}
-                                >
+                                <DropdownMenuItem onClick={handleCloseAllTabs}>
                                     Close all tabs
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -213,7 +242,7 @@ export const EditorTabs = ({
                 </div>
             </div>
             {activeFile && (
-                <div className="bg-[#1e1e1e] w-full truncate h-8 flex items-center text-xs text-muted-foreground p-2">
+                <div className="flex h-8 w-full items-center truncate bg-background p-2 text-xs text-muted-foreground dark:bg-[#1e1e1e]">
                     {activeFile.absolutePath}
                 </div>
             )}

@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Mail } from "lucide-react";
+import { ReactElement } from "react";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +10,14 @@ interface UserCardSkeletonProps {
     titleClassName?: string;
 }
 
-export const UserCardSkeleton = ({ titleClassName }: UserCardSkeletonProps) => {
+/**
+ * Skeleton component of a user card
+ *
+ * @returns {ReactElement} Skeleton component
+ */
+export const UserCardSkeleton = ({
+    titleClassName,
+}: UserCardSkeletonProps): ReactElement => {
     return (
         <Card className="max-w-full pl-1.5 shadow-lg">
             <CardContent className="flex flex-row items-center justify-between gap-x-3 p-4">

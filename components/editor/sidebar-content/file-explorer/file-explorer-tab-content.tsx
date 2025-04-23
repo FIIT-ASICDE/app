@@ -25,6 +25,12 @@ interface FileExplorerTabContentProps {
     onFileClick?: (item: RepositoryItem) => void;
 }
 
+/**
+ * Tab content component that lets the user explore the repository file tree
+ *
+ * @param {FileExplorerTabContentProps} props - Component props
+ * @returns {ReactElement} Tab content component
+ */
 export const FileExplorerTabContent = ({
     repository,
     tree,
@@ -40,10 +46,10 @@ export const FileExplorerTabContent = ({
     );
 
     return (
-        <div className="flex flex-col h-full w-full relative">
-            <header className="flex flex-col gap-y-3 p-4 pb-2 w-full h-[88px]">
+        <div className="relative flex h-full w-full flex-col">
+            <header className="flex h-[88px] w-full flex-col gap-y-3 p-4 pb-2">
                 <div className="flex flex-row items-center justify-between gap-x-3">
-                    <div className="flex min-w-0 flex-row gap-x-2 font-medium pr-8">
+                    <div className="flex min-w-0 flex-row gap-x-2 pr-8 font-medium">
                         <AvatarDisplay
                             displayType="select"
                             name={repository.ownerName}
@@ -51,14 +57,14 @@ export const FileExplorerTabContent = ({
                         />
                         <DynamicTitle
                             title={repository.ownerName + "/" + repository.name}
-                            className="text-foreground hover:text-foreground text-md"
+                            className="text-md text-foreground hover:text-foreground"
                             tooltipVisible
                         />
                     </div>
                     <CloseButton
                         onClick={handleCloseSidebarAction}
                         tooltip="Close sidebar"
-                        className="absolute top-4 right-4"
+                        className="absolute right-4 top-4"
                     />
                 </div>
                 <div className="flex flex-row gap-x-1">
@@ -92,7 +98,7 @@ export const FileExplorerTabContent = ({
 
             <Separator />
 
-            <ScrollArea className="relative flex-1 w-full min-h-0">
+            <ScrollArea className="relative min-h-0 w-full flex-1">
                 <div className="flex flex-auto flex-col text-nowrap">
                     {tree.length > 0 ? (
                         <FileTree

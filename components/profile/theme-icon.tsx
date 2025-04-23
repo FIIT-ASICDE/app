@@ -1,4 +1,5 @@
 import { Moon, Sun } from "lucide-react";
+import { ReactElement } from "react";
 
 interface ThemeIconProps {
     theme: string | undefined;
@@ -6,7 +7,17 @@ interface ThemeIconProps {
     filled?: boolean;
 }
 
-export const ThemeIcon = ({ theme, className, filled }: ThemeIconProps) => {
+/**
+ * Icon component corresponding to the current user's theme
+ *
+ * @param {ThemeIconProps} props - Component props
+ * @returns {ReactElement} Icon
+ */
+export const ThemeIcon = ({
+    theme,
+    className,
+    filled,
+}: ThemeIconProps): ReactElement => {
     if (theme === "light") {
         if (filled) {
             return <Sun className={className} fill={"currentColor"} />;

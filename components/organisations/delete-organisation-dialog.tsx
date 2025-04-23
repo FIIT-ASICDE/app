@@ -4,7 +4,7 @@ import { api } from "@/lib/trpc/react";
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import { CircleX, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 import { toast } from "sonner";
 
 import { useUser } from "@/components/context/user-context";
@@ -24,9 +24,15 @@ interface DeleteOrganisationDialogProps {
     organisation: OrganisationDisplay;
 }
 
+/**
+ * Dialog component that lets the user delete an organisation
+ *
+ * @param {DeleteOrganisationDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const DeleteOrganisationDialog = ({
     organisation,
-}: DeleteOrganisationDialogProps) => {
+}: DeleteOrganisationDialogProps): ReactElement => {
     const router = useRouter();
     const { user } = useUser();
     const [deleteOrganisationInput, setDeleteOrganisationInput] =

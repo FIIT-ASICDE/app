@@ -14,6 +14,12 @@ interface CommandOptionsProps {
     user: OnboardedUser;
 }
 
+/**
+ * Options that the user has when opening the command bar dialog
+ *
+ * @param {CommandOptionsProps} props - Component props
+ * @returns {Array<CommandElementGroup>} Array of command element groups
+ */
 export const CommandOptions = ({
     user,
 }: CommandOptionsProps): Array<CommandElementGroup> => {

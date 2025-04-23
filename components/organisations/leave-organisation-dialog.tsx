@@ -6,7 +6,7 @@ import { OrganisationDisplay } from "@/lib/types/organisation";
 import { UserDisplay } from "@/lib/types/user";
 import { Loader2, Search, UserRoundMinus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 
 import { useUser } from "@/components/context/user-context";
 import { AvatarDisplay } from "@/components/generic/avatar-display";
@@ -35,11 +35,17 @@ interface LeaveOrganisationDialogProps {
     possibleAdmins?: Array<UserDisplay>;
 }
 
+/**
+ * Dialog component that lets the user leave an organisation
+ *
+ * @param {LeaveOrganisationDialogProps} props - Component props
+ * @returns {ReactElement} Dialog component
+ */
 export const LeaveOrganisationDialog = ({
     organisation,
     isUserOnlyAdmin,
     possibleAdmins,
-}: LeaveOrganisationDialogProps) => {
+}: LeaveOrganisationDialogProps): ReactElement => {
     const router = useRouter();
     const { user } = useUser();
 

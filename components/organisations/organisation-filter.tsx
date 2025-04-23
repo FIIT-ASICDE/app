@@ -10,7 +10,7 @@ import {
     X,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 
 import { TooltipDropdown } from "@/components/generic/tooltip-dropdown";
 import { Badge } from "@/components/ui/badge";
@@ -31,10 +31,16 @@ interface OrganisationFilterProps {
     };
 }
 
+/**
+ * Component used to filter a list of organisations
+ *
+ * @param {OrganisationFilterProps} props - Component props
+ * @returns {ReactElement} Filter component
+ */
 export const OrganisationFilter = ({
     type,
     filters,
-}: OrganisationFilterProps) => {
+}: OrganisationFilterProps): ReactElement => {
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();

@@ -1,5 +1,6 @@
 import { AvatarDisplayType, AvatarProportions } from "@/lib/types/generic";
 import { cn } from "@/lib/utils";
+import { ReactElement } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -10,12 +11,18 @@ interface AvatarDisplayProps {
     className?: string;
 }
 
+/**
+ * Avatar displaying user/organisation image or the first initial of their name
+ *
+ * @param {AvatarDisplayProps} props - Component props
+ * @returns {ReactElement} Avatar component
+ */
 export const AvatarDisplay = ({
     displayType,
     image,
     name,
     className,
-}: AvatarDisplayProps) => {
+}: AvatarDisplayProps): ReactElement => {
     const getAvatarProportions = (): AvatarProportions => {
         switch (displayType) {
             case "profile":

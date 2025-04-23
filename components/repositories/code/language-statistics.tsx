@@ -37,9 +37,15 @@ type ActiveShapeProps = Omit<
     fill: string;
 };
 
+/**
+ * Chart component that displays the language statistics of a repository
+ *
+ * @param {LanguageStatisticsChartProps} props - Component props
+ * @returns {ReactElement} Chart component
+ */
 export default function LanguageStatisticsChart({
     languageStatistics,
-}: LanguageStatisticsChartProps) {
+}: LanguageStatisticsChartProps): ReactElement {
     const [activeIndex, setActiveIndex] = useState<number | undefined>();
 
     if (languageStatistics.percentages.length === 0) {

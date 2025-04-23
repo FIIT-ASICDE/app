@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { ElementType } from "react";
+import { ElementType, ReactElement } from "react";
 
 import { DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -19,6 +19,12 @@ interface FileExplorerControlButtonProps {
     onClick?: () => void;
 }
 
+/**
+ * Control button component that enables user actions on repository items
+ *
+ * @param {FileExplorerControlButtonProps} props - Component props
+ * @returns {ReactElement} Button component
+ */
 export const FileExplorerControlButton = ({
     icon: Icon,
     tooltipContent,
@@ -27,7 +33,7 @@ export const FileExplorerControlButton = ({
     className,
     iconClassName,
     onClick,
-}: FileExplorerControlButtonProps) => {
+}: FileExplorerControlButtonProps): ReactElement => {
     return (
         <Tooltip>
             <TooltipTrigger asChild>

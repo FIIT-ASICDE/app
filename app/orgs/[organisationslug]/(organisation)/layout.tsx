@@ -1,18 +1,26 @@
 import { api } from "@/lib/trpc/server";
 import { TRPCError } from "@trpc/server";
 import { UserRoundX } from "lucide-react";
-import React from "react";
+import React, { ReactElement } from "react";
 
 import { OrganisationHeader } from "@/components/organisations/organisation-header";
 import { Separator } from "@/components/ui/separator";
 
+interface OrganisationLayoutProps {
+    children: React.ReactNode;
+    params: Promise<{ organisationslug: string }>;
+}
+
+/**
+ * Layout for organisation profile
+ *
+ * @param {OrganisationLayoutProps} props - Component props
+ * @returns {Promise<ReactElement>} Organisation profile layout component
+ */
 export default async function OrganisationLayout({
     children,
     params,
-}: Readonly<{
-    children: React.ReactNode;
-    params: Promise<{ organisationslug: string }>;
-}>) {
+}: OrganisationLayoutProps): Promise<ReactElement> {
     const orgSlug = (await params).organisationslug.replace(/%20/g, " ");
     try {
         const org = await api.org.byName(orgSlug);

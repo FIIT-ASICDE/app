@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { type ReactNode, useCallback } from "react";
+import { ReactElement, type ReactNode, useCallback } from "react";
 
 import {
     Pagination,
@@ -34,16 +34,10 @@ export interface DynamicPaginationProps {
 }
 
 /**
- * Navigate with Next.js links (need to update your own `pagination.tsx` to use Next.js Link)
+ * Pagination component displaying the current page & available pages, updated dynamically
  *
- * @example
- * ```
- * <DynamicPagination
- page={1}
- pageSize={20}
- totalCount={500}
- />
- * ```
+ * @param {DynamicPaginationProps} props - Component props
+ * @returns {ReactElement} Pagination component
  */
 export function DynamicPagination({
     pageSizeSelectOptions,
@@ -52,7 +46,7 @@ export function DynamicPagination({
     page,
     pageSearchParam,
     className,
-}: DynamicPaginationProps) {
+}: DynamicPaginationProps): ReactElement {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();

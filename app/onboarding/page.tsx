@@ -2,6 +2,7 @@ import { OnboardingForm } from "@/app/onboarding/onboarding-form";
 import { auth } from "@/auth";
 import { redirectIfNotOnboarded } from "@/lib/onboarding-guard";
 import { BookUser } from "lucide-react";
+import { ReactElement } from "react";
 
 import {
     Card,
@@ -11,7 +12,12 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 
-export default async function OnboardingPage() {
+/**
+ * Onboarding page for a user
+ *
+ * @returns {Promise<ReactElement>} Onboarding page component
+ */
+export default async function OnboardingPage(): Promise<ReactElement> {
     const session = await auth();
     await redirectIfNotOnboarded(session, "onboarding");
 

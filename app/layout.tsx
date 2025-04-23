@@ -1,7 +1,7 @@
 import "@/app/globals.css";
 import { TRPCReactProvider } from "@/lib/trpc/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
-import React, { Suspense } from "react";
+import React, { ReactElement, Suspense } from "react";
 
 import DevControls from "@/components/dev/dev-controls";
 import { Toaster } from "@/components/ui/sonner";
@@ -14,11 +14,19 @@ const ThemeProvider = ({
     return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
 };
 
+interface RootLayoutProps {
+    children: React.ReactNode;
+}
+
+/**
+ * Root layout for all pages
+ *
+ * @param {ProfileLayoutProps} props - Component props
+ * @returns {Promise<ReactElement>} Root layout component
+ */
 export default async function RootLayout({
     children,
-}: Readonly<{
-    children: React.ReactNode;
-}>) {
+}: RootLayoutProps): Promise<ReactElement> {
     return (
         <html lang="en" suppressHydrationWarning>
             <body>

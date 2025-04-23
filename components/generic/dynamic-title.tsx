@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { ReactElement } from "react";
 
 import {
     Tooltip,
@@ -14,12 +15,18 @@ interface DynamicTitleProps {
     className?: string;
 }
 
+/**
+ * Component displaying the title of a user or an organisation that gets dynamically truncated
+ *
+ * @param {DynamicTitleProps} props - Component props
+ * @returns {ReactElement} Title component
+ */
 export const DynamicTitle = ({
     title,
     link,
     tooltipVisible,
     className,
-}: DynamicTitleProps) => {
+}: DynamicTitleProps): ReactElement => {
     return (
         <Tooltip>
             <TooltipTrigger asChild>

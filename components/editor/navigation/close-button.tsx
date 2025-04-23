@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Minus } from "lucide-react";
+import { ReactElement } from "react";
 
 import {
     Tooltip,
@@ -13,11 +14,17 @@ interface CloseButtonProps {
     tooltip?: string;
 }
 
+/**
+ * Button component that closes the sidebar or the bottom panel on the editor page
+ *
+ * @param {CloseButtonProps} props - Component props
+ * @returns {ReactElement} Button component
+ */
 export const CloseButton = ({
     onClick,
     className,
     tooltip,
-}: CloseButtonProps) => {
+}: CloseButtonProps): ReactElement => {
     return (
         <Tooltip>
             <TooltipTrigger asChild>

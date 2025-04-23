@@ -1,14 +1,28 @@
 "use client";
 
 import { api } from "@/lib/trpc/react";
-import type { DirectoryDisplayItem, RepositoryItem } from "@/lib/types/repository";
+import type {
+    DirectoryDisplayItem,
+    RepositoryItem,
+} from "@/lib/types/repository";
 import { cn } from "@/lib/utils";
-import { Dispatch, DragEvent, SetStateAction, useState } from "react";
+import {
+    Dispatch,
+    DragEvent,
+    ReactElement,
+    SetStateAction,
+    useState,
+} from "react";
 import { toast } from "sonner";
 
 import { FileTreeItem } from "@/components/editor/file/file-tree-item";
 import { MoveItemDialog } from "@/components/editor/file/move-item-dialog";
-import { findItemInTree, handleToggle, moveItemInTree, sortTree } from "@/components/generic/generic";
+import {
+    findItemInTree,
+    handleToggle,
+    moveItemInTree,
+    sortTree,
+} from "@/components/generic/generic";
 
 interface FileTreeProps {
     repositoryId: string;
@@ -21,6 +35,12 @@ interface FileTreeProps {
     setExpandedItemsAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
 }
 
+/**
+ * Component displaying the whole file tree of a repository
+ *
+ * @param {FileTreeProps} props - Component props
+ * @returns {ReactElement} File tree component
+ */
 export const FileTree = ({
     repositoryId,
     tree,
@@ -30,17 +50,17 @@ export const FileTree = ({
     setSelectedItemAction,
     expandedItems,
     setExpandedItemsAction,
-}: FileTreeProps) => {
+}: FileTreeProps): ReactElement => {
     const [moveDialogOpen, setMoveDialogOpen] = useState<boolean>(false);
     const [sourceItem, setSourceItem] = useState<RepositoryItem | undefined>(
-        undefined
+        undefined,
     );
     const [targetItem, setTargetItem] = useState<RepositoryItem | undefined>(
-        undefined
+        undefined,
     );
     const [isDragOverRoot, setIsDragOverRoot] = useState<boolean>(false);
     const [hoveredItem, setHoveredItem] = useState<RepositoryItem | undefined>(
-        undefined
+        undefined,
     );
 
     const moveItemMutation = api.editor.renameItem.useMutation({
@@ -50,7 +70,7 @@ export const FileTree = ({
             const updatedTree: Array<RepositoryItem> = moveItemInTree(
                 tree,
                 sourceItem,
-                targetItem
+                targetItem,
             );
             setTreeAction(updatedTree);
 
@@ -78,7 +98,12 @@ export const FileTree = ({
     const sortedTree: Array<RepositoryItem> = sortTree([...tree]);
 
     const handleMoveItem = (source: RepositoryItem, target: RepositoryItem) => {
-        console.log("handleMoveItem called with source:", source.absolutePath, "target:", target.absolutePath);
+        console.log(
+            "handleMoveItem called with source:",
+            source.absolutePath,
+            "target:",
+            target.absolutePath,
+        );
 
         if (source && target) {
             setSourceItem(source);
@@ -86,7 +111,7 @@ export const FileTree = ({
             setMoveDialogOpen(true);
         } else {
             console.error(
-                "Cannot open move dialog: source or target is undefined"
+                "Cannot open move dialog: source or target is undefined",
             );
         }
     };
@@ -128,7 +153,10 @@ export const FileTree = ({
 
         try {
             const sourcePath: string = event.dataTransfer.getData("text/plain");
-            const sourceItem: RepositoryItem | undefined = findItemInTree(tree, sourcePath);
+            const sourceItem: RepositoryItem | undefined = findItemInTree(
+                tree,
+                sourcePath,
+            );
 
             if (!sourceItem) return;
 
@@ -151,7 +179,7 @@ export const FileTree = ({
         <div
             className={cn(
                 "flex min-h-full flex-1 flex-grow flex-col rounded border border-transparent p-2 pt-2",
-                isDragOverRoot && "border-primary bg-accent"
+                isDragOverRoot && "border-primary bg-accent",
             )}
             onDragOver={handleRootDragOver}
             onDragLeave={handleRootDragLeave}
@@ -167,8 +195,15 @@ export const FileTree = ({
                     onItemClick={(repoItem: RepositoryItem) => {
                         console.log("2clicked on:", repoItem);
 
-                        if (repoItem.type === "directory" || repoItem.type === "directory-display") {
-                            handleToggle(repoItem, expandedItems, setExpandedItemsAction);
+                        if (
+                            repoItem.type === "directory" ||
+                            repoItem.type === "directory-display"
+                        ) {
+                            handleToggle(
+                                repoItem,
+                                expandedItems,
+                                setExpandedItemsAction,
+                            );
                         } else {
                             onItemClick?.(repoItem);
                         }

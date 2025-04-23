@@ -18,7 +18,7 @@ import {
     X,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 
 import { TooltipDropdown } from "@/components/generic/tooltip-dropdown";
 import { Badge } from "@/components/ui/badge";
@@ -40,7 +40,15 @@ interface RepositoryFilterProps {
     };
 }
 
-export const RepositoryFilter = ({ filters }: RepositoryFilterProps) => {
+/**
+ * Component that lets the user filter repositories fulfilling their requirements
+ *
+ * @param {RepositoryFilterProps} props - Component props
+ * @returns {ReactElement} Filter component
+ */
+export const RepositoryFilter = ({
+    filters,
+}: RepositoryFilterProps): ReactElement => {
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();

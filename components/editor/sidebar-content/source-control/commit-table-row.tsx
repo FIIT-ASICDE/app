@@ -1,6 +1,6 @@
 import { GitCommit } from "@/lib/types/repository";
 import { Check, ChevronDown, ChevronRight, Copy, X } from "lucide-react";
-import { Fragment } from "react";
+import { Fragment, ReactElement } from "react";
 import { toast } from "sonner";
 
 import { ChangesTable } from "@/components/editor/sidebar-content/source-control/changes-table";
@@ -17,11 +17,17 @@ interface CommitTableRowProps {
     toggleRow: (commitHash: string) => void;
 }
 
+/**
+ * Table row component of a commit table displaying information about one specific commit
+ *
+ * @param {CommitTableRowProps} props - Component props
+ * @returns {ReactElement} Table row component
+ */
 export const CommitTableRow = ({
     commit,
     expandedRowHash,
     toggleRow,
-}: CommitTableRowProps) => {
+}: CommitTableRowProps): ReactElement => {
     const handleCopyCommitHash = (commitHash: string) => {
         navigator.clipboard
             .writeText(commitHash)

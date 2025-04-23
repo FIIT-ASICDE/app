@@ -4,6 +4,7 @@ import { OrganisationSettingsTab } from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 import { BookUser, Mail, TriangleAlert } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ReactElement } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,9 +17,15 @@ interface OrganisationSettingsTabsProps {
     tab: OrganisationSettingsTab;
 }
 
+/**
+ * Tabs component used on the settings part of the organisation page
+ *
+ * @param {OrganisationSettingsTabsProps} props - Component props
+ * @returns {ReactElement} Tabs component
+ */
 export const OrganisationSettingsTabs = ({
     tab,
-}: OrganisationSettingsTabsProps) => {
+}: OrganisationSettingsTabsProps): ReactElement => {
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const router = useRouter();

@@ -4,7 +4,7 @@ import { api } from "@/lib/trpc/react";
 import { FileItem, RepositoryItem } from "@/lib/types/repository";
 import { File as FileIcon, Folder } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, ReactElement, SetStateAction, useState } from "react";
 
 import { getTimeDeltaString } from "@/components/generic/generic";
 import {
@@ -24,13 +24,19 @@ interface FileExplorerProps {
     setFilePreviewAction: Dispatch<SetStateAction<FileItem | undefined>>;
 }
 
+/**
+ * Component that lets the user browse the contents of a repository
+ *
+ * @param {FileExplorerProps} props - Component props
+ * @returns {ReactElement} File explorer component
+ */
 export default function FileExplorer({
     files,
     setFilePreviewAction,
     ownerSlug,
     repoSlug,
     subPath,
-}: FileExplorerProps) {
+}: FileExplorerProps): ReactElement {
     const router = useRouter();
     const pathName = usePathname();
 
