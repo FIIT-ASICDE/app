@@ -1,9 +1,9 @@
 "use client";
 
+import { HocuspocusProvider } from "@hocuspocus/provider";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { ReactElement, useEffect, useRef } from "react";
 import { MonacoBinding } from "y-monaco";
-import { WebsocketProvider } from "y-websocket";
 import * as Y from "yjs";
 
 interface EditorProps {
@@ -25,7 +25,7 @@ export default function Editor({
 }: EditorProps): ReactElement {
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
     const monacoEl = useRef<HTMLElement | null>(null);
-    const providerRef = useRef<WebsocketProvider | null>(null);
+    const providerRef = useRef<HocuspocusProvider | null>(null);
     const ydocRef = useRef<Y.Doc | null>(null);
 
     useEffect(() => {
@@ -54,17 +54,14 @@ export default function Editor({
             automaticLayout: true,
         });
 
-        // if (process.env.NODE_ENV !== "production") {
         const ydoc = new Y.Doc();
         ydocRef.current = ydoc;
 
-        const provider = new WebsocketProvider(
-            process.env.NEXT_PUBLIC_EDITOR_SERVER_URL ??
-                "wss://ide.drasic.com/ws",
-            "connect",
-            ydoc,
-            { params: { filePath } },
-        );
+        const provider = new HocuspocusProvider({
+            url: process.env.EDITOR_SERVER_URL ?? "http://localhost:42069",
+            name: filePath,
+            document: ydoc,
+        });
         providerRef.current = provider;
 
         if (editorRef.current) {
@@ -76,7 +73,6 @@ export default function Editor({
                 provider.awareness,
             );
         }
-        // }
 
         return () => {
             if (editorRef.current) {
