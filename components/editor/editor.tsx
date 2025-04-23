@@ -1,10 +1,13 @@
 "use client";
 
+import { env } from "@/env";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { ReactElement, useEffect, useRef } from "react";
 import { MonacoBinding } from "y-monaco";
 import * as Y from "yjs";
+
+import { useUser } from "@/components/context/user-context";
 
 interface EditorProps {
     filePath: string;
@@ -23,6 +26,7 @@ export default function Editor({
     language = "systemverilog",
     theme = "vs-dark",
 }: EditorProps): ReactElement {
+    const { user } = useUser();
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
     const monacoEl = useRef<HTMLElement | null>(null);
     const providerRef = useRef<HocuspocusProvider | null>(null);
@@ -58,10 +62,18 @@ export default function Editor({
         ydocRef.current = ydoc;
 
         const provider = new HocuspocusProvider({
-            url: process.env.EDITOR_SERVER_URL ?? "http://localhost:42069",
+            url: env.NEXT_PUBLIC_EDITOR_SERVER_URL ?? "http://localhost:42069",
             name: filePath,
             document: ydoc,
         });
+
+        provider.setAwarenessField("user", {
+            name: user.username,
+        });
+        provider.on("awarenessUpdate", ({ states }) => {
+            console.log(states);
+        });
+
         providerRef.current = provider;
 
         if (editorRef.current) {

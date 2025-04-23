@@ -1,3 +1,4 @@
+import { env } from "@/env";
 import { createCaller } from "@/lib/server/api/root";
 import { PrismaType, prismaClientSingleton } from "@/prisma";
 import { PostgreSqlContainer } from "@testcontainers/postgresql";
@@ -21,7 +22,7 @@ export async function testingPrisma() {
     let prisma: PrismaType;
     let cleanupFn: () => Promise<void>;
 
-    if (process.env.CI === "true") {
+    if (env.CI === "true") {
         // running in GitLab CI/CD:
         // use the pre-provisioned PostgreSQL service (see .gitlab-ci.yml)
         // the service alias is "postgres" and it listens on port 5432.
