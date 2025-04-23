@@ -1,3 +1,5 @@
+"use client";
+
 import type {
     BottomPanelContentTab,
     Configuration,
@@ -148,8 +150,10 @@ export const EditorNavigation = ({
         }
     };
 
-    const conf: string | null = localStorage.getItem("configuration");
-    const configuration: Configuration = JSON.parse(conf || "");
+    const conf: string | null = null; // localStorage.getItem("configuration");
+    const configuration: Configuration | undefined = conf
+        ? JSON.parse(conf)
+        : undefined;
 
     const getSimulationTooltipContent = () => {
         if (!configuration) {
