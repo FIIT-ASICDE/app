@@ -1,4 +1,4 @@
-import { env } from "@/env";
+import { env } from "@/app/env";
 import { authenticate } from "@/lib/authenticate";
 import { getFile } from "@/lib/server-file-utils";
 import { headers } from "next/headers";

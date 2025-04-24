@@ -1,6 +1,6 @@
 "use client";
 
-import { env } from "@/env";
+import { env } from "@/app/env";
 import { AppRouter } from "@/lib/server/api/root";
 import { createQueryClient } from "@/lib/trpc/query-client";
 import { type QueryClient, QueryClientProvider } from "@tanstack/react-query";

@@ -1,4 +1,4 @@
-import { env } from "@/env";
+import { env } from "@/app/env";
 import { PrismaClient } from "@/lib/prisma";
 import { DefaultArgs } from "@/lib/prisma/runtime/library";
 import { PrismaPg } from "@prisma/adapter-pg";

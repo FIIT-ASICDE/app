@@ -1,6 +1,6 @@
 "use client";
 
-import { env } from "@/env";
+import { env } from "@/app/env";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { ReactElement, useEffect, useRef } from "react";

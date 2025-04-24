@@ -62,18 +62,7 @@ export const env = createEnv({
             .url("NEXT_PUBLIC_EDITOR_SERVER_URL must be a valid URL")
             .default("http://localhost:42069"),
     },
-    runtimeEnv: {
-        NODE_ENV: process.env.NODE_ENV,
-        AUTH_SECRET: process.env.AUTH_SECRET,
-        DATABASE_URL: process.env.DATABASE_URL,
-        AUTH_TRUST_HOST: process.env.AUTH_TRUST_HOST,
-        REPOSITORIES_STORAGE_ROOT: process.env.REPOSITORIES_STORAGE_ROOT,
-        USER_ASSETS_STORAGE_ROOT: process.env.USER_ASSETS_STORAGE_ROOT,
-        AUTH_GITHUB_ID: process.env.AUTH_GITHUB_ID,
-        AUTH_GITHUB_SECRET: process.env.AUTH_GITHUB_SECRET,
-        CI: process.env.CI,
-        PORT: process.env.PORT,
-
+    experimental__runtimeEnv: {
         NEXT_PUBLIC_EDITOR_SERVER_URL: process.env.EDITOR_SERVER_URL,
     },
 });

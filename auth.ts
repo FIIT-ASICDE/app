@@ -1,4 +1,4 @@
-import { env } from "@/env";
+import { env } from "@/app/env";
 import prisma from "@/prisma";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth, { DefaultSession } from "next-auth";

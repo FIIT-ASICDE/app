@@ -1,4 +1,4 @@
-import { env } from "@/env";
+import { env } from "@/app/env";
 import { appRouter } from "@/lib/server/api/root";
 import { createTRPCContext } from "@/lib/server/api/trpc";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";

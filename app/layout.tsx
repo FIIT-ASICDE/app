@@ -1,5 +1,5 @@
+import { env } from "@/app/env";
 import "@/app/globals.css";
-import { env } from "@/env";
 import { TRPCReactProvider } from "@/lib/trpc/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import React, { ReactElement, Suspense } from "react";
