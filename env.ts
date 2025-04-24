@@ -13,7 +13,7 @@ export const env = createEnv({
             .describe("Secret used for Github OAuth app"),
 
         NODE_ENV: z
-            .enum(["production", "development"])
+            .enum(["production", "development", "test"])
             .describe("Forwared NODE_ENV from runtime"),
         PORT: z.string().default("3000").describe("Port of the application"),
         AUTH_SECRET: z
