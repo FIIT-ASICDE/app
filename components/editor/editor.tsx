@@ -51,6 +51,7 @@ export default function Editor({
         }
 
         const model = monaco.editor.createModel("", language);
+        model.setEOL(monaco.editor.EndOfLineSequence.LF);
         editorRef.current = monaco.editor.create(monacoEl.current, {
             model,
             language,
