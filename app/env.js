@@ -2,7 +2,9 @@ import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
 export const env = createEnv({
-    skipValidation: process.env.NODE_ENV === "test",
+    skipValidation:
+        process.env.NODE_ENV === "test" ||
+        process.env.SKIP_ENV_VALIDATION === "true",
     server: {
         AUTH_GITHUB_ID: z
             .string()
@@ -64,6 +66,7 @@ export const env = createEnv({
             .default("http://localhost:42069"),
     },
     experimental__runtimeEnv: {
-        NEXT_PUBLIC_EDITOR_SERVER_URL: process.env.EDITOR_SERVER_URL,
+        NEXT_PUBLIC_EDITOR_SERVER_URL:
+            process.env.NEXT_PUBLIC_EDITOR_SERVER_URL,
     },
 });
