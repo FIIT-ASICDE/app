@@ -12,6 +12,7 @@ else
 	pm2 reload asicde --update-env
 fi
 
+sleep 1
 if pm2 show asicde | grep 'status ' | grep -q 'online'; then
 	exit 0 # Exit with success code
 else
