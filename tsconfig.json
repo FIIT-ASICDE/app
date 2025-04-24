@@ -13,7 +13,7 @@
 		"noImplicitAny": true,
 		"esModuleInterop": true,
 		"module": "esnext",
-		"moduleResolution": "bundler",
+		"moduleResolution": "node",
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"jsx": "preserve",
@@ -34,12 +34,9 @@
 		"next-env.d.ts",
 		"**/*.ts",
 		"**/*.tsx",
-		".next/types/**/*.ts",
-		"app/env.mjs",
-		"app/env.mjs"
+		".next/types/**/*.ts"
 	],
 	"exclude": [
-		"node_modules",
-		"editor-server"
+		"node_modules"
 	]
 }
