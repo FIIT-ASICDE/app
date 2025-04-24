@@ -1,6 +1,5 @@
 "use client";
 
-import { env } from "@/app/env";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { ReactElement, useEffect, useRef } from "react";
@@ -63,7 +62,9 @@ export default function Editor({
         ydocRef.current = ydoc;
 
         const provider = new HocuspocusProvider({
-            url: env.NEXT_PUBLIC_EDITOR_SERVER_URL ?? "http://localhost:42069",
+            url:
+                process.env.NEXT_PUBLIC_EDITOR_SERVER_URL ??
+                "http://localhost:42069",
             name: filePath,
             document: ydoc,
             onAwarenessChange(data) {

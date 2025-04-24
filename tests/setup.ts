@@ -1,4 +1,3 @@
-import { env } from "@/app/env";
 import { createCaller } from "@/lib/server/api/root";
 import { PrismaType, prismaClientSingleton } from "@/prisma";
 import { PostgreSqlContainer } from "@testcontainers/postgresql";
@@ -22,7 +21,7 @@ export async function testingPrisma() {
     let prisma: PrismaType;
     let cleanupFn: () => Promise<void>;
 
-    if (env.CI === "true") {
+    if (process.env.CI === "true") {
         // running in GitLab CI/CD:
         // use the pre-provisioned PostgreSQL service (see .gitlab-ci.yml)
         // the service alias is "postgres" and it listens on port 5432.
@@ -92,8 +91,7 @@ async function initializeTestEnv() {
     await rm(baseDir, { recursive: true, force: true });
     await mkdir(baseDir, { recursive: true });
 
-    // @ts-ignore must set the baseDir to temporary dir, so that tests can be rerun
-    env.REPOSITORIES_STORAGE_ROOT = baseDir;
+    process.env.REPOSITORIES_STORAGE_ROOT = baseDir;
 }
 
 export async function initializeUser(

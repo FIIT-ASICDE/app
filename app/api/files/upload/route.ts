@@ -1,4 +1,3 @@
-import { env } from "@/app/env";
 import { calculateFileHash, saveFile } from "@/lib/server-file-utils";
 import { NextResponse } from "next/server";
 
@@ -16,7 +15,7 @@ export async function POST(request: Request) {
 
         const buffer = Buffer.from(await file.arrayBuffer());
         const hash = await calculateFileHash(buffer);
-        await saveFile(buffer, hash, env.USER_ASSETS_STORAGE_ROOT!);
+        await saveFile(buffer, hash, process.env.USER_ASSETS_STORAGE_ROOT!);
 
         return NextResponse.json({
             filename: file.name,
