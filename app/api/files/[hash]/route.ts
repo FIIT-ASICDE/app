@@ -16,7 +16,7 @@ export const GET = authenticate<{ hash: string }>(async ({ params }) => {
     try {
         const buffer = await getFile(
             hash,
-            process.env.USER_ASSETS_STORAGE_ROOT,
+            process.env.USER_ASSETS_STORAGE_ROOT!,
         );
 
         if (!buffer) {
