@@ -1,3 +1,4 @@
+import { env } from "@/app/env";
 import { authenticate } from "@/lib/authenticate";
 import { getFile } from "@/lib/server-file-utils";
 import { headers } from "next/headers";
@@ -14,10 +15,7 @@ export const GET = authenticate<{ hash: string }>(async ({ params }) => {
     }
 
     try {
-        const buffer = await getFile(
-            hash,
-            process.env.USER_ASSETS_STORAGE_ROOT!,
-        );
+        const buffer = await getFile(hash, env.USER_ASSETS_STORAGE_ROOT);
 
         if (!buffer) {
             return NextResponse.json(

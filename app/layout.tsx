@@ -1,3 +1,4 @@
+import { env } from "@/app/env";
 import "@/app/globals.css";
 import { TRPCReactProvider } from "@/lib/trpc/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
@@ -37,9 +38,7 @@ export default async function RootLayout({
                                 {children}
                                 <Toaster closeButton />
                             </TRPCReactProvider>
-                            {process.env.NODE_ENV === "development" && (
-                                <DevControls />
-                            )}
+                            {env.NODE_ENV === "development" && <DevControls />}
                         </TooltipProvider>
                     </Suspense>
                 </ThemeProvider>

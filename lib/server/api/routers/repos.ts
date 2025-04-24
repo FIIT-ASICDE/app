@@ -1,3 +1,4 @@
+import { env } from "@/app/env";
 import {
     calculateLanguageStatistics,
     findReadmeFile,
@@ -2001,7 +2002,7 @@ export function getRelativePathInRepo(absolutePath: string): string {
 }
 
 function ensureStorageRootSet(): string {
-    const storageRoot = process.env.REPOSITORIES_STORAGE_ROOT;
+    const storageRoot = env.REPOSITORIES_STORAGE_ROOT;
     if (!storageRoot || storageRoot === "") {
         throw new Error(
             "REPOSITORIES_STORAGE_ROOT environment variable is not set or empty.",

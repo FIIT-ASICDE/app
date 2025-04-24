@@ -1,3 +1,4 @@
+import { env } from "@/app/env";
 import prisma from "@/prisma";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth, { DefaultSession } from "next-auth";
@@ -36,7 +37,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // If you want to change session strategy, then also auth in editor server
     // must be also reimplemented
     session: { strategy: "jwt" },
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: env.AUTH_SECRET,
     adapter: PrismaAdapter(prisma),
     providers,
     callbacks: {
