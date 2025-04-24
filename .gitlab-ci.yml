@@ -25,6 +25,8 @@ build-app:
         paths:
             - .next
         expire_in: 24 hours
+    variables:
+        NEXT_PUBLIC_EDITOR_SERVER_URL: "https://ide.drasic.com/ws"
     script:
         - bun install
         - bun run build
@@ -34,22 +36,6 @@ build-app:
             - bun.lock
             - node_modules
             - .next/cache/
-
-build-editor-server:
-    stage: build
-    tags:
-        - bun
-    artifacts:
-        paths:
-            - editor-server/build
-        expire_in: 24 hours
-    script:
-        - cd editor-server
-        - bun install
-        - bun build server.ts --compile --minify --outfile ./build/editor-server
-    only:
-        changes:
-            - editor-server/**
 
 integration-test:
     stage: test
@@ -104,31 +90,3 @@ deploy-dev:
         - ssh asicde@147.175.149.102 "cd ~/asicde && ./scripts/deploy.sh"
     only:
         - master
-# deploy-dev-editor-server:
-#     stage: deploy
-#     environment:
-#         name: development
-#         url: https://ide.drasic.com
-#     tags:
-#         - alpine
-#     dependencies:
-#         - build-editor-server
-#     before_script:
-#         - "command -v ssh-agent >/dev/null || ( apk add --update openssh openssl rsync )"
-#         - mkdir -p ~/.ssh
-#         - chmod 700 ~/.ssh
-#         - echo "$DEPLOYER_SSH_PK" | openssl enc -base64 -d -out ~/.ssh/id_ed25519
-#         - chmod 400 ~/.ssh/id_ed25519
-#         - eval $(ssh-agent -s)
-#         - ssh-add -v ~/.ssh/id_ed25519
-#         - echo "StrictHostKeyChecking no" >> ~/.ssh/config # https://forum.gitlab.com/t/error-host-key-verification-failed/77315/3
-#     script:
-#         - rsync -avzr --delete scripts asicde@asicde.fiit.stuba.sk:/home/asicde/asicde/
-#         - rsync -avzr --delete editor-server/build/editor-server asicde@asicde.fiit.stuba.sk:/home/asicde/asicde/editor-server/
-#         - ssh asicde@asicde.fiit.stuba.sk "cd ~/asicde && ./scripts/deploy-editor-server.sh"
-#     only:
-#         refs:
-#             - master
-#         changes:
-#             - editor-server/**/*
-#             - scripts/deploy-editor-server.sh
