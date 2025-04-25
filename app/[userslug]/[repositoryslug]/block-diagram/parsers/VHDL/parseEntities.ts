@@ -27,48 +27,40 @@ export class ParseEntities
     public entities: ParsedEntity[] = [];
     private currentEntity: ParsedEntity | null = null;
 
-    protected defaultResult(): void { /* ничего */ }
+    protected defaultResult(): void { }
 
-    // Точка входа
     visitDesign_file(ctx: parser.Design_fileContext): void {
         this.visitChildren(ctx);
     }
 
-    // entity ... end entity
     visitEntity_declaration(ctx: parser.Entity_declarationContext): void {
         const name = ctx.identifier(0)?.text;
         if (!name) return;
         this.currentEntity = { name, ports: [] };
 
-        // обходим subtree, чтобы попасть на все interface_port_declaration
         this.visitChildren(ctx);
 
         this.entities.push(this.currentEntity);
         this.currentEntity = null;
     }
 
-    // Для каждого interface_port_declaration
     visitInterface_port_declaration(
         ctx: parser.Interface_port_declarationContext
     ): void {
         if (!this.currentEntity) return;
 
-        // 1) Имена
         const ids = ctx.identifier_list()?.identifier() ?? [];
 
-        // 2) Направление: signal_mode() вместо порт_моде
         const modeCtx = ctx.signal_mode();
         const txt = modeCtx?.text.toLowerCase();
         const direction: EntityPort['direction'] =
             txt === 'out'   ? 'out'
                 : txt === 'inout'? 'inout'
-                    : /* иначе */      'in';
+                    : 'in';
 
-        // 3) Тип
         const subtype = ctx.subtype_indication();
         const typeName = subtype.selected_name(0)?.text || 'unknown';
 
-        // 4) Вычисляем width — ищем два первых целых поддеревом subtype
         let width = 1;
         const nums: number[] = [];
         const stack: ParseTree[] = [subtype];
@@ -89,7 +81,6 @@ export class ParseEntities
             width = Math.abs(msb - lsb) + 1;
         }
 
-        // 5) Пушим порт для каждого идентификатора
         for (const id of ids) {
             this.currentEntity.ports.push({
                 name: id.text,
@@ -100,7 +91,6 @@ export class ParseEntities
         }
     }
 
-    // Обход всего дерева по умолчанию
     visitChildren(ctx: ParseTree): void {
         for (let i = 0; i < ctx.childCount; i++) {
             ctx.getChild(i).accept(this);
@@ -108,7 +98,6 @@ export class ParseEntities
     }
 }
 
-// Функция‑обёртка
 export function parseEntities(vhdlText: string): ParsedEntity[] {
     const inputStream = CharStreams.fromString(vhdlText);
     const lexer       = new vhdlLexer(inputStream);

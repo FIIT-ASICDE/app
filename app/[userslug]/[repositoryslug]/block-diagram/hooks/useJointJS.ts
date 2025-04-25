@@ -26,8 +26,8 @@ function highlightAllInputPorts(
     elements.forEach((elem) => {
         if (elem.id === sourceElemId) return;
 
-        const ports: CustomPort[] = elem.get('ports')?.items || [];
-        ports.forEach((p: CustomPort) => {
+        const ports: CustomPort[] = (elem.get('ports')?.items || []) as CustomPort[];
+            ports.forEach((p: CustomPort) => {
             if (p.group === 'input') {
                 if (sourcePort.isStruct) {
                     if (areStructPortsCompatible(sourcePort, p)) {
@@ -40,7 +40,7 @@ function highlightAllInputPorts(
                 else {
                     let portBw = p.bandwidth ?? -1;
                     if (elem.attributes.elType === 'splitter') {
-                        const ports: CustomPort[] = elem.get('ports')?.items ?? [];
+                        const ports: CustomPort[] = (elem.get('ports')?.items ?? []) as CustomPort[];
                         const outputPorts: CustomPort[] = ports.filter((p: CustomPort) => p.group === 'output');
                         const maxEndBit = outputPorts.reduce((max: number, p: CustomPort) => {
                             const bw = p.endBit ?? 0;
@@ -74,7 +74,7 @@ function resetAllPortsColor(graph: dia.Graph) {
 
     const elements = graph.getElements();
     elements.forEach((elem) => {
-        const ports: CustomPort[] = elem.get('ports')?.items || [];
+        const ports: CustomPort[] = (elem.get('ports')?.items || []) as CustomPort[];
         ports.forEach((p) => {
             if (p.group === 'input') {
                 elem.portProp(p.id, 'attrs/portCircle/fill', '#fff');

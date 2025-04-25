@@ -8,7 +8,7 @@ export const JointJSCombiner = (combiner: Combiner, parseResults: UnifiedPackage
     const combineInPorts = combiner.inPorts || [];
     const inCount = combineInPorts.length;
     let dimension = 100 + (inCount - 2) * 20;
-    const totalBandwidth = combineInPorts.reduce((sum, port) => sum + port.bandwidth, 0);
+    const totalBandwidth = combineInPorts.reduce((sum, port) => sum + (port.bandwidth || 1), 0);
     const isStruct = combiner.structPackage ? combiner.structPackage.length > 0 : false;
 
     const portItems = [];

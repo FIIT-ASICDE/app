@@ -135,7 +135,7 @@ const DiagramArea = () => {
         graph.on('change', onGraphChange);
         graph.on('add', onGraphChange);
         graph.on('remove', onGraphChange);
-        graph.on('batch:stop', onGraphChange);  // можно добавить для групповых изменений (перемещение нескольких элементов)
+        graph.on('batch:stop', onGraphChange);
 
         return () => {
             graph.off('change', onGraphChange);
@@ -145,20 +145,6 @@ const DiagramArea = () => {
         };
     }, [graph, debouncedSave]);
 
-    // // addPaperEvents()
-    // // generateCode()
-
-    // const { ... } = useBlockDiagrams()
-
-    // useBlockDiagrams() -> generateCode(lang: Languages), generateDiagram(), getShapes(), createPaper(), addPaperEvents()
-
-    // useEffect(() => {
-    //     // Init paper -> useJointJS() -> basic paper -> add aditional attributes?
-    //     // addPaperEvents()
-    //     // useJointJS() -> blockDiagramShapes() -> { ... }
-    //      // const paper ...
-            // addPaperEvents(paper)
-    // })
 
     function getElType(toolType: string): string {
         switch (toolType) {

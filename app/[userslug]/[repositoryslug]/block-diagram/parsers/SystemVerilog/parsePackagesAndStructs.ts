@@ -43,7 +43,6 @@ export class PackageStructVisitor
         return;
     }
 
-    // Переопределяем метод visitChildren для обхода всех узлов
     visitChildren(ctx: ParseTree): void {
         for (let i = 0; i < ctx.childCount; i++) {
             const child = ctx.getChild(i);
@@ -52,61 +51,49 @@ export class PackageStructVisitor
     }
 
     visitSource_text(ctx: parser.Source_textContext): void {
-        console.log("Visiting source text");
         this.visitChildren(ctx);
     }
 
     visitDescription(ctx: parser.DescriptionContext): void {
-        console.log("Visiting description");
         this.visitChildren(ctx);
     }
 
     visitPackage_declaration(ctx: parser.Package_declarationContext): void {
-        console.log("Visiting package declaration");
-        // Получаем имя пакета
+
         const packageIdentifier = ctx.package_identifier();
         if (packageIdentifier) {
             const packageName = packageIdentifier.text;
-            console.log(`Found package: ${packageName}`);
 
             this.currentPackage = {
                 name: packageName,
                 structs: []
             };
 
-            // Обходим все дочерние узлы
             this.visitChildren(ctx);
 
-            // Добавляем пакет в список
             this.packages.push(this.currentPackage);
             this.currentPackage = null;
         }
     }
 
     visitPkg_decl_item(ctx: parser.Pkg_decl_itemContext): void {
-        console.log("Visiting package declaration item");
         this.visitChildren(ctx);
     }
 
     visitPackage_item(ctx: parser.Package_itemContext): void {
-        console.log("Visiting package item");
         this.visitChildren(ctx);
     }
 
     visitPackage_or_generate_item_declaration(ctx: parser.Package_item_declarationContext): void {
-        console.log("Visiting package or generate item declaration");
         this.visitChildren(ctx);
     }
 
     visitData_declaration(ctx: parser.Data_declarationContext): void {
-        console.log("Visiting data declaration");
         this.visitChildren(ctx);
     }
 
     visitType_declaration(ctx: parser.Type_declarationContext): void {
-        console.log("Visiting type declaration");
 
-        // Проверяем, есть ли typedef
         let hasTypedef = false;
         for (let i = 0; i < ctx.childCount; i++) {
             const child = ctx.getChild(i);
@@ -117,24 +104,17 @@ export class PackageStructVisitor
         }
 
         if (hasTypedef) {
-            console.log("Found typedef");
 
-            // Получаем data_type
+
             const dataType = ctx.data_type();
             if (dataType) {
-                // Проверяем, есть ли struct_union
+
                 const structUnion = this.findStructUnion(dataType);
                 if (structUnion && structUnion.text.includes('struct')) {
-                    console.log("Found struct typedef");
-
-                    // Получаем имя структуры
                     const typeIdentifiers = ctx.type_identifier();
                     if (typeIdentifiers && typeIdentifiers.length > 0 && this.currentPackage) {
-                        // Берем первый элемент из массива type_identifier
                         const structName = typeIdentifiers[0].text;
-                        console.log(`Struct name: ${structName}`);
 
-                        // Проверяем, есть ли packed
                         const isPacked = this.isStructPacked(dataType);
 
                         this.currentStruct = {
@@ -143,12 +123,10 @@ export class PackageStructVisitor
                             isPacked
                         };
 
-                        this.bitPointer = 0; // Сбрасываем указатель битов для новой структуры
+                        this.bitPointer = 0;
 
-                        // Обрабатываем поля структуры
                         this.processStructFields(dataType);
 
-                        // Добавляем структуру в текущий пакет
                         this.currentPackage.structs.push(this.currentStruct);
                         this.currentStruct = null;
                     }
@@ -157,7 +135,6 @@ export class PackageStructVisitor
         }
     }
 
-    // Вспомогательный метод для поиска struct_union в data_type
     private findStructUnion(ctx: parser.Data_typeContext): any {
         for (let i = 0; i < ctx.childCount; i++) {
             const child = ctx.getChild(i);
@@ -168,7 +145,6 @@ export class PackageStructVisitor
         return null;
     }
 
-    // Вспомогательный метод для проверки, является ли структура packed
     private isStructPacked(ctx: parser.Data_typeContext): boolean {
         for (let i = 0; i < ctx.childCount; i++) {
             const child = ctx.getChild(i);
@@ -179,11 +155,9 @@ export class PackageStructVisitor
         return false;
     }
 
-    // Вспомогательный метод для обработки полей структуры
     private processStructFields(ctx: parser.Data_typeContext): void {
         if (!this.currentStruct) return;
 
-        // Ищем struct_union_member в дочерних узлах
         for (let i = 0; i < ctx.childCount; i++) {
             const child = ctx.getChild(i);
             if (child.constructor.name.includes('Struct_union_memberContext')) {
@@ -192,23 +166,19 @@ export class PackageStructVisitor
         }
     }
 
-    // Вспомогательный метод для обработки одного поля структуры
     private processStructMember(ctx: any): void {
         console.log("Processing struct member");
         if (!this.currentStruct) return;
 
-        // Получаем тип поля
         let fieldType = '';
         let bandwidth = 1;
         let high: number | undefined;
         let low: number | undefined;
 
-        // Получаем data_type_or_void
         const dataTypeOrVoid = ctx.data_type_or_void ? ctx.data_type_or_void() : null;
         if (dataTypeOrVoid) {
             fieldType = dataTypeOrVoid.text;
 
-            // Проверяем, есть ли диапазон битов
             const dataType = dataTypeOrVoid.data_type ? dataTypeOrVoid.data_type() : null;
             if (dataType) {
                 const packedDimension = dataType.packed_dimension ? dataType.packed_dimension() : null;
@@ -217,14 +187,12 @@ export class PackageStructVisitor
                     if (range) {
                         const constantExpressions = range.constant_expression ? range.constant_expression() : null;
                         if (constantExpressions && constantExpressions.length >= 2) {
-                            // Пытаемся извлечь числовые значения для диапазона
                             try {
                                 high = parseInt(constantExpressions[0].text, 10);
                                 low = parseInt(constantExpressions[1].text, 10);
                                 bandwidth = Math.abs(high - low) + 1;
                                 console.log(`Field range: [${high}:${low}], bandwidth: ${bandwidth}`);
                             } catch (e) {
-                                // Если не удалось преобразовать в числа, используем значение по умолчанию
                                 bandwidth = 1;
                             }
                         }
@@ -232,10 +200,9 @@ export class PackageStructVisitor
                 }
             }
         } else {
-            fieldType = 'logic'; // Значение по умолчанию
+            fieldType = 'logic';
         }
 
-        // Получаем имя поля
         const listOfVariableDecl = ctx.list_of_variable_decl_assignments ? ctx.list_of_variable_decl_assignments() : null;
         if (listOfVariableDecl) {
             const variableDecl = listOfVariableDecl.variable_decl_assignment ? listOfVariableDecl.variable_decl_assignment() : null;
@@ -267,26 +234,15 @@ export class PackageStructVisitor
 
 export function parsePackagesAndStructs(svText: string): Package[] {
     try {
-        console.log("Starting SystemVerilog parsing...");
-        
-        // Создаем лексер и парсер
         const inputStream = CharStreams.fromString(svText);
         const lexer = new SystemVerilogLexer(inputStream);
         const tokenStream = new CommonTokenStream(lexer);
         const parser = new SystemVerilogParser(tokenStream);
         parser.removeErrorListeners();
         parser.addErrorListener(new QuietErrorListener());
-        // Парсим входной текст
-        console.log("Parsing source text...");
         const tree = parser.source_text();
-        
-        // Создаем и запускаем посетителя
-        console.log("Starting visitor...");
         const visitor = new PackageStructVisitor();
         visitor.visit(tree);
-        
-        console.log("Parsing complete.");
-        // Возвращаем собранные пакеты
         return visitor.packages;
     } catch (error) {
         console.error('Error parsing SystemVerilog:', error);

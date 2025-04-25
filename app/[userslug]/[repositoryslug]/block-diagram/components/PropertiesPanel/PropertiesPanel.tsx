@@ -415,7 +415,7 @@ const PropertiesPanel = () => {
 
         if (isEditingPort && editPortIndex !== null) {
             if (editPortType === 'input') {
-                const updated = [...properties.createdInPorts];
+                const updated = [...(properties.createdInPorts || [])];
                 updated[editPortIndex] = {
                     name: newPortData.name,
                     bandwidth: newPortData.bandwidth,
@@ -427,7 +427,7 @@ const PropertiesPanel = () => {
                     createdInPorts: updated,
                 }));
             } else {
-                const updated = [...properties.createdOutPorts];
+                const updated = [...(properties.createdOutPorts || [])];
                 updated[editPortIndex] = {
                     name: newPortData.name,
                     bandwidth: newPortData.bandwidth,
@@ -445,7 +445,7 @@ const PropertiesPanel = () => {
                 setProperties(prev => ({
                     ...prev,
                     createdInPorts: [
-                        ...prev.createdInPorts,
+                        ...(prev.createdInPorts || []),
                         {
                             name: newPortData.name,
                             bandwidth: newPortData.bandwidth,
@@ -458,7 +458,7 @@ const PropertiesPanel = () => {
                 setProperties(prev => ({
                     ...prev,
                     createdOutPorts: [
-                        ...prev.createdOutPorts,
+                                    ...(prev.createdOutPorts || []),
                         {
                             name: newPortData.name,
                             bandwidth: newPortData.bandwidth,
@@ -487,8 +487,10 @@ const PropertiesPanel = () => {
         setErrorMessage('');
 
         const currentPort = portType === 'input'
-            ? properties.createdInPorts[index]
-            : properties.createdOutPorts[index];
+        ? properties.createdInPorts?.[index] 
+        : properties.createdOutPorts?.[index];
+
+        if (!currentPort) return;
 
         setNewPortData({
             name: currentPort.name,
@@ -501,11 +503,11 @@ const PropertiesPanel = () => {
     };
     const handleDeletePort = (portType: 'input' | 'output', index: number) => {
         if (portType === 'input') {
-            const updatedInPorts = [...properties.createdInPorts];
+            const updatedInPorts = [...(properties.createdInPorts || [])];
             updatedInPorts.splice(index, 1);
             setProperties(prev => ({ ...prev, createdInPorts: updatedInPorts }));
         } else {
-            const updatedOutPorts = [...properties.createdOutPorts];
+            const updatedOutPorts = [...(properties.createdOutPorts || [])];
             updatedOutPorts.splice(index, 1);
             setProperties(prev => ({ ...prev, createdOutPorts: updatedOutPorts }));
         }
@@ -520,7 +522,7 @@ const PropertiesPanel = () => {
         if (elementType) {
             const { x, y } = selectedElement.position();
             const elementData = new elementType.class();
-            elementData.name = properties.label || ''; //TODO: handle that splitter do not have name
+            elementData.name = properties.label || '';
             elementData.position = { x, y };
 
             if (!['splitter', 'combiner', 'module', ].includes(elType)) {
@@ -528,7 +530,7 @@ const PropertiesPanel = () => {
                     elementData.dataBandwidth = 1;
                 }
                 else {
-                    elementData.dataBandwidth = properties.bandwidth; //TODO: handle that decoder and encoder will have min 2 width of bandwidth
+                    elementData.dataBandwidth = properties.bandwidth;
                 }
             }
             if (elType === 'comparator') {
@@ -583,27 +585,21 @@ const PropertiesPanel = () => {
             if (elType === 'combiner') {
                 elementData.bitPortType = properties.bitPortType || 'custom';
                 if (properties.bitPortType === 'custom') {
-                    elementData.inPorts = properties.createdInPorts.map((p) => ({
+                    elementData.inPorts = properties.createdInPorts?.map((p) => ({
                         name: p.name,
                         bandwidth: p.bandwidth,
                     }));
-                }
-                else {
-                    // TODO: handle structs
                 }
             }
             if (elType === 'splitter') {
                 elementData.bitPortType = properties.bitPortType || 'custom';
                 if (properties.bitPortType === 'custom') {
-                    elementData.outPorts = properties.createdOutPorts.map((p) => ({
+                    elementData.outPorts = properties.createdOutPorts?.map((p) => ({
                         name: p.name,
                         bandwidth: p.bandwidth,
                         startBit: p.startBit,
                         endBit: p.endBit
                     }));
-                }
-                else {
-                    // TODO: handle structs
                 }
             }
             if (elType === 'module') {
@@ -613,11 +609,11 @@ const PropertiesPanel = () => {
 
                 elementData.instance = properties.instance || '';
 
-                elementData.inPorts = properties.createdInPorts.map((p) => ({
+                elementData.inPorts = properties.createdInPorts?.map((p) => ({
                     name: p.name,
                     bandwidth: p.bandwidth,
                 }));
-                elementData.outPorts = properties.createdOutPorts.map((p) => ({
+                elementData.outPorts = properties.createdOutPorts?.map((p) => ({
                     name: p.name,
                     bandwidth: p.bandwidth,
                 }));
@@ -677,8 +673,7 @@ const PropertiesPanel = () => {
             newCell.attributes.name = newCell.attributes.name + '_copy';
         }
 
-        const pos = newCell.position();
-        newCell.position(pos.x + 20, pos.y + 20);
+        newCell.position();
         graph.addCell(newCell);
 
         setSelectedElement(newCell);
@@ -1021,7 +1016,7 @@ const PropertiesPanel = () => {
                             <div className="mt-6 border-t border-gray-200 pt-4">
                                 <h4 className="font-medium text-gray-800 mb-2">Input Ports</h4>
                                 <div className="space-y-1 max-h-40 overflow-y-auto">
-                                    {properties.createdInPorts.map((p, idx) => (
+                                    {properties.createdInPorts?.map((p, idx) => (
                                         <div key={idx} className="flex items-center justify-between p-2 border-b border-gray-100">
                                             <span className="text-sm">{p.name} (bw={p.bandwidth})</span>
                                             <div className="flex space-x-2">
@@ -1056,7 +1051,7 @@ const PropertiesPanel = () => {
                             <div className="mt-4 border-t border-gray-200 pt-4">
                                 <h4 className="font-medium text-gray-800 mb-2">Output Ports</h4>
                                 <div className="space-y-1 max-h-40 overflow-y-auto">
-                                    {properties.createdOutPorts.map((p, idx) => (
+                                    {properties.createdOutPorts?.map((p, idx) => (
                                         <div key={idx} className="flex items-center justify-between p-2 border-b border-gray-100">
                                             <span className="text-sm">{p.name} (bw={p.bandwidth})</span>
                                             <div className="flex space-x-2">
@@ -1253,7 +1248,7 @@ const PropertiesPanel = () => {
                         <div className="mt-6 border-t border-gray-200 pt-4">
                             <h4 className="font-medium text-gray-800 mb-2">Input Ports</h4>
                             <div className="space-y-1 max-h-40 overflow-y-auto">
-                                {properties.createdInPorts.map((p, idx) => (
+                                {properties.createdInPorts?.map((p, idx) => (
                                     <div key={idx} className="flex items-center justify-between p-2 border-b border-gray-100">
                                         <span className="text-sm">{p.name} (bw={p.bandwidth})</span>
                                         <div className="flex space-x-2">
@@ -1289,7 +1284,7 @@ const PropertiesPanel = () => {
                         <div className="mt-4 border-t border-gray-200 pt-4">
                             <h4 className="font-medium text-gray-800 mb-2">Output Ports</h4>
                             <div className="space-y-1 max-h-40 overflow-y-auto">
-                                {properties.createdOutPorts.map((p, idx) => (
+                                {properties.createdOutPorts?.map((p, idx) => (
                                     <div key={idx} className="flex items-center justify-between p-2 border-b border-gray-100">
                                         <span className="text-sm">{p.name} ({p.startBit} - {p.endBit})</span>
                                         <div className="flex space-x-2">

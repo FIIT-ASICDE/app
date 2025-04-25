@@ -1,4 +1,5 @@
 import { dia } from "@joint/core";
+import { CustomPort } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces";
 
 
 const operatorMap: { [key: string]: string } = {
@@ -131,7 +132,7 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         const structTypeDef = cell.attributes.structTypeDef;
 
         if (cell.attributes.elType === 'combiner') {
-            const outPort = cellPorts.find(p => p.group === 'output');
+            const outPort = cellPorts.find((p: CustomPort) => p.group === 'output');
             if (isStruct && structPackage && structTypeDef) {
                 code += `${structPackage}::${structTypeDef} ${netName};\n`;
             } else {
@@ -186,11 +187,11 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         if (type === 'splitter') {
 
 
-            const inputPort = cellPorts.find(p => p.group === 'input');
+            const inputPort = cellPorts.find((p: CustomPort) => p.group === 'input');
             const inputKey = `${cell.id}:${inputPort?.id}`;
             const inputSignal = connectionMap[inputKey] ? connectionMap[inputKey][0] : '/* unconnected */';
 
-            cellPorts.filter(p => p.group === 'output').forEach(outputPort => {
+            cellPorts.filter((p: CustomPort) => p.group === 'output').forEach((outputPort: CustomPort) => {
                 const outputKey = `${cell.id}:${outputPort.id}`;
                 const outputSignal = outputConnectionMap[outputKey] ? outputConnectionMap[outputKey][0] : '/* unconnected */';
                 const bitStart = outputPort.startBit;
@@ -199,8 +200,8 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
                     name: netName,
                     connectedTo: outputSignal,
                     connectedFrom: inputSignal,
-                    startBit: bitStart,
-                    endBit: bitEnd
+                    startBit: bitStart || 0,
+                    endBit: bitEnd || 0
                 });
             });
 
@@ -209,8 +210,8 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
 
         if (type === 'combiner') {
 
-            const inputPorts = cellPorts.filter(p => p.group === 'input').reverse();
-            const inputSignals = inputPorts.map(p => {
+            const inputPorts = cellPorts.filter((p: CustomPort) => p.group === 'input').reverse();
+            const inputSignals = inputPorts.map((p: CustomPort) => {
                 const key = `${cell.id}:${p.id}`;
                 return connectionMap[key] ? getBitSelectedSignal(connectionMap[key][0], netName) : '/* unconnected */';
             });
@@ -222,9 +223,9 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         const type = cell.attributes.elType;
         const netName = elementNames[cell.id];
         const cellPorts = cell.attributes.ports?.items || [];
-        const inputPorts = cellPorts.filter(p => p.group === 'input');
+        const inputPorts = cellPorts.filter((p: CustomPort) => p.group === 'input');
 
-        const inputSignals = inputPorts.map(p => {
+        const inputSignals = inputPorts.map((p: CustomPort) => {
             const key = `${cell.id}:${p.id}`;
             return connectionMap[key] ? getBitSelectedSignal(connectionMap[key][0], netName) : '/* unconnected */';
         });
@@ -245,9 +246,9 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         const type = cell.attributes.elType;
         const netName = elementNames[cell.id];
         const cellPorts = cell.attributes.ports?.items || [];
-        const inputPorts = cellPorts.filter(p => p.group === 'input');
+        const inputPorts = cellPorts.filter((p: CustomPort) => p.group === 'input');
 
-        const inputSignals = inputPorts.map(p => {
+        const inputSignals = inputPorts.map((p: CustomPort) => {
             const key = `${cell.id}:${p.id}`;
             return connectionMap[key] ? getBitSelectedSignal(connectionMap[key][0], netName) : '/* unconnected */';
         });
@@ -269,8 +270,8 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         const netName = getPortName(cell);
         const inPorts = cell.attributes.inPorts;
         const cellPorts = cell.attributes.ports?.items || [];
-        const selectPort = cellPorts.find(p => p.id === 'select');
-        const outputPort = cellPorts.find(p => p.group === 'output');
+        const selectPort = cellPorts.find((p: CustomPort) => p.id === 'select');
+        const outputPort = cellPorts.find((p: CustomPort) => p.group === 'output');
 
         if (!selectPort || !outputPort) return;
 
@@ -302,7 +303,7 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         const cellPorts = cell.attributes.ports?.items || [];
 
 
-        const inputPorts = cellPorts.filter(p => p.group === 'input');
+        const inputPorts = cellPorts.filter((p: CustomPort) => p.group === 'input');
         const inputKey = `${cell.id}:${inputPorts[0]?.id}`;
         const inputSignal = connectionMap[inputKey] ? getBitSelectedSignal(connectionMap[inputKey][0], netName) : '/* unconnected */';
 
@@ -348,16 +349,16 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         const instanceName = cell.attributes.instance;
         const cellPorts = cell.attributes.ports?.items || [];
 
-        const inputPorts = cellPorts.filter(p => p.group === 'input');
-        const outputPorts = cellPorts.filter(p => p.group === 'output');
+        const inputPorts = cellPorts.filter((p: CustomPort) => p.group === 'input');
+        const outputPorts = cellPorts.filter((p: CustomPort) => p.group === 'output');
 
-        let portMappings = inputPorts.map(p => {
+        let portMappings = inputPorts.map((p: CustomPort) => {
             const key = `${cell.id}:${p.id}`;
             const connectedSignal = connectionMap[key] ? getBitSelectedSignal(connectionMap[key][0], moduleName) : '/* unconnected */';
             return `.${p.name}(${connectedSignal})`;
         });
 
-        portMappings = portMappings.concat(outputPorts.map(p => {
+        portMappings = portMappings.concat(outputPorts.map((p: CustomPort) => {
             const key = `${cell.id}:${p.id}`;
             const outputConnectedSignal = outputConnectionMap[key] ? getBitSelectedSignal(outputConnectionMap[key][0], moduleName) : '/* unconnected */';
             return `.${p.name}(${outputConnectedSignal})`;

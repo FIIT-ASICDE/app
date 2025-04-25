@@ -51,8 +51,6 @@ const Sidebar = () => {
             </TooltipContent>
         </Tooltip>
     );
-    // { createShape1, createShape2 } = useBlockDiagrams()
-    // Button - onDragStart, onClick{() => createSpecificShape}
 
 
     const handleDragStart = (event: React.DragEvent, toolType: string) => {

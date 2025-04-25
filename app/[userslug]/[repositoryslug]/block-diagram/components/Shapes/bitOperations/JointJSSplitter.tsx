@@ -7,7 +7,7 @@ export const JointJSSplitter = (splitter: Splitter, parseResults: UnifiedPackage
     const selectOutPorts = splitter.outPorts || [];
     const outCount = selectOutPorts.length;
     let dimension = 100 + (outCount - 2) * 20;
-    const totalBandwidth = selectOutPorts.reduce((sum, port) => sum + port.bandwidth, 0);
+    const totalBandwidth = selectOutPorts.reduce((sum, port) => sum + (port.bandwidth || 1), 0);
     const isStruct = splitter.structPackage ? splitter.structPackage.length > 0 : false;
 
     const portItems = [];

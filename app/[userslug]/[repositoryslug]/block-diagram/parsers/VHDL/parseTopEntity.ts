@@ -11,9 +11,9 @@ import { QuietErrorListener } from "@/app/[userslug]/[repositoryslug]/block-diag
 
 
 /**
- * @param vhdlText     — текст одного файла с топ‑entity + architecture
- * @param externals    — массив внешних сущностей (ParsedEntity)
- * @returns ParsedTopModule или null, если не нашли ни одной entity
+ * @param vhdlText     — text of one file with top-entity + architecture
+ * @param externals    — array of external entities (ParsedEntity)
+ * @returns ParsedTopModule or null if no entity was found
  */
 export function parseTopEntity(
     vhdlText: string,
@@ -46,7 +46,6 @@ class TopEntityVisitor
 
     protected defaultResult(): void {}
 
-    // 1) Находим entity_declaration
     visitEntity_declaration(ctx: parser.Entity_declarationContext): void {
         const name = ctx.identifier(0)?.text;
         if (!name) {
@@ -54,11 +53,10 @@ class TopEntityVisitor
             return;
         }
         this.current = { name, ports: [], subModules: [] };
-        this.visitChildren(ctx); // собрать порты
-        this.top = this.current; // отметили верхний entity
+        this.visitChildren(ctx);
+        this.top = this.current;
     }
 
-    // 2) Собираем порты entity
     visitInterface_port_declaration(
         ctx: parser.Interface_port_declarationContext
     ): void {
@@ -68,7 +66,6 @@ class TopEntityVisitor
         const dir: TopModulePort['direction'] =
             mode === 'out' ? 'output' : mode === 'inout' ? 'inout' : 'input';
 
-        // вычисляем ширину по любым двум числам в subtype_indication
         let width = 1;
         const nums: number[] = [];
         const stack: ParseTree[] = [ctx.subtype_indication()];
@@ -92,37 +89,31 @@ class TopEntityVisitor
         }
     }
 
-    // 3) Входим в architecture, чтобы ловить component_instantiation
     visitArchitecture_declarative_part(
         ctx: parser.Architecture_declarative_partContext
     ): void {
         this.visitChildren(ctx);
     }
 
-    // 4) Каждый component‑instantiation
     visitComponent_instantiation_statement(
         ctx: parser.Component_instantiation_statementContext
     ): void {
         if (!this.current) return;
 
-        // 4.1) Имя инстанса
         const labelCtx = ctx.label_colon();
         const instanceName = labelCtx?.identifier()?.text ?? `u_unknown`;
 
-        // 4.2) Имя entity из instantiated_unit.text
         const instUnit = ctx.instantiated_unit();
         const moduleName = instUnit?.text ?? 'UNKNOWN';
 
-        // 4.3) Порт‑карта
         const assocListCtx = ctx.port_map_aspect()?.association_list();
         const elems = assocListCtx?.association_element() ?? [];
 
         const conns: SubModule['portConnections'] = elems.map(ae => {
             const formal =
-                ae.formal_part()?.identifier(0)?.text.replace(/:$/, '') ?? '';
+                ae.formal_part()?.identifier()?.text.replace(/:$/, '') ?? '';
             const actual = ae.actual_part()?.text ?? '';
 
-            // direction/width из externals
             let dir: 'input' | 'output' | 'inout' = 'input';
             let width = 1;
             const ext = this.externals.find(e => e.name === moduleName);
@@ -130,10 +121,9 @@ class TopEntityVisitor
                 const ep = ext.ports.find(p => p.name === formal);
                 if (ep) {
                     dir = ep.direction === 'out' ? 'output' : ep.direction === 'inout' ? 'inout' : 'input';
-                    width = ep.width;
+                    width = ep.width || 1;
                 }
             }
-            // fallback на топ‑порт
             const tp = this.current!.ports.find(p => p.name === actual);
             if (tp) width = tp.width;
 
@@ -146,8 +136,6 @@ class TopEntityVisitor
             portConnections: conns
         });
     }
-
-    // 5) Обычный обход
     visitChildren(ctx: ParseTree): void {
         for (let i = 0; i < ctx.childCount; i++) {
             ctx.getChild(i).accept(this);

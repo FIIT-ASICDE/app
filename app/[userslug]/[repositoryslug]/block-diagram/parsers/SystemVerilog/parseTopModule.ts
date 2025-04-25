@@ -14,7 +14,6 @@ import {
 import * as parser from '@/app/antlr/SystemVerilog/generated/SystemVerilogParser';
 import {QuietErrorListener } from '@/app/[userslug]/[repositoryslug]/block-diagram/parsers/QuietErrorListener'
 
-// Входные типы — список всех external модулей
 export interface ModulePort {
     name: string;
     direction: 'input' | 'output' | 'inout' | 'in' | 'out';
@@ -26,7 +25,6 @@ export interface ParsedModule {
     ports: ModulePort[];
 }
 
-// Выходные типы
 export interface TopModulePort {
     direction: 'input' | 'output' | 'inout';
     name: string;
@@ -49,9 +47,9 @@ export interface ParsedTopModule {
 }
 
 /**
- * @param svText        — текст одного top‑модуля
- * @param externalMods  — список ParsedModule из других файлов
- * @returns ParsedTopModule или null, если парсинг не удался
+ * @param svText - text of one top module
+ * @param externalMods - list of ParsedModule from other files
+ * @returns ParsedTopModule or null if parsing failed
  */
 export function parseTopModule(
     svText: string,
@@ -83,7 +81,6 @@ class TopModuleVisitor
 
     protected defaultResult(): void { return; }
 
-    // Находим declaration верхнего модуля
     visitModule_declaration(ctx: parser.Module_declarationContext): void {
         const header = ctx.module_header();
         const name = header?.module_identifier()?.text;
@@ -91,16 +88,13 @@ class TopModuleVisitor
             this.visitChildren(ctx);
             return;
         }
-        // инициализация
+
         this.current = { name, ports: [], subModules: [] };
-        // собираем ANSI‑порты
         const portList = header.list_of_port_declarations();
         if (portList) this.visitList_of_port_declarations(portList);
-        // обходим все элементы внутри модуля
         for (const mi of ctx.module_item() ?? []) {
             mi.accept(this);
         }
-        // сохраняем
         this.topModule = this.current;
         this.current = null;
     }
@@ -118,20 +112,18 @@ class TopModuleVisitor
         if (!this.current) return;
         const id = ctx.port_identifier();
         if (!id) return;
-        // направление
         let dir: TopModulePort['direction'] = 'input';
         const pd = ctx.port_direction()?.text;
         if (pd === 'output') dir = 'output';
         else if (pd === 'inout') dir = 'inout';
-        // ширина
         let width = 1;
         const dt = ctx.data_type() ?? ctx.implicit_data_type();
         if (dt) {
             const dims = dt.packed_dimension();
             if (dims.length) {
                 const cr = dims[0].constant_range();
-                const exprs = cr.constant_expression();
-                if (exprs.length >= 2) {
+                const exprs = cr?.constant_expression();
+                if (exprs && exprs.length >= 2) {
                     const msb = parseInt(exprs[0].text, 10);
                     const lsb = parseInt(exprs[1].text, 10);
                     width = Math.abs(msb - lsb) + 1;
@@ -149,22 +141,18 @@ class TopModuleVisitor
         ctx: Module_program_interface_instantiationContext
     ): void {
         if (!this.current) return;
-        // имя типа и инстанса
-        const moduleName = ctx.instance_identifier(0)?.text || 'UNKNOWN';
+        const moduleName = ctx.instance_identifier()?.text || 'UNKNOWN';
         const hier = ctx.hierarchical_instance(0);
         if (!hier) return;
         const instName = hier.name_of_instance().getChild(0).text;
-        // external описание
         const extMod = this.external.find(m => m.name === moduleName);
         const connCtx = hier.list_of_port_connections();
         const ports: SubModule['portConnections'] = [];
         for (const npc of connCtx?.named_port_connection() ?? []) {
             const portName = npc.port_identifier()?.text ?? '';
             const expr = npc.port_assign()?.expression()?.text ?? '';
-            // default values
             let width = 1;
             let direction: 'input'|'output'|'inout' = 'input';
-            // берем из external
             if (extMod) {
                 const extPort = extMod.ports.find(p => p.name === portName);
                 if (extPort) {
@@ -176,15 +164,12 @@ class TopModuleVisitor
                     width = extPort.width ?? width;
                 }
             }
-            // если связано к top signal
             const topP = this.current.ports.find(p => p.name === expr);
             if (topP) width = topP.width;
             ports.push({ portName, connectedTo: expr, width, direction });
         }
         this.current.subModules.push({ moduleName, instanceName: instName, portConnections: ports });
     }
-
-    // обход остальных
     visitChildren(ctx: ParseTree): void {
         for (let i = 0; i < ctx.childCount; i++) {
             ctx.getChild(i).accept(this);

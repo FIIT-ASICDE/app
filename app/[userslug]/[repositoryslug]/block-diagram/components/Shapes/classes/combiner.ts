@@ -1,16 +1,16 @@
 export class Combiner {
-    public name: string;
-    public id: string;
-    public dataBandwidth: number;
-    public position: {
+    public name!: string;
+    public id!: string;
+    public dataBandwidth!: number;
+    public position!: {
         x: number,
         y: number
     };
-    public inPorts: ModulePort[];
-    public bitPortType: string;
-    public structPackage: string;
-    public structTypeDef: string;
-    public language: string;
+    public inPorts!: ModulePort[];
+    public bitPortType!: string;
+    public structPackage!: string;
+    public structTypeDef!: string;
+    public language!: string;
 }
 
 

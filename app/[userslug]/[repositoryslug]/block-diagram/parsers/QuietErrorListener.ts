@@ -9,7 +9,6 @@ export class QuietErrorListener implements ANTLRErrorListener<any> {
         msg: string,
         e: RecognitionException | undefined
     ): void {
-        // Просто ничего не делаем, либо логируем кастомно:
-        // console.warn(`ANTLR error at ${line}:${charPositionInLine} -> ${msg}`);
+
     }
 }

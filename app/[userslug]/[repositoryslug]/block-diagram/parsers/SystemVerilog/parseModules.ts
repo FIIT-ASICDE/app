@@ -7,7 +7,6 @@ import { SystemVerilogParserVisitor } from "@/app/antlr/SystemVerilog/generated/
 import * as parser from '@/app/antlr/SystemVerilog/generated/SystemVerilogParser';
 import { QuietErrorListener } from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/QuietErrorListener";
 
-// Интерфейсы для представления модулей и портов
 export interface ModulePort {
     name: string;
     direction: 'input' | 'output' | 'inout';
@@ -20,7 +19,6 @@ export interface ParsedModule {
     ports: ModulePort[];
 }
 
-// Visitor для сбора информации о модулях и их портах
 class ModuleVisitor 
     extends AbstractParseTreeVisitor<void>
     implements SystemVerilogParserVisitor<void> {
@@ -36,7 +34,6 @@ class ModuleVisitor
         return;
     }
 
-    // Переопределяем метод visitChildren для обхода всех узлов
     visitChildren(ctx: ParseTree): void {
         for (let i = 0; i < ctx.childCount; i++) {
             const child = ctx.getChild(i);
@@ -53,7 +50,7 @@ class ModuleVisitor
     }
 
     visitModule_declaration(ctx: parser.Module_declarationContext): void {
-        // Получаем имя модуля из заголовка
+
         const moduleHeader = ctx.module_header();
         if (moduleHeader) {
             const moduleIdentifier = moduleHeader.module_identifier();
@@ -64,29 +61,26 @@ class ModuleVisitor
                     name: moduleName,
                     ports: []
                 };
-                
-                // Обрабатываем порты модуля
+
                 const portList = moduleHeader.list_of_port_declarations();
                 if (portList) {
                     this.visitList_of_port_declarations(portList);
                 }
-                
-                // Добавляем модуль в список
+
                 this.modules.push(this.currentModule);
                 this.currentModule = null;
             }
         }
-        
-        // Продолжаем обход дерева
+
         this.visitChildren(ctx);
     }
 
     visitList_of_port_declarations(ctx: parser.List_of_port_declarationsContext): void {
-        // Обрабатываем все объявления портов
+
         const portDeclarations = ctx.port_decl();
         if (portDeclarations) {
             for (let i = 0; i < portDeclarations.length; i++) {
-                // Получаем объявление порта ANSI из port_decl
+
                 const ansiPortDecl = portDeclarations[i].ansi_port_declaration();
                 if (ansiPortDecl) {
                     this.visitAnsi_port_declaration(ansiPortDecl);
@@ -100,14 +94,12 @@ class ModuleVisitor
         const id = ctx.port_identifier();
         if (!id) return;
 
-        // 1) имя и направление
         const portName = id.text;
         let direction: 'input'|'output'|'inout' = 'input';
         const pd = ctx.port_direction()?.text;
         if (pd === 'output') direction = 'output';
         else if (pd === 'inout') direction = 'inout';
 
-        // 2) разберём явный vs неявный тип
         const explicitTypeCtx = ctx.data_type();
         const implicitTypeCtx = ctx.implicit_data_type();
 
@@ -116,16 +108,15 @@ class ModuleVisitor
         let dims: parser.Packed_dimensionContext[] = [];
 
         if (explicitTypeCtx) {
-            // явный data_type
-            typeStr = explicitTypeCtx.getChild(0).text;                // базовый токен: logic/bit/reg/…
-            dims = explicitTypeCtx.packed_dimension();                 // все [MSB:LSB]
+
+            typeStr = explicitTypeCtx.getChild(0).text;
+            dims = explicitTypeCtx.packed_dimension();
         } else if (implicitTypeCtx) {
-            // неявный — по умолчанию logic
+
             typeStr = 'logic';
             dims = implicitTypeCtx.packed_dimension();
         }
 
-        // 3) вычисляем ширину (берём первый диапазон, если есть)
         if (dims.length > 0) {
             const rangeCtx = dims[0].constant_range();
             if (rangeCtx) {
@@ -142,24 +133,17 @@ class ModuleVisitor
     }
 }
 
-// Функция для парсинга модулей SystemVerilog
 export function parseModules(svText: string): ParsedModule[] {
     try {
-        // Создаем лексер и парсер
         const inputStream = CharStreams.fromString(svText);
         const lexer = new SystemVerilogLexer(inputStream);
         const tokenStream = new CommonTokenStream(lexer);
         const parser = new SystemVerilogParser(tokenStream);
         parser.removeErrorListeners();
         parser.addErrorListener(new QuietErrorListener());
-        // Парсим входной текст
         const tree = parser.source_text();
-        
-        // Создаем и запускаем посетителя
         const visitor = new ModuleVisitor();
         visitor.visit(tree);
-        
-        // Возвращаем собранные модули
         return visitor.modules;
     } catch (error) {
         console.error('Error parsing SystemVerilog modules:', error);

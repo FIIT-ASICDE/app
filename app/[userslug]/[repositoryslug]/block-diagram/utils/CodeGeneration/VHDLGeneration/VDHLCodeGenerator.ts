@@ -1,5 +1,6 @@
+import { CustomPort } from '@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces';
 import { dia } from "@joint/core";
-import {CustomPort} from '@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces'
+
 
 const operatorMapVHDL: { [key: string]: string } = {
     and: 'AND',
@@ -147,7 +148,8 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         const structType = cell.attributes.structTypeDef;
 
         if (cell.attributes.elType === 'combiner') {
-            const outPort = cellPorts.find(p => p.group === 'output');
+            const outPort = cellPorts.find((p: CustomPort) => p.group === "output",
+            );
             if (isStruct && structType && structType) {
                 code += `    SIGNAL ${netName} : ${structPkg}.${structType};\n`;
             }
@@ -228,11 +230,11 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
 
         if (type === 'splitter') {
 
-            const inputPort = cellPorts.find(p => p.group === 'input');
+            const inputPort = cellPorts.find((p: CustomPort) => p.group === 'input');
             const inputKey = `${cell.id}:${inputPort?.id}`;
             const inputSignal = connectionMap[inputKey] ? connectionMap[inputKey][0] : "'0'";
 
-            cellPorts.filter(p => p.group === 'output').forEach(outputPort => {
+            cellPorts.filter((p: CustomPort) => p.group === 'output').forEach((outputPort: CustomPort) => {
                 const outputKey = `${cell.id}:${outputPort.id}`;
                 const outputSignal = outputConnectionMap[outputKey] ? outputConnectionMap[outputKey][0] : "'0'";
                 const bitStart = outputPort.startBit;
@@ -241,8 +243,8 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
                     name: netName,
                     connectedTo: outputSignal,
                     connectedFrom: inputSignal,
-                    startBit: bitStart,
-                    endBit: bitEnd
+                    startBit: bitStart || 0,
+                    endBit: bitEnd || 0
                 });
             });
 
@@ -250,8 +252,8 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         }
 
         if (type === 'combiner') {
-            const inputPorts = cellPorts.filter(p => p.group === 'input').reverse();
-            const inputSignals = inputPorts.map(p => {
+            const inputPorts = cellPorts.filter((p: CustomPort) => p.group === 'input').reverse();
+            const inputSignals = inputPorts.map((p: CustomPort) => {
                 const key = `${cell.id}:${p.id}`;
                 return connectionMap[key] ? getBitSelectedSignal(connectionMap[key][0], netName) : "'0'";
             });
@@ -263,9 +265,9 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         const type = cell.attributes.elType;
         const netName = elementNames[cell.id];
         const cellPorts = cell.attributes.ports?.items || [];
-        const inputPorts = cellPorts.filter(p => p.group === 'input');
+        const inputPorts = cellPorts.filter((p: CustomPort) => p.group === 'input');
 
-        const inputSignals = inputPorts.map(p => {
+        const inputSignals = inputPorts.map((p: CustomPort) => {
             const key = `${cell.id}:${p.id}`;
             return connectionMap[key] ? connectionMap[key].join(` ${operatorMapVHDL[type]} `) : "'0'";
         });
@@ -285,9 +287,9 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         const type = cell.attributes.elType;
         const netName = elementNames[cell.id];
         const cellPorts = cell.attributes.ports?.items || [];
-        const inputPorts = cellPorts.filter(p => p.group === 'input');
+        const inputPorts = cellPorts.filter((p: CustomPort) => p.group === 'input');
 
-        const inputSignals = inputPorts.map(p => {
+        const inputSignals = inputPorts.map((p: CustomPort) => {
             const key = `${cell.id}:${p.id}`;
             return connectionMap[key] ? connectionMap[key][0] : "'0'";
         });
@@ -311,8 +313,8 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         const netName = getPortName(cell);
         const inPorts = cell.attributes.inPorts;
         const cellPorts = cell.attributes.ports?.items || [];
-        const selectPort = cellPorts.find(p => p.id === 'select');
-        const outputPort = cellPorts.find(p => p.group === 'output');
+        const selectPort = cellPorts.find((p: CustomPort) => p.id === 'select');
+        const outputPort = cellPorts.find((p: CustomPort) => p.group === 'output');
 
         if (!selectPort || !outputPort) return;
 
@@ -346,7 +348,7 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         const netName = elementNames[cell.id];
         const cellPorts = cell.attributes.ports?.items || [];
 
-        const inputPorts = cellPorts.filter(p => p.group === 'input');
+        const inputPorts = cellPorts.filter((p: CustomPort) => p.group === 'input');
         const inputKey = `${cell.id}:${inputPorts[0]?.id}`;
         const inputSignal = connectionMap[inputKey] ? connectionMap[inputKey][0] : "'0'";
 
@@ -389,16 +391,16 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         const instanceName = cell.attributes.instance;
         const cellPorts = cell.attributes.ports?.items || [];
 
-        const inputPorts = cellPorts.filter(p => p.group === 'input');
-        const outputPorts = cellPorts.filter(p => p.group === 'output');
+        const inputPorts = cellPorts.filter((p: CustomPort) => p.group === 'input');
+        const outputPorts = cellPorts.filter((p: CustomPort) => p.group === 'output');
 
-        let portMappings = inputPorts.map(p => {
+        let portMappings = inputPorts.map((p: CustomPort) => {
             const key = `${cell.id}:${p.id}`;
             const connectedSignal = connectionMap[key] ? connectionMap[key][0] : "'0'";
             return `.${p.name}(${connectedSignal})`;
         });
 
-        portMappings = portMappings.concat(outputPorts.map(p => {
+        portMappings = portMappings.concat(outputPorts.map((p: CustomPort) => {
             const key = `${cell.id}:${p.id}`;
             const outputConnectedSignal = outputConnectionMap[key] ? outputConnectionMap[key][0] : "'0'";
             return `${p.name} => ${outputConnectedSignal}`;
