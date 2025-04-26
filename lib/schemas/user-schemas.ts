@@ -109,10 +109,7 @@ export const editUserFormSchema = z.object({
             z.object({
                 type: z.literal("local"),
                 file: z
-                    .any() // Use z.any() and refine manually
-                    .refine((file) => isFileInstance(file), {
-                        message: "Invalid file type.",
-                    })
+                    .instanceof(File)
                     .refine((file: File) => file.size < 2000000, {
                         message: "Profile image must be less than 2MB.",
                     })
@@ -139,10 +136,6 @@ export const editUserFormSchema = z.object({
         ])
         .optional(),
 });
-
-const isFileInstance = (file: unknown): file is File => {
-    return typeof window !== "undefined" && file instanceof File;
-};
 
 export const userSearchSchema = z.object({
     searchTerm: z
