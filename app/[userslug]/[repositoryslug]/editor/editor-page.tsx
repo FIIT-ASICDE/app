@@ -296,7 +296,7 @@ export default function EditorPage({
             openFiles: transformedOpenFiles,
             repoId: repository.id,
         });
-    }, 2000);
+    }, 500);
 
     useEffect(() => {
         saveSessionDebounced();
