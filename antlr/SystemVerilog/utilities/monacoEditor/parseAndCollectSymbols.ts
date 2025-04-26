@@ -1,6 +1,6 @@
 import { CharStreams, CommonTokenStream } from "antlr4ts";
-import { SystemVerilogLexer } from "./generated/SystemVerilogLexer";
-import { SystemVerilogParser } from "./generated/SystemVerilogParser";
+import { SystemVerilogLexer } from "../../grammar/generated/SystemVerilogLexer";
+import { SystemVerilogParser } from "../../grammar/generated/SystemVerilogParser";
 import { SymbolCollectorVisitor } from "./SymbolCollectorVisitor";
 import { symbolTableManager } from "./symbolTable";
 

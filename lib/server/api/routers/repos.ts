@@ -31,8 +31,8 @@ import { Session } from "next-auth";
 import path from "path";
 import util from "util";
 import { z } from "zod";
-import { indexRepositorySymbols } from "../../utils/indexRepositorySymbols";
-import { symbolTableManager } from "@/app/antlr/SystemVerilog/symbolTable";
+import { indexRepositorySymbols } from "../../../../antlr/SystemVerilog/utilities/monacoEditor/indexRepositorySymbols";
+import { symbolTableManager } from "@/antlr/SystemVerilog/utilities/monacoEditor/symbolTable";
 
 const execPromise = util.promisify(exec);
 

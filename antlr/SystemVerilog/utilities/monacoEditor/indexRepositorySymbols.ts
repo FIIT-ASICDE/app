@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
-import { parseAndCollectSymbols } from "@/app/antlr/SystemVerilog/parseAndCollectSymbols";
+import { parseAndCollectSymbols } from "./parseAndCollectSymbols";
 
 const supportedExtensions = [".sv", ".v", ".svh"];
 

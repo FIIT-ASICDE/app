@@ -1,5 +1,5 @@
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
-import { symbolTableManager } from "@/app/antlr/SystemVerilog/symbolTable";
+import { symbolTableManager } from "@/antlr/SystemVerilog/utilities/monacoEditor/symbolTable";
 import { trpcClient } from "@/lib/trpc/client";
 
 function extractRepoInfoFromUri(uri: monaco.Uri) {
@@ -34,6 +34,7 @@ export function registerDefinitionProvider(
       if (!targetModel) {
         try {
           const { ownerSlug, repositorySlug, path } = extractRepoInfoFromUri(targetUri);
+          console.log("Loading file", { path });
 
           const fileResult = await trpcClient.repo.loadRepoItem.query({
             ownerSlug,

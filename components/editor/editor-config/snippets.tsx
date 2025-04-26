@@ -1,5 +1,5 @@
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
-import { InterfaceSymbolInfo, ModuleSymbolInfo, ProgramSymbolInfo, symbolTableManager } from "@/app/antlr/SystemVerilog/symbolTable";
+import { InterfaceSymbolInfo, ModuleSymbolInfo, ProgramSymbolInfo, symbolTableManager } from "@/antlr/SystemVerilog/utilities/monacoEditor/symbolTable";
 
 let snippetsCache: { [key: string]: any } = {};
 let languageCompletionProviders: { [key: string]: boolean } = {};

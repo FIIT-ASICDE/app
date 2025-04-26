@@ -9,10 +9,10 @@ import {
   Source_textContext,
   Function_body_declarationContext,
   Task_body_declarationContext,
-} from "./generated/SystemVerilogParser";
+} from "../../grammar/generated/SystemVerilogParser";
 
 import { AbstractParseTreeVisitor } from "antlr4ts/tree";
-import { SystemVerilogParserVisitor } from "./generated/SystemVerilogParserVisitor";
+import { SystemVerilogParserVisitor } from "../../grammar/generated/SystemVerilogParserVisitor";
 import {
   SymbolInfo,
   SymbolTable,

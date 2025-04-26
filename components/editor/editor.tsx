@@ -6,7 +6,7 @@ import { ReactElement, useEffect, useRef } from "react";
 import { MonacoBinding } from "y-monaco";
 import * as Y from "yjs";
 import { registerLanguageSupport } from "./editor-config/registerLanguage";
-import { parseAndCollectSymbols } from "@/app/antlr/SystemVerilog/parseAndCollectSymbols";
+import { parseAndCollectSymbols } from "@/antlr/SystemVerilog/utilities/monacoEditor/parseAndCollectSymbols";
 import { FileItem, FileDisplayItem } from "@/lib/types/repository";
 
 window.addEventListener("unhandledrejection", (event) => {
@@ -73,7 +73,7 @@ export default function Editor({
 
   useEffect(() => {
     if (!monacoEl.current) return;
-
+ console.log("filepath",filePath)
     const uri = monaco.Uri.parse(`inmemory://${filePath}`);
 
     const model =
@@ -106,12 +106,14 @@ export default function Editor({
           const { uri, range } = pendingNavigationRef.current;
       
           if (onOpenFile) {
-            const fileName = uri.path.split("/").pop() || "untitled";
-          
+            const parts = uri.path.split("/").filter(Boolean);
+            parts.shift(); // remove the first part (repository name)
+            const fileName = parts[parts.length - 1] || "untitled";  
+            const filePath = parts.join("/");
             onOpenFile({
               type: "file-display",
               name: fileName,
-              absolutePath: fileName,
+              absolutePath: filePath,
               language: "systemverilog",
               lastActivity: new Date(),
             });
@@ -183,7 +185,7 @@ export default function Editor({
           provider.awareness
         );
       }
-    }
+    
 
     const initialCode = model.getValue();
     if (initialCode) {

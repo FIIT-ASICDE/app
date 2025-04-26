@@ -39,7 +39,7 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { symbolTableManager } from "@/app/antlr/SystemVerilog/symbolTable";
+import { symbolTableManager } from "@/antlr/SystemVerilog/utilities/monacoEditor/symbolTable";
 
 interface EditorPageProps {
     repository: Repository;
@@ -277,7 +277,8 @@ export default function EditorPage({
         }
     }, [session]);
 
-    const serializeFile = (file: FileDisplayItem) => ({
+    const serializeFile = (file: FileDisplayItem) => (
+        console.log("serializing file", file),{
         name: file.name,
         type: file.type,
         lastActivity: new Date(file.lastActivity),
@@ -438,17 +439,14 @@ export default function EditorPage({
                                 handleTabSwitchAction={handleTabSwitch}
                                 handleCloseTabAction={handleCloseTab}
                             />
-                            {activeFile ? (
+                            {activeFile && Object.keys(activeFile).length > 0 ? (
                                 <DynamicEditor
-                                filePath={editorFilePath}
-                                onOpenFile={handleOpenFile}
-                                onReady={handleEditorReady}
-                                    language={activeFile.language.replace(
-                                        " ",
-                                        "",
-                                    )}
+                                    filePath={editorFilePath}
+                                    onOpenFile={handleOpenFile}
+                                    onReady={handleEditorReady}
+                                    language={activeFile.language.replace(" ", "")}
                                     theme={editorTheme()}
-                            />
+                                />
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                                     No file open
