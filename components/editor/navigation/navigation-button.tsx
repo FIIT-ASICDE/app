@@ -9,7 +9,7 @@ import {
 
 interface NavigationButtonProps {
     icon: ElementType;
-    tooltip: string;
+    tooltip: ReactElement;
     tooltipSide?: "right" | "top" | "bottom" | "left";
     onClick?: () => void;
 }

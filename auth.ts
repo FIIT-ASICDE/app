@@ -36,7 +36,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // If you want to change session strategy, then also auth in editor server
     // must be also reimplemented
     session: { strategy: "jwt" },
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.AUTH_SECRET,
     adapter: PrismaAdapter(prisma),
     providers,
     callbacks: {

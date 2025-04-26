@@ -13,6 +13,7 @@ import type {
     Repository,
     RepositoryItem,
 } from "@/lib/types/repository";
+import { useTheme } from "next-themes";
 import dynamic from "next/dynamic";
 import {
     type ElementRef,
@@ -60,6 +61,8 @@ export default function EditorPage({
     repository,
     lastSimulation,
 }: EditorPageProps): ReactElement {
+    const { theme, resolvedTheme } = useTheme();
+
     const [activeSidebarContent, setActiveSidebarContent] =
         useState<SidebarContentTab>("fileExplorer");
     const [activeBottomPanelContent, setActiveBottomPanelContent] =
@@ -215,6 +218,14 @@ export default function EditorPage({
         }
     };
 
+    const [yosysInput, setYosysInput] = useState<
+        RouterInputs["synthesis"]["runYosysStream"] | null
+    >(null);
+
+    const resultYosys = api.synthesis.runYosysStream.useQuery(yosysInput!, {
+        enabled: !!yosysInput,
+    });
+
     const onStartSynthesis = () => {
         // TODO: maxo start synthesis
         console.log(
@@ -223,6 +234,14 @@ export default function EditorPage({
                 " and file: " +
                 configuration?.synthesis.file.absolutePath,
         );
+
+        if (configuration?.synthesis.type === "yosys") {
+            const input = {
+                repoId: repository.id,
+                verilogFilePath: configuration.synthesis.file.absolutePath,
+            };
+            setYosysInput(input);
+        }
     };
 
     const handleFileClick = (item: RepositoryItem) => {
@@ -327,6 +346,15 @@ export default function EditorPage({
         return `${repository.ownerName}/${repository.name}/${activeFile.absolutePath}`;
     }, [activeFile, repository]);
 
+    const editorTheme = () => {
+        if (theme === "dark" || resolvedTheme === "dark") {
+            return "vs-dark";
+        } else if (theme === "light" || resolvedTheme === "light") {
+            return "vs-light";
+        }
+        return "vs-light";
+    };
+
     return (
         <div className="flex h-screen flex-row">
             <EditorNavigation
@@ -413,9 +441,13 @@ export default function EditorPage({
                             {activeFile ? (
                                 <DynamicEditor
                                 filePath={editorFilePath}
-                                language={activeFile.language}
                                 onOpenFile={handleOpenFile}
                                 onReady={handleEditorReady}
+                                    language={activeFile.language.replace(
+                                        " ",
+                                        "",
+                                    )}
+                                    theme={editorTheme()}
                             />
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center text-muted-foreground">
@@ -440,6 +472,8 @@ export default function EditorPage({
                             []
                         }
                         lastSimulation={lastSimulation}
+                        synthesisOutput={resultYosys.data ?? []}
+                        lastSynthesis={resultYosys.data?.[0]?.content ?? null}
                     />
                 </ResizablePanel>
             </ResizablePanelGroup>
