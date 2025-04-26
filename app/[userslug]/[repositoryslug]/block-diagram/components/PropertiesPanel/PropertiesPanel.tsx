@@ -130,7 +130,13 @@ const PropertiesPanel = () => {
     const [showErrorNotification, setShowErrorNotification] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [clipboardCell, setClipboardCell] = useState<dia.Cell | null>(null);
-    const elementTypes = {
+    type ElementTypeKey =
+        | 'input' | 'output' | 'and' | 'or' | 'xor' | 'xnor' | 'nand' | 'nor' | 'not'
+        | 'alu' | 'comparator' | 'decoder' | 'encoder'
+        | 'multiplexer' | 'splitter' | 'combiner'
+        | 'sram' | 'register' | 'module';
+
+    const elementTypes: Record<ElementTypeKey, { class: any; create: any }> = {
         'input': { class: Port, create: JointJSInputPort },
         'output': { class: Port, create: JointJSOutputPort },
         'and': { class: And, create: JointJSAnd },
@@ -517,7 +523,7 @@ const PropertiesPanel = () => {
         if (!selectedElement) return;
 
         const elType = selectedElement.attributes.elType;
-        const elementType = elementTypes[elType];
+        const elementType = elementTypes[elType as ElementTypeKey];
 
         if (elementType) {
             const { x, y } = selectedElement.position();
@@ -1371,7 +1377,6 @@ const PropertiesPanel = () => {
 
                     </>
                 )}
-
                 <div className="mt-6 pt-4 border-t border-gray-200">
                     <Button
                         onClick={handleSave}
@@ -1381,6 +1386,7 @@ const PropertiesPanel = () => {
                     </Button>
                 </div>
             </div>
+
 
             {showSaveNotification && (
                 <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg">

@@ -114,6 +114,61 @@ const DiagramArea = () => {
         };
     }, [paper]);
 
+    useEffect(() => {
+        if (!paper || !paperElement.current) return;
+
+        const updateTheme = () => {
+            const isDark = document.documentElement.classList.contains('dark');
+
+            // Меняем фон Paper
+            paper.drawBackground({
+                color: isDark ? '#0d0d0d' : '#ffffff'
+            });
+
+            // Меняем цвета всех элементов
+            graph.getElements().forEach(cell => {
+                cell.attr({
+                    body: {
+                        fill: isDark ? '#1f1f1f' : '#ffffff',
+                        stroke: isDark ? '#888888' : '#000000',
+                    },
+                    label: {
+                        fill: isDark ? '#eeeeee' : '#000000',
+                    },
+
+                });
+                cell.getPorts().forEach(port => {
+                    if (port.id) {
+                        cell.portProp(port.id, 'attrs/portLine/fill', isDark ? '#1f1f1f' : '#ffffff');
+                        cell.portProp(port.id, 'attrs/portLine/stroke', isDark ? '#888888' : '#000000');
+                        cell.portProp(port.id, 'attrs/portLabel/fill', isDark ? '#ffffff' : '#000000');
+                    }
+                });
+            });
+
+            // Меняем цвета всех связей
+            graph.getLinks().forEach(link => {
+                link.attr({
+                    line: {
+                        stroke: isDark ? '#aaaaaa' : '#000000',
+                    }
+                });
+            });
+        };
+
+        updateTheme(); // вызвать один раз сразу при монтировании
+
+        const observer = new MutationObserver(() => {
+            updateTheme();
+        });
+
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+        return () => {
+            observer.disconnect();
+        };
+    }, [paper, graph]);
+
 
     const saveDiagramMutation = api.repo.saveFileContent.useMutation();
 
@@ -354,7 +409,7 @@ const DiagramArea = () => {
         <div className="flex flex-col h-full">
             <PaperToolbar />
             <div
-                className="w-full h-full bg-white overflow-hidden cursor-default"
+                className="w-full h-full bg-white overflow-hidden cursor-default dark:bg-black"
                 ref={paperElement}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}

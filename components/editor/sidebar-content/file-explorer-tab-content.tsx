@@ -9,12 +9,14 @@ import { CreateDirectoryDialog } from "@/components/editor/file/create-directory
 import { CreateFileDialog } from "@/components/editor/file/create-file-dialog";
 import { FileTree } from "@/components/editor/file/file-tree";
 import { CloseButton } from "@/components/editor/navigation/close-button";
-import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer-control-button";
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CreateDiagramDialog } from "@/components/editor/file/create-diagram-dialog";
+import {
+    FileExplorerControlButton
+} from "@/components/editor/sidebar-content/file-explorer/file-explorer-control-button";
 
 interface FileExplorerTabContentProps {
     repository: Repository;

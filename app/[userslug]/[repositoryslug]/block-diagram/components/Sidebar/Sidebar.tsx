@@ -26,7 +26,7 @@ const Sidebar = () => {
         { type: 'combiner', label: 'Combiner', img: 'Combiner.svg' },
     ];
 
-    const iconItemClass = "flex items-center justify-center p-1.5 min-h-[60px] bg-white border border-gray-300 rounded cursor-grab hover:bg-blue-50 hover:shadow-md transition-transform active:cursor-grabbing";
+    const iconItemClass = "flex items-center justify-center p-1.5 min-h-[60px] bg-white border border-gray-300 rounded cursor-grab hover:bg-blue-50 hover:shadow-md dark:bg-gray-800 transition-transform active:cursor-grabbing";
     const svgIconClass = "w-10 h-10";
 
     const ElementIcon = ({ type, label, img }: { type: string; label: string; img: string }) => (
