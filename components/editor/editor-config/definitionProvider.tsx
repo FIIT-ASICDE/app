@@ -34,7 +34,6 @@ export function registerDefinitionProvider(
       if (!targetModel) {
         try {
           const { ownerSlug, repositorySlug, path } = extractRepoInfoFromUri(targetUri);
-          console.log("Loading file", { path });
 
           const fileResult = await trpcClient.repo.loadRepoItem.query({
             ownerSlug,

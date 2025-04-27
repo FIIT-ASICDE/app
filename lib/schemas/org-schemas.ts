@@ -40,7 +40,7 @@ export const createOrganisationFormSchema = z.object({
             z.object({
                 type: z.literal("local"),
                 file: z
-                .instanceof(File)
+                    .instanceof(File)
                     .refine((file: File) => file.size < 2000000, {
                         message: "Profile image must be less than 2MB.",
                     })
@@ -136,7 +136,7 @@ export const editOrganisationFormSchema = z.object({
             z.object({
                 type: z.literal("local"),
                 file: z
-                .instanceof(File)
+                    .instanceof(File)
                     .refine((file: File) => file.size < 2000000, {
                         message: "Profile image must be less than 2MB.",
                     })

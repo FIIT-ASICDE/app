@@ -277,8 +277,7 @@ export default function EditorPage({
         }
     }, [session]);
 
-    const serializeFile = (file: FileDisplayItem) => (
-        console.log("serializing file", file),{
+    const serializeFile = (file: FileDisplayItem) => ({
         name: file.name,
         type: file.type,
         lastActivity: new Date(file.lastActivity),

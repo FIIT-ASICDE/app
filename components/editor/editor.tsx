@@ -73,7 +73,6 @@ export default function Editor({
 
   useEffect(() => {
     if (!monacoEl.current) return;
- console.log("filepath",filePath)
     const uri = monaco.Uri.parse(`inmemory://${filePath}`);
 
     const model =
