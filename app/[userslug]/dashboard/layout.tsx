@@ -9,7 +9,7 @@ interface DashboardLayoutProps {
 }
 
 /**
- * Layout for user dashboard
+ * layout for user dashboard
  *
  * @param {DashboardLayoutProps} props - Component props
  * @returns {Promise<ReactElement>} User dashboard layout component

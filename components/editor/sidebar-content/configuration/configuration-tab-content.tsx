@@ -104,7 +104,7 @@ export const ConfigurationTabContent = ({
                 case "verilatorC++":
                     return "Verilator C++ requires a C++ TestBench file.";
                 case "verilatorSystemVerilog":
-                    return "Verilator SystemVerilog requires a SystemVerilog TestBench file.";
+                    return "Verilator system-verilog requires a system-verilog TestBench file.";
                 case "icarusVerilog":
                     return "Icarus Verilog requires a Verilog TestBench file.";
             }
@@ -338,7 +338,7 @@ export const ConfigurationTabContent = ({
                                                         ? "No C++ files found"
                                                         : selectedSimulationType ===
                                                             "verilatorSystemVerilog"
-                                                          ? "No SystemVerilog files found"
+                                                          ? "No system-verilog files found"
                                                           : "No Verilog files found"}
                                                 </CommandEmpty>
                                             </CommandGroup>

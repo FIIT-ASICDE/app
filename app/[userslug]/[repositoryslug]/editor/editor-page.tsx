@@ -36,7 +36,7 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import DiagramPage from "@/app/[userslug]/[repositoryslug]/block-diagram/DiagramPage";
+import DiagramPage from "@/app/[userslug]/[repositoryslug]/block-diagram/diagram-page";
 
 interface EditorPageProps {
     repository: Repository;

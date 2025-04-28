@@ -4,18 +4,18 @@ import { RepositoryItem, FileDisplayItem } from "@/lib/types/repository";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { createDiagramFromParsedModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/createDiagramFromParsedModule";
+import { createDiagramFromParsedModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/diagram-generation/create-diagram-from-parsed-module";
 import {
     parseModules
-} from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/SystemVerilog/parseModules";
-import { ParsedModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/DiagramGeneration/interfaces";
-import { parseEntities } from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/VHDL/parseEntities";
+} from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/system-verilog/parse-modules";
+import { ParsedModule } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/diagram-generation/interfaces";
+import { parseEntities } from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/vhdl/parse-entities";
 import {
     parseTopModule
-} from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/SystemVerilog/parseTopModule";
+} from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/system-verilog/parse-top-module";
 import {
     parseTopEntity
-} from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/VHDL/parseTopEntity";
+} from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/vhdl/parse-top-entity";
 
 interface GenerateDiagramDialogProps {
     repositoryId: string;

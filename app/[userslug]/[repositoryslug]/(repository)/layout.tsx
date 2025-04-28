@@ -12,7 +12,7 @@ interface RepositoryLayoutProps {
 }
 
 /**
- * Layout for a repository page
+ * layout for a repository page
  *
  * @param {RepositoryLayoutProps} props - Component props
  * @returns {Promise<ReactElement>} Repository layout component

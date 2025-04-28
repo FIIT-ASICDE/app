@@ -21,7 +21,7 @@ interface LayoutOptionsProps {
  * Component that lets the user change the layout of a displayed list
  *
  * @param {LayoutOptionsProps} props - Component props
- * @returns {ReactElement} Layout options component
+ * @returns {ReactElement} layout options component
  */
 export const LayoutOptions = ({
     layout,

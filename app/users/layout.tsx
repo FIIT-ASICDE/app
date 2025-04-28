@@ -8,7 +8,7 @@ interface AllUsersLayoutProps {
 }
 
 /**
- * Layout for all users
+ * layout for all users
  *
  * @param {AllUsersLayoutProps} props - Component props
  * @returns {Promise<ReactElement>} All users layout component

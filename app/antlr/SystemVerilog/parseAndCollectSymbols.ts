@@ -32,7 +32,7 @@ export function parseAndCollectSymbols(input: string, uri: string): void {
         symbolTableManager.addSymbols(uri, mergedSymbols);
 
     } catch (error) {
-        console.error("[parseAndCollectSymbols] Error parsing SystemVerilog:", error);
+        console.error("[parseAndCollectSymbols] Error parsing system-verilog:", error);
         // If there's an error, remove any existing symbols for this file
         symbolTableManager.removeSymbols(uri);
     }

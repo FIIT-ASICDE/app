@@ -1,4 +1,4 @@
-// Generated from app/antlr/VHDL/grammar/vhdl.g4 by ANTLR 4.9.0-SNAPSHOT
+// Generated from app/antlr/vhdl/grammar/vhdl.g4 by ANTLR 4.9.0-SNAPSHOT
 
 
 import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";

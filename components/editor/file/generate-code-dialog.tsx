@@ -4,8 +4,8 @@ import { RepositoryItem, FileDisplayItem } from "@/lib/types/repository";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { generateSystemVerilogCode } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/CodeGeneration/SystemVerilogGeneration/SystemVerilogCodeGenerator";
-import { generateVHDLCode } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/CodeGeneration/VHDLGeneration/VDHLCodeGenerator";
+import { generateSystemVerilogCode } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/code-generation/system-verilog-generation/system-verilog-code-generator";
+import { generateVHDLCode } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/code-generation/vhdl-generation/vhdl-code-generator";
 import { dia, shapes } from '@joint/core';
 interface GenerateCodeDialogProps {
     repositoryId: string;
@@ -92,7 +92,7 @@ export const GenerateCodeDialog = ({
                 content: code,
             }, {
                 onSuccess: () => {
-                    toast.success("SystemVerilog file generated");
+                    toast.success("system-verilog file generated");
                     addGeneratedFileToTree(fileName, filePath, "system verilog");
                     setOpen(false);
                 },
@@ -125,7 +125,7 @@ export const GenerateCodeDialog = ({
                 content: code,
             }, {
                 onSuccess: () => {
-                    toast.success("VHDL file generated");
+                    toast.success("vhdl file generated");
                     addGeneratedFileToTree(fileName, filePath, "vhdl");
                     setOpen(false);
                 },
@@ -138,7 +138,7 @@ export const GenerateCodeDialog = ({
         }
     };
 
-    const getLockedLanguage = (serialized: SerializedDiagram): "SystemVerilog" | "VHDL" | null => {
+    const getLockedLanguage = (serialized: SerializedDiagram): "system-verilog" | "vhdl" | null => {
         const languageSet = new Set<string>();
 
         serialized.cells.forEach((cell) => {
@@ -155,7 +155,7 @@ export const GenerateCodeDialog = ({
         });
 
         if (languageSet.size === 1) {
-            return languageSet.has("VHDL") ? "VHDL" : "SystemVerilog";
+            return languageSet.has("vhdl") ? "vhdl" : "system-verilog";
         }
 
         return null;
@@ -179,16 +179,16 @@ export const GenerateCodeDialog = ({
                 <div className="flex flex-col gap-2 mt-4">
                     <Button
                         onClick={handleSystemVerilogGenerate}
-                        disabled={isFileLoading || !!(lockedLanguage && lockedLanguage !== "SystemVerilog")}
+                        disabled={isFileLoading || !!(lockedLanguage && lockedLanguage !== "system-verilog")}
                     >
-                        {isFileLoading ? "Loading..." : "Generate SystemVerilog Code"}
+                        {isFileLoading ? "Loading..." : "Generate system-verilog Code"}
                     </Button>
 
                     <Button
                         onClick={handleVHDLGenerate}
-                        disabled={isFileLoading || !!(lockedLanguage && lockedLanguage !== "VHDL")}
+                        disabled={isFileLoading || !!(lockedLanguage && lockedLanguage !== "vhdl")}
                     >
-                        {isFileLoading ? "Loading..." : "Generate VHDL Code"}
+                        {isFileLoading ? "Loading..." : "Generate vhdl Code"}
                     </Button>
                 </div>
             </DialogContent>
