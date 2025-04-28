@@ -20,6 +20,22 @@ export type Repository = {
     userRole?: RepoUserRole;
 
     isGitRepo?: boolean;
+
+    symbolTable?: {
+        globalSymbols: Record<string, SymbolInfo>;
+        fileSymbols: {
+            isInitialized: boolean;
+            totalSymbols: number;
+            files: number;
+            symbols: Array<{
+                name: string;
+                type: string;
+                uri: string;
+                line: number;
+                column: number;
+            }>;
+        };
+    };
 };
 
 export type RepositoryOverview = Omit<Repository, "contributors" | "tree"> & {
