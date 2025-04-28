@@ -709,7 +709,7 @@ const PropertiesPanel = () => {
                             onValueChange={(value) => {
                                 const isLocked = checkLanguageLock();
                                 if (!isLocked) {
-                                    setSelectedLanguage(value as "system-verilog" | "vhdl");
+                                    setSelectedLanguage(value as "SystemVerilog" | "VHDL");
                                 } else {
                                     toast.error("You can't change language because there are elements with assigned language.");
                                 }

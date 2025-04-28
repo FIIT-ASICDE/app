@@ -96,7 +96,7 @@ const PaperToolbar: React.FC = () => {
         }
     };
 
-    const tooltipText = selectedLanguage === "SystemVerilog" ? "Generate system-verilog Code" : "Generate vhdl Code";
+    const tooltipText = selectedLanguage === "SystemVerilog" ? "Generate SystemVerilog Code" : "Generate VHDL Code";
 
 
     return (

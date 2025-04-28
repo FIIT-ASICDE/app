@@ -52,11 +52,11 @@ interface ConfigurationTabContentProps {
  * @returns {ReactElement} Tab content component
  */
 export const ConfigurationTabContent = ({
-    repository,
-    handleCloseSidebarAction,
-    configuration,
-    setConfigurationAction,
-}: ConfigurationTabContentProps): ReactElement => {
+                                            repository,
+                                            handleCloseSidebarAction,
+                                            configuration,
+                                            setConfigurationAction,
+                                        }: ConfigurationTabContentProps): ReactElement => {
     const [selectedSimulationType, setSelectedSimulationType] = useState<
         SimulationType | undefined
     >(undefined);
@@ -104,7 +104,7 @@ export const ConfigurationTabContent = ({
                 case "verilatorC++":
                     return "Verilator C++ requires a C++ TestBench file.";
                 case "verilatorSystemVerilog":
-                    return "Verilator system-verilog requires a system-verilog TestBench file.";
+                    return "Verilator SystemVerilog requires a SystemVerilog TestBench file.";
                 case "icarusVerilog":
                     return "Icarus Verilog requires a Verilog TestBench file.";
             }
@@ -337,9 +337,9 @@ export const ConfigurationTabContent = ({
                                                     "verilatorC++"
                                                         ? "No C++ files found"
                                                         : selectedSimulationType ===
-                                                            "verilatorSystemVerilog"
-                                                          ? "No system-verilog files found"
-                                                          : "No Verilog files found"}
+                                                        "verilatorSystemVerilog"
+                                                            ? "No SystemVerilog files found"
+                                                            : "No Verilog files found"}
                                                 </CommandEmpty>
                                             </CommandGroup>
                                         </CommandList>
@@ -457,7 +457,7 @@ export const ConfigurationTabContent = ({
                                 disabled={
                                     selectedSimulationType === undefined ||
                                     selectedSimulationTestBenchFile ===
-                                        undefined ||
+                                    undefined ||
                                     selectedSynthesisType === undefined ||
                                     selectedSynthesisFile === undefined
                                 }
@@ -474,7 +474,7 @@ export const ConfigurationTabContent = ({
                                                 simulation: {
                                                     type: selectedSimulationType,
                                                     testBench:
-                                                        selectedSimulationTestBenchFile,
+                                                    selectedSimulationTestBenchFile,
                                                 },
                                                 synthesis: {
                                                     type: selectedSynthesisType,

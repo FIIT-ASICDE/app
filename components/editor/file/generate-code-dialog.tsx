@@ -92,7 +92,7 @@ export const GenerateCodeDialog = ({
                 content: code,
             }, {
                 onSuccess: () => {
-                    toast.success("system-verilog file generated");
+                    toast.success("SystemVerilog file generated");
                     addGeneratedFileToTree(fileName, filePath, "system verilog");
                     setOpen(false);
                 },
@@ -125,7 +125,7 @@ export const GenerateCodeDialog = ({
                 content: code,
             }, {
                 onSuccess: () => {
-                    toast.success("vhdl file generated");
+                    toast.success("VHDL file generated");
                     addGeneratedFileToTree(fileName, filePath, "vhdl");
                     setOpen(false);
                 },
@@ -138,7 +138,7 @@ export const GenerateCodeDialog = ({
         }
     };
 
-    const getLockedLanguage = (serialized: SerializedDiagram): "system-verilog" | "vhdl" | null => {
+    const getLockedLanguage = (serialized: SerializedDiagram): "SystemVerilog" | "VHDL" | null => {
         const languageSet = new Set<string>();
 
         serialized.cells.forEach((cell) => {
@@ -155,7 +155,7 @@ export const GenerateCodeDialog = ({
         });
 
         if (languageSet.size === 1) {
-            return languageSet.has("vhdl") ? "vhdl" : "system-verilog";
+            return languageSet.has("VHDL") ? "VHDL" : "SystemVerilog";
         }
 
         return null;
@@ -179,16 +179,16 @@ export const GenerateCodeDialog = ({
                 <div className="flex flex-col gap-2 mt-4">
                     <Button
                         onClick={handleSystemVerilogGenerate}
-                        disabled={isFileLoading || !!(lockedLanguage && lockedLanguage !== "system-verilog")}
+                        disabled={isFileLoading || !!(lockedLanguage && lockedLanguage !== "SystemVerilog")}
                     >
-                        {isFileLoading ? "Loading..." : "Generate system-verilog Code"}
+                        {isFileLoading ? "Loading..." : "Generate SystemVerilog Code"}
                     </Button>
 
                     <Button
                         onClick={handleVHDLGenerate}
-                        disabled={isFileLoading || !!(lockedLanguage && lockedLanguage !== "vhdl")}
+                        disabled={isFileLoading || !!(lockedLanguage && lockedLanguage !== "VHDL")}
                     >
-                        {isFileLoading ? "Loading..." : "Generate vhdl Code"}
+                        {isFileLoading ? "Loading..." : "Generate VHDL Code"}
                     </Button>
                 </div>
             </DialogContent>

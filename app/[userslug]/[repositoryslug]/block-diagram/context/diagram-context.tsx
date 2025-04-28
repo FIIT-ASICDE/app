@@ -113,11 +113,11 @@ export const DiagramProvider = ({ children, repository, activeFile, tree, setTre
         console.log(languageSet);
 
         if (languageSet.size === 1) {
-            const lang = languageSet.has("vhdl") ? "vhdl" : "system-verilog";
+            const lang = languageSet.has("VHDL") ? "VHDL" : "SystemVerilog";
             setSelectedLanguage(lang);
             return true; // locked
         } else if (languageSet.size > 1) {
-            const lang = languageSet.has("system-verilog") ? "system-verilog" : "vhdl";
+            const lang = languageSet.has("SystemVerilog") ? "SystemVerilog" : "VHDL";
             setSelectedLanguage(lang);
             return true; // locked
         } else {
