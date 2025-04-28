@@ -274,7 +274,7 @@ const TRACKED_EXTENSIONS: Record<string, string> = {
     sql: "sql",
     st: "st",
     swift: "swift",
-    sv: "system verilog",
+    sv: "systemverilog",
     tcl: "tcl",
     tokens: "tokens",
     twig: "twig",

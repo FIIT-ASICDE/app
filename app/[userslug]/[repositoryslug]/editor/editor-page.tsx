@@ -9,6 +9,7 @@ import type {
 } from "@/lib/types/editor";
 import type {
     FileDisplayItem,
+    FileItem,
     Repository,
     RepositoryItem,
 } from "@/lib/types/repository";
@@ -18,7 +19,9 @@ import {
     type ElementRef,
     ReactElement,
     RefObject,
+    useCallback,
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from "react";
@@ -36,6 +39,7 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { symbolTableManager } from "@/antlr/SystemVerilog/utilities/monacoEditor/symbolTable";
 
 interface EditorPageProps {
     repository: Repository;
@@ -241,30 +245,9 @@ export default function EditorPage({
     };
 
     const handleFileClick = (item: RepositoryItem) => {
-        if (item.type !== "file-display" && item.type !== "file") {
-            return;
+        if (item.type === "file" || item.type === "file-display") {
+            handleOpenFile(item);
         }
-
-        const fileDisplay: FileDisplayItem = {
-            type: "file-display",
-            name: item.name,
-            absolutePath: item.absolutePath,
-            lastActivity: item.lastActivity,
-            language: item.language,
-        };
-
-        if (
-            !openFiles.some(
-                (file: FileDisplayItem) =>
-                    file.absolutePath === item.absolutePath,
-            )
-        ) {
-            setOpenFiles((prevFiles: Array<FileDisplayItem>) => [
-                ...prevFiles,
-                fileDisplay,
-            ]);
-        }
-        setActiveFile(fileDisplay);
     };
 
     const handleTabSwitch = (item: FileDisplayItem) => {
@@ -294,35 +277,74 @@ export default function EditorPage({
         }
     }, [session]);
 
-    const saveSessionDebounced = useDebouncedCallback(() => {
-        const transformedOpenFiles = openFiles.map((file) => ({
-            name: file.name,
-            type: file.type,
-            lastActivity: new Date(file.lastActivity),
-            language: file.language,
-            absolutePath: file.absolutePath,
-        }));
+    const serializeFile = (file: FileDisplayItem) => ({
+        name: file.name,
+        type: file.type,
+        lastActivity: new Date(file.lastActivity),
+        language: file.language,
+        absolutePath: file.absolutePath,
+    });
 
-        const transformedActiveFile = activeFile
-            ? {
-                  name: activeFile.name,
-                  type: activeFile.type,
-                  lastActivity: new Date(activeFile.lastActivity),
-                  language: activeFile.language,
-                  absolutePath: activeFile.absolutePath,
-              }
-            : null;
+    const saveSessionDebounced = useDebouncedCallback(() => {
+        const transformedOpenFiles = openFiles.map(serializeFile);
+
+        const transformedActiveFile = activeFile ? serializeFile(activeFile) : null;
 
         saveSession.mutate({
             activeFile: transformedActiveFile,
             openFiles: transformedOpenFiles,
             repoId: repository.id,
         });
-    }, 3000);
+    }, 500);
 
     useEffect(() => {
         saveSessionDebounced();
-    }, [openFiles, activeFile, repository.id, saveSessionDebounced]);
+    }, [openFiles, activeFile]);
+
+    const handleOpenFile = useCallback((item: FileDisplayItem | FileItem) => {
+        const absolutePath = item.absolutePath.toLowerCase();
+    
+        setOpenFiles((prev) => {
+            const exists = prev.some((f) => f.absolutePath.toLowerCase() === absolutePath);
+            if (!exists) {
+                const newFile: FileDisplayItem = {
+                    type: "file-display",
+                    name: item.name,
+                    absolutePath: item.absolutePath,
+                    language: item.language,
+                    lastActivity: item.lastActivity,
+                };
+                setActiveFile(newFile);
+                return [...prev, newFile];
+            } else {
+                const file = prev.find((f) => f.absolutePath.toLowerCase() === absolutePath)!;
+                setActiveFile(file);
+                return prev;
+            }
+        });
+    }, []);
+
+    const handleEditorReady = useCallback(() => {
+        if (repository.symbolTable) {
+            symbolTableManager.initializeWithData({
+                ...repository.symbolTable,
+                fileSymbols: {
+                    ...repository.symbolTable.fileSymbols,
+                    symbols: repository.symbolTable.fileSymbols.symbols.map(symbol => ({
+                        ...symbol,
+                        type: "typedef" as const,
+                    })),
+                },
+            });
+        } else {
+            symbolTableManager.initialize();
+        }
+    }, [repository]);
+
+    const editorFilePath = useMemo(() => {
+        if (!activeFile) return "";
+        return `${repository.ownerName}/${repository.name}/${activeFile.absolutePath}`;
+    }, [activeFile, repository]);
 
     const editorTheme = () => {
         if (theme === "dark" || resolvedTheme === "dark") {
@@ -416,19 +438,12 @@ export default function EditorPage({
                                 handleTabSwitchAction={handleTabSwitch}
                                 handleCloseTabAction={handleCloseTab}
                             />
-                            {activeFile ? (
+                            {activeFile && Object.keys(activeFile).length > 0 ? (
                                 <DynamicEditor
-                                    filePath={
-                                        repository.ownerName +
-                                        "/" +
-                                        repository.name +
-                                        "/" +
-                                        activeFile.absolutePath
-                                    }
-                                    language={activeFile.language.replace(
-                                        " ",
-                                        "",
-                                    )}
+                                    filePath={editorFilePath}
+                                    onOpenFile={handleOpenFile}
+                                    onReady={handleEditorReady}
+                                    language={activeFile.language.replace(" ", "")}
                                     theme={editorTheme()}
                                 />
                             ) : (
