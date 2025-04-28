@@ -14,7 +14,8 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import { GenerateCodeDialog } from "@/components/editor/file/generate-code-dialog";
+import { GenerateDiagramDialog } from "@/components/editor/file/generate-diagram-dialog";
 interface RepositoryItemActionsProps {
     repositoryId: string;
     parentItem: RepositoryItem;
@@ -84,6 +85,10 @@ export const RepositoryItemActions = ({
             });
     };
 
+    const isDiagramFile =
+        (parentItem.type === "file-display" || parentItem.type === "file") &&
+        parentItem.name.endsWith(".bd");
+
     return (
         <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
             <DropdownMenuTrigger asChild>
@@ -151,7 +156,6 @@ export const RepositoryItemActions = ({
                     setTree={setTree}
                     onAction={onAction}
                 />
-
                 <DeleteItemDialog
                     repositoryId={repositoryId}
                     repositoryItem={parentItem}
@@ -159,6 +163,30 @@ export const RepositoryItemActions = ({
                     setTree={setTree}
                     onAction={onAction}
                 />
+                {!isDiagramFile && (
+                    <>
+                <DropdownMenuSeparator />
+                <GenerateDiagramDialog
+                    repositoryId={repositoryId}
+                    diagramFile={parentItem}
+                    tree={tree}
+                    setTree={setTree}
+                />
+                </>
+                )}
+
+                {isDiagramFile && (
+                    <>
+                        <DropdownMenuSeparator />
+                        <GenerateCodeDialog
+                            repositoryId={repositoryId}
+                            diagramFile={parentItem}
+                            tree={tree}
+                            setTree={setTree}
+                        />
+                    </>
+                )}
+
             </DropdownMenuContent>
         </DropdownMenu>
     );

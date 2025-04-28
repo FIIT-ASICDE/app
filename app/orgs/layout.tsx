@@ -8,7 +8,7 @@ interface AllOrganisationsLayoutProps {
 }
 
 /**
- * Layout for all organisations page
+ * layout for all organisations page
  *
  * @param {AllOrganisationsLayoutProps} props - Component props
  * @returns {Promise<ReactElement>} User profile layout component

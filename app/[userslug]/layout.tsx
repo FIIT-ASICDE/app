@@ -9,7 +9,7 @@ interface UserLayoutProps {
 }
 
 /**
- * Layout for a user
+ * layout for a user
  *
  * @param {UserLayoutProps} props - Component props
  * @returns {Promise<ReactElement>} User profile layout component

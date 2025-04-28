@@ -40,6 +40,7 @@ import {
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { symbolTableManager } from "@/antlr/SystemVerilog/utilities/monacoEditor/symbolTable";
+import DiagramPage from "@/app/[userslug]/[repositoryslug]/block-diagram/diagram-page";
 
 interface EditorPageProps {
     repository: Repository;
@@ -297,13 +298,21 @@ export default function EditorPage({
         });
     }, 500);
 
+    const isDiagramFile = (file: FileDisplayItem) => {
+        if (file.name != undefined) {
+            const fileName = file.name.toLowerCase();
+            return fileName.endsWith('.bd');
+        }
+
+    };
+
     useEffect(() => {
         saveSessionDebounced();
     }, [openFiles, activeFile]);
 
     const handleOpenFile = useCallback((item: FileDisplayItem | FileItem) => {
         const absolutePath = item.absolutePath.toLowerCase();
-    
+
         setOpenFiles((prev) => {
             const exists = prev.some((f) => f.absolutePath.toLowerCase() === absolutePath);
             if (!exists) {
@@ -439,13 +448,22 @@ export default function EditorPage({
                                 handleCloseTabAction={handleCloseTab}
                             />
                             {activeFile && Object.keys(activeFile).length > 0 ? (
-                                <DynamicEditor
-                                    filePath={editorFilePath}
-                                    onOpenFile={handleOpenFile}
-                                    onReady={handleEditorReady}
-                                    language={activeFile.language.replace(" ", "")}
-                                    theme={editorTheme()}
-                                />
+                                isDiagramFile(activeFile) ? (
+                                    <DiagramPage
+                                        repository={repository}
+                                        activeFile={activeFile}
+                                        tree={tree}
+                                        setTree={setTree}
+                                    />
+                                    ) : (
+                                        <DynamicEditor
+                                            filePath={editorFilePath}
+                                            onOpenFile={handleOpenFile}
+                                            onReady={handleEditorReady}
+                                            language={activeFile.language.replace(" ", "")}
+                                            theme={editorTheme()}
+                                        />
+                                    )
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                                     No file open

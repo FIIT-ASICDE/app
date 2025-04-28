@@ -10,7 +10,7 @@ interface ProtectedLayoutProps {
 }
 
 /**
- * Layout component that lets only a logged-in user continue
+ * layout component that lets only a logged-in user continue
  *
  * @param {ProtectedLayoutProps} props - Component props
  * @returns {Promise<ReactElement>} No data component

@@ -1,0 +1,42 @@
+import { useEffect } from 'react';
+
+
+interface UseHotkeysOptions {
+    onSave?: () => void;
+    onDelete?: () => void;
+    onCopy?: () => void;
+    onPaste?: () => void;
+}
+
+export function useHotkeys({
+    onSave,
+    onDelete,
+    onCopy,
+    onPaste,
+}: UseHotkeysOptions) {
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+            const key = e.key.toLowerCase();
+            if (isCtrlOrCmd && e.key.toLowerCase() === 's') {
+                e.preventDefault();
+                onSave?.();
+            }
+            if (e.key === 'Delete') {
+                onDelete?.();
+            }
+            if (isCtrlOrCmd && key === 'c') {
+                onCopy?.();
+            }
+            if (isCtrlOrCmd && key === 'v') {
+                onPaste?.();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [onSave, onDelete, onCopy, onPaste]);
+}

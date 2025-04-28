@@ -35,7 +35,7 @@ interface SidebarTabContentProps {
  * Content of the sidebar, can display file explorer, search, source control or configuration
  *
  * @param {SidebarTabContentProps} props - Component props
- * @returns {ReactElement} Sidebar content component
+ * @returns {ReactElement} sidebar content component
  */
 export const SidebarTabContent = ({
     activeSidebarContent,

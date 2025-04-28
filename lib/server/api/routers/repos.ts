@@ -15,6 +15,7 @@ import { createTRPCRouter, protectedProcedure } from "@/lib/server/api/trpc";
 import { PaginationResult } from "@/lib/types/generic";
 import { Invitation, InvitationStatus } from "@/lib/types/invitation";
 import {
+    FileItem,
     Repository,
     RepositoryDisplay,
     RepositoryItem,
@@ -25,8 +26,7 @@ import { UserDisplay } from "@/lib/types/user";
 import { PrismaType } from "@/prisma";
 import { TRPCError } from "@trpc/server";
 import { exec } from "child_process";
-import { access, mkdir, rename, rm } from "fs/promises";
-import { writeFile } from "fs/promises";
+import { access, mkdir, rename, rm, writeFile } from "fs/promises";
 import { Session } from "next-auth";
 import path from "path";
 import util from "util";
@@ -52,6 +52,9 @@ export const repoRouter = createTRPCRouter({
     transfer: transfer(),
     edit: edit(),
     removeContributor: removeContributor(),
+    loadAllFilesInRepo: loadAllFilesInRepo(),
+    saveFileContent: saveFileContent(),
+    loadOwnerAndRepoById: loadOwnerAndRepoById(),
 });
 
 function create() {
@@ -2043,3 +2046,74 @@ export async function initializeGit(
     await execPromise(`git -C "${repoPath}" config --unset user.email`);
     await execPromise(`git -C "${repoPath}" config --unset user.name`);
 }
+
+function loadAllFilesInRepo() {
+    return protectedProcedure
+        .input(repoBySlugsSchema)
+        .query(async ({ ctx, input }) => {
+            const owner = await ownerBySlug(
+                ctx.prisma,
+                decodeURIComponent(input.ownerSlug),
+            );
+            const decodedRepoSlug = decodeURIComponent(input.repositorySlug);
+            const repo = await repoBySlug(
+                ctx.prisma,
+                decodedRepoSlug,
+                ctx.session.user.id,
+                owner,
+            );
+
+            if (!repo) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Repository not found",
+                });
+            }
+
+            const repoPath = absoluteRepoPath(owner.name!, repo.name);
+            const tree = loadRepoItems(repoPath, -1, true);
+
+            function flattenFiles(item: RepositoryItem): FileItem[] {
+                if (item.type === "file") return [item];
+
+                if (item.type === "directory" && item.children) {
+                    return item.children.flatMap(flattenFiles);
+                }
+
+                return [];
+            }
+
+            return tree.flatMap(flattenFiles);
+        });
+}
+function saveFileContent() {
+    return protectedProcedure
+        .input(z.object({
+            repoId: z.string(),
+            path: z.string(),
+            content: z.string(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            const repoPath = await resolveRepoPathOrThrow(ctx.prisma, input.repoId);
+            const filePath = path.join(repoPath, input.path);
+            await writeFile(filePath, input.content, "utf-8");
+            return { success: true };
+        });
+}
+function loadOwnerAndRepoById() {
+    return protectedProcedure
+        .input(z.object({ repositoryId: z.string() }))
+        .query(async ({ ctx, input }) => {
+            const result = await resolveRepoOwnerAndName(ctx.prisma, input.repositoryId);
+
+            if (!result) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Repository not found",
+                });
+            }
+
+            return result; // { ownerName, repoName }
+        });
+}
+

@@ -7,6 +7,7 @@ import { Dispatch, SetStateAction, useState } from "react";
 
 import { CreateDirectoryDialog } from "@/components/editor/file/create-directory-dialog";
 import { CreateFileDialog } from "@/components/editor/file/create-file-dialog";
+import { CreateDiagramDialog } from "@/components/editor/file/create-diagram-dialog";
 import { FileTree } from "@/components/editor/file/file-tree";
 import { CloseButton } from "@/components/editor/navigation/close-button";
 import { FileExplorerControlButton } from "@/components/editor/sidebar-content/file-explorer/file-explorer-control-button";
@@ -74,6 +75,12 @@ export const FileExplorerTabContent = ({
                         setTree={setTreeAction}
                     />
                     <CreateFileDialog
+                        repositoryId={repository.id}
+                        buttonSize="icon"
+                        tree={tree}
+                        setTree={setTreeAction}
+                    />
+                    <CreateDiagramDialog
                         repositoryId={repository.id}
                         buttonSize="icon"
                         tree={tree}

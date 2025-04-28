@@ -12,7 +12,7 @@ interface OrganisationLayoutProps {
 }
 
 /**
- * Layout for organisation profile
+ * layout for organisation profile
  *
  * @param {OrganisationLayoutProps} props - Component props
  * @returns {Promise<ReactElement>} Organisation profile layout component
