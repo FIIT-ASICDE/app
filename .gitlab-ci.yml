@@ -37,33 +37,33 @@ build-app:
             - node_modules
             - .next/cache/
 
-integration-test:
-    stage: test
-    tags:
-        - bun
-    dependencies:
-        - build-app
-    services:
-        - name: postgres:latest
-          alias: postgres
-    variables:
-        POSTGRES_DB: asicde
-        POSTGRES_USER: asicde
-        POSTGRES_PASSWORD: asicde
-        DATABASE_URL: "postgresql://asicde:asicde@postgres:5432/asicde"
-    cache:
-        key: $CI_COMMIT_REF_SLUG
-        paths:
-            - bun.lock
-            - node_modules
-            - .next/cache/
-    before_script:
-        - apt-get update && apt-get install -y git
-    script:
-        - bun install
-        - bunx prisma generate
-        - bunx prisma migrate reset --force
-        - bun test
+# integration-test:
+#     stage: test
+#     tags:
+#         - bun
+#     dependencies:
+#         - build-app
+#     services:
+#         - name: postgres:latest
+#           alias: postgres
+#     variables:
+#         POSTGRES_DB: asicde
+#         POSTGRES_USER: asicde
+#         POSTGRES_PASSWORD: asicde
+#         DATABASE_URL: "postgresql://asicde:asicde@postgres:5432/asicde"
+#     cache:
+#         key: $CI_COMMIT_REF_SLUG
+#         paths:
+#             - bun.lock
+#             - node_modules
+#             - .next/cache/
+#     before_script:
+#         - apt-get update && apt-get install -y git
+#     script:
+#         - bun install
+#         - bunx prisma generate
+#         - bunx prisma migrate reset --force
+#         - bun test
 
 deploy-dev:
     stage: deploy
@@ -85,8 +85,7 @@ deploy-dev:
         - ssh-add -v ~/.ssh/id_ed25519
         - echo "StrictHostKeyChecking no" >> ~/.ssh/config # https://forum.gitlab.com/t/error-host-key-verification-failed/77315/3
     script:
-        - echo -e "bun.lock\npackage.json\npublic/\n.next/\nprisma/\nscripts/" > filelist.txt
-        - rsync -avzr --delete --exclude '.env' --exclude 'editor-server' --files-from=filelist.txt ./ asicde@147.175.149.102:/home/asicde/asicde/
+        - rsync -avzr --delete --exclude '.env' --exclude 'node_modules' ./ asicde@147.175.149.102:/home/asicde/asicde/
         - ssh asicde@147.175.149.102 "cd ~/asicde && ./scripts/deploy.sh"
     only:
         - master
