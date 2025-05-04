@@ -150,7 +150,7 @@ export const EditorNavigation = ({
         }
     };
 
-    const conf: string | null = null; // localStorage.getItem("configuration");
+    const conf: string | null = localStorage.getItem("configuration");
     const configuration: Configuration | undefined = conf
         ? JSON.parse(conf)
         : undefined;
