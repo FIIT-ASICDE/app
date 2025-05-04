@@ -16,7 +16,7 @@ lint:
         paths:
             - bun.lock
             - node_modules
-            - .next/cache/
+
 build-app:
     stage: build
     tags:
@@ -35,7 +35,7 @@ build-app:
         paths:
             - bun.lock
             - node_modules
-            - .next/cache/
+            - .next
 
 # integration-test:
 #     stage: test
