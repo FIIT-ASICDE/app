@@ -141,7 +141,7 @@ export const ConfigurationTabContent = ({
         } else if (selectedSimulationType === "verilatorSystemVerilog") {
             return files.filter(
                 (fileItem: FileItem | FileDisplayItem) =>
-                    fileItem.language === "system verilog",
+                    fileItem.language === "systemverilog",
             );
         } else {
             return files.filter(
