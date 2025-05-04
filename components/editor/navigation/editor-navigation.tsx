@@ -21,6 +21,7 @@ import {
     ReactElement,
     RefObject,
     SetStateAction,
+    useEffect,
     useState,
 } from "react";
 import type { ImperativePanelGroupHandle } from "react-resizable-panels";
@@ -150,10 +151,14 @@ export const EditorNavigation = ({
         }
     };
 
-    const conf: string | null = localStorage.getItem("configuration");
-    const configuration: Configuration | undefined = conf
-        ? JSON.parse(conf)
-        : undefined;
+    const [configuration, setConfiguration] = useState<
+        Configuration | undefined
+    >(undefined);
+
+    useEffect(() => {
+        const conf: string | null = localStorage.getItem("configuration");
+        setConfiguration(conf ? JSON.parse(conf) : undefined);
+    }, []);
 
     const getSimulationTooltipContent = () => {
         if (!configuration) {

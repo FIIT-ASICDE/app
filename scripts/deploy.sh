@@ -3,7 +3,6 @@
 set -e
 
 bun install --production
-bunx prisma generate
 
 if [ -z "$(pm2 pid asicde)" ]; then
 	pm2 start bun --name "asicde" --time -- start
