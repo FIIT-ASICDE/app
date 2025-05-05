@@ -35,6 +35,7 @@ import DynamicDiffEditor from "@/components/editor/diff-editor";
 import { EditorTabs } from "@/components/editor/editor-tabs";
 import { EditorNavigation } from "@/components/editor/navigation/editor-navigation";
 import { SidebarTabContent } from "@/components/editor/sidebar-content/sidebar-tab-content";
+import { findItemInTree } from "@/components/generic/generic";
 import {
     ResizableHandle,
     ResizablePanel,
@@ -281,6 +282,43 @@ export default function EditorPage({
                 fileDisplay,
             ]);
         }
+        setActiveFile(fileDisplay);
+        setShowDiffEditor(true);
+    };
+
+    const onOpenDiffEditorAction = (filePath: string) => {
+        const newActiveFile: RepositoryItem | undefined = findItemInTree(
+            tree,
+            filePath,
+        );
+
+        if (!newActiveFile) return;
+        if (
+            newActiveFile.type !== "file-display" &&
+            newActiveFile.type !== "file"
+        ) {
+            return;
+        }
+
+        const fileDisplay: FileDisplayItem = {
+            type: "file-display",
+            name: "Diff: " + newActiveFile.name,
+            absolutePath: "Diff: " + newActiveFile.absolutePath,
+            lastActivity: newActiveFile.lastActivity,
+            language: newActiveFile.language,
+        };
+
+        if (
+            !openFiles.some(
+                (file: FileDisplayItem) => file.absolutePath === filePath,
+            )
+        ) {
+            setOpenFiles((prevFiles: Array<FileDisplayItem>) => [
+                ...prevFiles,
+                fileDisplay,
+            ]);
+        }
+        setShowDiffEditor(false);
         setActiveFile(fileDisplay);
         setShowDiffEditor(true);
     };
