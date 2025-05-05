@@ -15,8 +15,8 @@ const eslintConfig = [
     // and issue https://github.com/microsoft/rushstack/issues/4965 which causes
     // the lint to fail. When it is fixed uncomment following two lines and pray
     // that the errors will be easily fixable
-    // ...compat.extends("next/core-web-vitals"),
-    // ...compat.extends("next/typescript"),
+    ...compat.extends("next/core-web-vitals"),
+    ...compat.extends("next/typescript"),
     ...compat.extends("prettier"),
     {
         rules: {
@@ -24,7 +24,7 @@ const eslintConfig = [
         },
     },
     {
-        ignores: ["node_modules", ".next/", "lib/prisma/**"],
+        ignores: ["node_modules", ".next/", "lib/prisma/**", "**/antlr/**"],
     },
 ];
 
