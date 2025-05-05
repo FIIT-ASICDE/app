@@ -35,13 +35,11 @@ import DynamicDiffEditor from "@/components/editor/diff-editor";
 import { EditorTabs } from "@/components/editor/editor-tabs";
 import { EditorNavigation } from "@/components/editor/navigation/editor-navigation";
 import { SidebarTabContent } from "@/components/editor/sidebar-content/sidebar-tab-content";
-import { findItemInTree } from "@/components/generic/generic";
 import {
     ResizableHandle,
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import DynamicDiffEditor from "@/components/editor/diff-editor";
 import { findItemInTree } from "@/components/generic/generic";
 import { symbolTableManager } from "@/antlr/SystemVerilog/utilities/monacoEditor/symbolTable";
 import DiagramPage from "@/app/[userslug]/[repositoryslug]/block-diagram/diagram-page";
@@ -291,28 +289,6 @@ export default function EditorPage({
         if (item.type === "file" || item.type === "file-display") {
             handleOpenFile(item);
         }
-
-        const fileDisplay: FileDisplayItem = {
-            type: "file-display",
-            name: item.name,
-            absolutePath: item.absolutePath,
-            lastActivity: item.lastActivity,
-            language: item.language,
-        };
-
-        if (
-            !openFiles.some(
-                (file: FileDisplayItem) =>
-                    file.absolutePath === item.absolutePath,
-            )
-        ) {
-            setOpenFiles((prevFiles: Array<FileDisplayItem>) => [
-                ...prevFiles,
-                fileDisplay,
-            ]);
-        }
-        setShowDiffEditor(false);
-        setActiveFile(fileDisplay);
     };
 
     const handleTabSwitch = (item: FileDisplayItem) => {
@@ -392,6 +368,7 @@ export default function EditorPage({
                     language: item.language,
                     lastActivity: item.lastActivity,
                 };
+                setShowDiffEditor(false);
                 setActiveFile(newFile);
                 return [...prev, newFile];
             } else {
@@ -433,6 +410,58 @@ export default function EditorPage({
         return "vs-light";
     };
 
+    const resolveMainContent = () => {
+        const diagramCondition: boolean = !!(activeFile && !showDiffEditor && isDiagramFile(activeFile));
+        const diffEditorCondition: boolean = !!(activeFile && showDiffEditor && !isDiagramFile(activeFile));
+        const editorCondition: boolean = !!(activeFile && !showDiffEditor && !isDiagramFile(activeFile));
+
+        switch (true) {
+            case diagramCondition:
+                return (
+                    <DiagramPage
+                        repository={repository}
+                        activeFile={activeFile!}
+                        tree={tree}
+                        setTree={setTree}
+                    />
+                );
+            case diffEditorCondition:
+                return (
+                    <DynamicDiffEditor
+                        filePath={
+                            repository.ownerName +
+                            "/" +
+                            repository.name +
+                            "/" +
+                            activeFile!.absolutePath
+                        }
+                        language={activeFile!.language}
+                        theme={editorTheme()}
+                    />
+                );
+            case editorCondition:
+                return (
+                    <DynamicEditor
+                        filePath={
+                            repository.ownerName +
+                            "/" +
+                            repository.name +
+                            "/" +
+                            activeFile!.absolutePath
+                        }
+                        language={activeFile!.language}
+                        theme={editorTheme()}
+                    />
+                );
+            default:
+                return (
+                    <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                        No file open
+                    </div>
+                );
+        }
+    };
+
     return (
         <div className="flex h-screen flex-row">
             <EditorNavigation
@@ -454,8 +483,8 @@ export default function EditorPage({
                     lastOpenedBottomPanelSize,
                     setLastOpenedBottomPanelSize,
                 }}
-                onStartSimulation={onStartSimulation}
-                onStartSynthesis={onStartSynthesis}
+                onStartSimulationAction={onStartSimulation}
+                onStartSynthesisAction={onStartSynthesis}
                 configuration={configuration}
                 setConfiguration={setConfiguration}
                 isGitRepo={repository.isGitRepo}
@@ -517,60 +546,7 @@ export default function EditorPage({
                                 handleTabSwitchAction={handleTabSwitch}
                                 handleCloseTabAction={handleCloseTab}
                             />
-                            {activeFile && !showDiffEditor ? (
-                                <DynamicEditor
-                                    filePath={
-                                        repository.ownerName +
-                                        "/" +
-                                        repository.name +
-                                        "/" +
-                                        activeFile.absolutePath
-                                    }
-                                    language={activeFile.language}
-                                    theme={
-                                        theme === "dark"
-                                            ? "vs-dark"
-                                            : "vs-light"
-                                    }
-                                />
-                            ) : activeFile && showDiffEditor ? (
-                                <DynamicDiffEditor
-                                    filePath={
-                                        repository.ownerName +
-                                        "/" +
-                                        repository.name +
-                                        "/" +
-                                        activeFile.absolutePath
-                                    }
-                                    language={activeFile.language}
-                                    theme={
-                                        theme === "dark"
-                                            ? "vs-dark"
-                                            : "vs-light"
-                                    }
-                                />
-                            {activeFile && Object.keys(activeFile).length > 0 ? (
-                                isDiagramFile(activeFile) ? (
-                                    <DiagramPage
-                                        repository={repository}
-                                        activeFile={activeFile}
-                                        tree={tree}
-                                        setTree={setTree}
-                                    />
-                                    ) : (
-                                        <DynamicEditor
-                                            filePath={editorFilePath}
-                                            onOpenFile={handleOpenFile}
-                                            onReady={handleEditorReady}
-                                            language={activeFile.language.replace(" ", "")}
-                                            theme={editorTheme()}
-                                        />
-                                    )
-                            ) : (
-                                <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                                    No file open
-                                </div>
-                            )}
+                            {resolveMainContent()}
                         </ResizablePanel>
                     </ResizablePanelGroup>
                 </ResizablePanel>
