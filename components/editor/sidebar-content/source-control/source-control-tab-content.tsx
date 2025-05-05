@@ -25,6 +25,7 @@ interface SourceControlTabContentProps {
     handleCloseSidebarAction: () => void;
     onCommitAction?: (data: z.infer<typeof commitSchema>) => Promise<void>;
     isLoading?: boolean;
+    onOpenDiffEditorAction: (filePath: string) => void;
 }
 
 /**
@@ -39,6 +40,7 @@ export const SourceControlTabContent = ({
     handleCloseSidebarAction,
     onCommitAction,
     isLoading,
+    onOpenDiffEditorAction,
 }: SourceControlTabContentProps): ReactElement => {
     const [changesSelected, setChangesSelected] = useState<
         Array<RepositoryItemChange>
@@ -132,6 +134,9 @@ export const SourceControlTabContent = ({
                                             changesSelected={changesSelected}
                                             setChangesSelected={
                                                 setChangesSelected
+                                            }
+                                            onOpenDiffEditorAction={
+                                                onOpenDiffEditorAction
                                             }
                                         />
                                     ),

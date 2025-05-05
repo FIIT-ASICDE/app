@@ -285,14 +285,16 @@ export const ConfigurationTabContent = ({
                                         }
                                     >
                                         {selectedSimulationTestBenchFile ? (
-                                            <div className="flex flex-row items-center justify-start gap-x-2">
+                                            <div className="flex flex-row items-center justify-start gap-x-2 text-foreground">
                                                 <FileIcon className="h-4 w-4 text-muted-foreground" />
                                                 {
                                                     selectedSimulationTestBenchFile.name
                                                 }
                                             </div>
                                         ) : (
-                                            "Select a TestBench file"
+                                            <span className="text-muted-foreground">
+                                                Select a TestBench file
+                                            </span>
                                         )}
                                     </Button>
                                 </div>
@@ -385,12 +387,14 @@ export const ConfigurationTabContent = ({
                                         }
                                     >
                                         {selectedSynthesisFile ? (
-                                            <div className="flex flex-row items-center justify-start gap-x-2">
+                                            <div className="flex flex-row items-center justify-start gap-x-2 text-foreground">
                                                 <FileIcon className="h-4 w-4 text-muted-foreground" />
                                                 {selectedSynthesisFile.name}
                                             </div>
                                         ) : (
-                                            "Select a Verilog file"
+                                            <span className="text-muted-foreground">
+                                                Select a Verilog file
+                                            </span>
                                         )}
                                     </Button>
                                 </div>

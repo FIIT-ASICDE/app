@@ -56,8 +56,8 @@ interface EditorNavigationProps {
         lastOpenedBottomPanelSize: number;
         setLastOpenedBottomPanelSize: Dispatch<SetStateAction<number>>;
     };
-    onStartSimulation: () => void;
-    onStartSynthesis: () => void;
+    onStartSimulationAction: () => void;
+    onStartSynthesisAction: () => void;
     configuration: Configuration | undefined;
     setConfiguration: Dispatch<SetStateAction<Configuration | undefined>>;
     isGitRepo?: boolean;
@@ -89,8 +89,8 @@ export const EditorNavigation = ({
         lastOpenedBottomPanelSize,
         setLastOpenedBottomPanelSize,
     },
-    onStartSimulation,
-    onStartSynthesis,
+    onStartSimulationAction,
+    onStartSynthesisAction,
     isGitRepo,
 }: EditorNavigationProps): ReactElement => {
     const { user } = useUser();
@@ -161,7 +161,7 @@ export const EditorNavigation = ({
     }, []);
 
     const getSimulationTooltipContent = () => {
-        if (!configuration) {
+        if (!configuration || !configuration.simulation) {
             return (
                 <p className="w-48 text-sm text-muted-foreground">
                     Simulation not yet configured
@@ -180,7 +180,7 @@ export const EditorNavigation = ({
                             toggleVerticalCollapse("simulation");
                             setActiveBottomPanelContent("simulation");
                         }
-                        onStartSimulation();
+                        onStartSimulationAction();
                     }}
                 >
                     Run simulation...
@@ -204,7 +204,7 @@ export const EditorNavigation = ({
     };
 
     const getSynthesisTooltipContent = () => {
-        if (!configuration) {
+        if (!configuration || !configuration.synthesis) {
             return (
                 <p className="w-48 text-sm text-muted-foreground">
                     Synthesis not yet configured
@@ -223,7 +223,7 @@ export const EditorNavigation = ({
                             toggleVerticalCollapse("synthesis");
                             setActiveBottomPanelContent("synthesis");
                         }
-                        onStartSynthesis();
+                        onStartSynthesisAction();
                     }}
                 >
                     Run synthesis...

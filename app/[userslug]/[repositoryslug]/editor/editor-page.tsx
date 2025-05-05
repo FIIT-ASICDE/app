@@ -31,6 +31,7 @@ import { useDebouncedCallback } from "use-debounce";
 import { z } from "zod";
 
 import { BottomPanelTabContent } from "@/components/editor/bottom-panel-content/bottom-panel-tab-content";
+import DynamicDiffEditor from "@/components/editor/diff-editor";
 import { EditorTabs } from "@/components/editor/editor-tabs";
 import { EditorNavigation } from "@/components/editor/navigation/editor-navigation";
 import { SidebarTabContent } from "@/components/editor/sidebar-content/sidebar-tab-content";
@@ -39,6 +40,7 @@ import {
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { findItemInTree } from "@/components/generic/generic";
 import { symbolTableManager } from "@/antlr/SystemVerilog/utilities/monacoEditor/symbolTable";
 import DiagramPage from "@/app/[userslug]/[repositoryslug]/block-diagram/diagram-page";
 
@@ -83,6 +85,8 @@ export default function EditorPage({
         useState<number>(20);
     const [activeFile, setActiveFile] = useState<FileDisplayItem | null>(null);
     const [openFiles, setOpenFiles] = useState<Array<FileDisplayItem>>([]);
+
+    const [showDiffEditor, setShowDiffEditor] = useState<boolean>(false);
 
     const [configuration, setConfiguration] = useState<
         Configuration | undefined
@@ -245,6 +249,42 @@ export default function EditorPage({
         }
     };
 
+    const onOpenDiffEditorAction = (filePath: string) => {
+        const newActiveFile: RepositoryItem | undefined = findItemInTree(
+            tree,
+            filePath,
+        );
+
+        if (!newActiveFile) return;
+        if (
+            newActiveFile.type !== "file-display" &&
+            newActiveFile.type !== "file"
+        ) {
+            return;
+        }
+
+        const fileDisplay: FileDisplayItem = {
+            type: "file-display",
+            name: "Diff: " + newActiveFile.name,
+            absolutePath: "Diff: " + newActiveFile.absolutePath,
+            lastActivity: newActiveFile.lastActivity,
+            language: newActiveFile.language,
+        };
+
+        if (
+            !openFiles.some(
+                (file: FileDisplayItem) => file.absolutePath === filePath,
+            )
+        ) {
+            setOpenFiles((prevFiles: Array<FileDisplayItem>) => [
+                ...prevFiles,
+                fileDisplay,
+            ]);
+        }
+        setShowDiffEditor(true);
+        setActiveFile(fileDisplay);
+    };
+
     const handleFileClick = (item: RepositoryItem) => {
         if (item.type === "file" || item.type === "file-display") {
             handleOpenFile(item);
@@ -252,6 +292,11 @@ export default function EditorPage({
     };
 
     const handleTabSwitch = (item: FileDisplayItem) => {
+        if (item.name.startsWith("Diff:")) {
+            setShowDiffEditor(true);
+        } else {
+            setShowDiffEditor(false);
+        }
         setActiveFile(item);
     };
 
@@ -323,6 +368,7 @@ export default function EditorPage({
                     language: item.language,
                     lastActivity: item.lastActivity,
                 };
+                setShowDiffEditor(false);
                 setActiveFile(newFile);
                 return [...prev, newFile];
             } else {
@@ -364,6 +410,58 @@ export default function EditorPage({
         return "vs-light";
     };
 
+    const resolveMainContent = () => {
+        const diagramCondition: boolean = !!(activeFile && !showDiffEditor && isDiagramFile(activeFile));
+        const diffEditorCondition: boolean = !!(activeFile && showDiffEditor && !isDiagramFile(activeFile));
+        const editorCondition: boolean = !!(activeFile && !showDiffEditor && !isDiagramFile(activeFile));
+
+        switch (true) {
+            case diagramCondition:
+                return (
+                    <DiagramPage
+                        repository={repository}
+                        activeFile={activeFile!}
+                        tree={tree}
+                        setTree={setTree}
+                    />
+                );
+            case diffEditorCondition:
+                return (
+                    <DynamicDiffEditor
+                        filePath={
+                            repository.ownerName +
+                            "/" +
+                            repository.name +
+                            "/" +
+                            activeFile!.absolutePath
+                        }
+                        language={activeFile!.language}
+                        theme={editorTheme()}
+                    />
+                );
+            case editorCondition:
+                return (
+                    <DynamicEditor
+                        filePath={
+                            repository.ownerName +
+                            "/" +
+                            repository.name +
+                            "/" +
+                            activeFile!.absolutePath
+                        }
+                        language={activeFile!.language}
+                        theme={editorTheme()}
+                    />
+                );
+            default:
+                return (
+                    <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                        No file open
+                    </div>
+                );
+        }
+    };
+
     return (
         <div className="flex h-screen flex-row">
             <EditorNavigation
@@ -385,8 +483,8 @@ export default function EditorPage({
                     lastOpenedBottomPanelSize,
                     setLastOpenedBottomPanelSize,
                 }}
-                onStartSimulation={onStartSimulation}
-                onStartSynthesis={onStartSynthesis}
+                onStartSimulationAction={onStartSimulation}
+                onStartSynthesisAction={onStartSynthesis}
                 configuration={configuration}
                 setConfiguration={setConfiguration}
                 isGitRepo={repository.isGitRepo}
@@ -433,6 +531,7 @@ export default function EditorPage({
                                 }}
                                 configuration={configuration}
                                 setConfigurationAction={setConfiguration}
+                                onOpenDiffEditorAction={onOpenDiffEditorAction}
                             />
                         </ResizablePanel>
 
@@ -447,28 +546,7 @@ export default function EditorPage({
                                 handleTabSwitchAction={handleTabSwitch}
                                 handleCloseTabAction={handleCloseTab}
                             />
-                            {activeFile && Object.keys(activeFile).length > 0 ? (
-                                isDiagramFile(activeFile) ? (
-                                    <DiagramPage
-                                        repository={repository}
-                                        activeFile={activeFile}
-                                        tree={tree}
-                                        setTree={setTree}
-                                    />
-                                    ) : (
-                                        <DynamicEditor
-                                            filePath={editorFilePath}
-                                            onOpenFile={handleOpenFile}
-                                            onReady={handleEditorReady}
-                                            language={activeFile.language.replace(" ", "")}
-                                            theme={editorTheme()}
-                                        />
-                                    )
-                            ) : (
-                                <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                                    No file open
-                                </div>
-                            )}
+                            {resolveMainContent()}
                         </ResizablePanel>
                     </ResizablePanelGroup>
                 </ResizablePanel>
