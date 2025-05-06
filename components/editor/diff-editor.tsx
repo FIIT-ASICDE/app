@@ -29,7 +29,6 @@ interface DynamicDiffEditorProps {
  * @returns {ReactElement} DiffEditor component
  */
 export default function DynamicDiffEditor({
-    filePath,
     language = "systemverilog",
     theme = "vs-dark",
 }: DynamicDiffEditorProps): ReactElement {

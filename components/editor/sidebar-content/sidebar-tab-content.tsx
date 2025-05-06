@@ -22,6 +22,8 @@ interface SidebarTabContentProps {
     setTreeAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
     selectedItem: RepositoryItem | undefined;
     setSelectedItemAction: Dispatch<SetStateAction<RepositoryItem | undefined>>;
+    expandedItems: Array<RepositoryItem>;
+    setExpandedItemsAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
     changes: Array<RepositoryItemChange>;
     handleCloseSidebarAction: () => void;
     onFileClick?: (item: RepositoryItem) => void;
@@ -47,6 +49,8 @@ export const SidebarTabContent = ({
     setTreeAction,
     selectedItem,
     setSelectedItemAction,
+    expandedItems,
+    setExpandedItemsAction,
     changes,
     handleCloseSidebarAction,
     onFileClick,
@@ -63,9 +67,13 @@ export const SidebarTabContent = ({
                     tree={tree}
                     selectedItem={selectedItem}
                     setSelectedItemAction={setSelectedItemAction}
+                    expandedItems={expandedItems}
+                    setExpandedItemsAction={setExpandedItemsAction}
                     setTreeAction={setTreeAction}
                     handleCloseSidebarAction={handleCloseSidebarAction}
                     onFileClick={onFileClick}
+                    configuration={configuration}
+                    setConfigurationAction={setConfigurationAction}
                 />
             )}
             {activeSidebarContent === "search" && (

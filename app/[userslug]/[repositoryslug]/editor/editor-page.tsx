@@ -104,6 +104,9 @@ export default function EditorPage({
     );
 
     const [selectedItem, setSelectedItem] = useState<RepositoryItem | undefined>(undefined);
+    const [expandedItems, setExpandedItems] = useState<Array<RepositoryItem>>(
+        [],
+    );
 
     const changes = api.git.changes.useQuery(
         { repoId: repository.id },
@@ -313,6 +316,7 @@ export default function EditorPage({
         }
         setActiveFile(item);
         setSelectedItem(item);
+        // TODO: expand all directories in which the item is nested
     };
 
     const { data: session } = api.editor.getSession.useQuery({
@@ -539,6 +543,8 @@ export default function EditorPage({
                                 setTreeAction={setTree}
                                 selectedItem={selectedItem}
                                 setSelectedItemAction={setSelectedItem}
+                                expandedItems={expandedItems}
+                                setExpandedItemsAction={setExpandedItems}
                                 changes={changes.data?.changes ?? []}
                                 handleCloseSidebarAction={handleCloseSidebar}
                                 onFileClick={handleFileClick}

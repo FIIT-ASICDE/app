@@ -3,7 +3,7 @@
 import { imgSrc } from "@/lib/client-file-utils";
 import { Repository, RepositoryItem } from "@/lib/types/repository";
 import { CopyMinus } from "lucide-react";
-import { Dispatch, ReactElement, SetStateAction, useState } from "react";
+import { Dispatch, ReactElement, SetStateAction } from "react";
 
 import { CreateDirectoryDialog } from "@/components/editor/file/create-directory-dialog";
 import { CreateFileDialog } from "@/components/editor/file/create-file-dialog";
@@ -16,15 +16,20 @@ import { DynamicTitle } from "@/components/generic/dynamic-title";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Configuration } from "@/lib/types/editor";
 
 interface FileExplorerTabContentProps {
     repository: Repository;
     tree: Array<RepositoryItem>;
     selectedItem: RepositoryItem | undefined;
     setSelectedItemAction: Dispatch<SetStateAction<RepositoryItem | undefined>>;
+    expandedItems: Array<RepositoryItem>;
+    setExpandedItemsAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
     setTreeAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
     handleCloseSidebarAction: () => void;
     onFileClick?: (item: RepositoryItem) => void;
+    configuration: Configuration | undefined;
+    setConfigurationAction: Dispatch<SetStateAction<Configuration | undefined>>;
 }
 
 /**
@@ -38,14 +43,14 @@ export const FileExplorerTabContent = ({
     tree,
     selectedItem,
     setSelectedItemAction,
+    expandedItems,
+    setExpandedItemsAction,
     setTreeAction,
     handleCloseSidebarAction,
     onFileClick,
+    configuration,
+    setConfigurationAction,
 }: FileExplorerTabContentProps): ReactElement => {
-    const [expandedItems, setExpandedItems] = useState<Array<RepositoryItem>>(
-        [],
-    );
-
     return (
         <div className="relative flex h-full w-full flex-col">
             <header className="flex h-[88px] w-full flex-col gap-y-3 p-4 pb-2">
@@ -72,18 +77,21 @@ export const FileExplorerTabContent = ({
                     <CreateDirectoryDialog
                         repositoryId={repository.id}
                         buttonSize="icon"
+                        parentItem={selectedItem}
                         tree={tree}
                         setTree={setTreeAction}
                     />
                     <CreateFileDialog
                         repositoryId={repository.id}
                         buttonSize="icon"
+                        parentItem={selectedItem}
                         tree={tree}
                         setTree={setTreeAction}
                     />
                     <CreateDiagramDialog
                         repositoryId={repository.id}
                         buttonSize="icon"
+                        parentItem={selectedItem}
                         tree={tree}
                         setTree={setTreeAction}
                     />
@@ -91,7 +99,7 @@ export const FileExplorerTabContent = ({
                         icon={CopyMinus}
                         tooltipContent="Collapse all"
                         onClick={() => {
-                            setExpandedItems([]);
+                            setExpandedItemsAction([]);
                         }}
                     />
                 </div>
@@ -110,7 +118,9 @@ export const FileExplorerTabContent = ({
                             selectedItem={selectedItem}
                             setSelectedItemAction={setSelectedItemAction}
                             expandedItems={expandedItems}
-                            setExpandedItemsAction={setExpandedItems}
+                            setExpandedItemsAction={setExpandedItemsAction}
+                            configuration={configuration}
+                            setConfigurationAction={setConfigurationAction}
                         />
                     ) : (
                         <Label className="text-sm text-muted-foreground">

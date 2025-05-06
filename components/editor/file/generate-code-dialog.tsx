@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { generateSystemVerilogCode } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/code-generation/system-verilog-generation/system-verilog-code-generator";
 import { generateVHDLCode } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/code-generation/vhdl-generation/vhdl-code-generator";
 import { dia, shapes } from '@joint/core';
+import { CodeXml, Loader2 } from "lucide-react";
 interface GenerateCodeDialogProps {
     repositoryId: string;
     diagramFile: RepositoryItem;
@@ -26,11 +27,11 @@ interface SerializedDiagram {
 
 
 export const GenerateCodeDialog = ({
-                                       repositoryId,
-                                       diagramFile,
-                                       tree,
-                                       setTree,
-                                   }: GenerateCodeDialogProps) => {
+    repositoryId,
+    diagramFile,
+    tree,
+    setTree,
+}: GenerateCodeDialogProps) => {
     const [open, setOpen] = useState(false);
     const saveFileMutation = api.repo.saveFileContent.useMutation();
 
@@ -170,25 +171,34 @@ export const GenerateCodeDialog = ({
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger className="flex w-full cursor-default flex-row items-center justify-between rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent">
-                Generate Code
+                Generate code
+                <CodeXml className="h-4 w-4 text-muted-foreground" />
             </DialogTrigger>
             <DialogContent className="max-w-md">
                 <DialogHeader>
-                    <DialogTitle className="text-center">Generate Code</DialogTitle>
+                    <DialogTitle className="text-center">Generate code</DialogTitle>
                 </DialogHeader>
                 <div className="flex flex-col gap-2 mt-4">
                     <Button
+                        variant="default"
+                        size="default"
                         onClick={handleSystemVerilogGenerate}
                         disabled={isFileLoading || !!(lockedLanguage && lockedLanguage !== "SystemVerilog")}
+                        className="hover:bg-primary-button-hover"
                     >
-                        {isFileLoading ? "Loading..." : "Generate SystemVerilog Code"}
+                        {isFileLoading ? <Loader2 className="text-muted-foreground animate-spin" /> : <CodeXml />}
+                        {isFileLoading ? "Loading..." : "Generate SystemVerilog code"}
                     </Button>
 
                     <Button
+                        variant="default"
+                        size="default"
                         onClick={handleVHDLGenerate}
                         disabled={isFileLoading || !!(lockedLanguage && lockedLanguage !== "VHDL")}
+                        className="hover:bg-primary-button-hover"
                     >
-                        {isFileLoading ? "Loading..." : "Generate VHDL Code"}
+                        {isFileLoading ? <Loader2 className="text-muted-foreground animate-spin" /> : <CodeXml />}
+                        {isFileLoading ? "Loading..." : "Generate VHDL code"}
                     </Button>
                 </div>
             </DialogContent>

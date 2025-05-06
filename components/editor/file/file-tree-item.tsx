@@ -20,6 +20,7 @@ import {
     handleToggle,
     sortTree,
 } from "@/components/generic/generic";
+import { Configuration } from "@/lib/types/editor";
 
 interface FileTreeItemProps {
     repositoryId: string;
@@ -39,6 +40,8 @@ interface FileTreeItemProps {
         targetItem: RepositoryItem,
     ) => void;
     onDragOverItem?: () => void;
+    configuration: Configuration | undefined;
+    setConfigurationAction: Dispatch<SetStateAction<Configuration | undefined>>;
 }
 
 /**
@@ -62,6 +65,8 @@ export const FileTreeItem = ({
     setHoveredItemAction,
     onMoveItem,
     onDragOverItem,
+    configuration,
+    setConfigurationAction,
 }: FileTreeItemProps): ReactElement => {
     const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
     const [isDragOver, setIsDragOver] = useState<boolean>(false);
@@ -143,12 +148,13 @@ export const FileTreeItem = ({
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                onClick={() => {
+                onClick={(event) => {
+                    event.stopPropagation();
                     setSelectedItemAction(item);
                     onItemClick?.(item);
                 }}
-                onContextMenu={(e) => {
-                    e.preventDefault();
+                onContextMenu={(event) => {
+                    event.preventDefault();
                     setSelectedItemAction(item);
                     setHoveredItemAction(item);
                     setDropdownOpen(true);
@@ -200,6 +206,8 @@ export const FileTreeItem = ({
                             setDropdownOpen(false);
                         }}
                         onOpenFile={onItemClick}
+                        configuration={configuration}
+                        setConfigurationAction={setConfigurationAction}
                     />
                 )}
             </div>
@@ -249,6 +257,8 @@ export const FileTreeItem = ({
                                     setHoveredItemAction={setHoveredItemAction}
                                     onMoveItem={onMoveItem}
                                     onDragOverItem={onDragOverItem}
+                                    configuration={configuration}
+                                    setConfigurationAction={setConfigurationAction}
                                 />
                             ),
                         )}

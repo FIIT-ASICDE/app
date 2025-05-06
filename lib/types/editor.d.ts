@@ -38,11 +38,20 @@ interface SynthesisOutput {
     type: SimulationOutputType;
     content: string;
 }
-export type SynthesisTab = "all" | "errors" | "lastSynthesis";
+export type SynthesisTab =
+    | "all"
+    | "errors"
+    | "lastSynthesis";
 
-export type SimulationTab = "all" | "errors" | "lastSimulation";
+export type SimulationTab =
+    | "all"
+    | "errors"
+    | "lastSimulation";
 
-type SimulationOutputType = "info" | "error" | "warning";
+type SimulationOutputType =
+    | "info"
+    | "error"
+    | "warning";
 
 interface SimulationOutput {
     type: SimulationOutputType;

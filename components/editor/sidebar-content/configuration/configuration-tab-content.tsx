@@ -184,8 +184,7 @@ export const ConfigurationTabContent = ({
         if (selectedSimulationType !== configuration?.simulation?.type) return true;
         if (selectedSimulationTestBenchFile?.absolutePath !== configuration?.simulation?.testBench?.absolutePath) return true;
         if (selectedSynthesisType !== configuration?.synthesis?.type) return true;
-        if (selectedSynthesisFile?.absolutePath !== configuration?.synthesis?.file?.absolutePath) return true;
-        return false;
+        return selectedSynthesisFile?.absolutePath !== configuration?.synthesis?.file?.absolutePath;
     };
 
     const saveConfiguration = () => {
