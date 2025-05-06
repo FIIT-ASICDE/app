@@ -98,13 +98,6 @@ export const FileTree = ({
     const sortedTree: Array<RepositoryItem> = sortTree([...tree]);
 
     const handleMoveItem = (source: RepositoryItem, target: RepositoryItem) => {
-        console.log(
-            "handleMoveItem called with source:",
-            source.absolutePath,
-            "target:",
-            target.absolutePath,
-        );
-
         if (source && target) {
             setSourceItem(source);
             setTargetItem(target);
@@ -193,8 +186,6 @@ export const FileTree = ({
                     tree={tree}
                     setTreeAction={setTreeAction}
                     onItemClick={(repoItem: RepositoryItem) => {
-                        console.log("2clicked on:", repoItem);
-
                         if (
                             repoItem.type === "directory" ||
                             repoItem.type === "directory-display"

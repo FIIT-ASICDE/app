@@ -143,8 +143,10 @@ export const FileTreeItem = ({
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                onClick={() => setSelectedItemAction(item)}
-                onDoubleClick={() => onItemClick?.(item)}
+                onClick={() => {
+                    setSelectedItemAction(item);
+                    onItemClick?.(item);
+                }}
                 onContextMenu={(e) => {
                     e.preventDefault();
                     setSelectedItemAction(item);
@@ -220,8 +222,6 @@ export const FileTreeItem = ({
                                     tree={tree}
                                     setTreeAction={setTreeAction}
                                     onItemClick={(repoItem: RepositoryItem) => {
-                                        console.log("2clicked on:", repoItem);
-
                                         if (
                                             repoItem.type === "directory" ||
                                             repoItem.type ===
