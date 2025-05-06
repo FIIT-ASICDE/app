@@ -20,18 +20,18 @@ export type SimulationType =
 export type SynthesisType = "yosys";
 
 type SimulationConfiguration = {
-    type: SimulationType;
-    testBench: FileItem | FileDisplayItem;
+    type: SimulationType | undefined;
+    testBench: FileItem | FileDisplayItem | undefined;
 };
 
 type SynthesisConfiguration = {
-    type: SynthesisType;
-    file: FileItem | FileDisplayItem;
+    type: SynthesisType | undefined;
+    file: FileItem | FileDisplayItem | undefined;
 };
 
 export type Configuration = {
-    simulation: SimulationConfiguration;
-    synthesis: SynthesisConfiguration;
+    simulation: SimulationConfiguration | undefined;
+    synthesis: SynthesisConfiguration | undefined;
 };
 
 interface SynthesisOutput {

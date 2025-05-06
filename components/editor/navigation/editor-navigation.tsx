@@ -13,7 +13,7 @@ import {
     GitCommitHorizontal,
     Play,
     PlayCircle,
-    SearchIcon,
+    SearchIcon
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -21,7 +21,6 @@ import {
     ReactElement,
     RefObject,
     SetStateAction,
-    useEffect,
     useState,
 } from "react";
 import type { ImperativePanelGroupHandle } from "react-resizable-panels";
@@ -59,7 +58,6 @@ interface EditorNavigationProps {
     onStartSimulationAction: () => void;
     onStartSynthesisAction: () => void;
     configuration: Configuration | undefined;
-    setConfiguration: Dispatch<SetStateAction<Configuration | undefined>>;
     isGitRepo?: boolean;
     repository: Repository;
 }
@@ -91,6 +89,7 @@ export const EditorNavigation = ({
     },
     onStartSimulationAction,
     onStartSynthesisAction,
+    configuration,
     isGitRepo,
 }: EditorNavigationProps): ReactElement => {
     const { user } = useUser();
@@ -151,30 +150,33 @@ export const EditorNavigation = ({
         }
     };
 
-    const [configuration, setConfiguration] = useState<
-        Configuration | undefined
-    >(undefined);
-
-    useEffect(() => {
-        const conf: string | null = localStorage.getItem("configuration");
-        setConfiguration(conf ? JSON.parse(conf) : undefined);
-    }, []);
-
     const getSimulationTooltipContent = () => {
-        if (!configuration || !configuration.simulation) {
+        if (!configuration || !configuration.simulation || !configuration.simulation.type || !configuration.simulation.testBench) {
             return (
-                <p className="w-48 text-sm text-muted-foreground">
-                    Simulation not yet configured
+                <p className="flex flex-row items-center justify-center w-fit gap-x-3">
+                    <span className="text-sm text-muted-foreground">Simulation not yet configured</span>
+                    <Button
+                        variant="outline"
+                        size="default"
+                        onClick={() => {
+                            if (activeSidebarContent !== "configuration" || horizontalCollapsed) {
+                                toggleHorizontalCollapse("configuration");
+                                setActiveSidebarContent("configuration");
+                            }
+                        }}
+                    >
+                        <Cog />
+                        Configure
+                    </Button>
                 </p>
             );
         }
 
         return (
-            <div className="flex w-48 flex-col items-center gap-y-2">
+            <div className="flex w-fit flex-col items-center gap-y-2">
                 <Button
-                    variant="link"
-                    size="sm"
-                    className="w-full px-2 text-foreground"
+                    variant="outline"
+                    size="default"
                     onClick={() => {
                         if (activeBottomPanelContent !== "simulation") {
                             toggleVerticalCollapse("simulation");
@@ -182,8 +184,9 @@ export const EditorNavigation = ({
                         }
                         onStartSimulationAction();
                     }}
+                    disabled={!configuration || !configuration.simulation || !configuration.simulation.type || !configuration.simulation.testBench}
                 >
-                    Run simulation...
+                    Run simulation
                 </Button>
                 <div className="flex w-full flex-col gap-y-1">
                     <div className="flex w-full flex-row items-center justify-between gap-x-2 text-sm">
@@ -196,7 +199,7 @@ export const EditorNavigation = ({
                         <span className="text-muted-foreground">
                             TestBench file:
                         </span>
-                        <span>{configuration.simulation.testBench.name}</span>
+                        <span>{configuration?.simulation?.testBench?.name ?? "N/A"}</span>
                     </div>
                 </div>
             </div>
@@ -204,20 +207,32 @@ export const EditorNavigation = ({
     };
 
     const getSynthesisTooltipContent = () => {
-        if (!configuration || !configuration.synthesis) {
+        if (!configuration || !configuration.synthesis || !configuration.synthesis.type || !configuration.synthesis.file) {
             return (
-                <p className="w-48 text-sm text-muted-foreground">
-                    Synthesis not yet configured
+                <p className="flex flex-row items-center justify-center w-fit gap-x-3">
+                    <span className="text-sm text-muted-foreground">Synthesis not yet configured</span>
+                    <Button
+                        variant="outline"
+                        size="default"
+                        onClick={() => {
+                            if (activeSidebarContent !== "configuration" || horizontalCollapsed) {
+                                toggleHorizontalCollapse("configuration");
+                                setActiveSidebarContent("configuration");
+                            }
+                        }}
+                    >
+                        <Cog />
+                        Configure
+                    </Button>
                 </p>
             );
         }
 
         return (
-            <div className="flex w-48 flex-col items-center gap-y-2">
+            <div className="flex w-fit flex-col items-center gap-y-2">
                 <Button
-                    variant="link"
-                    size="sm"
-                    className="w-full px-2 text-foreground"
+                    variant="outline"
+                    size="default"
                     onClick={() => {
                         if (activeBottomPanelContent !== "synthesis") {
                             toggleVerticalCollapse("synthesis");
@@ -225,8 +240,9 @@ export const EditorNavigation = ({
                         }
                         onStartSynthesisAction();
                     }}
+                    disabled={!configuration || !configuration.synthesis || !configuration.synthesis.type || !configuration.synthesis.file}
                 >
-                    Run synthesis...
+                    Run synthesis
                 </Button>
                 <div className="flex w-full flex-col gap-y-1">
                     <div className="flex w-full flex-row items-center justify-between gap-x-2 text-sm">
@@ -237,7 +253,7 @@ export const EditorNavigation = ({
                     </div>
                     <div className="flex w-full flex-row items-center justify-between gap-x-2 text-sm">
                         <span className="text-muted-foreground">File:</span>
-                        <span>{configuration.synthesis.file.name}</span>
+                        <span>{configuration.synthesis.file.name ?? "N/A"}</span>
                     </div>
                 </div>
             </div>

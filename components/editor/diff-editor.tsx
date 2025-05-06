@@ -1,6 +1,5 @@
 "use client";
 
-import { api } from "@/lib/trpc/react";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { ReactElement, useEffect, useRef } from "react";
 

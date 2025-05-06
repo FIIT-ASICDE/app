@@ -160,45 +160,50 @@ export default function EditorPage({
     );
 
     const onStartSimulation = () => {
-        // TODO: adam start simulation
-        console.log(configuration?.simulation.type);
-        console.log(configuration?.simulation.testBench);
+        if (
+            configuration &&
+            configuration.simulation &&
+            configuration.simulation.type &&
+            configuration.simulation.testBench
+        ) {
+            // TODO: adam start simulation
 
-        // simulateMutation.mutate({
-        //     repoId: repository.id,
-        //     testbenchPath: selectedTestbenchFile.absolutePath,
-        //     svPath: selectedSvFile.absolutePath
-        // });
+            // simulateMutation.mutate({
+            //     repoId: repository.id,
+            //     testbenchPath: selectedTestbenchFile.absolutePath,
+            //     svPath: selectedSvFile.absolutePath
+            // });
 
-        console.log(
-            "Starting simulation with type: " +
-                configuration?.simulation.type +
+            console.log(
+                "Starting simulation with type: " +
+                configuration.simulation.type +
                 " and file: " +
-                configuration?.simulation.testBench,
-        );
+                configuration.simulation.testBench?.absolutePath,
+            );
 
-        if (configuration?.simulation.type === "verilatorC++") {
-            const newInput = {
-                repoId: repository.id,
-                testbenchPath: configuration?.simulation.testBench.absolutePath,
-            };
-            setVerilatorCppInput(newInput); // <- toto spustí subscription
-        }
+            if (configuration.simulation.type === "verilatorC++") {
+                const newInput = {
+                    repoId: repository.id,
+                    testbenchPath: configuration.simulation.testBench.absolutePath,
+                };
+                setVerilatorCppInput(newInput); // <- toto spustí subscription
+            }
 
-        if (configuration?.simulation.type === "verilatorSystemVerilog") {
-            const newInput = {
-                repoId: repository.id,
-                testbenchPath: configuration?.simulation.testBench.absolutePath,
-            };
-            setVerilatorSvInput(newInput); // <- toto spustí subscription
-        }
+            if (configuration.simulation.type === "verilatorSystemVerilog") {
+                const newInput = {
+                    repoId: repository.id,
+                    testbenchPath: configuration.simulation.testBench.absolutePath,
+                };
+                setVerilatorSvInput(newInput); // <- toto spustí subscription
+            }
 
-        if (configuration?.simulation.type === "icarusVerilog") {
-            const newInput = {
-                repoId: repository.id,
-                testbenchPath: configuration?.simulation.testBench.absolutePath,
-            };
-            setIcarusInput(newInput); // <- toto spustí subscription
+            if (configuration?.simulation.type === "icarusVerilog") {
+                const newInput = {
+                    repoId: repository.id,
+                    testbenchPath: configuration.simulation.testBench.absolutePath,
+                };
+                setIcarusInput(newInput); // <- toto spustí subscription
+            }
         }
     };
 
@@ -234,20 +239,27 @@ export default function EditorPage({
     });
 
     const onStartSynthesis = () => {
-        // TODO: maxo start synthesis
-        console.log(
-            "Starting synthesis with type: " +
-                configuration?.synthesis.type +
+        if (
+            configuration &&
+            configuration.synthesis &&
+            configuration.synthesis.type &&
+            configuration.synthesis.file
+        ) {
+            // TODO: maxo start synthesis
+            console.log(
+                "Starting synthesis with type: " +
+                configuration.synthesis.type +
                 " and file: " +
-                configuration?.synthesis.file.absolutePath,
-        );
+                configuration.synthesis.file.absolutePath,
+            );
 
-        if (configuration?.synthesis.type === "yosys") {
-            const input = {
-                repoId: repository.id,
-                verilogFilePath: configuration.synthesis.file.absolutePath,
-            };
-            setYosysInput(input);
+            if (configuration.synthesis.type === "yosys") {
+                const input = {
+                    repoId: repository.id,
+                    verilogFilePath: configuration.synthesis.file.absolutePath,
+                };
+                setYosysInput(input);
+            }
         }
     };
 
@@ -489,7 +501,6 @@ export default function EditorPage({
                 onStartSimulationAction={onStartSimulation}
                 onStartSynthesisAction={onStartSynthesis}
                 configuration={configuration}
-                setConfiguration={setConfiguration}
                 isGitRepo={repository.isGitRepo}
                 repository={repository}
             />
@@ -504,7 +515,7 @@ export default function EditorPage({
                     }
                 }}
             >
-                <ResizablePanel defaultSize={80}>
+                <ResizablePanel defaultSize={80} minSize={15}>
                     <ResizablePanelGroup
                         direction="horizontal"
                         ref={horizontalGroupRef}
@@ -517,6 +528,7 @@ export default function EditorPage({
                     >
                         <ResizablePanel
                             defaultSize={20}
+                            minSize={15}
                             collapsible
                             collapsedSize={0}
                         >
@@ -542,7 +554,7 @@ export default function EditorPage({
 
                         <ResizableHandle />
 
-                        <ResizablePanel defaultSize={80}>
+                        <ResizablePanel defaultSize={80} minSize={15}>
                             <EditorTabs
                                 openFiles={openFiles}
                                 setOpenFilesAction={setOpenFiles}
@@ -558,7 +570,7 @@ export default function EditorPage({
 
                 <ResizableHandle />
 
-                <ResizablePanel defaultSize={20} collapsible collapsedSize={0}>
+                <ResizablePanel defaultSize={20} collapsible collapsedSize={0} minSize={15}>
                     <BottomPanelTabContent
                         activeBottomPanelContent={activeBottomPanelContent}
                         handleCloseBottomPanel={handleCloseBottomPanel}
