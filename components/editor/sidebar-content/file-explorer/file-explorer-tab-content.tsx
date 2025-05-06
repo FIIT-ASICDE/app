@@ -3,7 +3,7 @@
 import { imgSrc } from "@/lib/client-file-utils";
 import { Repository, RepositoryItem } from "@/lib/types/repository";
 import { CopyMinus } from "lucide-react";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, ReactElement, SetStateAction, useState } from "react";
 
 import { CreateDirectoryDialog } from "@/components/editor/file/create-directory-dialog";
 import { CreateFileDialog } from "@/components/editor/file/create-file-dialog";
@@ -20,6 +20,8 @@ import { Separator } from "@/components/ui/separator";
 interface FileExplorerTabContentProps {
     repository: Repository;
     tree: Array<RepositoryItem>;
+    selectedItem: RepositoryItem | undefined;
+    setSelectedItemAction: Dispatch<SetStateAction<RepositoryItem | undefined>>;
     setTreeAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
     handleCloseSidebarAction: () => void;
     onFileClick?: (item: RepositoryItem) => void;
@@ -34,13 +36,12 @@ interface FileExplorerTabContentProps {
 export const FileExplorerTabContent = ({
     repository,
     tree,
+    selectedItem,
+    setSelectedItemAction,
     setTreeAction,
     handleCloseSidebarAction,
     onFileClick,
-}: FileExplorerTabContentProps) => {
-    const [selectedItem, setSelectedItem] = useState<
-        RepositoryItem | undefined
-    >(undefined);
+}: FileExplorerTabContentProps): ReactElement => {
     const [expandedItems, setExpandedItems] = useState<Array<RepositoryItem>>(
         [],
     );
@@ -107,7 +108,7 @@ export const FileExplorerTabContent = ({
                             setTreeAction={setTreeAction}
                             onItemClick={onFileClick}
                             selectedItem={selectedItem}
-                            setSelectedItemAction={setSelectedItem}
+                            setSelectedItemAction={setSelectedItemAction}
                             expandedItems={expandedItems}
                             setExpandedItemsAction={setExpandedItems}
                         />

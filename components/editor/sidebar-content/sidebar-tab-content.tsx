@@ -20,6 +20,8 @@ interface SidebarTabContentProps {
     repository: Repository;
     tree: Array<RepositoryItem>;
     setTreeAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
+    selectedItem: RepositoryItem | undefined;
+    setSelectedItemAction: Dispatch<SetStateAction<RepositoryItem | undefined>>;
     changes: Array<RepositoryItemChange>;
     handleCloseSidebarAction: () => void;
     onFileClick?: (item: RepositoryItem) => void;
@@ -43,6 +45,8 @@ export const SidebarTabContent = ({
     repository,
     tree,
     setTreeAction,
+    selectedItem,
+    setSelectedItemAction,
     changes,
     handleCloseSidebarAction,
     onFileClick,
@@ -57,6 +61,8 @@ export const SidebarTabContent = ({
                 <FileExplorerTabContent
                     repository={repository}
                     tree={tree}
+                    selectedItem={selectedItem}
+                    setSelectedItemAction={setSelectedItemAction}
                     setTreeAction={setTreeAction}
                     handleCloseSidebarAction={handleCloseSidebarAction}
                     onFileClick={onFileClick}

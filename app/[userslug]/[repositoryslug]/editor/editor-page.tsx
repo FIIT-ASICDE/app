@@ -103,6 +103,8 @@ export default function EditorPage({
         repository.tree ?? [],
     );
 
+    const [selectedItem, setSelectedItem] = useState<RepositoryItem | undefined>(undefined);
+
     const changes = api.git.changes.useQuery(
         { repoId: repository.id },
         {
@@ -298,6 +300,7 @@ export default function EditorPage({
             setShowDiffEditor(false);
         }
         setActiveFile(item);
+        setSelectedItem(item);
     };
 
     const { data: session } = api.editor.getSession.useQuery({
@@ -522,6 +525,8 @@ export default function EditorPage({
                                 repository={repository}
                                 tree={tree}
                                 setTreeAction={setTree}
+                                selectedItem={selectedItem}
+                                setSelectedItemAction={setSelectedItem}
                                 changes={changes.data?.changes ?? []}
                                 handleCloseSidebarAction={handleCloseSidebar}
                                 onFileClick={handleFileClick}

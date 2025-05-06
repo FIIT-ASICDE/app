@@ -269,6 +269,7 @@ export const EditorNavigation = ({
                         icon={File}
                         tooltip="File Explorer"
                         activeSidebarContent={activeSidebarContent}
+                        sidebarOpen={!horizontalCollapsed}
                         onClick={() => {
                             toggleHorizontalCollapse("fileExplorer");
                             setActiveSidebarContent("fileExplorer");
@@ -279,6 +280,7 @@ export const EditorNavigation = ({
                         icon={SearchIcon}
                         tooltip="Search"
                         activeSidebarContent={activeSidebarContent}
+                        sidebarOpen={!horizontalCollapsed}
                         onClick={() => {
                             toggleHorizontalCollapse("search");
                             setActiveSidebarContent("search");
@@ -290,6 +292,7 @@ export const EditorNavigation = ({
                             icon={GitCommitHorizontal}
                             tooltip="Source Control"
                             activeSidebarContent={activeSidebarContent}
+                            sidebarOpen={!horizontalCollapsed}
                             onClick={() => {
                                 toggleHorizontalCollapse("sourceControl");
                                 setActiveSidebarContent("sourceControl");
@@ -301,6 +304,7 @@ export const EditorNavigation = ({
                         icon={Cog}
                         tooltip="Configuration"
                         activeSidebarContent={activeSidebarContent}
+                        sidebarOpen={!horizontalCollapsed}
                         onClick={() => {
                             toggleHorizontalCollapse("configuration");
                             setActiveSidebarContent("configuration");
