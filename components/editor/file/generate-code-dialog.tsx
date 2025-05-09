@@ -76,16 +76,13 @@ export const GenerateCodeDialog = ({
             toast.error("Failed to load diagram content");
             return;
         }
-
         try {
             const serialized = JSON.parse(fileData.content as string);
             const graph = loadGraphFromSerializedBD(serialized);
-
             const fileName = diagramFile.name.replace(/\.bd$/, ".sv");
             const moduleName = diagramFile.name.replace(/\.bd$/, "");
             const filePath = diagramFile.absolutePath.replace(/[^/]+$/, fileName);
             const code = generateSystemVerilogCode(graph, moduleName);
-
             saveFileMutation.mutate({
                 repoId: repositoryId,
                 path: filePath,

@@ -653,11 +653,7 @@ const PropertiesPanel = () => {
             setShowErrorNotification(true);
             return;
         }
-
         setShowSaveNotification(true);
-
-
-
         handleElementChange();
     };
 

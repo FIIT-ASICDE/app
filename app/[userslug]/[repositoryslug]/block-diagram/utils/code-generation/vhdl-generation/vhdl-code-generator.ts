@@ -60,7 +60,11 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
             entry.name === signal && entry.connectedTo === netName
         );
         if (bitSelectEntry) {
-            return `${bitSelectEntry.connectedFrom}(${bitSelectEntry.endBit} downto ${bitSelectEntry.startBit})`;
+            if (bitSelectEntry.startBit === bitSelectEntry.endBit) {
+                return `${bitSelectEntry.connectedFrom}(${bitSelectEntry.startBit})`;
+            } else {
+                return `${bitSelectEntry.connectedFrom}(${bitSelectEntry.endBit} DOWNTO ${bitSelectEntry.startBit})`;
+            }
         }
         return signal;
     }
@@ -217,6 +221,31 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
 
         code += `    signal ${netName} : ${netName}_type;\n\n`;
     });
+    registerCells.forEach(cell => {
+        const qKey = `${cell.id}:q`;
+        const qInvertedKey = `${cell.id}:qInverted`;
+
+        const connectedQ = outputConnectionMap[qKey] || [];
+        const connectedQInv = outputConnectionMap[qInvertedKey] || [];
+
+        const isConnectedToOutput = [...connectedQ, ...connectedQInv].some(signal =>
+            outputCells.some(outCell => getPortName(outCell) === signal)
+        );
+
+        if (!isConnectedToOutput) {
+            const netName = getPortName(cell);
+            elementNames[cell.id] = netName;
+            const isStruct = cell.attributes.isStruct;
+            const structPkg = cell.attributes.structPackage;
+            const structType = cell.attributes.structTypeDef;
+            const dataWidth = cell.attributes.bandwidth;
+            if (isStruct && structPkg && structType) {
+                code += `${structPkg}::${structType} ${netName};\n`;
+            } else {
+                code += `    SIGNAL ${netName} : STD_LOGIC_VECTOR(${dataWidth} DOWNTO 0);\n`;
+            }
+        }
+    });
 
     code += `\n\n`;
     code += `BEGIN\n`;
@@ -269,7 +298,7 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
 
         const inputSignals = inputPorts.map((p: CustomPort) => {
             const key = `${cell.id}:${p.id}`;
-            return connectionMap[key] ? connectionMap[key].join(` ${operatorMapVHDL[type]} `) : "'0'";
+            return connectionMap[key] ? getBitSelectedSignal(connectionMap[key][0], netName)  : "'0'";
         });
         console.log(inputSignals);
 
@@ -291,7 +320,7 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
 
         const inputSignals = inputPorts.map((p: CustomPort) => {
             const key = `${cell.id}:${p.id}`;
-            return connectionMap[key] ? connectionMap[key][0] : "'0'";
+            return connectionMap[key] ? getBitSelectedSignal(connectionMap[key][0], netName) : "'0'";
         });
         let expr = '';
 
@@ -319,11 +348,11 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         if (!selectPort || !outputPort) return;
 
         const selectKey = `${cell.id}:${selectPort.id}`;
-        const selectSignal = connectionMap[selectKey] ? connectionMap[selectKey][0] : "'0'";
+        const selectSignal = connectionMap[selectKey] ? getBitSelectedSignal(connectionMap[selectKey][0], netName) : "'0'";
 
         const inSignals = Array.from({ length: inPorts }, (_, i) => {
             const key = `${cell.id}:input${i + 1}`;
-            return connectionMap[key] ? connectionMap[key][0] : "'0'";
+            return connectionMap[key] ? getBitSelectedSignal(connectionMap[key][0], netName) : "'0'";
         });
 
         if (inPorts === 2) {
@@ -334,7 +363,9 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
             code += `        CASE ${selectSignal} IS\n`;
 
             for (let i = 0; i < inPorts; i++) {
-                code += `            WHEN "${i.toString(2).padStart(Math.ceil(Math.log2(inPorts)), '0')}" => ${netName} <= ${inSignals[i]};\n`;
+                const key = `${cell.id}:input${i + 1}`;
+                const inSignal = connectionMap[key] ? getBitSelectedSignal(connectionMap[key][0], netName) : '/* unconnected */';
+                code += `            WHEN "${i.toString(2).padStart(Math.ceil(Math.log2(inPorts)), '0')}" => ${netName} <= ${inSignal};\n`;
             }
 
             code += `            WHEN OTHERS => ${netName} <= (OTHERS => 'X');\n`;
@@ -350,7 +381,7 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
 
         const inputPorts = cellPorts.filter((p: CustomPort) => p.group === 'input');
         const inputKey = `${cell.id}:${inputPorts[0]?.id}`;
-        const inputSignal = connectionMap[inputKey] ? connectionMap[inputKey][0] : "'0'";
+        const inputSignal = connectionMap[inputKey] ? getBitSelectedSignal(connectionMap[inputKey][0], netName) : "'0'";
 
         if (type === 'decoder') {
             const bw = cell.attributes.bandwidth;
@@ -396,13 +427,13 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
 
         let portMappings = inputPorts.map((p: CustomPort) => {
             const key = `${cell.id}:${p.id}`;
-            const connectedSignal = connectionMap[key] ? connectionMap[key][0] : "'0'";
+            const connectedSignal = connectionMap[key] ? getBitSelectedSignal(connectionMap[key][0], moduleName) : "'0'";
             return `.${p.name}(${connectedSignal})`;
         });
 
         portMappings = portMappings.concat(outputPorts.map((p: CustomPort) => {
             const key = `${cell.id}:${p.id}`;
-            const outputConnectedSignal = outputConnectionMap[key] ? outputConnectionMap[key][0] : "'0'";
+            const outputConnectedSignal = outputConnectionMap[key] ? getBitSelectedSignal(outputConnectionMap[key][0], moduleName) : "'0'";
             return `${p.name} => ${outputConnectedSignal}`;
         }));
 
@@ -423,12 +454,27 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         const qKey = `${cell.id}:q`;
         const qInvertedKey = `${cell.id}:qInverted`;
 
-        const clkSignal = connectionMap[clkKey] ? connectionMap[clkKey][0] : "'0'";
-        const rstSignal = connectionMap[rstKey] ? connectionMap[rstKey][0] : "'0'";
-        const enSignal = connectionMap[enKey] ? connectionMap[enKey][0] : "'1'";
-        const dSignal = connectionMap[dKey] ? connectionMap[dKey][0] : "(others => '0')";
-        const qSignal = outputConnectionMap[qKey] ? outputConnectionMap[qKey][0] : regName;
-        const qInvertedSignal = outputConnectionMap[qInvertedKey] ? outputConnectionMap[qInvertedKey][0] : regName;
+        const clkSignal = connectionMap[clkKey] ? getBitSelectedSignal(connectionMap[clkKey][0], regName) : "'0'";
+        const rstSignal = connectionMap[rstKey] ? getBitSelectedSignal(connectionMap[rstKey][0], regName) : "'0'";
+        const enSignal = connectionMap[enKey] ? getBitSelectedSignal(connectionMap[enKey][0], regName) : "'1'";
+        const dSignal = connectionMap[dKey] ? getBitSelectedSignal(connectionMap[dKey][0], regName) : "(others => '0')";
+
+        const connectedQ = outputConnectionMap[qKey] || [];
+        const connectedQInv = outputConnectionMap[qInvertedKey] || [];
+
+        const isConnectedToOutput = [...connectedQ, ...connectedQInv].some(signal =>
+            outputCells.some(outCell => getPortName(outCell) === signal)
+        );
+        let qSignal;
+        let qInvertedSignal;
+        if (!isConnectedToOutput) {
+            qSignal = regName;
+            qInvertedSignal = regName;
+        }
+        else {
+            qSignal = outputConnectionMap[qKey] ? getBitSelectedSignal(outputConnectionMap[qKey][0], regName) : regName;
+            qInvertedSignal = outputConnectionMap[qInvertedKey] ? getBitSelectedSignal(outputConnectionMap[qInvertedKey][0], regName) : regName;
+        }
 
         // clk
         const clkEdge = cell.attributes.clkEdge === 'falling' ? 'falling_edge' : 'rising_edge';
@@ -529,11 +575,11 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         const weKey = `${cell.id}:we`;
         const dataOutKey = `${cell.id}:data_out`;
 
-        const clkSignal = connectionMap[clkKey] ? connectionMap[clkKey][0] : "'0'";
-        const dataInSignal = connectionMap[dataInKey] ? connectionMap[dataInKey][0] : "'0'";
-        const addrSignal = connectionMap[addrKey] ? connectionMap[addrKey][0] : "'0'";
-        const weSignal = connectionMap[weKey] ? connectionMap[weKey][0] : "'0'";
-        const dataOutSignal = outputConnectionMap[dataOutKey] ? outputConnectionMap[dataOutKey][0] : sramName;
+        const clkSignal = connectionMap[clkKey] ? getBitSelectedSignal(connectionMap[clkKey][0], sramName) : "'0'";
+        const dataInSignal = connectionMap[dataInKey] ? getBitSelectedSignal(connectionMap[dataInKey][0], sramName) : "'0'";
+        const addrSignal = connectionMap[addrKey] ? getBitSelectedSignal(connectionMap[addrKey][0], sramName) : "'0'";
+        const weSignal = connectionMap[weKey] ? getBitSelectedSignal(connectionMap[weKey][0], sramName) : "'0'";
+        const dataOutSignal = outputConnectionMap[dataOutKey] ? getBitSelectedSignal(outputConnectionMap[dataOutKey][0], sramName) : sramName;
 
         const clkEdge = cell.attributes.clkEdge === 'falling' ? 'falling_edge' : 'rising_edge';
 
@@ -552,7 +598,14 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         }
         code += `    END PROCESS;\n`;
 
-        code += `    ${dataOutSignal} <= ${sramName}(to_integer(unsigned(${addrSignal})));\n`;
+        const connectedOutputs = outputConnectionMap[dataOutKey] || [];
+        const isConnectedToOutput = connectedOutputs.some(signal =>
+            outputCells.some(outCell => getPortName(outCell) === signal)
+        );
+
+        if (isConnectedToOutput) {
+            code += `    ${dataOutSignal} <= ${sramName}(to_integer(unsigned(${addrSignal})));\n`;
+        }
     });
 
     outputCells.forEach(cell => {

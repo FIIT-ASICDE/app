@@ -60,7 +60,13 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
             entry.name === signal && entry.connectedTo === netName
         );
         if (bitSelectEntry) {
-            return `${bitSelectEntry.connectedFrom}[${bitSelectEntry.endBit}:${bitSelectEntry.startBit}]`;
+            if (bitSelectEntry.startBit === bitSelectEntry.endBit) {
+                return `${bitSelectEntry.connectedFrom}[${bitSelectEntry.startBit}]`;
+            }
+            else {
+                return `${bitSelectEntry.connectedFrom}[${bitSelectEntry.endBit}:${bitSelectEntry.startBit}]`;
+            }
+
         }
         return signal;
     }
@@ -174,7 +180,48 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         } else if (cell.attributes.elType === 'encoder') {
             code += `logic [${Math.ceil(Math.log2(bw)) - 1}:0] ${netName};\n`; // log2(bandwidth)
         }
+    } );
+    sramCells.forEach(cell => {
+        const netName = getPortName(cell);
+        elementNames[cell.id] = netName;
+
+        const isStruct = cell.attributes.isStruct;
+        const structPkg = cell.attributes.structPackage;
+        const structType = cell.attributes.structTypeDef;
+        const dataWidth = cell.attributes.bandwidth;
+        const depth = 1 << cell.attributes.addressBandwidth; // 2^addressBandwidth
+        if (isStruct && structPkg && structType) {
+            code += `${structPkg}::${structType} ${netName} [0:${depth - 1}];\n`;
+        } else {
+            code += `logic [${dataWidth - 1}:0] ${netName} [0:${depth - 1}];\n`;
+        }
     });
+    registerCells.forEach(cell => {
+        const qKey = `${cell.id}:q`;
+        const qInvertedKey = `${cell.id}:qInverted`;
+
+        const connectedQ = outputConnectionMap[qKey] || [];
+        const connectedQInv = outputConnectionMap[qInvertedKey] || [];
+
+        const isConnectedToOutput = [...connectedQ, ...connectedQInv].some(signal =>
+            outputCells.some(outCell => getPortName(outCell) === signal)
+        );
+
+        if (!isConnectedToOutput) {
+            const netName = getPortName(cell);
+            elementNames[cell.id] = netName;
+            const isStruct = cell.attributes.isStruct;
+            const structPkg = cell.attributes.structPackage;
+            const structType = cell.attributes.structTypeDef;
+            const dataWidth = cell.attributes.bandwidth;
+            if (isStruct && structPkg && structType) {
+                code += `${structPkg}::${structType} ${netName};\n`;
+            } else {
+                code += `logic [${dataWidth - 1}:0] ${netName};\n`;
+            }
+        }
+    });
+
     code += `\n`;
 
 
@@ -384,8 +431,23 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         const rstSignal = connectionMap[rstKey] ? getBitSelectedSignal(connectionMap[rstKey][0], regName)  : '/* unconnected */';
         const enSignal = connectionMap[enKey] ? getBitSelectedSignal(connectionMap[enKey][0], regName) : '1\'b1';
         const dSignal = connectionMap[dKey] ? getBitSelectedSignal(connectionMap[dKey][0], regName) : '/* unconnected */';
-        const qSignal = outputConnectionMap[qKey] ? getBitSelectedSignal(outputConnectionMap[qKey][0], regName) : regName;
-        const qInvertedSignal = outputConnectionMap[qInvertedKey] ? getBitSelectedSignal(outputConnectionMap[qInvertedKey][0], regName) : regName;
+
+        const connectedQ = outputConnectionMap[qKey] || [];
+        const connectedQInv = outputConnectionMap[qInvertedKey] || [];
+
+        const isConnectedToOutput = [...connectedQ, ...connectedQInv].some(signal =>
+            outputCells.some(outCell => getPortName(outCell) === signal)
+        );
+        let qSignal;
+        let qInvertedSignal;
+        if (!isConnectedToOutput) {
+            qSignal = regName;
+            qInvertedSignal = regName;
+        }
+        else {
+            qSignal = outputConnectionMap[qKey] ? getBitSelectedSignal(outputConnectionMap[qKey][0], regName) : regName;
+            qInvertedSignal = outputConnectionMap[qInvertedKey] ? getBitSelectedSignal(outputConnectionMap[qInvertedKey][0], regName) : regName;
+        }
 
         // clk
         const clkEdge = cell.attributes.clkEdge === 'falling' ? 'negedge' : 'posedge';
@@ -437,12 +499,6 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
     });
     sramCells.forEach(cell => {
         const sramName = getPortName(cell);
-        const isStruct = cell.attributes.isStruct;
-        const structPkg = cell.attributes.structPackage;
-        const structType = cell.attributes.structTypeDef;
-
-        const dataWidth = cell.attributes.bandwidth;
-        const depth = 1 << cell.attributes.addressBandwidth; // 2^addressBandwidth
 
         const clkKey = `${cell.id}:clk`;
         const dataInKey = `${cell.id}:data_in`;
@@ -456,13 +512,8 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         const weSignal = connectionMap[weKey] ? getBitSelectedSignal(connectionMap[weKey][0], sramName) : '/* unconnected */';
         const dataOutSignal = outputConnectionMap[dataOutKey] ? getBitSelectedSignal(outputConnectionMap[dataOutKey][0], sramName) : sramName;
 
-        const clkEdge = cell.attributes.clkEdge === 'falling' ? 'negedge' : 'posedge';
 
-        if (isStruct && structPkg && structType) {
-            code += `${structPkg}::${structType} ${sramName} [0:${depth - 1}];\n\n`;
-        } else {
-            code += `logic [${dataWidth - 1}:0] ${sramName} [0:${depth - 1}];\n\n`;
-        }
+        const clkEdge = cell.attributes.clkEdge === 'falling' ? 'negedge' : 'posedge';
 
         code += `always_ff @(${clkEdge} ${clkSignal}) begin\n`;
         code += `    if (${weSignal}) begin\n`;
@@ -470,7 +521,14 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         code += `    end\n`;
         code += `end\n\n`;
 
-        code += `assign ${dataOutSignal} = ${sramName}[${addrSignal}];\n\n`;
+        const connectedOutputs = outputConnectionMap[dataOutKey] || [];
+        const isConnectedToOutput = connectedOutputs.some(signal =>
+            outputCells.some(outCell => getPortName(outCell) === signal)
+        );
+
+        if (isConnectedToOutput) {
+            code += `assign ${dataOutSignal} = ${sramName}[${addrSignal}];\n\n`;
+        }
     });
 
     outputCells.forEach(cell => {

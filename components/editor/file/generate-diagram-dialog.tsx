@@ -45,7 +45,6 @@ export const GenerateDiagramDialog = ({
     }, {
         enabled: open && !!ownerName && !!repoName,
     });
-    console.log(fileData);
 
     const { data: allFiles } = api.repo.loadAllFilesInRepo.useQuery({
         ownerSlug: ownerName!,
@@ -73,20 +72,16 @@ export const GenerateDiagramDialog = ({
             toast.error("Failed to load module content");
             return;
         }
-
         const isSystemVerilog = diagramFile.name.toLowerCase().endsWith(".sv");
         const isVHDL = diagramFile.name.toLowerCase().endsWith(".vhd") || diagramFile.name.toLowerCase().endsWith(".vhdl");
-
         try {
             if (isSystemVerilog) {
-
                 const svFiles = allFiles?.filter(
                     (file) =>
                         file.type === "file" &&
                         file.name.toLowerCase().endsWith(".sv") &&
                         file.content
                 ) || [];
-
                 const parsedModules: ParsedModule[] = svFiles.flatMap((file) => {
                     try {
                         return parseModules(file.content);
@@ -95,14 +90,10 @@ export const GenerateDiagramDialog = ({
                         return [];
                     }
                 });
-
                 const parsedTopModule = parseTopModule(fileData.content as string, parsedModules);
-
                 const graph = createDiagramFromParsedModule(parsedTopModule);
-
                 const fileName = diagramFile.name.replace(/\.sv$/i, ".bd");
                 const filePath = diagramFile.absolutePath.replace(/[^/]+$/, fileName);
-
                 saveFileMutation.mutate({
                     repoId: repositoryId,
                     path: filePath,

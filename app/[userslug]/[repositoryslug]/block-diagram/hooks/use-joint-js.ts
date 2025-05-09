@@ -106,7 +106,9 @@ function areStructPortsCompatible(sourcePort: CustomPort, targetPort: CustomPort
 
 
 
-const useJointJs = (paperElement: React.RefObject<HTMLDivElement>, isReady: boolean) => {
+const useJointJs = (
+    paperElement: React.RefObject<HTMLDivElement>,
+    isReady: boolean) => {
     const { graph, setSelectedElement, setPaper, hasFormErrors } = useDiagramContext();
     const paperRef = useRef<dia.Paper | null>(null);
     const selectedCellViewRef = useRef<dia.CellView | null>(null);

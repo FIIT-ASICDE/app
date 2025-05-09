@@ -152,15 +152,14 @@ class TopModuleVisitor
             const portName = npc.port_identifier()?.text ?? '';
             const expr = npc.port_assign()?.expression()?.text ?? '';
             let width = 1;
-            let direction: 'input'|'output'|'inout' = 'input';
+            let direction: 'input'|'output' = 'input';
             if (extMod) {
                 const extPort = extMod.ports.find(p => p.name === portName);
                 if (extPort) {
                     direction =
-                        extPort.direction === 'in' ? 'input' :
-                            extPort.direction === 'out' ? 'output' :
-                                extPort.direction === 'inout' ? 'inout' :
-                                    extPort.direction as any;
+                        extPort.direction === 'input' ? 'input' :
+                            extPort.direction === 'output' ? 'output' :
+                                extPort.direction as any;
                     width = extPort.width ?? width;
                 }
             }
