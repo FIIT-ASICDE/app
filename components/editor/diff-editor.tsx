@@ -77,7 +77,7 @@ export default function DynamicDiffEditor({
                 diffEditorRef.current = null;
             }
         };
-    }, [originalContent, modifiedContent, language, theme]);
+    }, [language, theme]);
 
     return <main className="h-full w-full" ref={monacoEl}></main>;
 }

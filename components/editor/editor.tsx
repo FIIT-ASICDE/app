@@ -1,16 +1,15 @@
 "use client";
 
 import { parseAndCollectSymbols } from "@/antlr/SystemVerilog/utilities/monacoEditor/parseAndCollectSymbols";
-import { FileDisplayItem, FileItem } from "@/lib/types/repository";
+import { FileDisplayItem } from "@/lib/types/repository";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { ReactElement, useEffect, useRef } from "react";
 import { MonacoBinding } from "y-monaco";
 import * as Y from "yjs";
 
-import { registerLanguageSupport } from "./editor-config/registerLanguage";
-
 import { useUser } from "@/components/context/user-context";
+import { registerLanguageSupport } from "@/components/editor/editor-config/registerLanguage";
 
 window.addEventListener("unhandledrejection", (event) => {
     if (
@@ -170,7 +169,7 @@ export default function Editor({
             name: filePath,
             document: ydoc,
             onAwarenessChange(data) {
-                // @ts-ignore the data.states includes 'user', but it isn't typed,
+                // @ts-expect-error the data.states includes 'user', but it isn't typed,
                 // see the setAwarenessField call down below
                 onAwarenessChange(data.states, provider.document.clientID);
             },
@@ -210,7 +209,7 @@ export default function Editor({
             providerRef.current?.destroy();
             ydocRef.current?.destroy();
         };
-    }, [filePath, language, theme, onOpenFile, onReady]);
+    }, [filePath, language, theme, onOpenFile, onReady, user.username]);
 
     useEffect(() => {
         return () => {
