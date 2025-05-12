@@ -21,7 +21,6 @@ import {
     RefObject,
     useCallback,
     useEffect,
-    useMemo,
     useRef,
     useState,
 } from "react";
@@ -41,7 +40,6 @@ import {
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { findItemInTree } from "@/components/generic/generic";
-import { symbolTableManager } from "@/antlr/SystemVerilog/utilities/monacoEditor/symbolTable";
 import DiagramPage from "@/app/[userslug]/[repositoryslug]/block-diagram/diagram-page";
 
 interface EditorPageProps {
