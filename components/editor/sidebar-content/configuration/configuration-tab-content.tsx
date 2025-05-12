@@ -130,7 +130,7 @@ export const ConfigurationTabContent = ({
         if (files.length <= 0) return [];
 
         if (selectedSimulationType === undefined) {
-            return files;
+            return [];
         }
 
         if (selectedSimulationType === "verilatorC++") {
