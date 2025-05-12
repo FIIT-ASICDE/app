@@ -89,7 +89,6 @@ export const EditorNavigation = ({
         lastOpenedBottomPanelSize,
         setLastOpenedBottomPanelSize,
     },
-    onStartSimulationAction,
     onStartSynthesisAction,
     isGitRepo,
 }: EditorNavigationProps): ReactElement => {
@@ -160,48 +159,6 @@ export const EditorNavigation = ({
         setConfiguration(conf ? JSON.parse(conf) : undefined);
     }, []);
 
-    const getSimulationTooltipContent = () => {
-        if (!configuration || !configuration.simulation) {
-            return (
-                <p className="w-48 text-sm text-muted-foreground">
-                    Simulation not yet configured
-                </p>
-            );
-        }
-
-        return (
-            <div className="flex w-48 flex-col items-center gap-y-2">
-                <Button
-                    variant="link"
-                    size="sm"
-                    className="w-full px-2 text-foreground"
-                    onClick={() => {
-                        if (activeBottomPanelContent !== "simulation") {
-                            toggleVerticalCollapse("simulation");
-                            setActiveBottomPanelContent("simulation");
-                        }
-                        onStartSimulationAction();
-                    }}
-                >
-                    Run simulation...
-                </Button>
-                <div className="flex w-full flex-col gap-y-1">
-                    <div className="flex w-full flex-row items-center justify-between gap-x-2 text-sm">
-                        <span className="text-muted-foreground">
-                            Simulation type:
-                        </span>
-                        <span>{configuration.simulation.type}</span>
-                    </div>
-                    <div className="flex w-full flex-row items-center justify-between gap-x-2 text-sm">
-                        <span className="text-muted-foreground">
-                            TestBench file:
-                        </span>
-                        <span>{configuration.simulation.testBench.name}</span>
-                    </div>
-                </div>
-            </div>
-        );
-    };
 
     const getSynthesisTooltipContent = () => {
         if (!configuration || !configuration.synthesis) {
@@ -311,7 +268,7 @@ export const EditorNavigation = ({
                 <div className="flex flex-col items-center gap-2 p-2">
                     <NavigationButton
                         icon={Play}
-                        tooltip={getSimulationTooltipContent()}
+                        tooltip={<span>Simulation</span>}
                         onClick={() => {
                             toggleVerticalCollapse("simulation");
                             setActiveBottomPanelContent("simulation");
