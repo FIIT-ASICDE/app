@@ -158,7 +158,6 @@ export default function EditorPage({
     );
 
     const onStartSimulation = () => {
-        // TODO: adam start simulation
         console.log(configuration?.simulation.type);
         console.log(configuration?.simulation.testBench);
 
@@ -379,28 +378,6 @@ export default function EditorPage({
         });
     }, []);
 
-    const handleEditorReady = useCallback(() => {
-        if (repository.symbolTable) {
-            symbolTableManager.initializeWithData({
-                ...repository.symbolTable,
-                fileSymbols: {
-                    ...repository.symbolTable.fileSymbols,
-                    symbols: repository.symbolTable.fileSymbols.symbols.map(symbol => ({
-                        ...symbol,
-                        type: "typedef" as const,
-                    })),
-                },
-            });
-        } else {
-            symbolTableManager.initialize();
-        }
-    }, [repository]);
-
-    const editorFilePath = useMemo(() => {
-        if (!activeFile) return "";
-        return `${repository.ownerName}/${repository.name}/${activeFile.absolutePath}`;
-    }, [activeFile, repository]);
-
     const editorTheme = () => {
         if (theme === "dark" || resolvedTheme === "dark") {
             return "vs-dark";
@@ -567,6 +544,7 @@ export default function EditorPage({
                         lastSimulation={lastSimulation}
                         synthesisOutput={resultYosys.data ?? []}
                         lastSynthesis={resultYosys.data?.[0]?.content ?? null}
+                        onStartSimulationAction={onStartSimulation}
                     />
                 </ResizablePanel>
             </ResizablePanelGroup>
