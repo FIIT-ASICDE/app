@@ -1,11 +1,11 @@
 // Parser for extracting package and struct definitions from SystemVerilog source code
 // Uses ANTLR4-generated lexer and parser for SystemVerilog grammar
 import { CharStreams, CommonTokenStream } from 'antlr4ts';
-import { SystemVerilogLexer } from '@/app/antlr/SystemVerilog/generated/SystemVerilogLexer';
-import { SystemVerilogParser } from '@/app/antlr/SystemVerilog/generated/SystemVerilogParser';
+import { SystemVerilogLexer } from '@/antlr/SystemVerilog/grammar/generated/SystemVerilogLexer';
+import { SystemVerilogParser } from '@/antlr/SystemVerilog/grammar/generated/SystemVerilogParser';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
-import { SystemVerilogParserVisitor } from '@/app/antlr/SystemVerilog/generated/SystemVerilogParserVisitor';
-import * as parser from '@/app/antlr/SystemVerilog/generated/SystemVerilogParser';
+import { SystemVerilogParserVisitor } from '@/antlr/SystemVerilog/grammar/generated/SystemVerilogParserVisitor';
+import * as parser from '@/antlr/SystemVerilog/grammar/generated/SystemVerilogParser';
 import { ParseTree } from 'antlr4ts/tree/ParseTree';
 import { QuietErrorListener } from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/quiet-error-listener";
 

@@ -7,10 +7,10 @@
 import { CharStreams, CommonTokenStream } from 'antlr4ts';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import { ParseTree } from 'antlr4ts/tree/ParseTree';
-import { vhdlLexer } from '@/app/antlr/VHDL/generated/vhdlLexer';
-import { vhdlParser } from '@/app/antlr/VHDL/generated/vhdlParser';
-import { vhdlVisitor } from '@/app/antlr/VHDL/generated/vhdlVisitor';
-import * as parser from '@/app/antlr/VHDL/generated/vhdlParser';
+import { vhdlLexer } from '@/antlr/VHDL/generated/vhdlLexer';
+import { vhdlParser } from '@/antlr/VHDL/generated/vhdlParser';
+import { vhdlVisitor } from '@/antlr/VHDL/generated/vhdlVisitor';
+import * as parser from '@/antlr/VHDL/generated/vhdlParser';
 import { ParsedModule, ModulePort, ParsedTopModule, SubModule, TopModulePort } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/diagram-generation/interfaces";
 import { QuietErrorListener } from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/quiet-error-listener";
 

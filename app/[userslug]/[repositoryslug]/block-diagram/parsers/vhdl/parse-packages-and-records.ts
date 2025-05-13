@@ -5,15 +5,15 @@
  */
 
 import { CharStreams, CommonTokenStream } from 'antlr4ts';
-import { vhdlLexer } from '@/app/antlr/VHDL/generated/vhdlLexer';
-import { vhdlParser } from '@/app/antlr/VHDL/generated/vhdlParser';
+import { vhdlLexer } from '@/antlr/VHDL/generated/vhdlLexer';
+import { vhdlParser } from '@/antlr/VHDL/generated/vhdlParser';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
-import { vhdlVisitor } from '@/app/antlr/VHDL/generated/vhdlVisitor';
-import * as parser from '@/app/antlr/VHDL/generated/vhdlParser';
+import { vhdlVisitor } from '@/antlr/VHDL/generated/vhdlVisitor'
+import * as parser from '@/antlr/VHDL/generated/vhdlParser';
 import { ParseTree } from 'antlr4ts/tree/ParseTree';
 import { QuietErrorListener } from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/quiet-error-listener";
 
-/**
+/**2
  * Represents a field within a VHDL record type
  */
 export interface VhdlStructField {

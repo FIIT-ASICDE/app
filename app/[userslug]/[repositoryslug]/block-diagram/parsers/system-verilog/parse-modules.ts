@@ -3,10 +3,10 @@
 import { CharStreams, CommonTokenStream } from 'antlr4ts';
 import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
 import { ParseTree } from 'antlr4ts/tree/ParseTree';
-import { SystemVerilogLexer } from "@/app/antlr/SystemVerilog/generated/SystemVerilogLexer";
-import { SystemVerilogParser } from "@/app/antlr/SystemVerilog/generated/SystemVerilogParser";
-import { SystemVerilogParserVisitor } from "@/app/antlr/SystemVerilog/generated/SystemVerilogParserVisitor";
-import * as parser from '@/app/antlr/SystemVerilog/generated/SystemVerilogParser';
+import { SystemVerilogLexer } from "@/antlr/SystemVerilog/grammar/generated/SystemVerilogLexer";
+import { SystemVerilogParser } from "@/antlr/SystemVerilog/grammar/generated/SystemVerilogParser";
+import { SystemVerilogParserVisitor } from "@/antlr/SystemVerilog/grammar/generated/SystemVerilogParserVisitor";
+import * as parser from '@/antlr/SystemVerilog/grammar/generated/SystemVerilogParser';
 import { QuietErrorListener } from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/quiet-error-listener";
 
 // Interface representing a port in a SystemVerilog module
