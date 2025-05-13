@@ -1,7 +1,16 @@
+/**
+ * This module converts a block diagram represented as a JointJS graph into VHDL code.
+ * It handles various digital components including logic gates, multiplexers, registers,
+ * memory, and custom modules, generating appropriate VHDL constructs for each.
+ */
+
 import { CustomPort } from '@/app/[userslug]/[repositoryslug]/block-diagram/utils/diagram-generation/interfaces';
 import { dia } from "@joint/core";
 
-
+/**
+ * Mapping of logical operators to their VHDL symbols
+ * VHDL uses uppercase keywords for operators
+ */
 const operatorMapVHDL: { [key: string]: string } = {
     and: 'AND',
     or: 'OR',
@@ -11,15 +20,25 @@ const operatorMapVHDL: { [key: string]: string } = {
     xnor: 'XNOR',
     not: 'NOT'
 };
+
+/**
+ * Mapping of complex logic operations to their VHDL operators
+ */
 const complexLogicMapVHDL: { [key: string]: string } = {
     alu: '+',
     comparator: ''
 };
 
-
+/**
+ * Generates VHDL code from a JointJS graph representation
+ * @param graph - JointJS graph containing the block diagram
+ * @param topModuleName - Name for the generated top-level entity
+ * @returns Generated VHDL code as a string
+ */
 export function generateVHDLCode(graph: dia.Graph, topModuleName: string): string {
     const cells = graph.getCells();
 
+    // Categorize cells by their type for specific processing
     const inputCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'input');
     const outputCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'output');
     const multiplexerCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'multiplexer');
@@ -43,6 +62,8 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
     const sramCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'sram');
     const registerCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'register');
     const links = cells.filter(cell => cell.isLink());
+
+    // Table for tracking bit selections in splitter components
     const splitterTable: { name: string, connectedTo: string, connectedFrom: string, startBit: number, endBit: number }[] = [];
 
 
@@ -52,15 +73,29 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         ...registerCells.map(cell => cell.attributes.name),
     ]);
 
+    /**
+     * Gets the name attribute of a cell
+     */
     function getPortName(cell: dia.Cell): string {
         return cell.attributes.name;
     }
+
+    /**
+     * Resolves bit-selected signals using the splitter table
+     * Uses VHDL-specific syntax for array indexing
+     * @param signal - Signal name to check
+     * @param netName - Net name for context
+     * @returns Resolved signal with bit selection if applicable
+     */
     function getBitSelectedSignal(signal: string, netName: string): string {
         const bitSelectEntry = splitterTable.find(entry =>
             entry.name === signal && entry.connectedTo === netName
         );
         if (bitSelectEntry) {
-            if (bitSelectEntry.startBit === bitSelectEntry.endBit) {
+            if (bitSelectEntry.startBit === 0 && bitSelectEntry.endBit === 0) {
+                return `${bitSelectEntry.connectedFrom}`;
+            }
+            else if (bitSelectEntry.startBit === bitSelectEntry.endBit) {
                 return `${bitSelectEntry.connectedFrom}(${bitSelectEntry.startBit})`;
             } else {
                 return `${bitSelectEntry.connectedFrom}(${bitSelectEntry.endBit} DOWNTO ${bitSelectEntry.startBit})`;
@@ -69,6 +104,7 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         return signal;
     }
 
+    // Build connection maps for source-to-target and target-to-source relationships
     const connectionMap: { [key: string]: string[] } = {};
     const outputConnectionMap: { [key: string]: string[] } = {};
     links.forEach(link => {
@@ -92,6 +128,7 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         outputConnectionMap[sourceKey].push(targetName);
     });
 
+    // Generate port declarations with VHDL-specific types
     const portDeclarations: string[] = [];
     inputCells.forEach(cell => {
         const name = getPortName(cell);
@@ -125,13 +162,15 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         }
     });
 
+    // Generate VHDL entity declaration
     let code = `ENTITY ${topModuleName} IS\n`;
     code += `    PORT (\n${portDeclarations.join(";\n")}\n    );\n`;
     code += `END ENTITY ${topModuleName};\n\n`;
 
+    // Begin architecture section
     code += `ARCHITECTURE Behavioral OF ${topModuleName} IS\n`;
 
-
+    // Generate internal signal declarations
     const elementNames: { [key: string]: string } = {};
     logicCells.forEach(cell => {
         const netName = getPortName(cell);
@@ -250,15 +289,13 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
     code += `\n\n`;
     code += `BEGIN\n`;
 
-
-
+    // Generate logic for bit manipulation components (splitters and combiners)
     bitManipulationCells.forEach(cell => {
         const type = cell.attributes.elType;
         const netName = elementNames[cell.id];
         const cellPorts = cell.attributes.ports?.items || [];
 
         if (type === 'splitter') {
-
             const inputPort = cellPorts.find((p: CustomPort) => p.group === 'input');
             const inputKey = `${cell.id}:${inputPort?.id}`;
             const inputSignal = connectionMap[inputKey] ? connectionMap[inputKey][0] : "'0'";
@@ -290,6 +327,7 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         }
     });
 
+    // Generate logic for basic logic gates using VHDL operators
     logicCells.forEach(cell => {
         const type = cell.attributes.elType;
         const netName = elementNames[cell.id];
@@ -312,6 +350,8 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
 
         code += `\n`;
     });
+
+    // Generate logic for complex operations (ALU, comparators)
     complexLogicCells.forEach(cell => {
         const type = cell.attributes.elType;
         const netName = elementNames[cell.id];
@@ -338,6 +378,7 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         code += `\n`;
     });
 
+    // Generate multiplexer logic using VHDL CASE statements
     multiplexerCells.forEach(cell => {
         const netName = getPortName(cell);
         const inPorts = cell.attributes.inPorts;
@@ -374,6 +415,7 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         }
     });
 
+    // Generate encoder/decoder logic using VHDL CASE statements
     encodeDecodeCells.forEach(cell => {
         const type = cell.attributes.elType;
         const netName = elementNames[cell.id];
@@ -417,6 +459,7 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         }
     });
 
+    // Instantiate custom modules using VHDL component instantiation
     moduleCells.forEach(cell => {
         const moduleName = cell.attributes.name;
         const instanceName = cell.attributes.instance;
@@ -443,7 +486,7 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         code += `);\n\n`;
     });
 
-
+    // Generate register logic using VHDL PROCESS blocks
     registerCells.forEach(cell => {
         const regName = getPortName(cell);
 
@@ -566,6 +609,8 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         code += `    END PROCESS;\n`;
 
     });
+
+    // Generate SRAM logic using VHDL PROCESS blocks and array types
     sramCells.forEach(cell => {
         const sramName = elementNames[cell.id];
 
@@ -608,6 +653,7 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         }
     });
 
+    // Generate output assignments
     outputCells.forEach(cell => {
         const outputName = getPortName(cell);
         const inputKey = `${cell.id}:${cell.attributes.ports.items[0].id}`;
@@ -619,6 +665,7 @@ export function generateVHDLCode(graph: dia.Graph, topModuleName: string): strin
         }
     });
 
+    // Close architecture section
     code += `END Behavioral;\n`;
 
     return code;

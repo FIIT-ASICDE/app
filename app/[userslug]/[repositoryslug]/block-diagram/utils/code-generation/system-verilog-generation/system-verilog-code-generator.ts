@@ -1,7 +1,15 @@
+/**
+ * This module converts a block diagram represented as a JointJS graph into SystemVerilog code.
+ * It handles various digital components including logic gates, multiplexers, registers, memory,
+ * and custom modules, generating appropriate SystemVerilog constructs for each.
+ */
+
 import { dia } from "@joint/core";
 import { CustomPort } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/diagram-generation/interfaces";
 
-
+/**
+ * Mapping of logical operators to their SystemVerilog symbols
+ */
 const operatorMap: { [key: string]: string } = {
     and: '&',
     or: '|',
@@ -11,15 +19,25 @@ const operatorMap: { [key: string]: string } = {
     xnor: '^',
     not: '~'
 };
+
+/**
+ * Mapping of complex logic operations to their SystemVerilog operators
+ */
 const complexLogicMap: { [key: string]: string } = {
     alu: '+',
     comparator: '<'
 };
 
-
+/**
+ * Generates SystemVerilog code from a JointJS graph representation
+ * @param graph - JointJS graph containing the block diagram
+ * @param topModuleName - Name for the generated top-level module
+ * @returns Generated SystemVerilog code as a string
+ */
 export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: string): string {
     const cells = graph.getCells();
 
+    // Categorize cells by their type for specific processing
     const inputCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'input');
     const outputCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'output');
     const multiplexerCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'multiplexer');
@@ -43,6 +61,8 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
     const sramCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'sram');
     const registerCells = cells.filter(cell => !cell.isLink() && cell.attributes.elType === 'register');
     const links = cells.filter(cell => cell.isLink());
+
+    // Table for tracking bit selections in splitter components
     const splitterTable: { name: string, connectedTo: string, connectedFrom: string, startBit: number, endBit: number }[] = [];
 
 
@@ -52,25 +72,38 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         ...registerCells.map(cell => cell.attributes.name),
     ]);
 
+    /**
+     * Gets the name attribute of a cell
+     */
     function getPortName(cell: dia.Cell): string {
         return cell.attributes.name;
     }
+
+    /**
+     * Resolves bit-selected signals using the splitter table
+     * @param signal - Signal name to check
+     * @param netName - Net name for context
+     * @returns Resolved signal with bit selection if applicable
+     */
     function getBitSelectedSignal(signal: string, netName: string): string {
         const bitSelectEntry = splitterTable.find(entry =>
             entry.name === signal && entry.connectedTo === netName
         );
         if (bitSelectEntry) {
-            if (bitSelectEntry.startBit === bitSelectEntry.endBit) {
+            if (bitSelectEntry.startBit === 0 && bitSelectEntry.endBit === 0) {
+                return `${bitSelectEntry.connectedFrom}`;
+            }
+            else if (bitSelectEntry.startBit === bitSelectEntry.endBit) {
                 return `${bitSelectEntry.connectedFrom}[${bitSelectEntry.startBit}]`;
             }
             else {
                 return `${bitSelectEntry.connectedFrom}[${bitSelectEntry.endBit}:${bitSelectEntry.startBit}]`;
             }
-
         }
         return signal;
     }
 
+    // Build connection maps for source-to-target and target-to-source relationships
     const connectionMap: { [key: string]: string[] } = {};
     const outputConnectionMap: { [key: string]: string[] } = {};
     links.forEach(link => {
@@ -94,6 +127,7 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         outputConnectionMap[sourceKey].push(targetName);
     });
 
+    // Generate port declarations
     const portDeclarations: string[] = [];
     inputCells.forEach(cell => {
         const name = getPortName(cell);
@@ -120,8 +154,10 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         }
     });
 
+    // Start module definition
     let code = `module ${topModuleName} (\n${portDeclarations.join(',\n')}\n);\n\n`;
 
+    // Generate internal signal declarations
     const elementNames: { [key: string]: string } = {};
     logicCells.forEach(cell => {
         const netName = getPortName(cell);
@@ -224,16 +260,13 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
 
     code += `\n`;
 
-
-
+    // Generate logic for bit manipulation components (splitters and combiners)
     bitManipulationCells.forEach(cell => {
         const type = cell.attributes.elType;
         const netName = elementNames[cell.id];
         const cellPorts = cell.attributes.ports?.items || [];
 
         if (type === 'splitter') {
-
-
             const inputPort = cellPorts.find((p: CustomPort) => p.group === 'input');
             const inputKey = `${cell.id}:${inputPort?.id}`;
             const inputSignal = connectionMap[inputKey] ? connectionMap[inputKey][0] : '/* unconnected */';
@@ -256,7 +289,6 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         }
 
         if (type === 'combiner') {
-
             const inputPorts = cellPorts.filter((p: CustomPort) => p.group === 'input').reverse();
             const inputSignals = inputPorts.map((p: CustomPort) => {
                 const key = `${cell.id}:${p.id}`;
@@ -266,6 +298,7 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         }
     });
 
+    // Generate logic for basic logic gates
     logicCells.forEach(cell => {
         const type = cell.attributes.elType;
         const netName = elementNames[cell.id];
@@ -289,6 +322,8 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
 
         code += `\n`;
     });
+
+    // Generate logic for complex operations (ALU, comparators)
     complexLogicCells.forEach(cell => {
         const type = cell.attributes.elType;
         const netName = elementNames[cell.id];
@@ -313,6 +348,7 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         code += `\n`;
     });
 
+    // Generate multiplexer logic
     multiplexerCells.forEach(cell => {
         const netName = getPortName(cell);
         const inPorts = cell.attributes.inPorts;
@@ -344,16 +380,16 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
             code += `end\n\n`;
         }
     });
+
+    // Generate encoder/decoder logic
     encodeDecodeCells.forEach(cell => {
         const type = cell.attributes.elType;
         const netName = elementNames[cell.id];
         const cellPorts = cell.attributes.ports?.items || [];
 
-
         const inputPorts = cellPorts.filter((p: CustomPort) => p.group === 'input');
         const inputKey = `${cell.id}:${inputPorts[0]?.id}`;
         const inputSignal = connectionMap[inputKey] ? getBitSelectedSignal(connectionMap[inputKey][0], netName) : '/* unconnected */';
-
 
         if (type === 'decoder') {
             const bw = cell.attributes.bandwidth;
@@ -391,6 +427,7 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         }
     });
 
+    // Instantiate custom modules
     moduleCells.forEach(cell => {
         const moduleName = cell.attributes.name;
         const instanceName = cell.attributes.instance;
@@ -416,7 +453,7 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         code += `);\n\n`;
     });
 
-
+    // Generate register logic
     registerCells.forEach(cell => {
         const regName = getPortName(cell);
 
@@ -497,6 +534,8 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
 
         code += `end\n\n`;
     });
+
+    // Generate SRAM logic
     sramCells.forEach(cell => {
         const sramName = getPortName(cell);
 
@@ -511,7 +550,6 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         const addrSignal = connectionMap[addrKey] ? getBitSelectedSignal(connectionMap[addrKey][0], sramName) : '/* unconnected */';
         const weSignal = connectionMap[weKey] ? getBitSelectedSignal(connectionMap[weKey][0], sramName) : '/* unconnected */';
         const dataOutSignal = outputConnectionMap[dataOutKey] ? getBitSelectedSignal(outputConnectionMap[dataOutKey][0], sramName) : sramName;
-
 
         const clkEdge = cell.attributes.clkEdge === 'falling' ? 'negedge' : 'posedge';
 
@@ -531,6 +569,7 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
         }
     });
 
+    // Generate output assignments
     outputCells.forEach(cell => {
         const outputName = getPortName(cell);
         const inputKey = `${cell.id}:${cell.attributes.ports.items[0].id}`;
@@ -545,7 +584,6 @@ export function generateSystemVerilogCode(graph: dia.Graph, topModuleName: strin
     });
 
     code += `endmodule`;
-
 
     return code;
 }
