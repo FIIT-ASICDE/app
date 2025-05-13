@@ -21,6 +21,7 @@ import {
     ReactElement,
     RefObject,
     SetStateAction,
+    useEffect,
     useState,
 } from "react";
 import type { ImperativePanelGroupHandle } from "react-resizable-panels";
@@ -55,8 +56,8 @@ interface EditorNavigationProps {
         lastOpenedBottomPanelSize: number;
         setLastOpenedBottomPanelSize: Dispatch<SetStateAction<number>>;
     };
-    onStartSimulation: () => void;
-    onStartSynthesis: () => void;
+    onStartSimulationAction: () => void;
+    onStartSynthesisAction: () => void;
     configuration: Configuration | undefined;
     setConfiguration: Dispatch<SetStateAction<Configuration | undefined>>;
     isGitRepo?: boolean;
@@ -88,8 +89,8 @@ export const EditorNavigation = ({
         lastOpenedBottomPanelSize,
         setLastOpenedBottomPanelSize,
     },
-    onStartSimulation,
-    onStartSynthesis,
+    onStartSimulationAction,
+    onStartSynthesisAction,
     isGitRepo,
 }: EditorNavigationProps): ReactElement => {
     const { user } = useUser();
@@ -150,13 +151,17 @@ export const EditorNavigation = ({
         }
     };
 
-    const conf: string | null = null; // localStorage.getItem("configuration");
-    const configuration: Configuration | undefined = conf
-        ? JSON.parse(conf)
-        : undefined;
+    const [configuration, setConfiguration] = useState<
+        Configuration | undefined
+    >(undefined);
+
+    useEffect(() => {
+        const conf: string | null = localStorage.getItem("configuration");
+        setConfiguration(conf ? JSON.parse(conf) : undefined);
+    }, []);
 
     const getSimulationTooltipContent = () => {
-        if (!configuration) {
+        if (!configuration || !configuration.simulation) {
             return (
                 <p className="w-48 text-sm text-muted-foreground">
                     Simulation not yet configured
@@ -175,7 +180,7 @@ export const EditorNavigation = ({
                             toggleVerticalCollapse("simulation");
                             setActiveBottomPanelContent("simulation");
                         }
-                        onStartSimulation();
+                        onStartSimulationAction();
                     }}
                 >
                     Run simulation...
@@ -199,7 +204,7 @@ export const EditorNavigation = ({
     };
 
     const getSynthesisTooltipContent = () => {
-        if (!configuration) {
+        if (!configuration || !configuration.synthesis) {
             return (
                 <p className="w-48 text-sm text-muted-foreground">
                     Synthesis not yet configured
@@ -218,7 +223,7 @@ export const EditorNavigation = ({
                             toggleVerticalCollapse("synthesis");
                             setActiveBottomPanelContent("synthesis");
                         }
-                        onStartSynthesis();
+                        onStartSynthesisAction();
                     }}
                 >
                     Run synthesis...

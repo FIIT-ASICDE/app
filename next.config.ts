@@ -2,6 +2,7 @@ import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+    output: "standalone",
     webpack: (config, options) => {
         config.module.rules.push({ test: /\.ttf$/, type: "asset/resource" });
 

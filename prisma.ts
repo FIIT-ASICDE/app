@@ -19,6 +19,7 @@ export type PrismaType = PrismaClient<
     never,
     DefaultArgs
 >;
+
 const prisma: PrismaType = globalThis.prismaGlobal ?? prismaClientSingleton();
 
 export default prisma;

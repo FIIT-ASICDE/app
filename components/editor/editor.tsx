@@ -1,35 +1,36 @@
 "use client";
 
+import { parseAndCollectSymbols } from "@/antlr/SystemVerilog/utilities/monacoEditor/parseAndCollectSymbols";
+import { FileDisplayItem, FileItem } from "@/lib/types/repository";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { ReactElement, useEffect, useRef } from "react";
 import { MonacoBinding } from "y-monaco";
 import * as Y from "yjs";
+
 import { registerLanguageSupport } from "./editor-config/registerLanguage";
-import { parseAndCollectSymbols } from "@/antlr/SystemVerilog/utilities/monacoEditor/parseAndCollectSymbols";
-import { FileItem, FileDisplayItem } from "@/lib/types/repository";
+
+import { useUser } from "@/components/context/user-context";
 
 window.addEventListener("unhandledrejection", (event) => {
-  if (
-    event.reason?.name === "Canceled" ||
-    event.reason?.message === "Canceled"
-  ) {
-    event.preventDefault();
-  }
+    if (
+        event.reason?.name === "Canceled" ||
+        event.reason?.message === "Canceled"
+    ) {
+        event.preventDefault();
+    }
 });
 
 function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
+    func: T,
+    wait: number,
 ): (...args: Parameters<T>) => void {
-  let timeout: number | null = null;
-  return (...args: Parameters<T>) => {
-    if (timeout) window.clearTimeout(timeout);
-    timeout = window.setTimeout(() => func(...args), wait);
-  };
+    let timeout: number | null = null;
+    return (...args: Parameters<T>) => {
+        if (timeout) window.clearTimeout(timeout);
+        timeout = window.setTimeout(() => func(...args), wait);
+    };
 }
-
-import { useUser } from "@/components/context/user-context";
 
 interface EditorProps {
     filePath: string;
@@ -46,111 +47,118 @@ interface EditorProps {
  * @returns {ReactElement} Editor component
  */
 export default function Editor({
-  filePath,
-  language,
-  theme = "vs-dark",
-  onOpenFile,
-  onReady,
+    filePath,
+    language,
+    theme = "vs-dark",
+    onOpenFile,
+    onReady,
 }: EditorProps): ReactElement {
     const { user } = useUser();
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const monacoEl = useRef<HTMLElement | null>(null);
-  const providerRef = useRef<HocuspocusProvider | null>(null);
-  const ydocRef = useRef<Y.Doc | null>(null);
-  const pendingNavigationRef = useRef<{
-    uri: monaco.Uri;
-    range: monaco.IRange;
-  } | null>(null);
+    const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+    const monacoEl = useRef<HTMLElement | null>(null);
+    const providerRef = useRef<HocuspocusProvider | null>(null);
+    const ydocRef = useRef<Y.Doc | null>(null);
+    const pendingNavigationRef = useRef<{
+        uri: monaco.Uri;
+        range: monaco.IRange;
+    } | null>(null);
 
-  const debouncedParseRef = useRef<((code: string, uri: string) => void) | null>(null);
-  const loadedLanguages = useRef<Set<string>>(new Set());
+    const debouncedParseRef = useRef<
+        ((code: string, uri: string) => void) | null
+    >(null);
+    const loadedLanguages = useRef<Set<string>>(new Set());
 
-  if (!debouncedParseRef.current) {
-    debouncedParseRef.current = debounce((code: string, uri: string) => {
-      parseAndCollectSymbols(code, uri);
-    }, 2000);
-  }
-
-  useEffect(() => {
-    if (!monacoEl.current) return;
-    const uri = monaco.Uri.parse(`inmemory://${filePath}`);
-
-    const model =
-      monaco.editor.getModel(uri) || monaco.editor.createModel("", language, uri);
-
-    if (editorRef.current) {
-      const currentModel = editorRef.current.getModel();
-      if (!currentModel || currentModel.uri.toString() !== model.uri.toString()) {
-        editorRef.current.setModel(model);
-      }
-    } else {
-        model.setEOL(monaco.editor.EndOfLineSequence.LF);
-      editorRef.current = monaco.editor.create(monacoEl.current, {
-        model,
-        language,
-        theme,
-        automaticLayout: true,
-      });
-
-      if (onReady) {
-        onReady();
-      }
-
-      editorRef.current.onMouseDown((event) => {
-        if (
-          event.event.ctrlKey &&
-          pendingNavigationRef.current &&
-          event.target.type === monaco.editor.MouseTargetType.CONTENT_TEXT
-        ) {
-          const { uri, range } = pendingNavigationRef.current;
-      
-          if (onOpenFile) {
-            const parts = uri.path.split("/").filter(Boolean);
-            parts.shift(); // remove the first part (repository name)
-            const fileName = parts[parts.length - 1] || "untitled";  
-            const filePath = parts.join("/");
-            onOpenFile({
-              type: "file-display",
-              name: fileName,
-              absolutePath: filePath,
-              language: "systemverilog",
-              lastActivity: new Date(),
-            });
-          
-            const tryJump = () => {
-              const model = monaco.editor.getModel(uri);
-              if (model && editorRef.current) {
-                if (model.getValue().length === 0) {
-                  setTimeout(tryJump, 50);
-                  return;
-                }
-
-                editorRef.current.setModel(model);
-                editorRef.current.setPosition({
-                  lineNumber: range.startLineNumber,
-                  column: range.startColumn,
-                });
-                editorRef.current.revealRangeInCenter(range);
-                editorRef.current.focus();
-                pendingNavigationRef.current = null;
-              } else {
-                setTimeout(tryJump, 50);
-              }
-            };
-          
-            setTimeout(tryJump, 100);
-          }
-        }
-      });
-
-      if (language && !loadedLanguages.current.has(language)) {
-        registerLanguageSupport(language, pendingNavigationRef);
-        loadedLanguages.current.add(language);
-      }
+    if (!debouncedParseRef.current) {
+        debouncedParseRef.current = debounce((code: string, uri: string) => {
+            parseAndCollectSymbols(code, uri);
+        }, 2000);
     }
 
-    if (providerRef.current) providerRef.current.destroy();
-    if (ydocRef.current) ydocRef.current.destroy();
+    useEffect(() => {
+        if (!monacoEl.current) return;
+        const uri = monaco.Uri.parse(`inmemory://${filePath}`);
+
+        const model =
+            monaco.editor.getModel(uri) ||
+            monaco.editor.createModel("", language, uri);
+
+        if (editorRef.current) {
+            const currentModel = editorRef.current.getModel();
+            if (
+                !currentModel ||
+                currentModel.uri.toString() !== model.uri.toString()
+            ) {
+                editorRef.current.setModel(model);
+            }
+        } else {
+            model.setEOL(monaco.editor.EndOfLineSequence.LF);
+            editorRef.current = monaco.editor.create(monacoEl.current, {
+                model,
+                language,
+                theme,
+                automaticLayout: true,
+            });
+
+            if (onReady) {
+                onReady();
+            }
+
+            editorRef.current.onMouseDown((event) => {
+                if (
+                    event.event.ctrlKey &&
+                    pendingNavigationRef.current &&
+                    event.target.type ===
+                        monaco.editor.MouseTargetType.CONTENT_TEXT
+                ) {
+                    const { uri, range } = pendingNavigationRef.current;
+
+                    if (onOpenFile) {
+                        const parts = uri.path.split("/").filter(Boolean);
+                        parts.shift(); // remove the first part (repository name)
+                        const fileName = parts[parts.length - 1] || "untitled";
+                        const filePath = parts.join("/");
+                        onOpenFile({
+                            type: "file-display",
+                            name: fileName,
+                            absolutePath: filePath,
+                            language: "systemverilog",
+                            lastActivity: new Date(),
+                        });
+
+                        const tryJump = () => {
+                            const model = monaco.editor.getModel(uri);
+                            if (model && editorRef.current) {
+                                if (model.getValue().length === 0) {
+                                    setTimeout(tryJump, 50);
+                                    return;
+                                }
+
+                                editorRef.current.setModel(model);
+                                editorRef.current.setPosition({
+                                    lineNumber: range.startLineNumber,
+                                    column: range.startColumn,
+                                });
+                                editorRef.current.revealRangeInCenter(range);
+                                editorRef.current.focus();
+                                pendingNavigationRef.current = null;
+                            } else {
+                                setTimeout(tryJump, 50);
+                            }
+                        };
+
+                        setTimeout(tryJump, 100);
+                    }
+                }
+            });
+
+            if (language && !loadedLanguages.current.has(language)) {
+                registerLanguageSupport(language, pendingNavigationRef);
+                loadedLanguages.current.add(language);
+            }
+        }
+
+        if (providerRef.current) providerRef.current.destroy();
+        if (ydocRef.current) ydocRef.current.destroy();
 
         const ydoc = new Y.Doc();
         ydocRef.current = ydoc;
@@ -175,44 +183,43 @@ export default function Editor({
 
         providerRef.current = provider;
 
-      if (editorRef.current) {
-        const type = ydoc.getText("monaco");
-        new MonacoBinding(
-          type,
-          editorRef.current.getModel()!,
-          new Set([editorRef.current]),
-          provider.awareness
-        );
-      }
-    
+        if (editorRef.current) {
+            const type = ydoc.getText("monaco");
+            new MonacoBinding(
+                type,
+                editorRef.current.getModel()!,
+                new Set([editorRef.current]),
+                provider.awareness,
+            );
+        }
 
-    const initialCode = model.getValue();
-    if (initialCode) {
-      parseAndCollectSymbols(initialCode, uri.toString());
-    }
+        const initialCode = model.getValue();
+        if (initialCode) {
+            parseAndCollectSymbols(initialCode, uri.toString());
+        }
 
-    const contentChangeDisposable = model.onDidChangeContent(() => {
-      const code = model.getValue();
-      if (debouncedParseRef.current) {
-        debouncedParseRef.current(code, uri.toString());
-      }
-    });
+        const contentChangeDisposable = model.onDidChangeContent(() => {
+            const code = model.getValue();
+            if (debouncedParseRef.current) {
+                debouncedParseRef.current(code, uri.toString());
+            }
+        });
 
-    return () => {
-      contentChangeDisposable.dispose();
-      providerRef.current?.destroy();
-      ydocRef.current?.destroy();
-    };
-  }, [filePath, language, theme, onOpenFile, onReady]);
+        return () => {
+            contentChangeDisposable.dispose();
+            providerRef.current?.destroy();
+            ydocRef.current?.destroy();
+        };
+    }, [filePath, language, theme, onOpenFile, onReady]);
 
-  useEffect(() => {
-    return () => {
-      editorRef.current?.dispose();
-      editorRef.current = null;
-    };
-  }, []);
+    useEffect(() => {
+        return () => {
+            editorRef.current?.dispose();
+            editorRef.current = null;
+        };
+    }, []);
 
-  return <main className="h-full w-full" ref={monacoEl}></main>;
+    return <main className="h-full w-full" ref={monacoEl}></main>;
 }
 
 const getRandomColorForUser = (username: string): string => {
