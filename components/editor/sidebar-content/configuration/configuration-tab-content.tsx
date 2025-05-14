@@ -3,7 +3,7 @@ import {
     SimulationType,
     SynthesisType,
 } from "@/lib/types/editor";
-import { FileDisplayItem, FileItem, Repository } from "@/lib/types/repository";
+import { DirectoryDisplayItem, DirectoryItem, FileDisplayItem, FileItem, Repository } from "@/lib/types/repository";
 import { Portal } from "@radix-ui/react-portal";
 import { FileIcon, Info, Save } from "lucide-react";
 import {
@@ -17,7 +17,7 @@ import {
 import { toast } from "sonner";
 
 import { CloseButton } from "@/components/editor/navigation/close-button";
-import { getFilesFromRepo } from "@/components/generic/generic";
+import { getDirectoriesFromRepo, getFilesFromRepo } from "@/components/generic/generic";
 import { Button } from "@/components/ui/button";
 import {
     CommandDialog,
@@ -60,10 +60,16 @@ export const ConfigurationTabContent = ({
     const [selectedSimulationType, setSelectedSimulationType] = useState<
         SimulationType | undefined
     >(undefined);
+
     const [
         selectedSimulationTestBenchFile,
         setSelectedSimulationTestBenchFile,
     ] = useState<FileDisplayItem | FileItem | undefined>(undefined);
+
+    const [
+        selectedSimulationDirectory,
+        setSelectedSimulationDirectory,
+    ] = useState<DirectoryDisplayItem | DirectoryItem | undefined>(undefined);
 
     const [selectedSynthesisType, setSelectedSynthesisType] = useState<
         SynthesisType | undefined
@@ -74,6 +80,10 @@ export const ConfigurationTabContent = ({
 
     const [simulationFileSelectOpen, setSimulationFileSelectOpen] =
         useState<boolean>(false);
+
+    const [simulationDirectorySelectOpen, setSimulationDirectorySelectOpen] =
+        useState<boolean>(false);
+
     const [hoveredType, setHoveredType] = useState<SimulationType>();
 
     const [synthesisFileSelectOpen, setSynthesisFileSelectOpen] =
@@ -81,6 +91,10 @@ export const ConfigurationTabContent = ({
 
     const files: Array<FileItem | FileDisplayItem> = getFilesFromRepo(
         repository.tree,
+    );
+
+    const directories: Array<DirectoryItem | DirectoryDisplayItem> = getDirectoriesFromRepo(
+        repository.tree
     );
 
     const selectTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -297,6 +311,26 @@ export const ConfigurationTabContent = ({
                                             </span>
                                         )}
                                     </Button>
+
+                                    <Button
+                                        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm font-normal ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
+                                        onClick={() =>
+                                            setSimulationDirectorySelectOpen(true)
+                                        }
+                                    >
+                                        {selectedSimulationDirectory? (
+                                            <div className="flex flex-row items-center justify-start gap-x-2 text-foreground">
+                                                <FileIcon className="h-4 w-4 text-muted-foreground" />
+                                                {
+                                                    selectedSimulationDirectory.name
+                                                }
+                                            </div>
+                                        ) : (
+                                            <span className="text-muted-foreground">
+                                                Select output directory
+                                            </span>
+                                        )}
+                                    </Button>
                                 </div>
 
                                 <CommandDialog
@@ -342,6 +376,49 @@ export const ConfigurationTabContent = ({
                                                         "verilatorSystemVerilog"
                                                             ? "No SystemVerilog files found"
                                                             : "No Verilog files found"}
+                                                </CommandEmpty>
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </ScrollArea>
+                                </CommandDialog>
+
+                                <CommandDialog
+                                    open={simulationDirectorySelectOpen}
+                                    onOpenChange={setSimulationDirectorySelectOpen}
+                                >
+                                    <CommandInput placeholder="Select output directory..." />
+                                    <ScrollArea className="h-full max-h-60">
+                                        <CommandList>
+                                            <CommandGroup
+                                                heading={getGroupHeading()}
+                                            >
+                                                {directories.map(
+                                                    (
+                                                        directoryItem:
+                                                            | DirectoryItem
+                                                            | DirectoryDisplayItem,
+                                                    ) => (
+                                                        <CommandItem
+                                                            key={
+                                                                directoryItem.absolutePath
+                                                            }
+                                                            onSelect={() => {
+                                                                setSimulationDirectorySelectOpen(
+                                                                    false,
+                                                                );
+                                                                setSelectedSimulationDirectory(
+                                                                    directoryItem,
+                                                                );
+                                                            }}
+                                                            className="flex flex-row items-center gap-x-2"
+                                                        >
+                                                            <FileIcon className="h-4 w-4 text-muted-foreground" />
+                                                            {directoryItem.name}
+                                                        </CommandItem>
+                                                    ),
+                                                )}
+                                                <CommandEmpty>
+                                                    No specific directories found
                                                 </CommandEmpty>
                                             </CommandGroup>
                                         </CommandList>
@@ -459,11 +536,11 @@ export const ConfigurationTabContent = ({
                                 variant="default"
                                 className="w-1/2 hover:bg-primary-button-hover"
                                 disabled={
-                                    selectedSimulationType === undefined ||
-                                    selectedSimulationTestBenchFile ===
-                                    undefined ||
-                                    selectedSynthesisType === undefined ||
-                                    selectedSynthesisFile === undefined
+                                    selectedSimulationType === undefined &&
+                                    selectedSimulationTestBenchFile === undefined &&
+                                    selectedSynthesisType === undefined &&
+                                    selectedSynthesisFile === undefined &&
+                                    selectedSimulationDirectory === undefined
                                 }
                                 onClick={() => {
                                     if (
@@ -479,6 +556,7 @@ export const ConfigurationTabContent = ({
                                                     type: selectedSimulationType,
                                                     testBench:
                                                     selectedSimulationTestBenchFile,
+                                                    directory: selectedSimulationDirectory!.name
                                                 },
                                                 synthesis: {
                                                     type: selectedSynthesisType,

@@ -169,13 +169,16 @@ export default function EditorPage({
             "Starting simulation with type: " +
                 configuration?.simulation.type +
                 " and file: " +
-                configuration?.simulation.testBench,
+                configuration?.simulation.testBench +
+                " and directory: " +
+                configuration?.simulation.directory
         );
 
         if (configuration?.simulation.type === "verilatorC++") {
             const newInput = {
                 repoId: repository.id,
                 testbenchPath: configuration?.simulation.testBench.absolutePath,
+                directory: configuration?.simulation.directory
             };
             setVerilatorCppInput(newInput); // <- toto spustí subscription
         }
@@ -184,6 +187,7 @@ export default function EditorPage({
             const newInput = {
                 repoId: repository.id,
                 testbenchPath: configuration?.simulation.testBench.absolutePath,
+                directory: configuration?.simulation.directory
             };
             setVerilatorSvInput(newInput); // <- toto spustí subscription
         }
@@ -192,6 +196,7 @@ export default function EditorPage({
             const newInput = {
                 repoId: repository.id,
                 testbenchPath: configuration?.simulation.testBench.absolutePath,
+                directory: configuration?.simulation.directory
             };
             setIcarusInput(newInput); // <- toto spustí subscription
         }

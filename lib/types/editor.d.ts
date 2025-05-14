@@ -22,6 +22,7 @@ export type SynthesisType = "yosys";
 type SimulationConfiguration = {
     type: SimulationType;
     testBench: FileItem | FileDisplayItem;
+    directory: string;
 };
 
 type SynthesisConfiguration = {
