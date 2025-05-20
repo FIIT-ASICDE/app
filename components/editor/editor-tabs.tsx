@@ -33,6 +33,10 @@ interface EditorTabsProps {
     setActiveFileAction: Dispatch<SetStateAction<FileDisplayItem | null>>;
     handleTabSwitchAction: (tab: FileDisplayItem) => void;
     handleCloseTabAction: (tab: FileDisplayItem) => void;
+    handleSplitEditor: (tab: FileDisplayItem) => void;
+    handleCloseAllTabs: () => void;
+    editorId: string;
+    onTabDrop: (file: FileDisplayItem, sourceEditorId: string) => void;
 }
 
 /**
@@ -45,13 +49,17 @@ export const EditorTabs = ({
     openFiles,
     setOpenFilesAction,
     activeFile,
-    setActiveFileAction,
     handleTabSwitchAction,
     handleCloseTabAction,
+    handleCloseAllTabs,
+    editorId,
+    onTabDrop,
 }: EditorTabsProps): ReactElement => {
     const tabsContainerRef = useRef<HTMLDivElement>(null);
     const [visibleTabs, setVisibleTabs] = useState<FileDisplayItem[]>([]);
     const [hiddenTabs, setHiddenTabs] = useState<FileDisplayItem[]>([]);
+    const [draggedTabIndex, setDraggedTabIndex] = useState<number | null>(null);
+    const [isDraggingToRight, setIsDraggingToRight] = useState<boolean>(false);
 
     const calculateVisibleTabs = useCallback(() => {
         if (!tabsContainerRef.current) return;
@@ -129,16 +137,30 @@ export const EditorTabs = ({
         calculateVisibleTabs();
     }, [calculateVisibleTabs]);
 
-    const handleCloseAllTabs = () => {
-        setOpenFilesAction([]);
-        setActiveFileAction(null);
-    };
-
     return (
         <div className="flex flex-col">
             <div
                 ref={tabsContainerRef}
                 className="relative flex flex-row items-center justify-between"
+                onDragOver={(e) => {
+                    e.preventDefault();
+                    e.currentTarget.classList.add("bg-accent/10");
+                }}
+                onDragLeave={(e) => {
+                    e.currentTarget.classList.remove("bg-accent/10");
+                }}
+                onDrop={(e) => {
+                    e.preventDefault();
+                    e.currentTarget.classList.remove("bg-accent/10");
+                    const sourceEditorId = e.dataTransfer.getData("editorId");
+                    const fileData = e.dataTransfer.getData("file");
+                    if (sourceEditorId && fileData) {
+                        const file = JSON.parse(fileData);
+                        if (file && sourceEditorId !== editorId) {
+                            onTabDrop(file, sourceEditorId);
+                        }
+                    }
+                }}
             >
                 <div className="flex flex-row items-center justify-start">
                     {visibleTabs.map((file: FileDisplayItem, index: number) => {
@@ -148,11 +170,48 @@ export const EditorTabs = ({
                         return (
                             <div
                                 key={index + file.absolutePath}
+                                draggable
+                                onDragStart={(e) => {
+                                    setDraggedTabIndex(index);
+                                    e.dataTransfer.setData(
+                                        "editorId",
+                                        editorId,
+                                    );
+                                    e.dataTransfer.setData(
+                                        "file",
+                                        JSON.stringify(file),
+                                    );
+                                }}
+                                onDragOver={(e) => {
+                                    e.preventDefault();
+                                    const rect =
+                                        e.currentTarget.getBoundingClientRect();
+                                    const mouseX = e.clientX;
+                                    const isNearRightEdge =
+                                        mouseX > rect.right - 20;
+                                    setIsDraggingToRight(isNearRightEdge);
+                                }}
+                                onDragLeave={() => setIsDraggingToRight(false)}
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    if (draggedTabIndex === null) return;
+                                    const newTabs = [...openFiles];
+                                    const [moved] = newTabs.splice(
+                                        draggedTabIndex,
+                                        1,
+                                    );
+                                    newTabs.splice(index, 0, moved);
+                                    setOpenFilesAction(newTabs);
+                                    setDraggedTabIndex(null);
+                                    setIsDraggingToRight(false);
+                                }}
                                 className={cn(
                                     "flex w-32 cursor-pointer items-center justify-between border-x border-accent px-2 py-2 text-sm",
                                     isActive
-                                        ? "bg-background text-foreground dark:bg-[#1e1e1e] font-medium"
-                                        : "text-muted-foreground bg-muted hover:text-foreground",
+                                        ? "bg-background text-foreground dark:bg-[#1e1e1e]"
+                                        : "text-muted-foreground hover:text-foreground",
+                                    isDraggingToRight &&
+                                        "border-r-2 border-r-primary",
                                 )}
                                 onClick={() => handleTabSwitchAction(file)}
                             >

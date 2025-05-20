@@ -1,6 +1,7 @@
 "use client";
 
 import { commitSchema } from "@/lib/schemas/git-schemas";
+import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { RouterInputs, api } from "@/lib/trpc/react";
 import type {
     BottomPanelContentTab,
@@ -15,7 +16,7 @@ import type {
 } from "@/lib/types/repository";
 import { useTheme } from "next-themes";
 import dynamic from "next/dynamic";
-import {
+import React, {
     type ElementRef,
     ReactElement,
     RefObject,
@@ -23,6 +24,7 @@ import {
     useEffect,
     useRef,
     useState,
+    SetStateAction,
 } from "react";
 import { ImperativePanelGroupHandle } from "react-resizable-panels";
 import { toast } from "sonner";
@@ -41,6 +43,7 @@ import {
 } from "@/components/ui/resizable";
 import { findItemInTree } from "@/components/generic/generic";
 import DiagramPage from "@/app/[userslug]/[repositoryslug]/block-diagram/diagram-page";
+import { symbolTableManager } from "@/app/antlr/SystemVerilog/symbolTable";
 
 interface EditorPageProps {
     repository: Repository;
@@ -51,6 +54,16 @@ const DynamicEditor = dynamic(() => import("@/components/editor/editor"), {
     loading: () => <p>Loading...</p>,
     ssr: false,
 });
+
+interface EditorState {
+    files: FileDisplayItem[];
+    activeFile: FileDisplayItem | null;
+}
+
+interface SessionResponse {
+    id: string;
+    editors: Record<string, EditorState>;
+}
 
 /**
  * Editor page
@@ -73,6 +86,8 @@ export default function EditorPage({
         useRef<ElementRef<typeof ResizablePanelGroup>>(null);
     const horizontalGroupRef: RefObject<ImperativePanelGroupHandle> =
         useRef<ElementRef<typeof ResizablePanelGroup>>(null);
+    const editorGroupRef: RefObject<ImperativePanelGroupHandle> =
+        useRef<ElementRef<typeof ResizablePanelGroup>>(null);
 
     const [verticalCollapsed, setVerticalCollapsed] = useState<boolean>(false);
     const [horizontalCollapsed, setHorizontalCollapsed] =
@@ -81,8 +96,26 @@ export default function EditorPage({
         useState<number>(20);
     const [lastOpenedBottomPanelSize, setLastOpenedBottomPanelSize] =
         useState<number>(20);
-    const [activeFile, setActiveFile] = useState<FileDisplayItem | null>(null);
-    const [openFiles, setOpenFiles] = useState<Array<FileDisplayItem>>([]);
+    const lastSavedSessionRef = useRef<string | null>(null);
+
+    const [editors, setEditors] = useState<{
+        [key: string]: {
+            files: FileDisplayItem[];
+            activeFile: FileDisplayItem | null;
+        };
+    }>({
+        'editor1': {
+            files: [],
+            activeFile: null
+        }
+    });
+
+    const pendingNavigationRef = useRef<{
+        uri: monaco.Uri;
+        range: monaco.IRange;
+      } | null>(null);
+
+    const [activeEditorId, setActiveEditorId] = useState<string>('editor1');
 
     const [showDiffEditor, setShowDiffEditor] = useState<boolean>(false);
 
@@ -266,101 +299,239 @@ export default function EditorPage({
         }
     };
 
-    const onOpenDiffEditorAction = (filePath: string) => {
-        const newActiveFile: RepositoryItem | undefined = findItemInTree(
-            tree,
-            filePath,
-        );
-
-        if (!newActiveFile) return;
-        if (
-            newActiveFile.type !== "file-display" &&
-            newActiveFile.type !== "file"
-        ) {
-            return;
-        }
-
-        const fileDisplay: FileDisplayItem = {
+    const handleOpenFile = useCallback((item: FileDisplayItem | FileItem) => {
+        const absolutePath = item.absolutePath.toLowerCase();
+        const newFile: FileDisplayItem = {
             type: "file-display",
-            name: "Diff: " + newActiveFile.name,
-            absolutePath: "Diff: " + newActiveFile.absolutePath,
-            lastActivity: newActiveFile.lastActivity,
-            language: newActiveFile.language,
+            name: item.name,
+            absolutePath: item.absolutePath,
+            language: item.language || "txt",
+            lastActivity: new Date(),
         };
+        setShowDiffEditor(false);
 
-        if (
-            !openFiles.some(
-                (file: FileDisplayItem) => file.absolutePath === filePath,
-            )
-        ) {
-            setOpenFiles((prevFiles: Array<FileDisplayItem>) => [
-                ...prevFiles,
-                fileDisplay,
-            ]);
-        }
-        setShowDiffEditor(true);
-        setActiveFile(fileDisplay);
-    };
+        setEditors(prev => {
+            for (const [editorId, editor] of Object.entries(prev)) {
+                const match = editor.files.find(f => f.absolutePath.toLowerCase() === absolutePath);
+                if (match) {
+                    setActiveEditorId(editorId);
+                    return {
+                        ...prev,
+                        [editorId]: {
+                            ...editor,
+                            activeFile: match,
+                        },
+                    };
+                }
+            }
 
-    const handleFileClick = (item: RepositoryItem) => {
-        if (item.type === "file" || item.type === "file-display") {
-            handleOpenFile(item);
-        }
-    };
+            const currentEditor = prev[activeEditorId];
+            return {
+                ...prev,
+                [activeEditorId]: {
+                    files: [...currentEditor.files, newFile],
+                    activeFile: newFile,
+                },
+            };
+        });
+    }, [activeEditorId]);
 
-    const handleTabSwitch = (item: FileDisplayItem) => {
+
+
+    const handleTabSwitch = (item: FileDisplayItem, editorId: string) => {
         if (item.name.startsWith("Diff:")) {
             setShowDiffEditor(true);
         } else {
             setShowDiffEditor(false);
         }
-        setActiveFile(item);
-        setSelectedItem(item);
-        // TODO: expand all directories in which the item is nested
+        setEditors(prev => ({
+            ...prev,
+            [editorId]: {
+                ...prev[editorId],
+                activeFile: item
+            }
+        }));
     };
+
+    const handleCloseTab = (item: FileDisplayItem, editorId: string) => {
+        setEditors(prev => {
+            const editor = prev[editorId];
+            const newFiles = editor.files.filter(f => f.absolutePath !== item.absolutePath);
+
+            // If there are still files, just update the active file
+            if (newFiles.length > 0) {
+                return {
+                    ...prev,
+                    [editorId]: {
+                        files: newFiles,
+                        activeFile: editor.activeFile?.absolutePath === item.absolutePath
+                            ? newFiles[0] || null
+                            : editor.activeFile
+                    }
+                };
+            }
+
+            // If this is the last file in the editor
+            if (editorId === 'editor1') {
+                // If there are other editors, promote one to editor1
+                if (Object.keys(prev).length > 1) {
+                    const otherEditorId = Object.keys(prev).find(id => id !== 'editor1');
+                    if (otherEditorId) {
+                        const newEditors = { ...prev };
+                        newEditors['editor1'] = newEditors[otherEditorId];
+                        delete newEditors[otherEditorId];
+                        return newEditors;
+                    }
+                }
+                // If no other editors, just clear editor1
+                return {
+                    ...prev,
+                    [editorId]: {
+                        files: [],
+                        activeFile: null
+                    }
+                };
+            }
+
+            // For non-editor1 editors, remove them when empty
+            const newEditors = { ...prev };
+            delete newEditors[editorId];
+            return newEditors;
+        });
+    };
+
+    const handleSplitEditor = (item: FileDisplayItem) => {
+        const newEditorId = `editor${Object.keys(editors).length + 1}`;
+        setEditors(prev => {
+            // Find the source editor that contains the file
+            const sourceEditorId = Object.entries(prev).find(([, editor]) =>
+                editor.files.some(f => f.absolutePath === item.absolutePath)
+            )?.[0];
+
+            if (!sourceEditorId) return prev;
+
+            // Remove the file from the source editor
+            const newState = { ...prev };
+            newState[sourceEditorId] = {
+                ...prev[sourceEditorId],
+                files: prev[sourceEditorId].files.filter(f => f.absolutePath !== item.absolutePath),
+                activeFile: prev[sourceEditorId].activeFile?.absolutePath === item.absolutePath
+                    ? prev[sourceEditorId].files[0] || null
+                    : prev[sourceEditorId].activeFile
+            };
+
+            // Add the file to the new editor
+            newState[newEditorId] = {
+                files: [item],
+                activeFile: item
+            };
+
+            return newState;
+        });
+    };
+
+    const handleCloseAllTabs = (editorId: string) => {
+        setEditors(prev => {
+            if (editorId === 'editor1' && Object.keys(prev).length > 1) {
+                const otherEditorId = Object.keys(prev).find(id => id !== 'editor1');
+                if (otherEditorId) {
+                    const newEditors = { ...prev };
+                    newEditors['editor1'] = newEditors[otherEditorId];
+                    delete newEditors[otherEditorId];
+                    return newEditors;
+                }
+            }
+
+            if (editorId === 'editor1') {
+                return {
+                    ...prev,
+                    [editorId]: {
+                        files: [],
+                        activeFile: null
+                    }
+                };
+            }
+
+            const newEditors = { ...prev };
+            delete newEditors[editorId];
+            return newEditors;
+        });
+    }
+
+        const onOpenDiffEditorAction = (filePath: string) => {
+            const repoItem = findItemInTree(tree, filePath);
+            if (!repoItem || (repoItem.type !== "file" && repoItem.type !== "file-display")) return;
+
+            const newFile: FileDisplayItem = {
+                type: "file-display",
+                name: "Diff: " + repoItem.name,
+                absolutePath: "Diff: " + repoItem.absolutePath,
+                language: repoItem.language || "txt",
+                lastActivity: new Date(),
+            };
+
+            setShowDiffEditor(true);
+
+            setEditors(prev => {
+                const currentEditor = prev[activeEditorId];
+                const alreadyOpen = currentEditor.files.some(f => f.absolutePath === newFile.absolutePath);
+
+                return {
+                    ...prev,
+                    [activeEditorId]: {
+                        ...currentEditor,
+                        files: alreadyOpen ? currentEditor.files : [...currentEditor.files, newFile],
+                        activeFile: newFile,
+                    }
+                };
+            });
+        };
+
 
     const { data: session } = api.editor.getSession.useQuery({
         repoId: repository.id,
     });
     const saveSession = api.editor.saveSession.useMutation();
 
-    const handleCloseTab = (fileToClose: FileDisplayItem) => {
-        const filteredFiles = openFiles.filter(
-            (file) => file.name !== fileToClose.name,
-        );
-        setOpenFiles(filteredFiles);
-
-        if (activeFile?.name === fileToClose.name) {
-            setActiveFile(filteredFiles.length > 0 ? filteredFiles[0] : null);
-        }
-    };
-
-    useEffect(() => {
-        if (session) {
-            setOpenFiles(session.openFiles || []);
-            setActiveFile(session.activeFile);
-        }
-    }, [session]);
-
     const serializeFile = (file: FileDisplayItem) => ({
         name: file.name,
         type: file.type,
-        lastActivity: new Date(file.lastActivity),
+        lastActivity: new Date(new Date(file.lastActivity).toISOString()),
         language: file.language,
         absolutePath: file.absolutePath,
-    });
+      });
 
     const saveSessionDebounced = useDebouncedCallback(() => {
-        const transformedOpenFiles = openFiles.map(serializeFile);
+        const serializedEditors = Object.entries(editors).reduce((acc, [id, editor]) => {
+            acc[id] = {
+                files: editor.files.map(serializeFile),
+                activeFile: editor.activeFile ? serializeFile(editor.activeFile) : null
+            };
+            return acc;
+        }, {} as Record<string, { files: FileDisplayItem[]; activeFile: FileDisplayItem | null }>);
 
-        const transformedActiveFile = activeFile ? serializeFile(activeFile) : null;
-
-        saveSession.mutate({
-            activeFile: transformedActiveFile,
-            openFiles: transformedOpenFiles,
+        const sessionData = {
             repoId: repository.id,
-        });
-    }, 500);
+            editors: serializedEditors,
+          };
+
+          const sessionString = JSON.stringify(sessionData);
+          if (lastSavedSessionRef.current === sessionString) {
+            return;
+          }
+          lastSavedSessionRef.current = sessionString;
+
+          saveSession.mutate(sessionData);
+    }, 1500);
+
+    useEffect(() => {
+        if (session) {
+            const sessionResponse = session as unknown as SessionResponse;
+            if (sessionResponse.editors) {
+                setEditors(sessionResponse.editors);
+            }
+        }
+    }, [session]);
 
     const isDiagramFile = (file: FileDisplayItem) => {
         if (file.name != undefined) {
@@ -371,32 +542,30 @@ export default function EditorPage({
     };
 
     useEffect(() => {
-        saveSessionDebounced();
-    }, [openFiles, activeFile]);
+        const serialized = JSON.stringify(editors);
+        if (lastSavedSessionRef.current !== serialized) {
+          lastSavedSessionRef.current = serialized;
+          saveSessionDebounced();
+        }
+      }, [editors, saveSessionDebounced]);
 
-    const handleOpenFile = useCallback((item: FileDisplayItem | FileItem) => {
-        const absolutePath = item.absolutePath.toLowerCase();
-
-        setOpenFiles((prev) => {
-            const exists = prev.some((f) => f.absolutePath.toLowerCase() === absolutePath);
-            if (!exists) {
-                const newFile: FileDisplayItem = {
-                    type: "file-display",
-                    name: item.name,
-                    absolutePath: item.absolutePath,
-                    language: item.language,
-                    lastActivity: item.lastActivity,
-                };
-                setShowDiffEditor(false);
-                setActiveFile(newFile);
-                return [...prev, newFile];
-            } else {
-                const file = prev.find((f) => f.absolutePath.toLowerCase() === absolutePath)!;
-                setActiveFile(file);
-                return prev;
-            }
-        });
-    }, []);
+    const handleEditorReady = useCallback(() => {
+        if (repository.symbolTable) {
+            symbolTableManager.initializeWithData({
+                ...repository.symbolTable,
+                fileSymbols: {
+                    ...repository.symbolTable.fileSymbols,
+                    symbols: repository.symbolTable.fileSymbols.symbols.map(symbol => ({
+                        ...symbol,
+                        type: "typedef" as const,
+                        scope: symbol.scope ?? "<global>",
+                    })),
+                },
+            });
+        } else {
+            symbolTableManager.initialize();
+        }
+    }, [repository]);
 
     const editorTheme = () => {
         if (theme === "dark" || resolvedTheme === "dark") {
@@ -407,17 +576,71 @@ export default function EditorPage({
         return "vs-light";
     };
 
-    const resolveMainContent = () => {
-        const diagramCondition: boolean = !!(activeFile && !showDiffEditor && isDiagramFile(activeFile));
-        const diffEditorCondition: boolean = !!(activeFile && showDiffEditor && !isDiagramFile(activeFile));
-        const editorCondition: boolean = !!(activeFile && !showDiffEditor && !isDiagramFile(activeFile));
+    const handleFileClick = (item: RepositoryItem) => {
+        if (item.type === "file" || item.type === "file-display") {
+            const fileItem: FileDisplayItem = {
+                type: "file-display",
+                name: item.name,
+                absolutePath: item.absolutePath.replace(/\\/g, "/"),
+                language: item.language || "txt",
+                lastActivity: new Date(),
+            };
+            handleOpenFile(fileItem);
+        }
+    };
+
+    const hasOpenFiles = Object.values(editors).some(editor => editor.files.length > 0);
+
+    const handleMoveTab = (file: FileDisplayItem, sourceEditorId: string, targetEditorId: string) => {
+        setEditors(prev => {
+            const newEditors = { ...prev };
+
+            // Remove file from source editor
+            newEditors[sourceEditorId] = {
+                ...prev[sourceEditorId],
+                files: prev[sourceEditorId].files.filter(f => f.absolutePath !== file.absolutePath),
+                activeFile: prev[sourceEditorId].activeFile?.absolutePath === file.absolutePath
+                    ? prev[sourceEditorId].files[0] || null
+                    : prev[sourceEditorId].activeFile
+            };
+
+            // Add file to target editor if it's not already there
+            if (!newEditors[targetEditorId].files.some(f => f.absolutePath === file.absolutePath)) {
+                newEditors[targetEditorId] = {
+                    ...prev[targetEditorId],
+                    files: [...prev[targetEditorId].files, file],
+                    activeFile: file
+                };
+            }
+
+            // If source editor is empty and it's editor1, promote another editor
+            if (newEditors[sourceEditorId].files.length === 0 && sourceEditorId === 'editor1') {
+                const otherEditorId = Object.keys(newEditors).find(id => id !== 'editor1');
+                if (otherEditorId) {
+                    newEditors['editor1'] = newEditors[otherEditorId];
+                    delete newEditors[otherEditorId];
+                }
+            }
+            // If source editor is empty and not editor1, remove it
+            else if (newEditors[sourceEditorId].files.length === 0 && sourceEditorId !== 'editor1') {
+                delete newEditors[sourceEditorId];
+            }
+
+            return newEditors;
+        });
+    };
+
+    const resolveMainContent = (editor: { files?: FileDisplayItem[]; activeFile: FileDisplayItem | null; }) => {
+        const diagramCondition: boolean = !!(editor.activeFile && !showDiffEditor && isDiagramFile(editor.activeFile));
+        const diffEditorCondition: boolean = !!(editor.activeFile && showDiffEditor && !isDiagramFile(editor.activeFile));
+        const editorCondition: boolean = !!(editor.activeFile && !showDiffEditor && !isDiagramFile(editor.activeFile));
 
         switch (true) {
             case diagramCondition:
                 return (
                     <DiagramPage
                         repository={repository}
-                        activeFile={activeFile!}
+                        activeFile={editor.activeFile!}
                         tree={tree}
                         setTree={setTree}
                     />
@@ -430,24 +653,23 @@ export default function EditorPage({
                             "/" +
                             repository.name +
                             "/" +
-                            activeFile!.absolutePath
+                            editor.activeFile!.absolutePath
                         }
-                        language={activeFile!.language}
+                        language={editor.activeFile!.language}
                         theme={editorTheme()}
                     />
                 );
             case editorCondition:
                 return (
                     <DynamicEditor
-                        filePath={
-                            repository.ownerName +
-                            "/" +
-                            repository.name +
-                            "/" +
-                            activeFile!.absolutePath
-                        }
-                        language={activeFile!.language}
+                        key={editor.activeFile!.absolutePath}
+                        filePath={`${repository.ownerName}/${repository.name}/${editor.activeFile!.absolutePath}`}
+                        onOpenFile={handleOpenFile}
+                        onReady={handleEditorReady}
+                        language={editor.activeFile!.language.replace(" ", "")}
                         theme={editorTheme()}
+                        activeFile={editor.activeFile}
+                        pendingNavigationRef={pendingNavigationRef}
                     />
                 );
             default:
@@ -538,16 +760,84 @@ export default function EditorPage({
 
                         <ResizableHandle />
 
-                        <ResizablePanel defaultSize={80} minSize={15}>
-                            <EditorTabs
-                                openFiles={openFiles}
-                                setOpenFilesAction={setOpenFiles}
-                                activeFile={activeFile}
-                                setActiveFileAction={setActiveFile}
-                                handleTabSwitchAction={handleTabSwitch}
-                                handleCloseTabAction={handleCloseTab}
-                            />
-                            {resolveMainContent()}
+                        <ResizablePanel defaultSize={80}>
+                            {!hasOpenFiles ? (
+                                <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                                    No file open
+                                </div>
+                            ) : (
+                                <ResizablePanelGroup
+                                    direction="horizontal"
+                                    ref={editorGroupRef}
+                                >
+                                    {Object.entries(editors).map(([editorId, editor], index) => (
+                                        <React.Fragment key={editorId}>
+                                            {index > 0 && <ResizableHandle />}
+                                            <ResizablePanel defaultSize={100 / Object.keys(editors).length}>
+                                                <EditorTabs
+                                                    openFiles={editor.files}
+                                                    setOpenFilesAction={(files) => {
+                                                        if (Array.isArray(files)) {
+                                                            setEditors(prev => ({
+                                                                ...prev,
+                                                                [editorId]: { ...prev[editorId], files }
+                                                            }));
+                                                        }
+                                                    }}
+                                                    activeFile={editor.activeFile}
+                                                    setActiveFileAction={(value: SetStateAction<FileDisplayItem | null>) => {
+                                                        setEditors(prev => {
+                                                            const newState = { ...prev };
+                                                            newState[editorId] = {
+                                                                ...prev[editorId],
+                                                                activeFile: typeof value === 'function' ? value(prev[editorId].activeFile) : value
+                                                            };
+                                                            return newState;
+                                                        });
+                                                    }}
+                                                    handleTabSwitchAction={(file) => handleTabSwitch(file, editorId)}
+                                                    handleCloseTabAction={(file) => handleCloseTab(file, editorId)}
+                                                    handleSplitEditor={handleSplitEditor}
+                                                    handleCloseAllTabs={() => handleCloseAllTabs(editorId)}
+                                                    editorId={editorId}
+                                                    onTabDrop={(file, sourceEditorId) => handleMoveTab(file, sourceEditorId, editorId)}
+                                                />
+                                                <div className="relative h-full">
+                                                    {editor.activeFile && Object.keys(editor.activeFile).length > 0 ? (
+                                                        resolveMainContent(editor)
+                                                    ) : null}
+                                                    {Object.keys(editors).length < 2 && (editor.activeFile && !isDiagramFile(editor.activeFile)) && (
+                                                        <div
+                                                            className="absolute right-0 top-0 bottom-0 w-64 flex items-center justify-center"
+                                                            onDragOver={(e) => {
+                                                                e.preventDefault();
+                                                            }}
+                                                            onDrop={(e) => {
+                                                                e.preventDefault();
+                                                                const sourceEditorId = e.dataTransfer.getData('editorId');
+                                                                const fileData = e.dataTransfer.getData('file');
+                                                                if (fileData) {
+                                                                    const file = JSON.parse(fileData);
+                                                                    if (file) {
+                                                                        if (sourceEditorId) {
+                                                                            const editorId = Object.keys(editors)[0];
+                                                                            if (editors[editorId].files.length > 1) {
+                                                                                handleSplitEditor(file);
+                                                                            }
+                                                                        } else {
+                                                                            handleSplitEditor(file);
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }}
+                                                        />
+                                                    )}
+                                                </div>
+                                            </ResizablePanel>
+                                        </React.Fragment>
+                                    ))}
+                                </ResizablePanelGroup>
+                            )}
                         </ResizablePanel>
                     </ResizablePanelGroup>
                 </ResizablePanel>

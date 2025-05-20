@@ -28,6 +28,7 @@ export type Repository = {
             totalSymbols: number;
             files: number;
             symbols: Array<{
+                scope: string;
                 name: string;
                 type: string;
                 uri: string;

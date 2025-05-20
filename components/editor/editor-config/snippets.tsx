@@ -1,14 +1,22 @@
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { InterfaceSymbolInfo, ModuleSymbolInfo, ProgramSymbolInfo, symbolTableManager } from "@/antlr/SystemVerilog/utilities/monacoEditor/symbolTable";
 
-let snippetsCache: { [key: string]: any } = {};
-let languageCompletionProviders: { [key: string]: boolean } = {};
+const snippetsCache: Record<string, SnippetsMap> = {};
+const languageCompletionProviders: { [key: string]: boolean } = {};
 
 const languageToSnippetFileMap: { [key: string]: string } = {
   systemverilog: "systemverilog.json",
   vhdl: "vhdl.json",
   verilog: "verilog.json",
 };
+
+type Snippet = {
+    prefix: string;
+    body: string | string[];
+    description?: string;
+};
+
+type SnippetsMap = Record<string, Snippet>;
 
 export async function loadSnippets(language: string) {
   const snippetFile = languageToSnippetFileMap[language];
@@ -19,7 +27,8 @@ export async function loadSnippets(language: string) {
 
   try {
     const response = await fetch(`/snippets/${snippetFile}`);
-    const snippets = await response.json();
+    const rawSnippets = await response.json();
+    const snippets = rawSnippets as SnippetsMap;
     snippetsCache[language] = snippets;
 
     if (languageCompletionProviders[language]) {
@@ -40,7 +49,7 @@ export async function loadSnippets(language: string) {
         );
 
         const staticSuggestions = Object.entries(snippets).map(
-          ([key, snippet]: [string, any]) => ({
+          ([, snippet]) => ({
             label: snippet.prefix,
             kind: monaco.languages.CompletionItemKind.Snippet,
             insertText: Array.isArray(snippet.body)
@@ -67,7 +76,7 @@ export async function loadSnippets(language: string) {
 
           for (const symbol of matchingSymbols) {
             const instanceName = `\${0:u_${symbol.name}}`;
-            const portLines = symbol.ports.map((p, i) => `  .${p}(\${${i + 1}:${p}})`);
+            const portLines = symbol.ports.map((p, i) => `  .${p.name}(\${${i + 1}:${p.name}})`);
 
             dynamicSuggestions.push({
               label: `${symbol.name} instantiation`,
@@ -131,7 +140,7 @@ export async function loadSnippets(language: string) {
         ].filter(
           (s, i, arr) => arr.findIndex((t) => t.label === s.label) === i
         );
-
+        
         return { suggestions };
       },
     });

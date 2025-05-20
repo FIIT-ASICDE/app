@@ -160,7 +160,7 @@ class TopModuleVisitor
                         extPort.direction === 'in' ? 'input' :
                             extPort.direction === 'out' ? 'output' :
                                 extPort.direction === 'inout' ? 'inout' :
-                                    extPort.direction as any;
+                                    extPort.direction;
                     width = extPort.width ?? width;
                 }
             }
