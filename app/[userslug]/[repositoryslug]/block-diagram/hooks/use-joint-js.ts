@@ -404,7 +404,6 @@ const useJointJs = (
                     isLinkingRef.current = false;
                 }
             });
-            const selectedElements: dia.Element[] = [];
 
             // Handle element selection and tool addition
             paper.on('element:pointerclick', (elementView) => {
