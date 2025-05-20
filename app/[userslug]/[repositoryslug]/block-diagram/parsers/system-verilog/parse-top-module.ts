@@ -19,7 +19,7 @@ import {QuietErrorListener } from '@/app/[userslug]/[repositoryslug]/block-diagr
 // Interface representing a port in a SystemVerilog module
 export interface ModulePort {
     name: string;           // Port identifier
-    direction: 'input' | 'output' | 'inout' | 'in' | 'out';  // Port direction
+    direction: 'input' | 'output' | 'inout';  // Port direction
     type?: string;         // Data type of the port
     width?: number;        // Bit width of the port
 }
@@ -72,16 +72,16 @@ export function parseTopModule(
     const lexer = new SystemVerilogLexer(inputStream);
     const tokens = new CommonTokenStream(lexer);
     const parserInstance = new SystemVerilogParser(tokens);
-        
+
         // Configure error handling
         parserInstance.removeErrorListeners();
         parserInstance.addErrorListener(new QuietErrorListener());
-        
+
         // Parse and visit the syntax tree
     const tree = parserInstance.source_text();
     const visitor = new TopModuleVisitor(externalMods);
     visitor.visit(tree);
-        
+
     return visitor.topModule;
     } catch (error) {
         console.error('Error parsing top module:', error);
@@ -93,7 +93,7 @@ export function parseTopModule(
 class TopModuleVisitor
     extends AbstractParseTreeVisitor<void>
     implements SystemVerilogParserVisitor<void> {
-    
+
     public topModule: ParsedTopModule | null = null;  // Stores the parsed top module
     private current: ParsedTopModule | null = null;   // Currently processed module
     private external: ParsedModule[];                 // List of external module definitions
@@ -117,16 +117,16 @@ class TopModuleVisitor
 
         // Initialize new top module structure
         this.current = { name, ports: [], subModules: [] };
-        
+
         // Process port declarations if present
         const portList = header.list_of_port_declarations();
         if (portList) this.visitList_of_port_declarations(portList);
-        
+
         // Process module items (including submodule instantiations)
         for (const mi of ctx.module_item() ?? []) {
             mi.accept(this);
         }
-        
+
         // Store completed module and reset current
         this.topModule = this.current;
         this.current = null;
@@ -200,7 +200,7 @@ class TopModuleVisitor
             const portName = npc.port_identifier()?.text ?? '';
             const expr = npc.port_assign()?.expression()?.text ?? '';
             let width = 1;
-            let direction: 'input'|'output' = 'input';
+            let direction: 'input'|'output'|'inout' = 'input';
 
             // Get port information from external module if available
             if (extMod) {
@@ -209,7 +209,7 @@ class TopModuleVisitor
                     direction =
                         extPort.direction === 'input' ? 'input' :
                             extPort.direction === 'output' ? 'output' :
-                                extPort.direction as any;
+                                extPort.direction;
                     width = extPort.width ?? width;
                 }
             }

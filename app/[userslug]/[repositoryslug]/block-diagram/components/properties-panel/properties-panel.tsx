@@ -1,6 +1,4 @@
 // pages/block-diagram/components/properties-panel/properties-panel.tsx
-// Tento komponent umožňuje používateľovi upravovať vlastnosti vybraného prvku v diagrame
-
 import React, { useState, useEffect } from "react";
 import { useHotkeys } from "@/app/[userslug]/[repositoryslug]/block-diagram/hooks/use-hotkeys";
 import { useDiagramContext } from "@/app/[userslug]/[repositoryslug]/block-diagram/context/use-diagram-context";
@@ -100,7 +98,7 @@ interface Properties {
 // Main Properties Panel Component
 const PropertiesPanel = () => {
     // Context and state management for the entire diagram editor
-    const { 
+    const {
         selectedElement,          // Currently selected element
         graph,                    // JointJS graph instance
         setSelectedElement,       // Function to update selected element
@@ -114,7 +112,7 @@ const PropertiesPanel = () => {
         setParseModulesResults,   // Function to update parsed modules
         checkLanguageLock        // Function to check if language can be changed
     } = useDiagramContext();
-    
+
     // Initialize properties state with default values
     const [properties, setProperties] = useState<Properties>({
         label: '',
@@ -139,7 +137,6 @@ const PropertiesPanel = () => {
         moduleType: 'new',
         existingModule: '',
     });
-
     // UI State Management
     const [errorMessage, setErrorMessage] = useState('');           // Error message for form validation
     const [showAddPortDialog, setShowAddPortDialog] = useState(false); // Control port addition dialog
@@ -152,37 +149,6 @@ const PropertiesPanel = () => {
     const [showErrorNotification, setShowErrorNotification] = useState(false); // Error notification control
     const [errors, setErrors] = useState<Record<string, string>>({}); // Form validation errors
     const [clipboardCell, setClipboardCell] = useState<dia.Cell | null>(null); // Clipboard for copy/paste operations
-
-    // Element type definitions and their corresponding classes
-    type ElementTypeKey =
-        | 'input' | 'output' | 'and' | 'or' | 'xor' | 'xnor' | 'nand' | 'nor' | 'not'
-        | 'alu' | 'comparator' | 'decoder' | 'encoder'
-        | 'multiplexer' | 'splitter' | 'combiner'
-        | 'sram' | 'register' | 'module';
-
-    const elementTypes: Record<ElementTypeKey, { class: any; create: any }> = {
-        'input': { class: Port, create: JointJsInputPort },
-        'output': { class: Port, create: JointJsOutputPort },
-        'and': { class: And, create: JointJsAnd },
-        'or': { class: Or, create: JointJsOr },
-        'xor': { class: Xor, create: JointJsXor },
-        'xnor': { class: Xnor, create: JointJsXnor },
-        'nand': { class: Nand, create: JointJsNand },
-        'nor': { class: Nor, create: JointJsNor },
-        'not': {class: Not, create: JointJsNot },
-        'alu': { class: Alu, create: JointJsAlu },
-        'comparator': { class: Comparator, create: JointJsComparator },
-        'decoder': { class: Decoder, create: JointJsDecoder },
-        'encoder': { class: Encoder, create: JointJsEncoder },
-        'multiplexer': { class: Multiplexer, create: JointJsMultiplexer },
-        'splitter': { class: Splitter, create: JointJsSplitter },
-        'combiner': { class: Combiner, create: JointJsCombiner },
-        'sram': { class: Sram, create: JointJsSram },
-        'register': { class: Register, create: JointJsRegister },
-        'module': { class: Module, create: JointJsModule}
-
-    };
-
 
     useEffect(() => {
         if (selectedElement) {
@@ -405,10 +371,10 @@ const PropertiesPanel = () => {
         }
     }, [showSaveNotification, showErrorNotification]);
 
-    
+
 
     // Port Management Functions
-    
+
     // Add new input port to the element
     const handleAddInputPort = () => {
         setNewPortType('input');
@@ -557,29 +523,16 @@ const PropertiesPanel = () => {
         if (!selectedElement) return;
 
         const elType = selectedElement.attributes.elType;
-        const elementType = elementTypes[elType as ElementTypeKey];
+        const { x, y } = selectedElement.position();
+        let elementData;
+        let newElement;
 
-        if (elementType) {
-            const { x, y } = selectedElement.position();
-            const elementData = new elementType.class();
-            elementData.name = properties.label || '';
-            elementData.position = { x, y };
-
-            if (!['splitter', 'combiner', 'module', ].includes(elType)) {
-                if (properties.bandwidthType === 'bit') {
-                    elementData.dataBandwidth = 1;
-                }
-                else {
-                    elementData.dataBandwidth = properties.bandwidth;
-                }
-            }
-            if (elType === 'comparator') {
-                elementData.type = properties.comparatorType || '>';
-            }
-            if (elType === 'alu') {
-                elementData.type = properties.aluType || '+';
-            }
-            if (['input', 'output', 'multiplexer', 'register', 'sram'].includes(elType)) {
+        switch (elType) {
+            case 'input':
+                elementData = new Port();
+                elementData.name = properties.label || '';
+                elementData.position = { x, y };
+                elementData.dataBandwidth = properties.bandwidthType === 'bit' ? 1 : (properties.bandwidth || 1);
                 if (properties.bandwidthType === 'struct') {
                     elementData.structPackage = properties.structPackage || '';
                     elementData.structTypeDef = properties.structTypeDef || '';
@@ -590,8 +543,191 @@ const PropertiesPanel = () => {
                     elementData.structTypeDef = '';
                     elementData.language = '';
                 }
-            }
-            if (['combiner', 'splitter'].includes(elType)) {
+                newElement = JointJsInputPort(elementData);
+                break;
+
+            case 'output':
+                elementData = new Port();
+                elementData.name = properties.label || '';
+                elementData.position = { x, y };
+                elementData.dataBandwidth = properties.bandwidthType === 'bit' ? 1 : (properties.bandwidth || 1);
+                if (properties.bandwidthType === 'struct') {
+                    elementData.structPackage = properties.structPackage || '';
+                    elementData.structTypeDef = properties.structTypeDef || '';
+                    elementData.language = selectedLanguage;
+                }
+                else {
+                    elementData.structPackage = '';
+                    elementData.structTypeDef = '';
+                    elementData.language = '';
+                }
+                newElement = JointJsOutputPort(elementData);
+                break;
+
+            case 'and':
+                elementData = new And();
+                elementData.name = properties.label || '';
+                elementData.position = { x, y };
+                elementData.dataBandwidth = properties.bandwidthType === 'bit' ? 1 : (properties.bandwidth || 1);
+                elementData.inPorts = properties.inputPorts || 2;
+                newElement = JointJsAnd(elementData);
+                break;
+
+            case 'or':
+                elementData = new Or();
+                elementData.name = properties.label || '';
+                elementData.position = { x, y };
+                elementData.dataBandwidth = properties.bandwidthType === 'bit' ? 1 : (properties.bandwidth || 1);
+                elementData.inPorts = properties.inputPorts || 2;
+                newElement = JointJsOr(elementData);
+                break;
+
+            case 'xor':
+                elementData = new Xor();
+                elementData.name = properties.label || '';
+                elementData.position = { x, y };
+                elementData.dataBandwidth = properties.bandwidthType === 'bit' ? 1 : (properties.bandwidth || 1);
+                elementData.inPorts = properties.inputPorts || 2;
+                newElement = JointJsXor(elementData);
+                break;
+
+            case 'xnor':
+                elementData = new Xnor();
+                elementData.name = properties.label || '';
+                elementData.position = { x, y };
+                elementData.dataBandwidth = properties.bandwidthType === 'bit' ? 1 : (properties.bandwidth || 1);
+                elementData.inPorts = properties.inputPorts || 2;
+                newElement = JointJsXnor(elementData);
+                break;
+
+            case 'nand':
+                elementData = new Nand();
+                elementData.name = properties.label || '';
+                elementData.position = { x, y };
+                elementData.dataBandwidth = properties.bandwidthType === 'bit' ? 1 : (properties.bandwidth || 1);
+                elementData.inPorts = properties.inputPorts || 2;
+                newElement = JointJsNand(elementData);
+                break;
+
+            case 'nor':
+                elementData = new Nor();
+                elementData.name = properties.label || '';
+                elementData.position = { x, y };
+                elementData.dataBandwidth = properties.bandwidthType === 'bit' ? 1 : (properties.bandwidth || 1);
+                elementData.inPorts = properties.inputPorts || 2;
+                newElement = JointJsNor(elementData);
+                break;
+
+            case 'not':
+                elementData = new Not();
+                elementData.name = properties.label || '';
+                elementData.position = { x, y };
+                elementData.dataBandwidth = properties.bandwidthType === 'bit' ? 1 : (properties.bandwidth || 1);
+                newElement = JointJsNot(elementData);
+                break;
+
+            case 'multiplexer':
+                elementData = new Multiplexer();
+                elementData.name = properties.label || '';
+                elementData.position = { x, y };
+                elementData.dataBandwidth = properties.bandwidthType === 'bit' ? 1 : (properties.bandwidth || 1);
+                if (properties.bandwidthType === 'struct') {
+                    elementData.structPackage = properties.structPackage || '';
+                    elementData.structTypeDef = properties.structTypeDef || '';
+                    elementData.language = selectedLanguage;
+                }
+                else {
+                    elementData.structPackage = '';
+                    elementData.structTypeDef = '';
+                    elementData.language = '';
+                }
+                elementData.dataPorts = properties.inputPorts || 2;
+                newElement = JointJsMultiplexer(elementData);
+                break;
+
+            case 'decoder':
+                elementData = new Decoder();
+                elementData.name = properties.label || '';
+                elementData.position = { x, y };
+                elementData.dataBandwidth = properties.bandwidthType === 'bit' ? 1 : (properties.bandwidth || 1);
+                newElement = JointJsDecoder(elementData);
+                break;
+
+            case 'encoder':
+                elementData = new Encoder();
+                elementData.name = properties.label || '';
+                elementData.position = { x, y };
+                elementData.dataBandwidth = properties.bandwidthType === 'bit' ? 1 : (properties.bandwidth || 1);
+                newElement = JointJsEncoder(elementData);
+                break;
+
+            case 'alu':
+                elementData = new Alu();
+                elementData.name = properties.label || '';
+                elementData.position = { x, y };
+                elementData.dataBandwidth = properties.bandwidthType === 'bit' ? 1 : (properties.bandwidth || 1);
+                elementData.type = properties.aluType || '+';
+                newElement = JointJsAlu(elementData);
+                break;
+
+            case 'comparator':
+                elementData = new Comparator();
+                elementData.name = properties.label || '';
+                elementData.position = { x, y };
+                elementData.dataBandwidth = properties.bandwidthType === 'bit' ? 1 : (properties.bandwidth || 1);
+                elementData.type = properties.comparatorType || '>';
+                newElement = JointJsComparator(elementData);
+                break;
+
+            case 'sram':
+                elementData = new Sram();
+                elementData.name = properties.label || '';
+                elementData.position = { x, y };
+                elementData.dataBandwidth = properties.bandwidthType === 'bit' ? 1 : (properties.bandwidth || 1);
+                if (properties.bandwidthType === 'struct') {
+                    elementData.structPackage = properties.structPackage || '';
+                    elementData.structTypeDef = properties.structTypeDef || '';
+                    elementData.language = selectedLanguage;
+                }
+                else {
+                    elementData.structPackage = '';
+                    elementData.structTypeDef = '';
+                    elementData.language = '';
+                }
+                elementData.addressBandwidth = properties.addressBandwidth || 8;
+                elementData.clkEdge = properties.clkEdge;
+                newElement = JointJsSram(elementData);
+                break;
+
+            case 'register':
+                elementData = new Register();
+                elementData.name = properties.label || '';
+                elementData.position = { x, y };
+                elementData.dataBandwidth = properties.bandwidthType === 'bit' ? 1 : (properties.bandwidth || 1);
+                if (properties.bandwidthType === 'struct') {
+                    elementData.structPackage = properties.structPackage || '';
+                    elementData.structTypeDef = properties.structTypeDef || '';
+                    elementData.language = selectedLanguage;
+                }
+                else {
+                    elementData.structPackage = '';
+                    elementData.structTypeDef = '';
+                    elementData.language = '';
+                }
+                elementData.resetPort = properties.resetPort || false;
+                elementData.enablePort = properties.enablePort || false;
+                elementData.clkEdge = properties.clkEdge;
+                elementData.rstEdge = properties.rstEdge;
+                elementData.qInverted = properties.qInverted;
+                elementData.rstType = properties.rstType;
+                newElement = JointJsRegister(elementData);
+                break;
+
+            case 'splitter':
+                elementData = new Splitter();
+                elementData.name = properties.label || '';
+                elementData.position = { x, y };
+                elementData.bitPortType = properties.bitPortType || 'custom';
                 if (properties.bitPortType === 'struct') {
                     elementData.structPackage = properties.structPackage || '';
                     elementData.structTypeDef = properties.structTypeDef || '';
@@ -602,79 +738,65 @@ const PropertiesPanel = () => {
                     elementData.structTypeDef = '';
                     elementData.language = '';
                 }
-
-            }
-            if (['and', 'or', 'nor', 'xnor', 'nand', 'xor'].includes(elType)) {
-                elementData.inPorts = properties.inputPorts || 2;
-            }
-            if (elType === 'multiplexer') {
-                elementData.dataPorts = properties.inputPorts || 2;
-            }
-            if (elType === 'sram') {
-                elementData.addressBandwidth = properties.addressBandwidth || 8;
-                elementData.clkEdge = properties.clkEdge;
-            }
-            if (elType === 'register') {
-                elementData.resetPort = properties.resetPort || false;
-                elementData.enablePort = properties.enablePort || false;
-                elementData.clkEdge = properties.clkEdge;
-                elementData.rstEdge = properties.rstEdge;
-                elementData.qInverted = properties.qInverted;
-                elementData.rstType = properties.rstType;
-            }
-            if (elType === 'combiner') {
-                elementData.bitPortType = properties.bitPortType || 'custom';
                 if (properties.bitPortType === 'custom') {
-                    elementData.inPorts = properties.createdInPorts?.map((p) => ({
+                    elementData.outPorts = (properties.createdOutPorts || []).map((p) => ({
+                        name: p.name,
+                        bandwidth: p.bandwidth,
+                        startBit: p.startBit || 0,
+                        endBit: p.endBit || 0
+                    }));
+                }
+                newElement = JointJsSplitter(elementData, parseResults);
+                break;
+
+            case 'combiner':
+                elementData = new Combiner();
+                elementData.name = properties.label || '';
+                elementData.position = { x, y };
+                elementData.bitPortType = properties.bitPortType || 'custom';
+                if (properties.bitPortType === 'struct') {
+                    elementData.structPackage = properties.structPackage || '';
+                    elementData.structTypeDef = properties.structTypeDef || '';
+                    elementData.language = selectedLanguage;
+                }
+                else {
+                    elementData.structPackage = '';
+                    elementData.structTypeDef = '';
+                    elementData.language = '';
+                }
+                if (properties.bitPortType === 'custom') {
+                    elementData.inPorts = (properties.createdInPorts || []).map((p) => ({
                         name: p.name,
                         bandwidth: p.bandwidth,
                     }));
                 }
-            }
-            if (elType === 'splitter') {
-                elementData.bitPortType = properties.bitPortType || 'custom';
-                if (properties.bitPortType === 'custom') {
-                    elementData.outPorts = properties.createdOutPorts?.map((p) => ({
-                        name: p.name,
-                        bandwidth: p.bandwidth,
-                        startBit: p.startBit,
-                        endBit: p.endBit
-                    }));
-                }
-            }
-            if (elType === 'module') {
-                elementData.moduleType = properties.moduleType;
+                newElement = JointJsCombiner(elementData, parseResults);
+                break;
 
-                elementData.existingModule = properties.moduleType === 'existing' ? properties.existingModule : '';
-
+            case 'module':
+                elementData = new Module();
+                elementData.name = properties.label || '';
+                elementData.position = { x, y };
+                elementData.moduleType = properties.moduleType || 'new';
+                elementData.existingModule = properties.moduleType === 'existing' ? (properties.existingModule || '') : '';
                 elementData.instance = properties.instance || '';
-
-                elementData.inPorts = properties.createdInPorts?.map((p) => ({
+                elementData.inPorts = (properties.createdInPorts || []).map((p) => ({
                     name: p.name,
                     bandwidth: p.bandwidth,
                 }));
-                elementData.outPorts = properties.createdOutPorts?.map((p) => ({
+                elementData.outPorts = (properties.createdOutPorts || []).map((p) => ({
                     name: p.name,
                     bandwidth: p.bandwidth,
                 }));
-            }
-
-            graph.removeCells([selectedElement]);
-            let newElement;
-            if (elType === 'splitter' || elType === 'combiner') {
-                newElement = elementType.create(elementData, parseResults);
-            }
-            else if (elType === 'module') {
-                newElement = elementType.create(elementData, parseModulesResults);
-            }
-            else {
-                newElement = elementType.create(elementData);
-            }
-            graph.addCell(newElement);
-            setSelectedElement(newElement);
-
+                newElement = JointJsModule(elementData, parseModulesResults);
+                break;
         }
 
+        if (newElement) {
+            graph.removeCells([selectedElement]);
+            graph.addCell(newElement);
+            setSelectedElement(newElement);
+        }
     };
 
 
@@ -688,13 +810,13 @@ const PropertiesPanel = () => {
             setShowErrorNotification(true);
             return;
         }
-        
+
         setShowSaveNotification(true);
         handleElementChange();
     };
 
     // Clipboard Operations
-    
+
     // Copy selected element
     function handleCopy() {
         if (!selectedElement) return;
@@ -707,7 +829,7 @@ const PropertiesPanel = () => {
     function handlePaste() {
         if (!clipboardCell) return;
         const newCell = clipboardCell.clone();
-        
+
         // Update name to avoid duplicates
         if (newCell.attributes.name && newCell.attributes.attrs?.label?.text) {
             newCell.attr('label/text', newCell.attributes.attrs.label.text + '_copy');

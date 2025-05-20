@@ -156,7 +156,7 @@ export class PackageStructVisitor
     }
 
     // Helper method to find struct or union keyword in data type context
-    private findStructUnion(ctx: parser.Data_typeContext): any {
+    private findStructUnion(ctx: parser.Data_typeContext) {
         for (let i = 0; i < ctx.childCount; i++) {
             const child = ctx.getChild(i);
             if (child.text === 'struct' || child.text === 'union') {
@@ -184,13 +184,13 @@ export class PackageStructVisitor
         for (let i = 0; i < ctx.childCount; i++) {
             const child = ctx.getChild(i);
             if (child.constructor.name.includes('Struct_union_memberContext')) {
-                this.processStructMember(child);
+                this.processStructMember(child as parser.Struct_union_memberContext);
             }
         }
     }
 
     // Process individual struct member and extract field information
-    private processStructMember(ctx: any): void {
+    private processStructMember(ctx: parser.Struct_union_memberContext): void {
         console.log("Processing struct member");
         if (!this.currentStruct) return;
 
@@ -210,7 +210,7 @@ export class PackageStructVisitor
             if (dataType) {
                 const packedDimension = dataType.packed_dimension ? dataType.packed_dimension() : null;
                 if (packedDimension && packedDimension.length > 0) {
-                    const range = packedDimension[0].constant_range ? packedDimension[0].constant_range() : null;
+                    const range = packedDimension[0].constant_range();
                     if (range) {
                         const constantExpressions = range.constant_expression ? range.constant_expression() : null;
                         if (constantExpressions && constantExpressions.length >= 2) {
@@ -220,6 +220,7 @@ export class PackageStructVisitor
                                 bandwidth = Math.abs(high - low) + 1;
                                 console.log(`Field range: [${high}:${low}], bandwidth: ${bandwidth}`);
                             } catch (e) {
+                                console.log(e);
                                 bandwidth = 1;
                             }
                         }
@@ -269,16 +270,16 @@ export function parsePackagesAndStructs(svText: string): Package[] {
         const lexer = new SystemVerilogLexer(inputStream);
         const tokenStream = new CommonTokenStream(lexer);
         const parser = new SystemVerilogParser(tokenStream);
-        
+
         // Configure error handling
         parser.removeErrorListeners();
         parser.addErrorListener(new QuietErrorListener());
-        
+
         // Parse and visit the syntax tree
         const tree = parser.source_text();
         const visitor = new PackageStructVisitor();
         visitor.visit(tree);
-        
+
         return visitor.packages;
     } catch (error) {
         console.error('Error parsing system-verilog:', error);

@@ -11,13 +11,13 @@ import { vhdlLexer } from '@/antlr/VHDL/generated/vhdlLexer';
 import { vhdlParser } from '@/antlr/VHDL/generated/vhdlParser';
 import { vhdlVisitor } from '@/antlr/VHDL/generated/vhdlVisitor';
 import * as parser from '@/antlr/VHDL/generated/vhdlParser';
-import { ParsedModule, ModulePort, ParsedTopModule, SubModule, TopModulePort } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/diagram-generation/interfaces";
+import { ParsedModule, ParsedTopModule, SubModule, TopModulePort } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/diagram-generation/interfaces";
 import { QuietErrorListener } from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/quiet-error-listener";
 
 /**
  * Main parsing function for VHDL top-level entities
  * Analyzes a VHDL file containing a top-level entity and its architecture
- * 
+ *
  * @param vhdlText - VHDL source code containing the top-level entity and architecture
  * @param externals - Array of external entities that might be instantiated within the top entity
  * @returns ParsedTopModule object containing the entity structure, or null if no entity was found
@@ -31,11 +31,11 @@ export function parseTopEntity(
     const lex = new vhdlLexer(input);
     const tokens = new CommonTokenStream(lex);
     const p = new vhdlParser(tokens);
-    
+
     // Configure error handling
     p.removeErrorListeners();
     p.addErrorListener(new QuietErrorListener());
-    
+
     // Parse and visit the syntax tree
     const tree = p.design_file();
     const visitor = new TopEntityVisitor(externals);
@@ -85,10 +85,10 @@ class TopEntityVisitor
         ctx: parser.Interface_port_declarationContext
     ): void {
         if (!this.current) return;
-        
+
         // Get all port identifiers (multiple ports can share the same declaration)
         const ids = ctx.identifier_list()?.identifier() ?? [];
-        
+
         // Determine port direction
         const mode = ctx.signal_mode()?.text.toLowerCase();
         const dir: TopModulePort['direction'] =

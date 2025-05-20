@@ -4,18 +4,18 @@ stages:
     - test
     - deploy
 
-# lint:
-#     stage: code-quality
-#     tags:
-#         - bun
-#     script:
-#         - bun install
-#         - bun run lint
-#     cache:
-#         key: $CI_COMMIT_REF_SLUG
-#         paths:
-#             - bun.lock
-#             - node_modules
+lint:
+    stage: code-quality
+    tags:
+        - bun
+    script:
+        - bun install
+        - bun run lint
+    cache:
+        key: $CI_COMMIT_REF_SLUG
+        paths:
+            - bun.lock
+            - node_modules
 
 build-app:
     stage: build

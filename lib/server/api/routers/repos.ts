@@ -1,3 +1,5 @@
+import { indexRepositorySymbols } from "@/antlr/SystemVerilog/utilities/monacoEditor/indexRepositorySymbols";
+import { symbolTableManager } from "@/antlr/SystemVerilog/utilities/monacoEditor/symbolTable";
 import {
     calculateLanguageStatistics,
     findReadmeFile,
@@ -31,8 +33,6 @@ import { Session } from "next-auth";
 import path from "path";
 import util from "util";
 import { z } from "zod";
-import { indexRepositorySymbols } from "../../../../antlr/SystemVerilog/utilities/monacoEditor/indexRepositorySymbols";
-import { symbolTableManager } from "@/antlr/SystemVerilog/utilities/monacoEditor/symbolTable";
 
 const execPromise = util.promisify(exec);
 
@@ -261,8 +261,8 @@ function searchByOwnerAndRepoSlug() {
                 isGitRepo,
                 symbolTable: {
                     globalSymbols: symbolTableManager.getAllSymbols(),
-                    fileSymbols: symbolTableManager.debug()
-                }
+                    fileSymbols: symbolTableManager.debug(),
+                },
             } satisfies Repository;
         });
 }
@@ -1687,10 +1687,12 @@ export async function ownerBySlug(
     }
     const user = await prisma.user.findFirst({
         select: { id: true, name: true, image: true },
-        where: { name: {
-            equals: decodedOwnerSlug,
-            mode: "insensitive",
-          }, },
+        where: {
+            name: {
+                equals: decodedOwnerSlug,
+                mode: "insensitive",
+            },
+        },
     });
 
     if (!user) {
