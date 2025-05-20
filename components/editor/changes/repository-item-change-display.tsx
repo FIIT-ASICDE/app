@@ -1,12 +1,10 @@
 import {
-    FileDisplayItem,
-    RepositoryItem,
     RepositoryItemChange,
 } from "@/lib/types/repository";
 import { FileIcon } from "lucide-react";
 import { Dispatch, ReactElement, SetStateAction } from "react";
 
-import { findItemInTree, getChangeContent } from "@/components/generic/generic";
+import { getChangeContent } from "@/components/generic/generic";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 

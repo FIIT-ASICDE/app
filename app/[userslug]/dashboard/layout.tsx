@@ -31,7 +31,7 @@ export default async function DashboardLayout({
                     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
                         <h2 className="text-2xl font-bold">User Not Found</h2>
                         <p className="text-muted-foreground">
-                            The user you're looking for doesn't exist.
+                            The user you are looking for does not exist.
                         </p>
                     </div>
                 );

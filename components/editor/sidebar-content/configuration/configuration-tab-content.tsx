@@ -52,19 +52,18 @@ interface ConfigurationTabContentProps {
  * @returns {ReactElement} Tab content component
  */
 export const ConfigurationTabContent = ({
-                                            repository,
-                                            handleCloseSidebarAction,
-                                            configuration,
-                                            setConfigurationAction,
-                                        }: ConfigurationTabContentProps): ReactElement => {
+    repository,
+    handleCloseSidebarAction,
+    configuration,
+    setConfigurationAction,
+}: ConfigurationTabContentProps): ReactElement => {
     const [selectedSimulationType, setSelectedSimulationType] = useState<
         SimulationType | undefined
-    >(undefined);
-
+    >(configuration?.simulation?.type);
     const [
         selectedSimulationTestBenchFile,
         setSelectedSimulationTestBenchFile,
-    ] = useState<FileDisplayItem | FileItem | undefined>(undefined);
+    ] = useState<FileDisplayItem | FileItem | undefined>(configuration?.simulation?.testBench);
 
     const [
         selectedSimulationDirectory,
@@ -73,10 +72,10 @@ export const ConfigurationTabContent = ({
 
     const [selectedSynthesisType, setSelectedSynthesisType] = useState<
         SynthesisType | undefined
-    >("yosys");
+    >(configuration?.synthesis?.type);
     const [selectedSynthesisFile, setSelectedSynthesisFile] = useState<
         FileDisplayItem | FileItem | undefined
-    >(undefined);
+    >(configuration?.synthesis?.file);
 
     const [simulationFileSelectOpen, setSimulationFileSelectOpen] =
         useState<boolean>(false);
@@ -192,6 +191,42 @@ export const ConfigurationTabContent = ({
             default:
                 return "Files in " + repository.name;
         }
+    };
+
+    const configurationChangesMade = () => {
+        if (selectedSimulationType !== configuration?.simulation?.type) return true;
+        if (selectedSimulationTestBenchFile?.absolutePath !== configuration?.simulation?.testBench?.absolutePath) return true;
+        if (selectedSynthesisType !== configuration?.synthesis?.type) return true;
+        return selectedSynthesisFile?.absolutePath !== configuration?.synthesis?.file?.absolutePath;
+    };
+
+    const saveConfiguration = () => {
+        const newConfiguration: Configuration = {
+            ...configuration,
+            simulation: {
+                type: selectedSimulationType,
+                testBench: selectedSimulationTestBenchFile,
+            },
+            synthesis: {
+                type: selectedSynthesisType,
+                file: selectedSynthesisFile,
+            }
+        };
+
+        setConfigurationAction(newConfiguration);
+
+        localStorage.setItem(
+            "configuration",
+            JSON.stringify(newConfiguration),
+        );
+
+        console.log(localStorage.getItem("configuration"));
+
+        toast.success(
+            "Configuration saved successfully",
+        );
+
+        handleCloseSidebarAction();
     };
 
     return (
@@ -523,70 +558,15 @@ export const ConfigurationTabContent = ({
                                 </CommandDialog>
                             </div>
                         </div>
-
-                        <div className="flex w-full flex-row gap-x-3">
-                            <Button
-                                variant="outline"
-                                className="w-1/2"
-                                onClick={() => handleCloseSidebarAction()}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                variant="default"
-                                className="w-1/2 hover:bg-primary-button-hover"
-                                disabled={
-                                    selectedSimulationType === undefined &&
-                                    selectedSimulationTestBenchFile === undefined &&
-                                    selectedSynthesisType === undefined &&
-                                    selectedSynthesisFile === undefined &&
-                                    selectedSimulationDirectory === undefined
-                                }
-                                onClick={() => {
-                                    if (
-                                        selectedSimulationType &&
-                                        selectedSimulationTestBenchFile &&
-                                        selectedSynthesisType &&
-                                        selectedSynthesisFile
-                                    ) {
-                                        const newConfiguration: Configuration =
-                                            {
-                                                ...configuration,
-                                                simulation: {
-                                                    type: selectedSimulationType,
-                                                    testBench:
-                                                    selectedSimulationTestBenchFile,
-                                                    directory: selectedSimulationDirectory!.name
-                                                },
-                                                synthesis: {
-                                                    type: selectedSynthesisType,
-                                                    file: selectedSynthesisFile,
-                                                },
-                                            };
-                                        setConfigurationAction(
-                                            newConfiguration,
-                                        );
-                                        localStorage.setItem(
-                                            "configuration",
-                                            JSON.stringify(newConfiguration),
-                                        );
-
-                                        toast.success(
-                                            "Configuration saved successfully",
-                                        );
-
-                                        handleCloseSidebarAction();
-                                    } else {
-                                        toast.error(
-                                            "Every input has to be filled to save a configuration",
-                                        );
-                                    }
-                                }}
-                            >
-                                <Save />
-                                Save
-                            </Button>
-                        </div>
+                        <Button
+                            variant="default"
+                            className="w-full hover:bg-primary-button-hover"
+                            disabled={!configurationChangesMade()}
+                            onClick={saveConfiguration}
+                        >
+                            <Save />
+                            Save
+                        </Button>
                     </div>
                 </div>
             </ScrollArea>

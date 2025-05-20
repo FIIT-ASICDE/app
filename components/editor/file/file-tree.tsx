@@ -23,6 +23,7 @@ import {
     moveItemInTree,
     sortTree,
 } from "@/components/generic/generic";
+import { Configuration } from "@/lib/types/editor";
 
 interface FileTreeProps {
     repositoryId: string;
@@ -33,6 +34,8 @@ interface FileTreeProps {
     setSelectedItemAction: Dispatch<SetStateAction<RepositoryItem | undefined>>;
     expandedItems: Array<RepositoryItem>;
     setExpandedItemsAction: Dispatch<SetStateAction<Array<RepositoryItem>>>;
+    configuration: Configuration | undefined;
+    setConfigurationAction: Dispatch<SetStateAction<Configuration | undefined>>;
 }
 
 /**
@@ -50,6 +53,8 @@ export const FileTree = ({
     setSelectedItemAction,
     expandedItems,
     setExpandedItemsAction,
+    configuration,
+    setConfigurationAction,
 }: FileTreeProps): ReactElement => {
     const [moveDialogOpen, setMoveDialogOpen] = useState<boolean>(false);
     const [sourceItem, setSourceItem] = useState<RepositoryItem | undefined>(
@@ -98,13 +103,6 @@ export const FileTree = ({
     const sortedTree: Array<RepositoryItem> = sortTree([...tree]);
 
     const handleMoveItem = (source: RepositoryItem, target: RepositoryItem) => {
-        console.log(
-            "handleMoveItem called with source:",
-            source.absolutePath,
-            "target:",
-            target.absolutePath,
-        );
-
         if (source && target) {
             setSourceItem(source);
             setTargetItem(target);
@@ -184,6 +182,10 @@ export const FileTree = ({
             onDragOver={handleRootDragOver}
             onDragLeave={handleRootDragLeave}
             onDrop={handleRootDrop}
+            onClick={(event) =>  {
+                event.stopPropagation();
+                setSelectedItemAction(undefined);
+            }}
         >
             {sortedTree.map((item: RepositoryItem, index: number) => (
                 <FileTreeItem
@@ -193,8 +195,6 @@ export const FileTree = ({
                     tree={tree}
                     setTreeAction={setTreeAction}
                     onItemClick={(repoItem: RepositoryItem) => {
-                        console.log("2clicked on:", repoItem);
-
                         if (
                             repoItem.type === "directory" ||
                             repoItem.type === "directory-display"
@@ -217,6 +217,8 @@ export const FileTree = ({
                     setHoveredItemAction={setHoveredItem}
                     onMoveItem={handleMoveItem}
                     onDragOverItem={() => setIsDragOverRoot(false)}
+                    configuration={configuration}
+                    setConfigurationAction={setConfigurationAction}
                 />
             ))}
 

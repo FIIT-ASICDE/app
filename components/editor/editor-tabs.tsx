@@ -151,8 +151,8 @@ export const EditorTabs = ({
                                 className={cn(
                                     "flex w-32 cursor-pointer items-center justify-between border-x border-accent px-2 py-2 text-sm",
                                     isActive
-                                        ? "bg-background text-foreground dark:bg-[#1e1e1e]"
-                                        : "text-muted-foreground hover:text-foreground",
+                                        ? "bg-background text-foreground dark:bg-[#1e1e1e] font-medium"
+                                        : "text-muted-foreground bg-muted hover:text-foreground",
                                 )}
                                 onClick={() => handleTabSwitchAction(file)}
                             >
