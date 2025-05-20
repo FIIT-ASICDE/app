@@ -30,9 +30,17 @@ function simulateVerilatorCppStream() {
             z.object({
                 testbenchPath: z
                     .string()
-                    .min(1, "Testbench súbor musí mať názov."),
-                repoId: z.string(),
-                directory: z.string()
+                    .min(1, "Testbench súbor musí mať názov.")
+                    .nullable()
+                    .optional(),
+                repoId: z
+                    .string()
+                    .nullable()
+                    .optional(),
+                directory: z
+                    .string()
+                    .nullable()
+                    .optional(),
             }),
         )
         .query(async function* ({ input, ctx }) {
@@ -40,6 +48,14 @@ function simulateVerilatorCppStream() {
                 type: "info",
                 content: "Simulation Verilator C++ started.",
             } satisfies SimulationOutput;
+
+            if(input.testbenchPath == null || input.directory == null || input.repoId == null) {
+                yield {
+                    type: "error",
+                    content: "Missing simulation configuration",
+                } satisfies SimulationOutput;
+                return;
+            }
 
             const repoIdDecoded = decodeURIComponent(input.repoId);
             const testbenchPathDecode = decodeURIComponent(
@@ -79,10 +95,15 @@ function simulateVerilatorCppStream() {
                 .map((f) => `"${f.replace(/\\/g, "/")}"`)
                 .join(" ");
 
+            const testbenchPathRelative = path.relative(
+                path.join(absoluteRepoPath!, directoryDecode),
+                path.join(absoluteRepoPath!, testbenchPathDecode)
+            ).replace(/\\/g, "/");
+
             // Príkaz, ktorý spustí Verilator a zároveň uloží výstup do súboru
             const verilatorCommand =
                 ` cd /workspace && mkdir -p ${simDirPath} &&
-                verilator --cc --exe --build ${svFilesString} ${testbenchPathDecode} --Mdir ${simDirPath} |
+                verilator --cc --exe --build ${svFilesString} ${testbenchPathRelative} --Mdir ${simDirPath} |
                 tee ${outputFile}
               `.replace(/\n/g, " ");
 
@@ -124,9 +145,17 @@ function simulateVerilatorSvStream() {
             z.object({
                 testbenchPath: z
                     .string()
-                    .min(1, "Testbench súbor musí mať názov."),
-                repoId: z.string(),
-                directory: z.string()
+                    .min(1, "Testbench súbor musí mať názov.")
+                    .nullable()
+                    .optional(),
+                repoId: z
+                    .string()
+                    .nullable()
+                    .optional(),
+                directory: z
+                    .string()
+                    .nullable()
+                    .optional(),
             }),
         )
         .query(async function* ({ input, ctx }) {
@@ -134,6 +163,14 @@ function simulateVerilatorSvStream() {
                 type: "info",
                 content: `Simulation Verilator SV started.`,
             } satisfies SimulationOutput;
+
+            if(input.testbenchPath == null || input.directory == null || input.repoId == null) {
+                yield {
+                    type: "error",
+                    content: "Missing simulation configuration",
+                } satisfies SimulationOutput;
+                return;
+            }
 
             const repoIdDecoded = decodeURIComponent(input.repoId);
             const testbenchPathDecode = decodeURIComponent(
@@ -261,9 +298,17 @@ function simulateIcarusVerilogStream() {
             z.object({
                 testbenchPath: z
                     .string()
-                    .min(1, "Testbench súbor musí mať názov."),
-                repoId: z.string(),
-                directory: z.string()
+                    .min(1, "Testbench súbor musí mať názov.")
+                    .nullable()
+                    .optional(),
+                repoId: z
+                    .string()
+                    .nullable()
+                    .optional(),
+                directory: z
+                    .string()
+                    .nullable()
+                    .optional()
             }),
         )
         .query(async function* ({ input, ctx }) {
@@ -271,6 +316,14 @@ function simulateIcarusVerilogStream() {
                 type: "info",
                 content: `Simulation Icarus Verilog started.`,
             } satisfies SimulationOutput;
+
+            if(input.testbenchPath == null || input.directory == null || input.repoId == null) {
+                yield {
+                    type: "error",
+                    content: "Missing simulation configuration",
+                } satisfies SimulationOutput;
+                return;
+            }
 
             const repoIdDecoded = decodeURIComponent(input.repoId);
             const testbenchPathDecode = decodeURIComponent(input.testbenchPath);

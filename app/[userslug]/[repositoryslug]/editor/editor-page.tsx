@@ -5,7 +5,7 @@ import { RouterInputs, api } from "@/lib/trpc/react";
 import type {
     BottomPanelContentTab,
     Configuration,
-    SidebarContentTab,
+    SidebarContentTab, SimulationOutput
 } from "@/lib/types/editor";
 import type {
     FileDisplayItem,
@@ -21,7 +21,6 @@ import {
     RefObject,
     useCallback,
     useEffect,
-    useMemo,
     useRef,
     useState,
 } from "react";
@@ -161,57 +160,54 @@ export default function EditorPage({
         },
     );
 
+    const [errorOutputInput, setErrorOutputInput] = useState<SimulationOutput[] | null>(null);
+
+
     const onStartSimulation = () => {
-        if (
-            configuration &&
-            configuration.simulation &&
-            configuration.simulation.type &&
-            configuration.simulation.testBench
-        ) {
-            // TODO: adam start simulation
 
-            // simulateMutation.mutate({
-            //     repoId: repository.id,
-            //     testbenchPath: selectedTestbenchFile.absolutePath,
-            //     svPath: selectedSvFile.absolutePath
-            // });
+        console.log(
+            "Starting simulation with type: " +
+            configuration?.simulation?.type +
+            " and file: " +
+            configuration?.simulation?.testBench?.absolutePath +
+            " and directory: " +
+            configuration?.simulation?.directory,
+        );
 
-            console.log(
-                "Starting simulation with type: " +
-                configuration.simulation.type +
-                " and file: " +
-                configuration.simulation.testBench?.absolutePath +
-                " and directory: " +
-                configuration?.simulation.directory,
-            );
-
-            if (configuration.simulation.type === "verilatorC++") {
-                const newInput = {
-                    repoId: repository.id,
-                    testbenchPath: configuration.simulation.testBench.absolutePath,
-                    directory: configuration?.simulation.directory
-                };
-                setVerilatorCppInput(newInput); // <- toto spustí subscription
-            }
-
-            if (configuration.simulation.type === "verilatorSystemVerilog") {
-                const newInput = {
-                    repoId: repository.id,
-                    testbenchPath: configuration.simulation.testBench.absolutePath,
-                    directory: configuration?.simulation.directory
-                };
-                setVerilatorSvInput(newInput); // <- toto spustí subscription
-            }
-
-            if (configuration?.simulation.type === "icarusVerilog") {
-                const newInput = {
-                    repoId: repository.id,
-                    testbenchPath: configuration.simulation.testBench.absolutePath,
-                    directory: configuration?.simulation.directory
-                };
-                setIcarusInput(newInput); // <- toto spustí subscription
-            }
+        if (configuration?.simulation?.type === "verilatorC++") {
+            const newInput = {
+                repoId: repository.id,
+                testbenchPath: configuration?.simulation?.testBench?.absolutePath,
+                directory: configuration?.simulation?.directory
+            };
+            setVerilatorCppInput(newInput); // <- toto spustí subscription
         }
+
+        if (configuration?.simulation?.type === "verilatorSystemVerilog") {
+            const newInput = {
+                repoId: repository.id,
+                testbenchPath: configuration?.simulation?.testBench?.absolutePath,
+                directory: configuration?.simulation?.directory
+            };
+            setVerilatorSvInput(newInput); // <- toto spustí subscription
+        }
+
+        if (configuration?.simulation?.type === "icarusVerilog") {
+            const newInput = {
+                repoId: repository.id,
+                testbenchPath: configuration?.simulation?.testBench?.absolutePath,
+                directory: configuration?.simulation.directory
+            };
+            setIcarusInput(newInput); // <- toto spustí subscription
+
+        }
+
+        setErrorOutputInput([
+            {
+                type: "error",
+                content: "Missing or invalid simulation configuration.",
+            },
+        ]);
     };
 
     const handleOnCommit = async (data: z.infer<typeof commitSchema>) => {
@@ -567,6 +563,7 @@ export default function EditorPage({
                             resultVerilatorCpp.data ??
                             resultIcarus.data ??
                             resultVerilatorSv.data ??
+                            errorOutputInput ??
                             []
                         }
                         lastSimulation={lastSimulation}

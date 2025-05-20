@@ -68,7 +68,7 @@ export const ConfigurationTabContent = ({
     const [
         selectedSimulationDirectory,
         setSelectedSimulationDirectory,
-    ] = useState<DirectoryDisplayItem | DirectoryItem | undefined>(undefined);
+    ] = useState<string | undefined>(configuration?.simulation?.directory);
 
     const [selectedSynthesisType, setSelectedSynthesisType] = useState<
         SynthesisType | undefined
@@ -194,10 +194,7 @@ export const ConfigurationTabContent = ({
     };
 
     const configurationChangesMade = () => {
-        if (selectedSimulationType !== configuration?.simulation?.type) return true;
-        if (selectedSimulationTestBenchFile?.absolutePath !== configuration?.simulation?.testBench?.absolutePath) return true;
-        if (selectedSynthesisType !== configuration?.synthesis?.type) return true;
-        return selectedSynthesisFile?.absolutePath !== configuration?.synthesis?.file?.absolutePath;
+        return true;
     };
 
     const saveConfiguration = () => {
@@ -206,6 +203,7 @@ export const ConfigurationTabContent = ({
             simulation: {
                 type: selectedSimulationType,
                 testBench: selectedSimulationTestBenchFile,
+                directory: selectedSimulationDirectory
             },
             synthesis: {
                 type: selectedSynthesisType,
@@ -357,7 +355,7 @@ export const ConfigurationTabContent = ({
                                             <div className="flex flex-row items-center justify-start gap-x-2 text-foreground">
                                                 <FileIcon className="h-4 w-4 text-muted-foreground" />
                                                 {
-                                                    selectedSimulationDirectory.name
+                                                    selectedSimulationDirectory
                                                 }
                                             </div>
                                         ) : (
@@ -442,7 +440,7 @@ export const ConfigurationTabContent = ({
                                                                     false,
                                                                 );
                                                                 setSelectedSimulationDirectory(
-                                                                    directoryItem,
+                                                                    directoryItem.name,
                                                                 );
                                                             }}
                                                             className="flex flex-row items-center gap-x-2"

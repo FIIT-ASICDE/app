@@ -22,7 +22,7 @@ export type SynthesisType = "yosys";
 type SimulationConfiguration = {
     type: SimulationType | undefined;
     testBench: FileItem | FileDisplayItem | undefined;
-    directory: string;
+    directory: string | undefined;
 };
 
 type SynthesisConfiguration = {
