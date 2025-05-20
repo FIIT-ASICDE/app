@@ -1,5 +1,4 @@
 import { getLanguageByExtension } from "@/lib/files/repo-files";
-import { Prisma } from "@/lib/prisma";
 import {
     addItemSchema,
     deleteItemSchema,
@@ -46,11 +45,8 @@ function getEditorSession() {
             if (sessionData) {
                 return {
                     id: sessionData.id,
-                    openFiles: sessionData.openFiles
-                        ? (sessionData.openFiles as unknown as FileDisplayItem[])
-                        : [],
-                    activeFile: sessionData.activeFile
-                        ? (sessionData.activeFile as unknown as FileDisplayItem)
+                    editors: sessionData.editors
+                        ? (sessionData.editors as unknown as Record<string, { files: FileDisplayItem[]; activeFile: FileDisplayItem | null }>)
                         : null,
                 };
             }
@@ -64,29 +60,34 @@ function saveEditorSession() {
         .input(
             z.object({
                 repoId: z.string(),
-                openFiles: z.array(
+                editors: z.record(
+                    z.string(),
                     z.object({
-                        type: z.string(),
-                        name: z.string(),
-                        lastActivity: z.date(),
-                        language: z.string(),
-                        absolutePath: z.string(),
+                        files: z.array(
+                            z.object({
+                                type: z.string(),
+                                name: z.string(),
+                                lastActivity: z.date(),
+                                language: z.string(),
+                                absolutePath: z.string(),
+                            }),
+                        ),
+                        activeFile: z
+                            .object({
+                                type: z.string(),
+                                name: z.string(),
+                                lastActivity: z.date(),
+                                language: z.string(),
+                                absolutePath: z.string(),
+                            })
+                            .nullable(),
                     }),
                 ),
-                activeFile: z
-                    .object({
-                        type: z.string(),
-                        name: z.string(),
-                        lastActivity: z.date(),
-                        language: z.string(),
-                        absolutePath: z.string(),
-                    })
-                    .nullable(),
             }),
         )
         .mutation(async ({ ctx, input }) => {
             const { prisma, session } = ctx;
-            const { repoId, openFiles, activeFile } = input;
+            const { repoId, editors } = input;
 
             const repo = await prisma.repo.findUnique({
                 where: { id: repoId },
@@ -108,14 +109,12 @@ function saveEditorSession() {
                     },
                 },
                 update: {
-                    openFiles,
-                    activeFile: activeFile ?? Prisma.JsonNull,
+                    editors,
                 },
                 create: {
                     userId: session.user.id,
                     repoId,
-                    openFiles,
-                    activeFile: activeFile ?? Prisma.JsonNull,
+                    editors,
                 },
             });
 

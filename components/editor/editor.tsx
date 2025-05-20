@@ -1,16 +1,16 @@
 "use client";
 
-import { parseAndCollectSymbols } from "@/antlr/SystemVerilog/utilities/monacoEditor/parseAndCollectSymbols";
-import { FileDisplayItem, FileItem } from "@/lib/types/repository";
+import { getParser } from "@/antlr/SystemVerilog/utilities/monacoEditor/parserRegistry";
+import { FileDisplayItem } from "@/lib/types/repository";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { ReactElement, useEffect, useRef } from "react";
 import { MonacoBinding } from "y-monaco";
 import * as Y from "yjs";
 
-import { registerLanguageSupport } from "./editor-config/registerLanguage";
-
 import { useUser } from "@/components/context/user-context";
+import { fileContentCache } from "@/components/editor/editor-config/definitionProvider";
+import { registerLanguageSupport } from "@/components/editor/editor-config/registerLanguage";
 
 window.addEventListener("unhandledrejection", (event) => {
     if (
@@ -21,14 +21,16 @@ window.addEventListener("unhandledrejection", (event) => {
     }
 });
 
-function debounce<T extends (...args: any[]) => any>(
-    func: T,
+function debounce<F extends (...args: Parameters<F>) => ReturnType<F>>(
+    func: F,
     wait: number,
-): (...args: Parameters<T>) => void {
-    let timeout: number | null = null;
-    return (...args: Parameters<T>) => {
-        if (timeout) window.clearTimeout(timeout);
-        timeout = window.setTimeout(() => func(...args), wait);
+): (...args: Parameters<F>) => void {
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+    return (...args: Parameters<F>) => {
+        if (timeout) clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            func(...args);
+        }, wait);
     };
 }
 
@@ -38,6 +40,11 @@ interface EditorProps {
     theme?: string;
     onOpenFile?: (item: FileDisplayItem) => void;
     onReady?: () => void;
+    activeFile: FileDisplayItem | null;
+    pendingNavigationRef: React.MutableRefObject<{
+        uri: monaco.Uri;
+        range: monaco.IRange;
+    } | null>;
 }
 
 /**
@@ -52,41 +59,44 @@ export default function Editor({
     theme = "vs-dark",
     onOpenFile,
     onReady,
+    activeFile,
+    pendingNavigationRef,
 }: EditorProps): ReactElement {
     const { user } = useUser();
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
     const monacoEl = useRef<HTMLElement | null>(null);
     const providerRef = useRef<HocuspocusProvider | null>(null);
     const ydocRef = useRef<Y.Doc | null>(null);
-    const pendingNavigationRef = useRef<{
-        uri: monaco.Uri;
-        range: monaco.IRange;
-    } | null>(null);
-
     const debouncedParseRef = useRef<
         ((code: string, uri: string) => void) | null
     >(null);
     const loadedLanguages = useRef<Set<string>>(new Set());
 
-    if (!debouncedParseRef.current) {
-        debouncedParseRef.current = debounce((code: string, uri: string) => {
-            parseAndCollectSymbols(code, uri);
-        }, 2000);
-    }
-
     useEffect(() => {
         if (!monacoEl.current) return;
         const uri = monaco.Uri.parse(`inmemory://${filePath}`);
+        let model = monaco.editor.getModel(uri);
 
-        const model =
-            monaco.editor.getModel(uri) ||
-            monaco.editor.createModel("", language, uri);
+        if (!model) {
+            const cached = fileContentCache[uri.toString()] || "";
+            model = monaco.editor.createModel(cached, language, uri);
+        }
+
+        if (language && model.getLanguageId() !== language) {
+            monaco.languages.register({ id: language });
+            monaco.editor.setModelLanguage(model, language);
+        }
 
         if (editorRef.current) {
             const currentModel = editorRef.current.getModel();
-            if (
+            const isNewModel =
                 !currentModel ||
-                currentModel.uri.toString() !== model.uri.toString()
+                currentModel.uri.toString() !== model.uri.toString();
+
+            if (
+                activeFile &&
+                activeFile.name === filePath.split("/").slice(-1)[0] &&
+                isNewModel
             ) {
                 editorRef.current.setModel(model);
             }
@@ -116,24 +126,23 @@ export default function Editor({
                         const parts = uri.path.split("/").filter(Boolean);
                         parts.shift(); // remove the first part (repository name)
                         const fileName = parts[parts.length - 1] || "untitled";
-                        const filePath = parts.join("/");
+                        const absolutePath = parts.join("/");
                         onOpenFile({
                             type: "file-display",
                             name: fileName,
-                            absolutePath: filePath,
-                            language: "systemverilog",
+                            absolutePath,
+                            language: language || "txt",
                             lastActivity: new Date(),
                         });
 
-                        const tryJump = () => {
+                        setTimeout(() => {
                             const model = monaco.editor.getModel(uri);
-                            if (model && editorRef.current) {
-                                if (model.getValue().length === 0) {
-                                    setTimeout(tryJump, 50);
-                                    return;
-                                }
-
-                                editorRef.current.setModel(model);
+                            if (
+                                model &&
+                                editorRef.current
+                                    ?.getModel()
+                                    ?.uri.toString() === uri.toString()
+                            ) {
                                 editorRef.current.setPosition({
                                     lineNumber: range.startLineNumber,
                                     column: range.startColumn,
@@ -141,20 +150,18 @@ export default function Editor({
                                 editorRef.current.revealRangeInCenter(range);
                                 editorRef.current.focus();
                                 pendingNavigationRef.current = null;
-                            } else {
-                                setTimeout(tryJump, 50);
                             }
-                        };
-
-                        setTimeout(tryJump, 100);
+                        }, 100);
                     }
                 }
             });
+        }
 
-            if (language && !loadedLanguages.current.has(language)) {
-                registerLanguageSupport(language, pendingNavigationRef);
-                loadedLanguages.current.add(language);
-            }
+        if (language && !loadedLanguages.current.has(language)) {
+            registerLanguageSupport(language, pendingNavigationRef);
+            loadedLanguages.current.add(language);
+            const parser = getParser(language);
+            debouncedParseRef.current = parser ? debounce(parser, 2000) : null;
         }
 
         if (providerRef.current) providerRef.current.destroy();
@@ -170,7 +177,7 @@ export default function Editor({
             name: filePath,
             document: ydoc,
             onAwarenessChange(data) {
-                // @ts-ignore the data.states includes 'user', but it isn't typed,
+                // @ts-expect-error the data.states includes 'user', but it isn't typed,
                 // see the setAwarenessField call down below
                 onAwarenessChange(data.states, provider.document.clientID);
             },
@@ -194,8 +201,9 @@ export default function Editor({
         }
 
         const initialCode = model.getValue();
-        if (initialCode) {
-            parseAndCollectSymbols(initialCode, uri.toString());
+        const parser = getParser(language || "");
+        if (initialCode && parser) {
+            parser(initialCode, uri.toString());
         }
 
         const contentChangeDisposable = model.onDidChangeContent(() => {
@@ -205,12 +213,29 @@ export default function Editor({
             }
         });
 
+        if (
+            pendingNavigationRef.current &&
+            editorRef.current?.getModel()?.uri.toString() ===
+                pendingNavigationRef.current.uri.toString()
+        ) {
+            const range = pendingNavigationRef.current.range;
+            setTimeout(() => {
+                editorRef.current?.setPosition({
+                    lineNumber: range.startLineNumber,
+                    column: range.startColumn,
+                });
+                editorRef.current?.revealRangeInCenter(range);
+                editorRef.current?.focus();
+                pendingNavigationRef.current = null;
+            }, 100);
+        }
+
         return () => {
             contentChangeDisposable.dispose();
             providerRef.current?.destroy();
             ydocRef.current?.destroy();
         };
-    }, [filePath, language, theme, onOpenFile, onReady]);
+    }, [filePath, language, theme, onOpenFile, onReady, activeFile, user, pendingNavigationRef]);
 
     useEffect(() => {
         return () => {
@@ -293,34 +318,34 @@ function onAwarenessChange(
         }
 
         const cssRules = `
-		.yRemoteSelection-${state.clientId} {
+      .yRemoteSelection-${state.clientId} {
 			background-color: ${state.user.color}80; /* #RRGGBB + alpha hex value (80 is roughly 50%) */
-		}
+      }
 
-		.yRemoteSelectionHead-${state.clientId} {
+      .yRemoteSelectionHead-${state.clientId} {
+        position: absolute;
+        border-left: ${state.user.color} solid 2px;
+        border-top: ${state.user.color} solid 2px;
+        border-bottom: ${state.user.color} solid 2px;
+        height: 100%;
+        box-sizing: border-box;
+      }
+      .yRemoteSelectionHead-${state.clientId}::after {
 			position: absolute;
-			border-left: ${state.user.color} solid 2px;
-			border-top: ${state.user.color} solid 2px;
-			border-bottom: ${state.user.color} solid 2px;
-			height: 100%;
-			box-sizing: border-box;
-		}
-		.yRemoteSelectionHead-${state.clientId}::after {
-			position: absolute;
-			content: "${state.user.name}";
-			background-color: ${state.user.color};
+        content: "${state.user.name}";
+        background-color: ${state.user.color};
 			color: ${getContrastTextColor(state.user.name)};
-			padding: 2px 4px;
-			font-size: 11px;
+        padding: 2px 4px;
+        font-size: 11px;
 			line-height: 1;
-			white-space: nowrap;
-			border-top-left-radius: 2px;
-			border-top-right-radius: 2px;
-			bottom: 100%;
-			left: -2px;
-			z-index: 2;
-		}
-		`;
+        white-space: nowrap;
+        border-top-left-radius: 2px;
+        border-top-right-radius: 2px;
+        bottom: 100%;
+        left: -2px;
+        z-index: 2;
+      }
+    `;
 
         styleElement.innerHTML = cssRules;
     });

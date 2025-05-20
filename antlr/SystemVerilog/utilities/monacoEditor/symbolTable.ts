@@ -4,6 +4,7 @@ export interface BaseSymbolInfo {
     line: number;
     column: number;
     uri: string;
+    scope: string;
   }
   
   export interface PortInfo {
@@ -46,6 +47,9 @@ export interface BaseSymbolInfo {
   export interface TypedefSymbolInfo extends BaseSymbolInfo {
     type: "typedef";
   }
+  export interface VariableSymbolInfo extends BaseSymbolInfo {
+    type: "variable";
+  }
   
   export type SymbolInfo =
     | ModuleSymbolInfo
@@ -55,9 +59,11 @@ export interface BaseSymbolInfo {
     | PackageSymbolInfo
     | FunctionSymbolInfo
     | TaskSymbolInfo
-    | TypedefSymbolInfo;
+    | TypedefSymbolInfo
+    | VariableSymbolInfo;
   
   export type SymbolTable = Record<string, SymbolInfo>;
+  const scopeMap: Record<string, { name: string; startLine: number; endLine: number }[]> = {};
   
   let globalSymbolTable: SymbolTable = {};
   let fileSymbolTables: Record<string, SymbolTable> = {};
@@ -78,6 +84,22 @@ export interface BaseSymbolInfo {
         lastUpdateTime = {};
         isInitialized = true;
       }
+    },
+
+    getSymbolByKey(key: string): SymbolInfo | undefined {
+      return globalSymbolTable[key];
+    },
+
+    storeScopeMap(uri: string, scopes: { name: string; startLine: number; endLine: number }[]) {
+      scopeMap[uri] = scopes;
+    },
+    
+    getScopeForLine(uri: string, line: number): string | null {
+      const scopes = scopeMap[uri];
+      if (!scopes) return null;
+    
+      const match = scopes.find(s => line >= s.startLine && line <= s.endLine);
+      return match?.name ?? null;
     },
   
     initializeWithData(data: {
@@ -131,8 +153,8 @@ export interface BaseSymbolInfo {
   
         fileSymbolTables[uri] = mergedSymbols;
   
-        Object.entries(symbols).forEach(([name, info]) => {
-          globalSymbolTable[name] = info;
+        Object.entries(symbols).forEach(([key, info]) => {
+          globalSymbolTable[key] = info;
         });
   
         lastUpdateTime[uri] = now;
