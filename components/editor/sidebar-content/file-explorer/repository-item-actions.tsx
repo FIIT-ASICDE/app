@@ -106,6 +106,7 @@ export const RepositoryItemActions = ({
                 simulation: {
                     type: configuration?.simulation?.type,
                     testBench: parentItem,
+                    directory: configuration?.simulation?.directory,
                 },
                 synthesis: configuration?.synthesis,
             });
