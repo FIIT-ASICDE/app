@@ -149,62 +149,6 @@ export const EditorNavigation = ({
         }
     };
 
-    const getSimulationTooltipContent = () => {
-        if (!configuration || !configuration.simulation || !configuration.simulation.type || !configuration.simulation.testBench) {
-            return (
-                <p className="flex flex-row items-center justify-center w-fit gap-x-3">
-                    <span className="text-sm text-muted-foreground">Simulation not yet configured</span>
-                    <Button
-                        variant="outline"
-                        size="default"
-                        onClick={() => {
-                            if (activeSidebarContent !== "configuration" || horizontalCollapsed) {
-                                toggleHorizontalCollapse("configuration");
-                                setActiveSidebarContent("configuration");
-                            }
-                        }}
-                    >
-                        <Cog />
-                        Configure
-                    </Button>
-                </p>
-            );
-        }
-
-        return (
-            <div className="flex w-fit flex-col items-center gap-y-2">
-                <Button
-                    variant="outline"
-                    size="default"
-                    onClick={() => {
-                        if (activeBottomPanelContent !== "simulation") {
-                            toggleVerticalCollapse("simulation");
-                            setActiveBottomPanelContent("simulation");
-                        }
-                        onStartSimulationAction();
-                    }}
-                    disabled={!configuration || !configuration.simulation || !configuration.simulation.type || !configuration.simulation.testBench}
-                >
-                    Run simulation
-                </Button>
-                <div className="flex w-full flex-col gap-y-1">
-                    <div className="flex w-full flex-row items-center justify-between gap-x-2 text-sm">
-                        <span className="text-muted-foreground">
-                            Simulation type:
-                        </span>
-                        <span>{configuration.simulation.type}</span>
-                    </div>
-                    <div className="flex w-full flex-row items-center justify-between gap-x-2 text-sm">
-                        <span className="text-muted-foreground">
-                            TestBench file:
-                        </span>
-                        <span>{configuration?.simulation?.testBench?.name ?? "N/A"}</span>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
     const getSynthesisTooltipContent = () => {
         if (!configuration || !configuration.synthesis || !configuration.synthesis.type || !configuration.synthesis.file) {
             return (
