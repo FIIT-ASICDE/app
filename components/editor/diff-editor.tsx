@@ -1,6 +1,5 @@
 "use client";
 
-import { api } from "@/lib/trpc/react";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { ReactElement, useEffect, useRef } from "react";
 
@@ -30,7 +29,6 @@ interface DynamicDiffEditorProps {
  * @returns {ReactElement} DiffEditor component
  */
 export default function DynamicDiffEditor({
-    filePath,
     language = "systemverilog",
     theme = "vs-dark",
 }: DynamicDiffEditorProps): ReactElement {

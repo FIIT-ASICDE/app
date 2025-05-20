@@ -2,7 +2,7 @@ import { CharStreams, CommonTokenStream } from "antlr4ts";
 import { SystemVerilogLexer } from "../../grammar/generated/SystemVerilogLexer";
 import { SystemVerilogParser } from "../../grammar/generated/SystemVerilogParser";
 import { SymbolCollectorVisitor } from "./SymbolCollectorVisitor";
-import { symbolTableManager } from "./symbolTable";
+import { SymbolTable, symbolTableManager } from "./symbolTable";
 
 export function parseAndCollectSymbols(input: string, uri: string): void {
     try {
@@ -10,19 +10,32 @@ export function parseAndCollectSymbols(input: string, uri: string): void {
         const lexer = new SystemVerilogLexer(inputStream);
         const tokenStream = new CommonTokenStream(lexer);
         const parser = new SystemVerilogParser(tokenStream);
-
+        
+        parser.removeErrorListeners();
+        parser.addErrorListener({
+            syntaxError: () => {
+                // Silently ignore
+        }
+        });
         const tree = parser.source_text();
 
         const visitor = new SymbolCollectorVisitor(uri);
         visitor.visit(tree);
-
-        const symbols = visitor.symbolTable;
-
-        const existingSymbols = symbolTableManager.getFileSymbols(uri);
         
-        const mergedSymbols = { ...existingSymbols, ...symbols };
+        const symbolList = visitor.getSymbols();
 
-        symbolTableManager.addSymbols(uri, mergedSymbols);
+        const scopeRanges = visitor.getScopeRanges();
+
+        symbolTableManager.storeScopeMap(uri, scopeRanges);
+
+        const flatSymbolTable: SymbolTable = {};
+        for (const symbol of symbolList) {
+          const key = `${symbol.name}::${symbol.scope}`;
+          flatSymbolTable[key] = symbol;
+        }
+        
+        symbolTableManager.addSymbols(uri, flatSymbolTable);
+        //symbolTableManager.debug();
 
     } catch (error) {
         console.error("[parseAndCollectSymbols] Error parsing SystemVerilog:", error);
