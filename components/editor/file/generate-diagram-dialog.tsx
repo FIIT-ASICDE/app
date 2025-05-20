@@ -16,6 +16,7 @@ import {
 import {
     parseTopEntity
 } from "@/app/[userslug]/[repositoryslug]/block-diagram/parsers/vhdl/parse-top-entity";
+import { Loader2, SquarePlus } from "lucide-react";
 
 interface GenerateDiagramDialogProps {
     repositoryId: string;
@@ -25,11 +26,11 @@ interface GenerateDiagramDialogProps {
 }
 
 export const GenerateDiagramDialog = ({
-                                          repositoryId,
-                                          diagramFile,
-                                          tree,
-                                          setTree,
-                                      }: GenerateDiagramDialogProps) => {
+    repositoryId,
+    diagramFile,
+    tree,
+    setTree,
+}: GenerateDiagramDialogProps) => {
     const [open, setOpen] = useState(false);
     const saveFileMutation = api.repo.saveFileContent.useMutation();
 
@@ -167,15 +168,23 @@ export const GenerateDiagramDialog = ({
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger className="flex w-full cursor-default flex-row items-center justify-between rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent">
-                Generate Diagram
+                Generate a diagram
+                <SquarePlus className="h-4 w-4 text-muted-foreground" />
             </DialogTrigger>
             <DialogContent className="max-w-md">
                 <DialogHeader>
-                    <DialogTitle className="text-center">Generate Diagram</DialogTitle>
+                    <DialogTitle className="text-center">Generate a diagram</DialogTitle>
                 </DialogHeader>
                 <div className="flex flex-col gap-2 mt-4">
-                    <Button onClick={handleGenerateDiagram} disabled={isFileLoading}>
-                        {isFileLoading ? "Loading..." : "Generate Diagram"}
+                    <Button
+                        variant="default"
+                        size="default"
+                        onClick={handleGenerateDiagram}
+                        disabled={isFileLoading}
+                        className="hover:bg-primary-button-hover"
+                    >
+                        {isFileLoading ? <Loader2 className="text-muted-foreground animate-spin" /> : <SquarePlus />}
+                        {isFileLoading ? "Loading..." : "Generate"}
                     </Button>
                 </div>
             </DialogContent>

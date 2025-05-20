@@ -20,29 +20,39 @@ export type SimulationType =
 export type SynthesisType = "yosys";
 
 type SimulationConfiguration = {
-    type: SimulationType;
-    testBench: FileItem | FileDisplayItem;
+    type: SimulationType | undefined;
+    testBench: FileItem | FileDisplayItem | undefined;
+    directory: string | undefined;
 };
 
 type SynthesisConfiguration = {
-    type: SynthesisType;
-    file: FileItem | FileDisplayItem;
+    type: SynthesisType | undefined;
+    file: FileItem | FileDisplayItem | undefined;
 };
 
 export type Configuration = {
-    simulation: SimulationConfiguration;
-    synthesis: SynthesisConfiguration;
+    simulation: SimulationConfiguration | undefined;
+    synthesis: SynthesisConfiguration | undefined;
 };
 
 interface SynthesisOutput {
     type: SimulationOutputType;
     content: string;
 }
-export type SynthesisTab = "all" | "errors" | "lastSynthesis";
+export type SynthesisTab =
+    | "all"
+    | "errors"
+    | "lastSynthesis";
 
-export type SimulationTab = "all" | "errors" | "lastSimulation";
+export type SimulationTab =
+    | "all"
+    | "errors"
+    | "lastSimulation";
 
-type SimulationOutputType = "info" | "error" | "warning";
+type SimulationOutputType =
+    | "info"
+    | "error"
+    | "warning";
 
 interface SimulationOutput {
     type: SimulationOutputType;

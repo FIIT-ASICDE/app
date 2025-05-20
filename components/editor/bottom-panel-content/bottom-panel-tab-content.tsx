@@ -17,6 +17,7 @@ interface BottomPanelTabContentProps {
     lastSimulation: string | null;
     synthesisOutput: Array<SynthesisOutput>;
     lastSynthesis: string | null;
+    onStartSimulationAction: () => void;
 }
 
 /**
@@ -33,6 +34,7 @@ export const BottomPanelTabContent = ({
     lastSimulation,
     synthesisOutput,
     lastSynthesis,
+    onStartSimulationAction
 }: BottomPanelTabContentProps): ReactElement => {
     return (
         <div className="flex h-full">
@@ -42,6 +44,7 @@ export const BottomPanelTabContent = ({
                     configuration={configuration}
                     simulationOutput={simulationOutput}
                     lastSimulation={lastSimulation}
+                    onStartSimulationAction={onStartSimulationAction}
                 />
             )}
 

@@ -3,7 +3,7 @@ import {
     SimulationType,
     SynthesisType,
 } from "@/lib/types/editor";
-import { FileDisplayItem, FileItem, Repository } from "@/lib/types/repository";
+import { DirectoryDisplayItem, DirectoryItem, FileDisplayItem, FileItem, Repository } from "@/lib/types/repository";
 import { Portal } from "@radix-ui/react-portal";
 import { FileIcon, Info, Save } from "lucide-react";
 import {
@@ -17,7 +17,7 @@ import {
 import { toast } from "sonner";
 
 import { CloseButton } from "@/components/editor/navigation/close-button";
-import { getFilesFromRepo } from "@/components/generic/generic";
+import { getDirectoriesFromRepo, getFilesFromRepo } from "@/components/generic/generic";
 import { Button } from "@/components/ui/button";
 import {
     CommandDialog,
@@ -52,28 +52,37 @@ interface ConfigurationTabContentProps {
  * @returns {ReactElement} Tab content component
  */
 export const ConfigurationTabContent = ({
-                                            repository,
-                                            handleCloseSidebarAction,
-                                            configuration,
-                                            setConfigurationAction,
-                                        }: ConfigurationTabContentProps): ReactElement => {
+    repository,
+    handleCloseSidebarAction,
+    configuration,
+    setConfigurationAction,
+}: ConfigurationTabContentProps): ReactElement => {
     const [selectedSimulationType, setSelectedSimulationType] = useState<
         SimulationType | undefined
-    >(undefined);
+    >(configuration?.simulation?.type);
     const [
         selectedSimulationTestBenchFile,
         setSelectedSimulationTestBenchFile,
-    ] = useState<FileDisplayItem | FileItem | undefined>(undefined);
+    ] = useState<FileDisplayItem | FileItem | undefined>(configuration?.simulation?.testBench);
+
+    const [
+        selectedSimulationDirectory,
+        setSelectedSimulationDirectory,
+    ] = useState<string | undefined>(configuration?.simulation?.directory);
 
     const [selectedSynthesisType, setSelectedSynthesisType] = useState<
         SynthesisType | undefined
-    >("yosys");
+    >(configuration?.synthesis?.type);
     const [selectedSynthesisFile, setSelectedSynthesisFile] = useState<
         FileDisplayItem | FileItem | undefined
-    >(undefined);
+    >(configuration?.synthesis?.file);
 
     const [simulationFileSelectOpen, setSimulationFileSelectOpen] =
         useState<boolean>(false);
+
+    const [simulationDirectorySelectOpen, setSimulationDirectorySelectOpen] =
+        useState<boolean>(false);
+
     const [hoveredType, setHoveredType] = useState<SimulationType>();
 
     const [synthesisFileSelectOpen, setSynthesisFileSelectOpen] =
@@ -81,6 +90,10 @@ export const ConfigurationTabContent = ({
 
     const files: Array<FileItem | FileDisplayItem> = getFilesFromRepo(
         repository.tree,
+    );
+
+    const directories: Array<DirectoryItem | DirectoryDisplayItem> = getDirectoriesFromRepo(
+        repository.tree
     );
 
     const selectTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -130,7 +143,7 @@ export const ConfigurationTabContent = ({
         if (files.length <= 0) return [];
 
         if (selectedSimulationType === undefined) {
-            return files;
+            return [];
         }
 
         if (selectedSimulationType === "verilatorC++") {
@@ -178,6 +191,40 @@ export const ConfigurationTabContent = ({
             default:
                 return "Files in " + repository.name;
         }
+    };
+
+    const configurationChangesMade = () => {
+        return true;
+    };
+
+    const saveConfiguration = () => {
+        const newConfiguration: Configuration = {
+            ...configuration,
+            simulation: {
+                type: selectedSimulationType,
+                testBench: selectedSimulationTestBenchFile,
+                directory: selectedSimulationDirectory
+            },
+            synthesis: {
+                type: selectedSynthesisType,
+                file: selectedSynthesisFile,
+            }
+        };
+
+        setConfigurationAction(newConfiguration);
+
+        localStorage.setItem(
+            "configuration",
+            JSON.stringify(newConfiguration),
+        );
+
+        console.log(localStorage.getItem("configuration"));
+
+        toast.success(
+            "Configuration saved successfully",
+        );
+
+        handleCloseSidebarAction();
     };
 
     return (
@@ -297,6 +344,26 @@ export const ConfigurationTabContent = ({
                                             </span>
                                         )}
                                     </Button>
+
+                                    <Button
+                                        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm font-normal ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
+                                        onClick={() =>
+                                            setSimulationDirectorySelectOpen(true)
+                                        }
+                                    >
+                                        {selectedSimulationDirectory? (
+                                            <div className="flex flex-row items-center justify-start gap-x-2 text-foreground">
+                                                <FileIcon className="h-4 w-4 text-muted-foreground" />
+                                                {
+                                                    selectedSimulationDirectory
+                                                }
+                                            </div>
+                                        ) : (
+                                            <span className="text-muted-foreground">
+                                                Select output directory
+                                            </span>
+                                        )}
+                                    </Button>
                                 </div>
 
                                 <CommandDialog
@@ -342,6 +409,49 @@ export const ConfigurationTabContent = ({
                                                         "verilatorSystemVerilog"
                                                             ? "No SystemVerilog files found"
                                                             : "No Verilog files found"}
+                                                </CommandEmpty>
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </ScrollArea>
+                                </CommandDialog>
+
+                                <CommandDialog
+                                    open={simulationDirectorySelectOpen}
+                                    onOpenChange={setSimulationDirectorySelectOpen}
+                                >
+                                    <CommandInput placeholder="Select output directory..." />
+                                    <ScrollArea className="h-full max-h-60">
+                                        <CommandList>
+                                            <CommandGroup
+                                                heading={getGroupHeading()}
+                                            >
+                                                {directories.map(
+                                                    (
+                                                        directoryItem:
+                                                            | DirectoryItem
+                                                            | DirectoryDisplayItem,
+                                                    ) => (
+                                                        <CommandItem
+                                                            key={
+                                                                directoryItem.absolutePath
+                                                            }
+                                                            onSelect={() => {
+                                                                setSimulationDirectorySelectOpen(
+                                                                    false,
+                                                                );
+                                                                setSelectedSimulationDirectory(
+                                                                    directoryItem.name,
+                                                                );
+                                                            }}
+                                                            className="flex flex-row items-center gap-x-2"
+                                                        >
+                                                            <FileIcon className="h-4 w-4 text-muted-foreground" />
+                                                            {directoryItem.name}
+                                                        </CommandItem>
+                                                    ),
+                                                )}
+                                                <CommandEmpty>
+                                                    No specific directories found
                                                 </CommandEmpty>
                                             </CommandGroup>
                                         </CommandList>
@@ -446,69 +556,15 @@ export const ConfigurationTabContent = ({
                                 </CommandDialog>
                             </div>
                         </div>
-
-                        <div className="flex w-full flex-row gap-x-3">
-                            <Button
-                                variant="outline"
-                                className="w-1/2"
-                                onClick={() => handleCloseSidebarAction()}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                variant="default"
-                                className="w-1/2 hover:bg-primary-button-hover"
-                                disabled={
-                                    selectedSimulationType === undefined ||
-                                    selectedSimulationTestBenchFile ===
-                                    undefined ||
-                                    selectedSynthesisType === undefined ||
-                                    selectedSynthesisFile === undefined
-                                }
-                                onClick={() => {
-                                    if (
-                                        selectedSimulationType &&
-                                        selectedSimulationTestBenchFile &&
-                                        selectedSynthesisType &&
-                                        selectedSynthesisFile
-                                    ) {
-                                        const newConfiguration: Configuration =
-                                            {
-                                                ...configuration,
-                                                simulation: {
-                                                    type: selectedSimulationType,
-                                                    testBench:
-                                                    selectedSimulationTestBenchFile,
-                                                },
-                                                synthesis: {
-                                                    type: selectedSynthesisType,
-                                                    file: selectedSynthesisFile,
-                                                },
-                                            };
-                                        setConfigurationAction(
-                                            newConfiguration,
-                                        );
-                                        localStorage.setItem(
-                                            "configuration",
-                                            JSON.stringify(newConfiguration),
-                                        );
-
-                                        toast.success(
-                                            "Configuration saved successfully",
-                                        );
-
-                                        handleCloseSidebarAction();
-                                    } else {
-                                        toast.error(
-                                            "Every input has to be filled to save a configuration",
-                                        );
-                                    }
-                                }}
-                            >
-                                <Save />
-                                Save
-                            </Button>
-                        </div>
+                        <Button
+                            variant="default"
+                            className="w-full hover:bg-primary-button-hover"
+                            disabled={!configurationChangesMade()}
+                            onClick={saveConfiguration}
+                        >
+                            <Save />
+                            Save
+                        </Button>
                     </div>
                 </div>
             </ScrollArea>

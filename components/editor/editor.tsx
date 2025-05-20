@@ -1,7 +1,7 @@
 "use client";
 
-import { getParser } from "@/antlr/SystemVerilog/utilities/monacoEditor/parserRegistry";
 import { FileDisplayItem } from "@/lib/types/repository";
+import { getParser } from "@/antlr/SystemVerilog/utilities/monacoEditor/parserRegistry";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { ReactElement, useEffect, useRef } from "react";
