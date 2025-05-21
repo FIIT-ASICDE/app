@@ -2049,6 +2049,18 @@ export async function initializeGit(
     await execPromise(`git -C "${repoPath}" config --unset user.name`);
 }
 
+/**
+ * Retrieves all files from a repository, flattening the directory structure.
+ * This procedure:
+ * 1. Validates repository access permissions
+ * 2. Loads the complete file tree recursively
+ * 3. Flattens the tree structure into a single array of files
+ * 
+ * @param input.ownerSlug - Repository owner's slug (username/organization name)
+ * @param input.repositorySlug - Repository name slug
+ * @returns Array of FileItem objects representing all files in the repository
+ * @throws {TRPCError} If repository is not found or user lacks access permissions
+ */
 function loadAllFilesInRepo() {
     return protectedProcedure
         .input(repoBySlugsSchema)
@@ -2075,6 +2087,11 @@ function loadAllFilesInRepo() {
             const repoPath = absoluteRepoPath(owner.name!, repo.name);
             const tree = loadRepoItems(repoPath, -1, true);
 
+            /**
+             * Recursively flattens a directory tree into an array of files
+             * @param item - Repository item (file or directory) to process
+             * @returns Array of FileItem objects
+             */
             function flattenFiles(item: RepositoryItem): FileItem[] {
                 if (item.type === "file") return [item];
 
@@ -2088,6 +2105,17 @@ function loadAllFilesInRepo() {
             return tree.flatMap(flattenFiles);
         });
 }
+
+/**
+ * Saves content to a file in a repository.
+ * This protected procedure handles file writing operations with proper access control.
+ * 
+ * @param input.repoId - Repository ID
+ * @param input.path - Path to the file within the repository
+ * @param input.content - Content to write to the file
+ * @returns Object indicating success of the operation
+ * @throws {TRPCError} If repository is not found or file operation fails
+ */
 function saveFileContent() {
     return protectedProcedure
         .input(z.object({
@@ -2102,6 +2130,15 @@ function saveFileContent() {
             return { success: true };
         });
 }
+
+/**
+ * Retrieves the owner name and repository name for a given repository ID.
+ * Used for resolving repository information when only the ID is available.
+ * 
+ * @param input.repositoryId - UUID of the repository
+ * @returns Object containing ownerName and repoName
+ * @throws {TRPCError} If repository is not found
+ */
 function loadOwnerAndRepoById() {
     return protectedProcedure
         .input(z.object({ repositoryId: z.string() }))

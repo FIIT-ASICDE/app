@@ -70,32 +70,50 @@ import {
 
 
 
+// Interface defining all possible properties for diagram elements
 interface Properties {
-    label?: string;
-    comparatorType?: string;
-    aluType?: string;
-    bandwidth?: number;
-    bandwidthType?: string;
-    addressBandwidth?: number;
-    inputPorts?: number;
-    instance?: string;
-    createdInPorts?: { name: string; bandwidth: number; startBit?: number; endBit?: number }[];
-    createdOutPorts?: { name: string; bandwidth: number; startBit?: number; endBit?: number }[];
-    resetPort?: boolean;
-    enablePort?: boolean;
-    qInverted?: boolean;
-    clkEdge?: 'rising' | 'falling';
-    rstEdge?: 'rising' | 'falling';
-    rstType?: 'async' | 'sync';
-    bitPortType?: string;
-    structPackage?: string;
-    structTypeDef?: string;
-    moduleType?: 'new' | 'existing';
-    existingModule?: string;
+    label?: string;                // Element name
+    comparatorType?: string;       // Type of comparator operation (>, <, ==, etc.)
+    aluType?: string;             // Type of ALU operation (+, -, *, etc.)
+    bandwidth?: number;           // Data bus width
+    bandwidthType?: string;       // Width type (bit, vector, struct)
+    addressBandwidth?: number;    // Address bus width for memory elements
+    inputPorts?: number;          // Number of input ports
+    instance?: string;            // Module instance name
+    createdInPorts?: { name: string; bandwidth: number; startBit?: number; endBit?: number }[];  // Custom input ports configuration
+    createdOutPorts?: { name: string; bandwidth: number; startBit?: number; endBit?: number }[]; // Custom output ports configuration
+    resetPort?: boolean;          // Enable reset port
+    enablePort?: boolean;         // Enable control port
+    qInverted?: boolean;          // Invert Q output
+    clkEdge?: 'rising' | 'falling';  // Clock edge trigger type
+    rstEdge?: 'rising' | 'falling';  // Reset edge trigger type
+    rstType?: 'async' | 'sync';      // Reset type (asynchronous/synchronous)
+    bitPortType?: string;            // Port bit type configuration
+    structPackage?: string;          // Package containing struct definition
+    structTypeDef?: string;          // Struct type definition
+    moduleType?: 'new' | 'existing'; // Module type selection
+    existingModule?: string;         // Reference to existing module
 }
 
+// Main Properties Panel Component
 const PropertiesPanel = () => {
-    const { selectedElement, graph, setSelectedElement, setHasFormErrors, selectedLanguage, setSelectedLanguage, parseResults, setParseResults, repository, parseModulesResults, setParseModulesResults, checkLanguageLock } = useDiagramContext();
+    // Context and state management for the entire diagram editor
+    const {
+        selectedElement,          // Currently selected element
+        graph,                    // JointJS graph instance
+        setSelectedElement,       // Function to update selected element
+        setHasFormErrors,         // Function to track form validation state
+        selectedLanguage,         // Current HDL language (VHDL/SystemVerilog)
+        setSelectedLanguage,      // Function to change HDL language
+        parseResults,             // Parsed packages/structs results
+        setParseResults,          // Function to update parsed results
+        repository,               // Current repository information
+        parseModulesResults,      // Parsed modules results
+        setParseModulesResults,   // Function to update parsed modules
+        checkLanguageLock        // Function to check if language can be changed
+    } = useDiagramContext();
+
+    // Initialize properties state with default values
     const [properties, setProperties] = useState<Properties>({
         label: '',
         instance: '',
@@ -119,17 +137,18 @@ const PropertiesPanel = () => {
         moduleType: 'new',
         existingModule: '',
     });
-    const [errorMessage, setErrorMessage] = useState('');
-    const [showAddPortDialog, setShowAddPortDialog] = useState(false);
-    const [newPortType, setNewPortType] = useState<'input' | 'output'>('input');
-    const [newPortData, setNewPortData] = useState({ name: '', bandwidth: 1, startBit: 0, endBit: 0 });
-    const [isEditingPort, setIsEditingPort] = useState(false);
-    const [editPortIndex, setEditPortIndex] = useState<number | null>(null);
-    const [editPortType, setEditPortType] = useState<'input' | 'output'>('input');
-    const [showSaveNotification, setShowSaveNotification] = useState(false);
-    const [showErrorNotification, setShowErrorNotification] = useState(false);
-    const [errors, setErrors] = useState<Record<string, string>>({});
-    const [clipboardCell, setClipboardCell] = useState<dia.Cell | null>(null);
+    // UI State Management
+    const [errorMessage, setErrorMessage] = useState('');           // Error message for form validation
+    const [showAddPortDialog, setShowAddPortDialog] = useState(false); // Control port addition dialog
+    const [newPortType, setNewPortType] = useState<'input' | 'output'>('input'); // New port type selection
+    const [newPortData, setNewPortData] = useState({ name: '', bandwidth: 1, startBit: 0, endBit: 0 }); // New port configuration
+    const [isEditingPort, setIsEditingPort] = useState(false);      // Track port editing state
+    const [editPortIndex, setEditPortIndex] = useState<number | null>(null); // Index of port being edited
+    const [editPortType, setEditPortType] = useState<'input' | 'output'>('input'); // Type of port being edited
+    const [showSaveNotification, setShowSaveNotification] = useState(false); // Success notification control
+    const [showErrorNotification, setShowErrorNotification] = useState(false); // Error notification control
+    const [errors, setErrors] = useState<Record<string, string>>({}); // Form validation errors
+    const [clipboardCell, setClipboardCell] = useState<dia.Cell | null>(null); // Clipboard for copy/paste operations
 
     useEffect(() => {
         if (selectedElement) {
@@ -265,6 +284,7 @@ const PropertiesPanel = () => {
     }, [allFiles, selectedLanguage, setParseResults, setParseModulesResults]);
 
 
+    // Field validation function
     function validateField(fieldName: string, fieldValue: string | number | boolean | undefined): string {
         if (typeof fieldValue === 'string') {
             const trimmedValue = fieldValue.trim();
@@ -299,6 +319,7 @@ const PropertiesPanel = () => {
         return "";
     }
 
+    // Handle property changes from form inputs
     const handleChange = (e: { target: { name: string; type: string; checked?: boolean; value?: string | number | boolean; }; }) => {
         const { name, type, checked, value} = e.target;
 
@@ -350,6 +371,11 @@ const PropertiesPanel = () => {
         }
     }, [showSaveNotification, showErrorNotification]);
 
+
+
+    // Port Management Functions
+
+    // Add new input port to the element
     const handleAddInputPort = () => {
         setNewPortType('input');
         setNewPortData({ name: '', bandwidth: 1, startBit: 0, endBit: 0 });
@@ -359,6 +385,7 @@ const PropertiesPanel = () => {
         setEditPortIndex(null);
     };
 
+    // Add new output port to the element
     const handleAddOutputPort = () => {
         setNewPortType('output');
         setNewPortData({ name: '', bandwidth: 1, startBit: 0, endBit: 0 });
@@ -368,6 +395,7 @@ const PropertiesPanel = () => {
         setEditPortIndex(null);
     };
 
+    // Handle changes in port configuration
     const handleNewPortDataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setNewPortData(prev => ({
@@ -376,6 +404,7 @@ const PropertiesPanel = () => {
         }));
     };
 
+    // Submit new or edited port configuration
     const handleNewPortSubmit = () => {
         if (!selectedElement) return;
 
@@ -771,10 +800,11 @@ const PropertiesPanel = () => {
     };
 
 
-
+    // Save changes to the selected element
     const handleSave = () => {
         if (!selectedElement) return;
 
+        // Check for validation errors
         const hasAnyErrors = Object.values(errors).some((msg) => msg);
         if (hasAnyErrors) {
             setShowErrorNotification(true);
@@ -782,13 +812,12 @@ const PropertiesPanel = () => {
         }
 
         setShowSaveNotification(true);
-
-
-
         handleElementChange();
     };
 
+    // Clipboard Operations
 
+    // Copy selected element
     function handleCopy() {
         if (!selectedElement) return;
         const clone = selectedElement.clone();
@@ -796,11 +825,12 @@ const PropertiesPanel = () => {
         console.log("Copied element:", clone);
     }
 
+    // Paste copied element
     function handlePaste() {
         if (!clipboardCell) return;
-
         const newCell = clipboardCell.clone();
 
+        // Update name to avoid duplicates
         if (newCell.attributes.name && newCell.attributes.attrs?.label?.text) {
             newCell.attr('label/text', newCell.attributes.attrs.label.text + '_copy');
             newCell.attributes.name = newCell.attributes.name + '_copy';
@@ -808,9 +838,7 @@ const PropertiesPanel = () => {
 
         newCell.position();
         graph.addCell(newCell);
-
         setSelectedElement(newCell);
-        console.log("Pasted element:", newCell);
     }
 
     useHotkeys({

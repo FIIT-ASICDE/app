@@ -1,19 +1,39 @@
-import { useState } from "react";
-import { api } from "@/lib/trpc/react";
-import { RepositoryItem, FileDisplayItem } from "@/lib/types/repository";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+/**
+ * Provides a dialog interface for generating HDL code (SystemVerilog or VHDL)
+ * from block diagram representations. Handles file generation, saving,
+ * and tree updates.
+ */
 import { generateSystemVerilogCode } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/code-generation/system-verilog-generation/system-verilog-code-generator";
 import { generateVHDLCode } from "@/app/[userslug]/[repositoryslug]/block-diagram/utils/code-generation/vhdl-generation/vhdl-code-generator";
-import { dia, shapes } from '@joint/core';
+import { api } from "@/lib/trpc/react";
+import { FileDisplayItem, RepositoryItem } from "@/lib/types/repository";
+import { dia, shapes } from "@joint/core";
 import { CodeXml, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+
+/**
+ * Props interface for the GenerateCodeDialog component
+ */
 interface GenerateCodeDialogProps {
-    repositoryId: string;
-    diagramFile: RepositoryItem;
-    tree: RepositoryItem[];
-    setTree: (items: RepositoryItem[]) => void;
+    repositoryId: string; // ID of the current repository
+    diagramFile: RepositoryItem; // Block diagram file to generate code from
+    tree: RepositoryItem[]; // Repository file tree structure
+    setTree: (items: RepositoryItem[]) => void; // Function to update the file tree
 }
+
+/**
+ * Interface for serialized diagram data structure
+ */
 interface SerializedDiagram {
     cells: Array<{
         id: string;
@@ -25,7 +45,11 @@ interface SerializedDiagram {
     [key: string]: unknown;
 }
 
-
+/**
+ * GenerateCodeDialog Component
+ * Provides a dialog interface for generating HDL code from block diagrams.
+ * Supports both SystemVerilog and VHDL code generation.
+ */
 export const GenerateCodeDialog = ({
     repositoryId,
     diagramFile,
@@ -35,31 +59,52 @@ export const GenerateCodeDialog = ({
     const [open, setOpen] = useState(false);
     const saveFileMutation = api.repo.saveFileContent.useMutation();
 
-
-
-    function loadGraphFromSerializedBD(serialized: SerializedDiagram): dia.Graph {
+    /**
+     * Creates a JointJS graph from serialized block diagram data
+     * @param serialized - Serialized diagram data
+     * @returns Initialized JointJS graph
+     */
+    function loadGraphFromSerializedBD(
+        serialized: SerializedDiagram,
+    ): dia.Graph {
         const graph = new dia.Graph({}, { cellNamespace: shapes });
         graph.fromJSON(serialized);
         return graph;
     }
 
+    // Load repository owner and name information
     const { data } = api.repo.loadOwnerAndRepoById.useQuery({ repositoryId });
-
     const ownerName = data?.ownerName;
     const repoName = data?.repoName;
 
+    // Load diagram file content when dialog is opened
+    const { data: fileData, isLoading: isFileLoading } =
+        api.repo.loadRepoItem.useQuery(
+            {
+                ownerSlug: ownerName as string,
+                repositorySlug: repoName as string,
+                path: diagramFile.absolutePath,
+                loadItemsDisplaysDepth: 0,
+            },
+            {
+                enabled: open && !!ownerName && !!repoName,
+            },
+        );
 
-    const { data: fileData, isLoading: isFileLoading } = api.repo.loadRepoItem.useQuery({
-        ownerSlug: ownerName as string,
-        repositorySlug: repoName as string,
-        path: diagramFile.absolutePath,
-        loadItemsDisplaysDepth: 0,
-    }, {
-        enabled: open && !!ownerName && !!repoName,
-    });
-
-    const addGeneratedFileToTree = (name: string, absolutePath: string, language: string) => {
-        const alreadyExists = tree.some(item => item.absolutePath === absolutePath);
+    /**
+     * Adds a newly generated file to the repository tree
+     * @param name - Name of the generated file
+     * @param absolutePath - Full path of the file in the repository
+     * @param language - Programming language of the generated code
+     */
+    const addGeneratedFileToTree = (
+        name: string,
+        absolutePath: string,
+        language: string,
+    ) => {
+        const alreadyExists = tree.some(
+            (item) => item.absolutePath === absolutePath,
+        );
         if (!alreadyExists) {
             const newFile: FileDisplayItem = {
                 type: "file-display",
@@ -72,41 +117,59 @@ export const GenerateCodeDialog = ({
         }
     };
 
+    /**
+     * Handles SystemVerilog code generation
+     * Generates .sv file from the block diagram
+     */
     const handleSystemVerilogGenerate = () => {
-        if (!fileData || !('content' in fileData)) {
+        if (!fileData || !("content" in fileData)) {
             toast.error("Failed to load diagram content");
             return;
         }
-
         try {
             const serialized = JSON.parse(fileData.content as string);
             const graph = loadGraphFromSerializedBD(serialized);
-
             const fileName = diagramFile.name.replace(/\.bd$/, ".sv");
             const moduleName = diagramFile.name.replace(/\.bd$/, "");
-            const filePath = diagramFile.absolutePath.replace(/[^/]+$/, fileName);
+            const filePath = diagramFile.absolutePath.replace(
+                /[^/]+$/,
+                fileName,
+            );
             const code = generateSystemVerilogCode(graph, moduleName);
-
-            saveFileMutation.mutate({
-                repoId: repositoryId,
-                path: filePath,
-                content: code,
-            }, {
-                onSuccess: () => {
-                    toast.success("SystemVerilog file generated");
-                    addGeneratedFileToTree(fileName, filePath, "system verilog");
-                    setOpen(false);
+            saveFileMutation.mutate(
+                {
+                    repoId: repositoryId,
+                    path: filePath,
+                    content: code,
                 },
-                onError: (err) => {
-                    toast.error("Failed to save file: " + err.message);
+                {
+                    onSuccess: () => {
+                        toast.success("SystemVerilog file generated");
+                        addGeneratedFileToTree(
+                            fileName,
+                            filePath,
+                            "system verilog",
+                        );
+                        setOpen(false);
+                    },
+                    onError: (err) => {
+                        toast.error("Failed to save file: " + err.message);
+                    },
                 },
-            });
+            );
         } catch (err) {
-            toast.error("Failed to parse diagram JSON: " + (err as Error).message);
+            toast.error(
+                "Failed to parse diagram JSON: " + (err as Error).message,
+            );
         }
     };
+
+    /**
+     * Handles VHDL code generation
+     * Generates .vhd file from the block diagram
+     */
     const handleVHDLGenerate = () => {
-        if (!fileData || !('content' in fileData)) {
+        if (!fileData || !("content" in fileData)) {
             toast.error("Failed to load diagram content");
             return;
         }
@@ -114,39 +177,63 @@ export const GenerateCodeDialog = ({
         try {
             const serialized = JSON.parse(fileData.content as string);
             const graph = loadGraphFromSerializedBD(serialized);
-
             const fileName = diagramFile.name.replace(/\.bd$/, ".vhd");
             const moduleName = diagramFile.name.replace(/\.bd$/, "");
-            const filePath = diagramFile.absolutePath.replace(/[^/]+$/, fileName);
+            const filePath = diagramFile.absolutePath.replace(
+                /[^/]+$/,
+                fileName,
+            );
             const code = generateVHDLCode(graph, moduleName);
 
-            saveFileMutation.mutate({
-                repoId: repositoryId,
-                path: filePath,
-                content: code,
-            }, {
-                onSuccess: () => {
-                    toast.success("VHDL file generated");
-                    addGeneratedFileToTree(fileName, filePath, "vhdl");
-                    setOpen(false);
+            saveFileMutation.mutate(
+                {
+                    repoId: repositoryId,
+                    path: filePath,
+                    content: code,
                 },
-                onError: (err) => {
-                    toast.error("Failed to save file: " + err.message);
+                {
+                    onSuccess: () => {
+                        toast.success("VHDL file generated");
+                        addGeneratedFileToTree(fileName, filePath, "vhdl");
+                        setOpen(false);
+                    },
+                    onError: (err) => {
+                        toast.error("Failed to save file: " + err.message);
+                    },
                 },
-            });
+            );
         } catch (err) {
-            toast.error("Failed to parse diagram JSON: " + (err as Error).message);
+            toast.error(
+                "Failed to parse diagram JSON: " + (err as Error).message,
+            );
         }
     };
 
-    const getLockedLanguage = (serialized: SerializedDiagram): "SystemVerilog" | "VHDL" | null => {
+    /**
+     * Determines if the diagram is locked to a specific HDL language
+     * based on the components used in the diagram
+     * @param serialized - Serialized diagram data
+     * @returns The locked language ("SystemVerilog" or "VHDL") or null if not locked
+     */
+    const getLockedLanguage = (
+        serialized: SerializedDiagram,
+    ): "SystemVerilog" | "VHDL" | null => {
         const languageSet = new Set<string>();
 
         serialized.cells.forEach((cell) => {
             const elType = cell.elType;
             if (
                 elType &&
-                ["module", "sram", "register", "input", "output", "splitter", "combiner", "multiplexer"].includes(elType)
+                [
+                    "module",
+                    "sram",
+                    "register",
+                    "input",
+                    "output",
+                    "splitter",
+                    "combiner",
+                    "multiplexer",
+                ].includes(elType)
             ) {
                 const language = cell?.language;
                 if (language) {
@@ -162,11 +249,11 @@ export const GenerateCodeDialog = ({
         return null;
     };
 
-    const lockedLanguage = fileData && 'content' in fileData
-        ? getLockedLanguage(JSON.parse(fileData.content as string))
-        : null;
-
-    console.log(lockedLanguage);
+    // Determine the locked language from the current diagram
+    const lockedLanguage =
+        fileData && "content" in fileData
+            ? getLockedLanguage(JSON.parse(fileData.content as string))
+            : null;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -176,28 +263,49 @@ export const GenerateCodeDialog = ({
             </DialogTrigger>
             <DialogContent className="max-w-md">
                 <DialogHeader>
-                    <DialogTitle className="text-center">Generate code</DialogTitle>
+                    <DialogTitle className="text-center">
+                        Generate code
+                    </DialogTitle>
                 </DialogHeader>
-                <div className="flex flex-col gap-2 mt-4">
+                <div className="mt-4 flex flex-col gap-2">
                     <Button
                         variant="default"
                         size="default"
                         onClick={handleSystemVerilogGenerate}
-                        disabled={isFileLoading || !!(lockedLanguage && lockedLanguage !== "SystemVerilog")}
+                        disabled={
+                            isFileLoading ||
+                            !!(
+                                lockedLanguage &&
+                                lockedLanguage !== "SystemVerilog"
+                            )
+                        }
                         className="hover:bg-primary-button-hover"
                     >
-                        {isFileLoading ? <Loader2 className="text-muted-foreground animate-spin" /> : <CodeXml />}
-                        {isFileLoading ? "Loading..." : "Generate SystemVerilog code"}
+                        {isFileLoading ? (
+                            <Loader2 className="animate-spin text-muted-foreground" />
+                        ) : (
+                            <CodeXml />
+                        )}
+                        {isFileLoading
+                            ? "Loading..."
+                            : "Generate SystemVerilog code"}
                     </Button>
 
                     <Button
                         variant="default"
                         size="default"
                         onClick={handleVHDLGenerate}
-                        disabled={isFileLoading || !!(lockedLanguage && lockedLanguage !== "VHDL")}
+                        disabled={
+                            isFileLoading ||
+                            !!(lockedLanguage && lockedLanguage !== "VHDL")
+                        }
                         className="hover:bg-primary-button-hover"
                     >
-                        {isFileLoading ? <Loader2 className="text-muted-foreground animate-spin" /> : <CodeXml />}
+                        {isFileLoading ? (
+                            <Loader2 className="animate-spin text-muted-foreground" />
+                        ) : (
+                            <CodeXml />
+                        )}
                         {isFileLoading ? "Loading..." : "Generate VHDL code"}
                     </Button>
                 </div>

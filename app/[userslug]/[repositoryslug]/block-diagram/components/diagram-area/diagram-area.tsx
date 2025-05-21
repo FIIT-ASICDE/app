@@ -44,11 +44,13 @@ import PaperToolbar from "@/app/[userslug]/[repositoryslug]/block-diagram/compon
 import { useDebouncedCallback } from "use-debounce";
 import { api } from "@/lib/trpc/react";
 
+// Main component for the diagram area
 const DiagramArea = () => {
     const paperElement = useRef<HTMLDivElement>(null);
     const { graph, repository, activeFile, parseResults, parseModulesResults } = useDiagramContext();
     const [isReady, setIsReady] = useState(false);
 
+    // Load diagram file content
     const { data: fileData } = api.repo.loadRepoItem.useQuery(
         {
             ownerSlug: repository.ownerName,
@@ -60,6 +62,7 @@ const DiagramArea = () => {
         }
     );
 
+    // Process JSON diagram data
     useEffect(() => {
         if (fileData?.type === "file" && fileData.content) {
             try {
@@ -71,7 +74,7 @@ const DiagramArea = () => {
         }
     }, [fileData, graph]);
 
-
+    // Initialize paper when component is ready
     useEffect(() => {
         if (paperElement.current) {
             setIsReady(true);
@@ -85,6 +88,7 @@ const DiagramArea = () => {
         paperElement: paperElement.current
     });
 
+    // Auto-adjust paper size
     useEffect(() => {
         if (!paper || !paperElement.current) return;
 
@@ -114,18 +118,19 @@ const DiagramArea = () => {
         };
     }, [paper]);
 
+    // Handle theme changes (light/dark)
     useEffect(() => {
         if (!paper || !paperElement.current) return;
 
         const updateTheme = () => {
             const isDark = document.documentElement.classList.contains('dark');
 
-            // Меняем фон Paper
+            // Update paper background
             paper.drawBackground({
                 color: isDark ? '#0d0d0d' : '#ffffff'
             });
 
-            // Меняем цвета всех элементов
+            // Update elements appearance
             graph.getElements().forEach(cell => {
                 cell.attr({
                     body: {
@@ -135,8 +140,9 @@ const DiagramArea = () => {
                     label: {
                         fill: isDark ? '#eeeeee' : '#000000',
                     },
-
                 });
+                
+                // Update ports appearance
                 cell.getPorts().forEach(port => {
                     if (port.id) {
                         cell.portProp(port.id, 'attrs/portLine/fill', isDark ? '#1f1f1f' : '#ffffff');
@@ -146,7 +152,7 @@ const DiagramArea = () => {
                 });
             });
 
-            // Меняем цвета всех связей
+            // Update connections appearance
             graph.getLinks().forEach(link => {
                 link.attr({
                     line: {
@@ -156,8 +162,9 @@ const DiagramArea = () => {
             });
         };
 
-        updateTheme(); // вызвать один раз сразу при монтировании
+        updateTheme(); 
 
+        // Observer for theme changes
         const observer = new MutationObserver(() => {
             updateTheme();
         });
@@ -169,7 +176,7 @@ const DiagramArea = () => {
         };
     }, [paper, graph]);
 
-
+    // Auto-save diagram changes
     const saveDiagramMutation = api.repo.saveFileContent.useMutation();
 
     const debouncedSave = useDebouncedCallback(() => {
@@ -187,12 +194,14 @@ const DiagramArea = () => {
             debouncedSave();
         };
 
+        // Subscribe to graph changes
         graph.on('change', onGraphChange);
         graph.on('add', onGraphChange);
         graph.on('remove', onGraphChange);
         graph.on('batch:stop', onGraphChange);
 
         return () => {
+            // Cleanup subscriptions
             graph.off('change', onGraphChange);
             graph.off('add', onGraphChange);
             graph.off('remove', onGraphChange);
@@ -200,8 +209,9 @@ const DiagramArea = () => {
         };
     }, [graph, debouncedSave]);
 
-
+    // Get element type for new components
     function getElType(toolType: string): string {
+        // Map tool types to element types
         switch (toolType) {
         case 'and':        return 'and';
         case 'or':         return 'or';
@@ -226,13 +236,14 @@ const DiagramArea = () => {
         }
     }
 
+    // Generate unique name for new element
     function getNextName(graph: dia.Graph, elType: string): string {
         const all = graph.getElements();
         const sameTypeCount = all.filter(el => el.attributes.elType === elType).length;
         return elType + '_' + (sameTypeCount + 1);
     }
 
-
+    // Handle element drop on the diagram area
     const handleDrop = (event: React.DragEvent) => {
         event.preventDefault();
         const toolType = event.dataTransfer.getData('toolType');
@@ -244,10 +255,10 @@ const DiagramArea = () => {
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
 
-
         let element;
         switch(toolType) {
         case 'and':
+            // Create AND gate with default properties and other elements
             const and = new And();
             and.name = elementName;
             and.position = {x, y};
@@ -399,11 +410,10 @@ const DiagramArea = () => {
         graph.addCell(element);
     };
 
+    // Handle drag over event
     const handleDragOver = (event: React.DragEvent) => {
         event.preventDefault();
     };
-
-
 
     return (
         <div className="flex flex-col h-full">
