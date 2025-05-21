@@ -19,7 +19,7 @@ import {QuietErrorListener } from '@/app/[userslug]/[repositoryslug]/block-diagr
 // Interface representing a port in a SystemVerilog module
 export interface ModulePort {
     name: string;           // Port identifier
-    direction: 'input' | 'output' | 'inout';  // Port direction
+    direction: 'input' | 'output' | 'inout' | 'in' | 'out'; // Port direction
     type?: string;         // Data type of the port
     width?: number;        // Bit width of the port
 }
@@ -45,7 +45,7 @@ export interface SubModule {
         portName: string;   // Port name in the submodule
         connectedTo: string; // Signal/port it's connected to in the top module
         width: number;      // Bit width of the connection
-        direction: 'input' | 'output' | 'inout';  // Port direction
+        direction: 'input' | 'output' | 'inout' | 'in' | 'out'; // Port direction
     }[];
 }
 
@@ -200,7 +200,7 @@ class TopModuleVisitor
             const portName = npc.port_identifier()?.text ?? '';
             const expr = npc.port_assign()?.expression()?.text ?? '';
             let width = 1;
-            let direction: 'input'|'output'|'inout' = 'input';
+            let direction: 'input' | 'output' | 'inout' | 'in' | 'out' = 'input';
 
             // Get port information from external module if available
             if (extMod) {

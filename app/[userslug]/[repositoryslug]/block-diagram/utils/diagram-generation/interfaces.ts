@@ -43,7 +43,7 @@ export interface SubModule {
         portName: string;
         connectedTo: string;
         width: number;
-        direction: 'input' | 'output' | 'inout';
+        direction: 'input' | 'output' | 'inout' | 'in' | 'out';
     }[];
 }
 

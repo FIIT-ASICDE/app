@@ -112,7 +112,7 @@ export const createDiagramFromParsedModule = (
     });
 
     // Define connection type for net mapping
-    type Conn = { el: dia.Element; portId: string; direction: "input" | "output" | "inout" };
+    type Conn = { el: dia.Element; portId: string; direction: 'input' | 'output' | 'inout' | 'in' | 'out'};
     const nets: Record<string, Conn[]> = {};
 
     // Map connections for submodules
