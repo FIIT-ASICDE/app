@@ -64,31 +64,30 @@ integration-test:
         - bunx prisma generate
         - bunx prisma migrate reset --force
         - bun test
-
-deploy-dev:
-    stage: deploy
-    environment:
-        name: development
-        url: https://ide.drasic.com
-    tags:
-        - alpine
-    dependencies:
-        - integration-test
-        - build-app
-    before_script:
-        - "command -v ssh-agent >/dev/null || ( apk add --update openssh openssl rsync )"
-        - mkdir -p ~/.ssh
-        - chmod 700 ~/.ssh
-        - echo "$DEPLOYER_SSH_PK" | openssl enc -base64 -d -out ~/.ssh/id_ed25519
-        - chmod 400 ~/.ssh/id_ed25519
-        - eval $(ssh-agent -s)
-        - ssh-add -v ~/.ssh/id_ed25519
-        - echo "StrictHostKeyChecking no" >> ~/.ssh/config # https://forum.gitlab.com/t/error-host-key-verification-failed/77315/3
-    script:
-        - rsync -avzr --delete --exclude 'public' --exclude '.env*' ./.next/standalone/ asicde@147.175.149.102:/home/asicde/asicde/
-        - rsync -avzr --delete --exclude 'public' --exclude '.env*' ./.next/static/ asicde@147.175.149.102:/home/asicde/asicde/.next/static
-        - rsync -avzr --delete ./public/ asicde@147.175.149.102:/home/asicde/asicde/public
-        - rsync -avzr --delete --exclude 'public' --exclude '.env*' ./scripts/ asicde@147.175.149.102:/home/asicde/asicde/scripts
-        - ssh asicde@147.175.149.102 "cd ~/asicde && ./scripts/deploy.sh"
-    only:
-        - master
+# deploy-dev:
+#     stage: deploy
+#     environment:
+#         name: development
+#         url: https://ide.drasic.com
+#     tags:
+#         - alpine
+#     dependencies:
+#         - integration-test
+#         - build-app
+#     before_script:
+#         - "command -v ssh-agent >/dev/null || ( apk add --update openssh openssl rsync )"
+#         - mkdir -p ~/.ssh
+#         - chmod 700 ~/.ssh
+#         - echo "$DEPLOYER_SSH_PK" | openssl enc -base64 -d -out ~/.ssh/id_ed25519
+#         - chmod 400 ~/.ssh/id_ed25519
+#         - eval $(ssh-agent -s)
+#         - ssh-add -v ~/.ssh/id_ed25519
+#         - echo "StrictHostKeyChecking no" >> ~/.ssh/config # https://forum.gitlab.com/t/error-host-key-verification-failed/77315/3
+#     script:
+#         - rsync -avzr --delete --exclude 'public' --exclude '.env*' ./.next/standalone/ asicde@147.175.149.102:/home/asicde/asicde/
+#         - rsync -avzr --delete --exclude 'public' --exclude '.env*' ./.next/static/ asicde@147.175.149.102:/home/asicde/asicde/.next/static
+#         - rsync -avzr --delete ./public/ asicde@147.175.149.102:/home/asicde/asicde/public
+#         - rsync -avzr --delete --exclude 'public' --exclude '.env*' ./scripts/ asicde@147.175.149.102:/home/asicde/asicde/scripts
+#         - ssh asicde@147.175.149.102 "cd ~/asicde && ./scripts/deploy.sh"
+#     only:
+#         - master
