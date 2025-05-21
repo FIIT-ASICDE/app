@@ -8,12 +8,14 @@ import { ReactElement, useState } from "react";
 
 import { CloseButton } from "@/components/editor/navigation/close-button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 
 interface SimulationTabContentProps {
     handleCloseBottomPanel: () => void;
     configuration: Configuration | undefined;
     simulationOutput: Array<SimulationOutput>;
     lastSimulation: string | null;
+    onStartSimulationAction: () => void;
 }
 
 /**
@@ -26,6 +28,7 @@ export const SimulationTabContent = ({
     handleCloseBottomPanel,
     simulationOutput,
     lastSimulation,
+    onStartSimulationAction
 }: SimulationTabContentProps): ReactElement => {
     const [activeTab, setActiveTab] = useState<SimulationTab>("all");
 
@@ -33,12 +36,19 @@ export const SimulationTabContent = ({
         <div className="relative w-full text-nowrap p-4 pt-14">
             <header className="absolute left-4 right-4 top-4 flex flex-row items-center justify-between">
                 <div className="flex flex-row items-baseline gap-x-3 font-medium">
+                    <Button
+                        variant="default"
+                        className="w-1/2 hover:bg-primary-button-hover"
+                        onClick={onStartSimulationAction}
+                    >
+                        Start Simulation
+                    </Button>
                     <span
                         className={cn(
-                            "cursor-pointer text-xl decoration-accent underline-offset-4",
+                            "cursor-pointer inline-block text-xl px-4 py-2 rounded-lg font-medium",
                             activeTab === "all"
-                                ? "underline"
-                                : "text-muted-foreground hover:underline",
+                                ? "bg-gray-200 text-black"
+                                : "text-muted-foreground hover:bg-gray-100",
                         )}
                         onClick={() => setActiveTab("all")}
                     >
@@ -46,10 +56,10 @@ export const SimulationTabContent = ({
                     </span>
                     <span
                         className={cn(
-                            "cursor-pointer text-xl decoration-accent underline-offset-4",
+                            "cursor-pointer inline-block text-xl px-4 py-2 rounded-lg font-medium",
                             activeTab === "errors"
-                                ? "underline"
-                                : "text-muted-foreground hover:underline",
+                                ? "bg-gray-200 text-black"
+                                : "text-muted-foreground hover:bg-gray-100",
                         )}
                         onClick={() => setActiveTab("errors")}
                     >
@@ -57,10 +67,10 @@ export const SimulationTabContent = ({
                     </span>
                     <span
                         className={cn(
-                            "cursor-pointer text-xl decoration-accent underline-offset-4",
+                            "cursor-pointer inline-block text-xl px-4 py-2 rounded-lg font-medium",
                             activeTab === "lastSimulation"
-                                ? "underline"
-                                : "text-muted-foreground hover:underline",
+                                ? "bg-gray-200 text-black"
+                                : "text-muted-foreground hover:bg-gray-100",
                         )}
                         onClick={() => setActiveTab("lastSimulation")}
                     >

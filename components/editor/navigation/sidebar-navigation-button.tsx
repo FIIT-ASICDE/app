@@ -13,6 +13,7 @@ interface SidebarNavigationButtonProps {
     icon: ElementType;
     tooltip: string;
     activeSidebarContent: string;
+    sidebarOpen: boolean;
     onClick?: () => void;
 }
 
@@ -27,6 +28,7 @@ export const SidebarNavigationButton = ({
     icon: Icon,
     tooltip,
     activeSidebarContent,
+    sidebarOpen,
     onClick,
 }: SidebarNavigationButtonProps): ReactElement => {
     return (
@@ -37,7 +39,7 @@ export const SidebarNavigationButton = ({
                         "flex h-10 w-10 items-center justify-center rounded-md p-0",
                         "text-header-foreground",
                         "hover:bg-header-button-hover hover:text-header-foreground",
-                        value === activeSidebarContent
+                        value === activeSidebarContent && sidebarOpen
                             ? "bg-header-button-hover"
                             : "bg-header-button",
                     )}

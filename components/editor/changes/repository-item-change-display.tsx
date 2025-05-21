@@ -1,4 +1,6 @@
-import { RepositoryItemChange } from "@/lib/types/repository";
+import {
+    RepositoryItemChange,
+} from "@/lib/types/repository";
 import { FileIcon } from "lucide-react";
 import { Dispatch, ReactElement, SetStateAction } from "react";
 

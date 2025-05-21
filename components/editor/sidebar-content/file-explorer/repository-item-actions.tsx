@@ -1,5 +1,5 @@
 import { RepositoryItem } from "@/lib/types/repository";
-import { Code, Copy, Ellipsis } from "lucide-react";
+import { Code, Cog, Copy, Ellipsis } from "lucide-react";
 import { Dispatch, ReactElement, SetStateAction } from "react";
 import { toast } from "sonner";
 
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { GenerateCodeDialog } from "@/components/editor/file/generate-code-dialog";
 import { GenerateDiagramDialog } from "@/components/editor/file/generate-diagram-dialog";
+import { Configuration } from "@/lib/types/editor";
 interface RepositoryItemActionsProps {
     repositoryId: string;
     parentItem: RepositoryItem;
@@ -25,6 +26,8 @@ interface RepositoryItemActionsProps {
     setDropdownOpen: Dispatch<SetStateAction<boolean>>;
     onAction: () => void;
     onOpenFile?: (item: RepositoryItem) => void;
+    configuration: Configuration | undefined;
+    setConfigurationAction: Dispatch<SetStateAction<Configuration | undefined>>;
 }
 
 /**
@@ -42,6 +45,8 @@ export const RepositoryItemActions = ({
     setDropdownOpen,
     onAction,
     onOpenFile,
+    configuration,
+    setConfigurationAction,
 }: RepositoryItemActionsProps): ReactElement => {
     const openFile = () => {
         onOpenFile?.(parentItem);
@@ -85,9 +90,28 @@ export const RepositoryItemActions = ({
             });
     };
 
-    const isDiagramFile =
+    const isDiagramFile: boolean =
         (parentItem.type === "file-display" || parentItem.type === "file") &&
         parentItem.name.endsWith(".bd");
+
+    const displayTestBenchOption = (): boolean => {
+        return !!(parentItem.type === "file" || parentItem.type === "file-display" &&
+            configuration && configuration.simulation && configuration.simulation.type);
+    };
+
+    const setAsTestBench = () => {
+        if (parentItem.type === "file" || parentItem.type === "file-display") {
+            setConfigurationAction({
+                ...configuration,
+                simulation: {
+                    type: configuration?.simulation?.type,
+                    testBench: parentItem,
+                    directory: configuration?.simulation?.directory,
+                },
+                synthesis: configuration?.synthesis,
+            });
+        }
+    };
 
     return (
         <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
@@ -96,7 +120,7 @@ export const RepositoryItemActions = ({
                     <Ellipsis className="max-h-4 min-h-4 min-w-4 max-w-4" />
                 </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="min-w-40">
+            <DropdownMenuContent className="min-w-44">
                 {parentItem.type === "directory" ||
                 parentItem.type === "directory-display" ? (
                     <>
@@ -165,19 +189,21 @@ export const RepositoryItemActions = ({
                 />
                 {!isDiagramFile && (
                     <>
-                <DropdownMenuSeparator />
-                <GenerateDiagramDialog
-                    repositoryId={repositoryId}
-                    diagramFile={parentItem}
-                    tree={tree}
-                    setTree={setTree}
-                />
-                </>
+                        <DropdownMenuSeparator />
+
+                        <GenerateDiagramDialog
+                            repositoryId={repositoryId}
+                            diagramFile={parentItem}
+                            tree={tree}
+                            setTree={setTree}
+                        />
+                    </>
                 )}
 
                 {isDiagramFile && (
                     <>
                         <DropdownMenuSeparator />
+
                         <GenerateCodeDialog
                             repositoryId={repositoryId}
                             diagramFile={parentItem}
@@ -187,6 +213,19 @@ export const RepositoryItemActions = ({
                     </>
                 )}
 
+                {displayTestBenchOption() && (
+                    <>
+                        <DropdownMenuSeparator />
+
+                        <DropdownMenuItem
+                            className="flex flex-row items-center justify-between"
+                            onClick={setAsTestBench}
+                        >
+                            Set as TestBench
+                            <Cog className="text-muted-foreground" />
+                        </DropdownMenuItem>
+                    </>
+                )}
             </DropdownMenuContent>
         </DropdownMenu>
     );

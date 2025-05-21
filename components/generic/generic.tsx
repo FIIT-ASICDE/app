@@ -2,6 +2,7 @@ import { BadgeType, CardType, FilterType } from "@/lib/types/generic";
 import { Invitation } from "@/lib/types/invitation";
 import { RoleOrganisationFilter } from "@/lib/types/organisation";
 import {
+    DirectoryDisplayItem,
     DirectoryItem,
     FavoriteRepositoriesFilter,
     FileDisplayItem,
@@ -9,7 +10,7 @@ import {
     PinnedRepositoriesFilter,
     PublicRepositoriesFilter,
     RepositoryItem,
-    RepositoryItemChange,
+    RepositoryItemChange
 } from "@/lib/types/repository";
 import { Dispatch, ReactElement, SetStateAction } from "react";
 
@@ -664,6 +665,25 @@ export const getFilesFromRepo = (
             for (const child of item.children) {
                 traverseRepository(child);
             }
+        }
+    };
+
+    for (const item of tree) {
+        traverseRepository(item);
+    }
+    return files;
+};
+
+export const getDirectoriesFromRepo = (
+    tree: Array<RepositoryItem> | undefined,
+): Array<DirectoryItem | DirectoryDisplayItem> => {
+    if (!tree) return [];
+
+    const files: Array<DirectoryItem | DirectoryDisplayItem> = [];
+
+    const traverseRepository = (item: RepositoryItem): void => {
+        if (item.type === "directory" || item.type === "directory-display") {
+            files.push(item);
         }
     };
 
