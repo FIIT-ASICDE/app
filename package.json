@@ -9,6 +9,7 @@
 		"build": "prisma generate && next build",
 		"start": "prisma migrate deploy && bun run server.js",
 		"lint": "next lint",
+		"test": "prisma generate && bun test",
 		"format": "prettier --write './**/*.{ts,tsx,js,jsx,json}'"
 	},
 	"dependencies": {
