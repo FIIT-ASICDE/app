@@ -36,6 +36,7 @@ build-app:
             - bun.lock
             - node_modules
             - .next
+            - lib/prisma
 
 integration-test:
     stage: test
@@ -57,6 +58,7 @@ integration-test:
             - bun.lock
             - node_modules
             - .next
+            - lib/prisma
     before_script:
         - apt-get update && apt-get install -y git
     script:
