@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { useUser } from "@/components/context/user-context";
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -23,13 +24,24 @@ import { Textarea } from "@/components/ui/textarea";
 
 export function OnboardingForm() {
     const router = useRouter();
+    const { user } = useUser();
 
     const form = useForm<z.infer<typeof onboardSchema>>({
         resolver: zodResolver(onboardSchema),
-        defaultValues: {
-            name: "",
-            surname: "",
-            bio: "",
+        defaultValues: () => {
+            let firstName = "";
+            let lastName = "";
+            if (user.name.includes(" ")) {
+                const split = user.name.split(" ");
+                firstName = split[0];
+                lastName = split.slice(1).join(" ");
+            }
+
+            return Promise.resolve({
+                name: firstName,
+                surname: lastName,
+                bio: "",
+            });
         },
     });
 
