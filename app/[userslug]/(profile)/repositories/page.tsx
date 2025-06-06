@@ -9,6 +9,26 @@ import {
 
 import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
 
+import type { Metadata } from 'next'
+
+export async function generateMetadata(
+    input: { params: Promise<{ userslug: string }> }
+): Promise<Metadata> {
+    const { userslug } = await input.params;
+
+    try {
+        const profile = await api.user.byUsername({ username: userslug });
+
+        return {
+            title: `${profile.username} | Repositories`,
+        };
+    } catch (e) {
+        return {
+            title: "User Not Found",
+        };
+    }
+}
+
 interface UserRepositoriesPageProps {
     params: Promise<{
         userslug: string;

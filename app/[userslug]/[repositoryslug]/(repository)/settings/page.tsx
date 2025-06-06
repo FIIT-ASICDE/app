@@ -2,6 +2,30 @@ import SettingsPage from "@/app/[userslug]/[repositoryslug]/(repository)/setting
 import { api } from "@/lib/trpc/server";
 import { RepositorySettingsTab } from "@/lib/types/repository";
 
+import type { Metadata } from 'next'
+
+export async function generateMetadata(
+    input: { params: Promise<{ userslug: string; repositoryslug: string }> }
+): Promise<Metadata> {
+    const { userslug, repositoryslug } = await input.params;
+
+    try {
+        const profile = await api.user.byUsername({ username: userslug });
+        const repository = await api.repo.overview({
+            ownerSlug: userslug,
+            repositorySlug: repositoryslug,
+        });
+
+        return {
+            title: `${profile.username} | ${repository.name}`,
+        };
+    } catch (e) {
+        return {
+            title: "Repository Not Found",
+        };
+    }
+}
+
 interface RepositorySettingsPageProps {
     params: Promise<{
         userslug: string;

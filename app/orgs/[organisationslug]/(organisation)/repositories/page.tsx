@@ -3,6 +3,24 @@ import { api } from "@/lib/trpc/server";
 import { PublicRepositoriesFilter } from "@/lib/types/repository";
 
 import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
+import type { Metadata } from 'next';
+
+export async function generateMetadata(
+    input: { params: Promise<{ organisationslug: string }> }
+): Promise<Metadata> {
+    const { organisationslug } = await input.params;
+    try {
+        const org = await api.org.byName(organisationslug);
+
+        return {
+            title: `${org.name} | Repositories`,
+        };
+    } catch (e) {
+        return {
+            title: "Organisation Not Found",
+        };
+    }
+}
 
 interface OrganisationRepositoriesPageProps {
     params: Promise<{

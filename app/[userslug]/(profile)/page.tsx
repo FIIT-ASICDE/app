@@ -1,5 +1,25 @@
 import OverviewPage from "@/app/[userslug]/(profile)/overview-page";
 import { api } from "@/lib/trpc/server";
+import type { Metadata } from 'next'
+
+export async function generateMetadata(
+    input: { params: Promise<{ userslug: string }> }
+): Promise<Metadata> {
+    const { userslug } = await input.params;
+
+    try {
+        const profile = await api.user.byUsername({ username: userslug });
+
+        return {
+            title: `${profile.username} | Overview`,
+        };
+    } catch (e) {
+        return {
+            title: "User Not Found",
+        };
+    }
+}
+
 
 interface UserProfileProps {
     params: Promise<{

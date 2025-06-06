@@ -4,6 +4,24 @@ import { api } from "@/lib/trpc/server";
 import { RoleOrganisationFilter } from "@/lib/types/organisation";
 
 import { parseBoolean, parseFilterValue } from "@/components/generic/generic";
+import type { Metadata } from 'next';
+
+export async function generateMetadata(
+    input: { params: Promise<{ organisationslug: string }> }
+): Promise<Metadata> {
+    const { organisationslug } = await input.params;
+    try {
+        const org = await api.org.byName(organisationslug);
+
+        return {
+            title: `${org.name} | Members`,
+        };
+    } catch (e) {
+        return {
+            title: "Organisation Not Found",
+        };
+    }
+}
 
 interface OrganisationMembersPageProps {
     params: Promise<{
