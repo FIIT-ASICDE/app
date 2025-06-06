@@ -13,7 +13,7 @@ export async function generateMetadata(
         return {
             title: `${org.name} | Settings`,
         };
-    } catch (e) {
+    } catch {
         return {
             title: "Organisation Not Found",
         };

@@ -15,7 +15,7 @@ export async function generateMetadata(
         return {
             title: `${org.name} | Repositories`,
         };
-    } catch (e) {
+    } catch {
         return {
             title: "Organisation Not Found",
         };

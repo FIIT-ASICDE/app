@@ -22,7 +22,7 @@ export async function generateMetadata(
         return {
             title: `${profile.username} | Repositories`,
         };
-    } catch (e) {
+    } catch {
         return {
             title: "User Not Found",
         };

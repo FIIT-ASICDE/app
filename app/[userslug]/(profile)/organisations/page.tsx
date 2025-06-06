@@ -19,7 +19,7 @@ export async function generateMetadata(
         return {
             title: `${profile.username} | Organisations`,
         };
-    } catch (e) {
+    } catch {
         return {
             title: "User Not Found",
         };

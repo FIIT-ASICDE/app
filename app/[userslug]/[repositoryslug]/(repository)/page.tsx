@@ -18,7 +18,7 @@ export async function generateMetadata(
         return {
             title: `${profile.username} | ${repository.name}`,
         };
-    } catch (e) {
+    } catch {
         return {
             title: "Repository Not Found",
         };

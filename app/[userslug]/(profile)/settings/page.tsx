@@ -14,7 +14,7 @@ export async function generateMetadata(
         return {
             title: `${profile.username} | Settings`,
         };
-    } catch (e) {
+    } catch {
         return {
             title: "User Not Found",
         };

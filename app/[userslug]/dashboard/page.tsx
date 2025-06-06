@@ -1,5 +1,10 @@
 import DashboardPage from "@/app/[userslug]/dashboard/dashboard-page";
 import { api } from "@/lib/trpc/server";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: 'ASICDE',
+}
 
 interface UserDashboardPageProps {
     params: Promise<{

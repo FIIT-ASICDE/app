@@ -15,7 +15,7 @@ export async function generateMetadata(
         return {
             title: `${orgOverview.organisation.name} | Overview`,
         };
-    } catch (e) {
+    } catch {
         return {
             title: "Organisation Not Found",
         };

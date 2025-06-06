@@ -13,7 +13,7 @@ export async function generateMetadata(
         return {
             title: `${profile.username} | Overview`,
         };
-    } catch (e) {
+    } catch {
         return {
             title: "User Not Found",
         };
