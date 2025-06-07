@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect } from "react";
 import { CommandElementGroup } from "@/lib/types/generic";
 import { OnboardedUser } from "@/lib/types/user";
 import Link from "next/link";
@@ -32,6 +35,25 @@ export const CommandBarDialog = ({
     setCommandOpen,
 }: CommandBarDialogProps): ReactElement => {
     const commandOptions: Array<CommandElementGroup> = CommandOptions({ user });
+
+    useEffect(() => {
+        const handleEnter = (e: KeyboardEvent) => {
+            if (!commandOpen) return;
+            if (e.key === "Enter") {
+                const selected = document.querySelector(
+                    '[cmdk-item][aria-selected="true"]'
+                ) as HTMLElement | null;
+    
+                if (selected) {
+                    e.preventDefault();
+                    selected.click();
+                }
+            }
+        };
+    
+        window.addEventListener("keydown", handleEnter);
+        return () => window.removeEventListener("keydown", handleEnter);
+    }, [commandOpen]);
 
     return (
         <CommandDialog open={commandOpen} onOpenChange={setCommandOpen}>

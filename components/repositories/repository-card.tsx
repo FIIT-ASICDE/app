@@ -64,6 +64,7 @@ export default function RepositoryCard({
 
     return (
         <Card
+            onClick={() => router.push(repositoryLink)}
             className={cn(
                 "max-w-full pl-1.5 shadow-lg",
                 getCardStripe("repository"),
@@ -84,7 +85,10 @@ export default function RepositoryCard({
                             tooltipVisible
                         />
                     </div>
-                    <div className="flex flex-shrink-0 items-center justify-center gap-x-3">
+                    <div
+                        className="flex flex-shrink-0 items-center justify-center gap-x-3"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <VisibilityBadge visibility={repository.visibility} />
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -93,7 +97,10 @@ export default function RepositoryCard({
                                         "flex items-center justify-center rounded p-1.5",
                                         "hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent",
                                     )}
-                                    onClick={handleStarClick}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleStarClick();
+                                    }}
                                 >
                                     <Star
                                         fill={
@@ -121,7 +128,10 @@ export default function RepositoryCard({
                                             "flex items-center justify-center rounded p-1.5",
                                             "hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent",
                                         )}
-                                        onClick={handlePinClicked}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handlePinClicked();
+                                        }}
                                     >
                                         <Pin
                                             fill={
