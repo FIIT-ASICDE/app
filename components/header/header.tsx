@@ -34,8 +34,14 @@ export default async function Header(): Promise<ReactElement> {
                                 <p className="text-xl font-bold">ASICDE</p>
                             </Link>
                         </div>
-                        <CommandBar user={user} />
-                        <NavigationLoggedIn user={user} />
+                        <div className="flex items-center ml-auto gap-12">
+                            <div className="flex items-center">
+                                <CommandBar user={user} />
+                            </div>
+                            <div className="flex items-center">
+                                <NavigationLoggedIn user={user} />
+                            </div>
+                        </div>
                     </div>
                 </header>
             )}

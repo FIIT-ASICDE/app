@@ -1,8 +1,11 @@
+"use client";
+
 import { imgSrc } from "@/lib/client-file-utils";
 import { OrganisationDisplay } from "@/lib/types/organisation";
 import { cn } from "@/lib/utils";
 import { UsersRound } from "lucide-react";
 import { ReactElement } from "react";
+import { useRouter } from "next/navigation";
 
 import { AvatarDisplay } from "@/components/generic/avatar-display";
 import { DynamicTitle } from "@/components/generic/dynamic-title";
@@ -30,10 +33,12 @@ export const OrganisationCard = ({
     organisation,
     className,
 }: OrganisationCardProps): ReactElement => {
+    const router = useRouter();
     const organisationLink: string = "/orgs/" + organisation.name;
 
     return (
         <Card
+            onClick={() => router.push(organisationLink)}
             className={cn(
                 "max-w-full pl-1.5 shadow-lg",
                 getCardStripe("organisation"),
@@ -54,7 +59,10 @@ export const OrganisationCard = ({
                             tooltipVisible
                         />
                     </div>
-                    <div className="flex flex-shrink-0 flex-row items-center gap-x-3">
+                    <div
+                        className="flex flex-shrink-0 flex-row items-center gap-x-3"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         {organisation.userRole && (
                             <RoleBadge role={organisation.userRole} />
                         )}
