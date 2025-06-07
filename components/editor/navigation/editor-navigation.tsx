@@ -31,7 +31,6 @@ import { NavigationButton } from "@/components/editor/navigation/navigation-butt
 import { SidebarNavigationButton } from "@/components/editor/navigation/sidebar-navigation-button";
 import { HeaderDropdown } from "@/components/header/header-dropdown";
 import LogoIcon from "@/components/icons/logo";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 interface EditorNavigationProps {
@@ -87,8 +86,6 @@ export const EditorNavigation = ({
         lastOpenedBottomPanelSize,
         setLastOpenedBottomPanelSize,
     },
-    onStartSynthesisAction,
-    configuration,
     isGitRepo,
 }: EditorNavigationProps): ReactElement => {
     const { user } = useUser();
@@ -147,60 +144,6 @@ export const EditorNavigation = ({
                 setHorizontalCollapsed(false);
             }
         }
-    };
-
-    const getSynthesisTooltipContent = () => {
-        if (!configuration || !configuration.synthesis || !configuration.synthesis.type || !configuration.synthesis.file) {
-            return (
-                <p className="flex flex-row items-center justify-center w-fit gap-x-3">
-                    <span className="text-sm text-muted-foreground">Synthesis not yet configured</span>
-                    <Button
-                        variant="outline"
-                        size="default"
-                        onClick={() => {
-                            if (activeSidebarContent !== "configuration" || horizontalCollapsed) {
-                                toggleHorizontalCollapse("configuration");
-                                setActiveSidebarContent("configuration");
-                            }
-                        }}
-                    >
-                        <Cog />
-                        Configure
-                    </Button>
-                </p>
-            );
-        }
-
-        return (
-            <div className="flex w-fit flex-col items-center gap-y-2">
-                <Button
-                    variant="outline"
-                    size="default"
-                    onClick={() => {
-                        if (activeBottomPanelContent !== "synthesis") {
-                            toggleVerticalCollapse("synthesis");
-                            setActiveBottomPanelContent("synthesis");
-                        }
-                        onStartSynthesisAction();
-                    }}
-                    disabled={!configuration || !configuration.synthesis || !configuration.synthesis.type || !configuration.synthesis.file}
-                >
-                    Run synthesis
-                </Button>
-                <div className="flex w-full flex-col gap-y-1">
-                    <div className="flex w-full flex-row items-center justify-between gap-x-2 text-sm">
-                        <span className="text-muted-foreground">
-                            Synthesis type:
-                        </span>
-                        <span>{configuration.synthesis.type}</span>
-                    </div>
-                    <div className="flex w-full flex-row items-center justify-between gap-x-2 text-sm">
-                        <span className="text-muted-foreground">File:</span>
-                        <span>{configuration.synthesis.file.name ?? "N/A"}</span>
-                    </div>
-                </div>
-            </div>
-        );
     };
 
     return (
@@ -283,7 +226,7 @@ export const EditorNavigation = ({
 
                     <NavigationButton
                         icon={PlayCircle}
-                        tooltip={getSynthesisTooltipContent()}
+                        tooltip={<span>Synthesis</span>}
                         onClick={() => {
                             toggleVerticalCollapse("synthesis");
                             setActiveBottomPanelContent("synthesis");

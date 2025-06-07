@@ -8,12 +8,14 @@ import { ReactElement, useState } from "react";
 
 import { CloseButton } from "@/components/editor/navigation/close-button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 
 interface SynthesisTabContentProps {
     handleCloseBottomPanel: () => void;
     configuration: Configuration | undefined;
     synthesisOutput: Array<SynthesisOutput>;
     lastSynthesis: string | null;
+    onStartSynthesisAction: () => void;
 }
 
 /**
@@ -26,6 +28,7 @@ export const SynthesisTabContent = ({
     handleCloseBottomPanel,
     synthesisOutput,
     lastSynthesis,
+    onStartSynthesisAction,
 }: SynthesisTabContentProps): ReactElement => {
     const [activeTab, setActiveTab] = useState<SynthesisTab>("all");
 
@@ -33,6 +36,13 @@ export const SynthesisTabContent = ({
         <div className="relative w-full text-nowrap p-4 pt-14">
             <header className="absolute left-4 right-4 top-4 flex flex-row items-center justify-between">
                 <div className="flex flex-row items-baseline gap-x-3 font-medium">
+                    <Button
+                        variant="default"
+                        className="w-1/2 hover:bg-primary-button-hover"
+                        onClick={onStartSynthesisAction}
+                    >
+                        Start Synthesis
+                    </Button>
                     <span
                         className={cn(
                             "cursor-pointer text-xl decoration-accent underline-offset-4",
