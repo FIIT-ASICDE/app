@@ -76,6 +76,10 @@ export const ConfigurationTabContent = ({
     const [selectedSynthesisFile, setSelectedSynthesisFile] = useState<
         FileDisplayItem | FileItem | undefined
     >(configuration?.synthesis?.file);
+    const [
+        selectedSynthesisDirectory,
+        setSelectedSynthesisDirectory,
+    ] = useState<string | undefined>(configuration?.synthesis?.directory);
 
     const [simulationFileSelectOpen, setSimulationFileSelectOpen] =
         useState<boolean>(false);
@@ -86,6 +90,9 @@ export const ConfigurationTabContent = ({
     const [hoveredType, setHoveredType] = useState<SimulationType>();
 
     const [synthesisFileSelectOpen, setSynthesisFileSelectOpen] =
+        useState<boolean>(false);
+
+    const [synthesisDirectorySelectOpen, setSynthesisDirectorySelectOpen] =
         useState<boolean>(false);
 
     const files: Array<FileItem | FileDisplayItem> = getFilesFromRepo(
@@ -208,6 +215,7 @@ export const ConfigurationTabContent = ({
             synthesis: {
                 type: selectedSynthesisType,
                 file: selectedSynthesisFile,
+                directory: selectedSynthesisDirectory
             }
         };
 
@@ -507,6 +515,26 @@ export const ConfigurationTabContent = ({
                                             </span>
                                         )}
                                     </Button>
+
+                                    <Button
+                                        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm font-normal ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
+                                        onClick={() =>
+                                            setSynthesisDirectorySelectOpen(true)
+                                        }
+                                    >
+                                        {selectedSynthesisDirectory? (
+                                            <div className="flex flex-row items-center justify-start gap-x-2 text-foreground">
+                                                <FileIcon className="h-4 w-4 text-muted-foreground" />
+                                                {
+                                                    selectedSynthesisDirectory
+                                                }
+                                            </div>
+                                        ) : (
+                                            <span className="text-muted-foreground">
+                                                Select output directory
+                                            </span>
+                                        )}
+                                    </Button>
                                 </div>
 
                                 <CommandDialog
@@ -549,6 +577,49 @@ export const ConfigurationTabContent = ({
                                                 )}
                                                 <CommandEmpty>
                                                     No Verilog files found
+                                                </CommandEmpty>
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </ScrollArea>
+                                </CommandDialog>
+
+                                <CommandDialog
+                                    open={synthesisDirectorySelectOpen}
+                                    onOpenChange={setSynthesisDirectorySelectOpen}
+                                >
+                                    <CommandInput placeholder="Select output directory..." />
+                                    <ScrollArea className="h-full max-h-60">
+                                        <CommandList>
+                                            <CommandGroup
+                                                heading={getGroupHeading()}
+                                            >
+                                                {directories.map(
+                                                    (
+                                                        directoryItem:
+                                                            | DirectoryItem
+                                                            | DirectoryDisplayItem,
+                                                    ) => (
+                                                        <CommandItem
+                                                            key={
+                                                                directoryItem.absolutePath
+                                                            }
+                                                            onSelect={() => {
+                                                                setSynthesisDirectorySelectOpen(
+                                                                    false,
+                                                                );
+                                                                setSelectedSynthesisDirectory(
+                                                                    directoryItem.name,
+                                                                );
+                                                            }}
+                                                            className="flex flex-row items-center gap-x-2"
+                                                        >
+                                                            <FileIcon className="h-4 w-4 text-muted-foreground" />
+                                                            {directoryItem.name}
+                                                        </CommandItem>
+                                                    ),
+                                                )}
+                                                <CommandEmpty>
+                                                    No specific directories found
                                                 </CommandEmpty>
                                             </CommandGroup>
                                         </CommandList>

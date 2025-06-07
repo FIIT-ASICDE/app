@@ -28,6 +28,7 @@ type SimulationConfiguration = {
 type SynthesisConfiguration = {
     type: SynthesisType | undefined;
     file: FileItem | FileDisplayItem | undefined;
+    directory: string | undefined;
 };
 
 export type Configuration = {

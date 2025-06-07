@@ -280,27 +280,22 @@ export default function EditorPage({
     });
 
     const onStartSynthesis = () => {
-        if (
-            configuration &&
-            configuration.synthesis &&
-            configuration.synthesis.type &&
-            configuration.synthesis.file
-        ) {
-            // TODO: maxo start synthesis
-            console.log(
-                "Starting synthesis with type: " +
-                    configuration.synthesis.type +
-                    " and file: " +
-                    configuration.synthesis.file.absolutePath,
-            );
-
-            if (configuration.synthesis.type === "yosys") {
-                const input = {
-                    repoId: repository.id,
-                    verilogFilePath: configuration.synthesis.file.absolutePath,
-                };
-                setYosysInput(input);
-            }
+        console.log(
+            "Starting synthesis with type: " +
+                configuration?.synthesis?.type +
+                " and file: " +
+                configuration?.synthesis?.file?.absolutePath +
+                " and directory: " +
+                configuration?.synthesis?.directory,
+        );
+        
+        if (configuration?.synthesis?.type === "yosys") {
+            const newInput = {
+                repoId: repository.id,
+                verilogFilePath: configuration?.synthesis?.file?.absolutePath,
+                directory: configuration?.synthesis?.directory,
+            };
+            setYosysInput(newInput);
         }
     };
 
@@ -1056,6 +1051,7 @@ export default function EditorPage({
                         synthesisOutput={resultYosys.data ?? []}
                         lastSynthesis={resultYosys.data?.[0]?.content ?? null}
                         onStartSimulationAction={onStartSimulation}
+                        onStartSynthesisAction={onStartSynthesis}
                     />
                 </ResizablePanel>
             </ResizablePanelGroup>

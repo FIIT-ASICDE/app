@@ -18,8 +18,17 @@ function runYosysStream() {
             z.object({
                 verilogFilePath: z
                     .string()
-                    .min(1, "Verilog súbor musí mať názov."),
-                repoId: z.string(),
+                    .min(1, "Verilog súbor musí mať názov.")
+                    .nullable()
+                    .optional(),
+                repoId: z
+                    .string()
+                    .nullable()
+                    .optional(),
+                directory: z
+                    .string()
+                    .nullable()
+                    .optional(),
             }),
         )
         .query(async function* ({ input, ctx }) {
@@ -28,8 +37,19 @@ function runYosysStream() {
                 content: `Synthesis Yosys started.`,
             } satisfies SynthesisOutput;
 
+            if(input.verilogFilePath == null || input.directory == null || input.repoId == null) {
+                yield {
+                    type: "error",
+                    content: "Missing synthesis configuration",
+                } satisfies SynthesisOutput;
+                return;
+            }
+
             const repoIdDecoded = decodeURIComponent(input.repoId);
-            const verilogFilePath = decodeURIComponent(input.verilogFilePath);
+            const verilogFilePath = decodeURIComponent(
+                input.verilogFilePath,
+            ).replace(/\\/g, "/");
+            const directoryDecode = decodeURIComponent(input.directory);
 
             const absoluteRepoPath = await resolveRepoPath(
                 ctx.prisma,
@@ -43,10 +63,10 @@ function runYosysStream() {
 
             const now = new Date();
             const synthesisDir = now.toISOString().replace(/[:.]/g, "-");
-            const synDirPath = `syn_${synthesisDir}`;
+            const synDirPath = `${directoryDecode}/syn_${synthesisDir}`;
             const outputFile = `${synDirPath}/output.txt`;
             const outputVerilog = `${synDirPath}/output.v`;
-
+            
             const yosysCommand = `
                 cd /workspace && \
                 mkdir -p ${synDirPath} && \
