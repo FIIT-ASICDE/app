@@ -1,5 +1,10 @@
 import { auth } from "@/auth";
 import { redirectIfNotOnboarded } from "@/lib/onboarding-guard";
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'ASICDE',
+}
 
 /**
  * Root page that redirects based on user session

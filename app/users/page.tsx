@@ -2,6 +2,11 @@ import { UsersPage } from "@/app/users/users-page";
 import { api } from "@/lib/trpc/server";
 
 import { parseBoolean } from "@/components/generic/generic";
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'ASICDE',
+}
 
 interface AllUsersPageProps {
     searchParams?: Promise<{

@@ -17,6 +17,13 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: 'ASICDE',
+}
+
+
 interface LoginPageProps {
     searchParams: Promise<{
         callbackUrl: string | undefined;

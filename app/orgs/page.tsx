@@ -2,6 +2,11 @@ import { OrganisationsPage } from "@/app/orgs/organisations-page";
 import { api } from "@/lib/trpc/server";
 
 import { parseBoolean } from "@/components/generic/generic";
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'ASICDE',
+}
 
 interface AllOrganisationsPageProps {
     searchParams?: Promise<{
